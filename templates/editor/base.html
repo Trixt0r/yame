@@ -1,0 +1,75 @@
+<!-- basic HTML layout for the editor window -->
+<%
+var fs = require('fs');
+function isURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  var res = pattern.test(str);
+  if (res) return res;
+  else {
+      try {
+          fs.accessSync(str);
+          return true;
+      } catch (e) {
+          return false;
+      }
+  }
+}
+%>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta basedir="<%- baseDir %>" />
+        <script src="<%- url('app/core/require.js') %>"></script>
+        <script src="<%- url(app_path) %>"></script>
+
+        <% for (var x in scripts) { %>
+            <script <% for (var y in scripts[x].attributes) { %> <%- y %>="<%- scripts[x].attributes[y] %>" <% } %> > <%= scripts[x].body %> </script>
+        <% } %>
+
+        <% for (var x in styles) { %>
+            <% if (!isURL(styles[x])) { %>
+                <style> <%= styles[x] %> </style>
+            <% } else { %>
+                <link rel="stylesheet" href="<%- styles[x] %>">
+            <% } %>
+        <% } %>
+
+    </head>
+    <body>
+
+        <div id="main-menu" class="ui very wide sidebar grid">
+            <div class="four wide column">
+                <div class="ui vertical fluid tabular menu">
+                    <a class="active item" data-tab="tab-file"> File </a>
+                    <a class="item" data-tab="tab-settings"> Settings </a>
+                </div>
+            </div>
+            <div class="twelve wide stretched column">
+                <div class="ui segment">
+                    <div id="menu-file" class="ui tab active" data-tab="tab-file"><%= tpl('./editor/menu/file.html') %></div>
+                    <div id="menu-settings" class="ui tab" data-tab="tab-settings"><%= tpl('./editor/menu/settings.html') %></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-content" class="pusher">
+            <div class="ui massive black icon button" id="menu-button" style="position: absolute; background: none;">
+                <i class="list layout icon"></i>
+            </div>
+            <!-- Page Content -->
+            <div id="pixi-container" class="pixi"></div>
+
+            <% for (var x in templates) { %>
+                <%= templates[x].compile() %>
+            <% } %>
+        </div>
+    </body>
+    <script>
+        $('#main-menu').sidebar('attach events', '#menu-button', 'show');
+    </script>
+</html>

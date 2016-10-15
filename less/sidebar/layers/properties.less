@@ -1,0 +1,13 @@
+@properties-transition: all 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+.ui.segment.properties {
+    transition: @properties-transition;
+    max-height: 100%;
+    opacity: 1;
+    &.hidden {
+        opacity: 0;
+        max-height: 0;
+        margin: 0;
+        padding: 0;
+    }
+}
