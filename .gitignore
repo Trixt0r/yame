@@ -1,6 +1,6 @@
-./.vscode
-./app
-./css
-./node_modules
-./typings
-./semantic.json
+.vscode
+app
+css
+node_modules
+typings
+semantic.json
