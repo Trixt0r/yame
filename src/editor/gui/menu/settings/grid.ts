@@ -3,7 +3,7 @@ import { Input } from './../../../../core/view/input';
 import { View } from './../../../../core/view/abstract';
 
 import * as SELECTION from '../../../interaction/selection';
-import * as EDITOR from '../../../globals';
+import EDITOR from '../../../globals';
 
 const Pubsub = require('backbone').Events;
 

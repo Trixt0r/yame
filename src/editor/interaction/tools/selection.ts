@@ -1,4 +1,4 @@
-import * as EDITOR from '../../globals';
+import EDITOR from '../../globals';
 
 import {Map} from '../../../core/scene/map';
 import {Camera} from '../../../core/scene/camera';

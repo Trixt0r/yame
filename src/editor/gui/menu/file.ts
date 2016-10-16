@@ -1,7 +1,7 @@
 import { Button, Group as ButtonGroup } from './../../../core/view/button';
 import { View } from './../../../core/view/abstract';
 
-import * as EDITOR from '../../globals';
+import EDITOR from '../../globals';
 import * as Selection from '../../interaction/selection';
 
 import {ipcRenderer} from 'electron';

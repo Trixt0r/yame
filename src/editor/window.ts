@@ -1,9 +1,11 @@
-import Backend = require('../core/backend');
-
 import * as _ from 'underscore';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Promise from 'bluebird';
+import * as Backbone from 'backbone';
+
+import * as Backend from '../core/backend';
+import PluginManager from './pluginManager';
 
 export class Window extends Backend.Window {
 
@@ -39,21 +41,24 @@ export class Window extends Backend.Window {
 
         // Add all styles
         // Semantic ui
-        this.addStyle(path.resolve(Backend.baseDir, 'node_modules', 'semantic-ui', 'dist', 'semantic.css'));
-        this.addStyle(path.resolve(Backend.baseDir, 'node_modules', 'spectrum-colorpicker', 'spectrum.css'));
-        this.addStyle(path.resolve(Backend.baseDir, 'node_modules', 'jstree', 'dist', 'themes', 'default', 'style.css'));
+        this.addStyle(path.resolve(Backend.nodeDir, 'semantic-ui', 'dist', 'semantic.css'));
+        this.addStyle(path.resolve(Backend.nodeDir, 'spectrum-colorpicker', 'spectrum.css'));
+        this.addStyle(path.resolve(Backend.nodeDir, 'jstree', 'dist', 'themes', 'default', 'style.css'));
 
         this.addScript({ body: 'require("backbone").$ = window.jQuery = window.$ = require("jquery");' });
-        this.addScript({ attributes: {src: path.resolve(Backend.baseDir, 'node_modules', 'pixi.js', 'bin', 'pixi.js')}});
-        this.addScript({ attributes: {src: path.resolve(Backend.baseDir, 'node_modules', 'semantic-ui', 'dist', 'semantic.js')}});
+        this.addScript({ attributes: {src: path.resolve(Backend.nodeDir, 'pixi.js', 'bin', 'pixi.js')}});
+        this.addScript({ attributes: {src: path.resolve(Backend.nodeDir, 'semantic-ui', 'dist', 'semantic.js')}});
+        this.addScript({ attributes: {src: path.resolve(Backend.nodeDir, 'spectrum-colorpicker', 'spectrum.js')}});
         this.addScript({ attributes: {src: path.resolve(Backend.baseDir, 'lib', 'range.js')}});
-        this.addScript({ attributes: {src: path.resolve(Backend.baseDir, 'node_modules', 'spectrum-colorpicker', 'spectrum.js')}});
 
         // Custom
         let promise = this.loadCssFolder(Backend.cssDir);
 
         if (options.load === true)
             promise.then( () => this.load(this.template));
+
+        PluginManager.load()
+            .then(() => PluginManager.run(null, this, Backend, Backbone.Events));
     }
 
     /**

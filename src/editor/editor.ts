@@ -10,7 +10,7 @@ import { Camera } from '../core/scene/camera';
 
 import {Input} from '../core/view/input';
 
-import * as EDITOR from './globals';
+import EDITOR from './globals';
 
 import * as SELECTION from './interaction/selection';
 

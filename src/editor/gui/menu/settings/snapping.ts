@@ -2,7 +2,7 @@ import { View } from './../../../../core/view/abstract';
 import { Input } from './../../../../core/view/input';
 
 import * as SELECTION from '../../../interaction/selection';
-import * as EDITOR from '../../../globals';
+import EDITOR from '../../../globals';
 
 export class Snapping extends View {
 
@@ -15,21 +15,21 @@ export class Snapping extends View {
             .first()
             .checkbox(SELECTION.snapToGrid ? 'check' : 'uncheck')
             .checkbox({
-                onChecked: () => SELECTION.snapToGrid = true,
-                onUnchecked: () => SELECTION.snapToGrid = false,
+                onChecked: () => SELECTION.setSnapToGrid(true),
+                onUnchecked: () => SELECTION.setSnapToGrid(false),
             });
 
         (<any>$('#snapToAngle'))
             .first()
             .checkbox(SELECTION.snapToAngle ? 'check' : 'uncheck')
             .checkbox({
-                onChecked: () => { SELECTION.snapToAngle = true; angleSnapping.$el.removeAttr('disabled') },
-                onUnchecked: () => { SELECTION.snapToAngle = false; angleSnapping.$el.attr('disabled', '')},
+                onChecked: () => { SELECTION.setSnapToAngle(true); angleSnapping.$el.removeAttr('disabled') },
+                onUnchecked: () => { SELECTION.setSnapToAngle(false); angleSnapping.$el.attr('disabled', '')},
             });
         angleSnapping.value = String(SELECTION.angleSnap)
         angleSnapping.$el.on('keyup change blur', () => {
             let newAngle = parseFloat(angleSnapping.value);
-            if (!isNaN(newAngle)) SELECTION.angleSnap = newAngle;
+            if (!isNaN(newAngle)) SELECTION.setAngleSnap(newAngle);
         });
 
         if (SELECTION.snapToAngle)

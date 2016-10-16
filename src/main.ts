@@ -1,7 +1,7 @@
-declare var process;
+import * as process from 'process';
 import {BrowserWindow, app, dialog, ipcMain } from 'electron';
 
-import Backend = require('./core/backend');
+import * as Backend from './core/backend';
 import  { Window } from './editor/window';
 
 import {Directory} from './core/file/directory';
@@ -17,6 +17,7 @@ var Pubsub = require('backbone').Events;
  * @returns {boolean} Whether quitting the application was successful or not.
  */
 function quit() {
+    Pubsub.trigger('main:quit');
     app.quit();
     return true;
 }
@@ -57,17 +58,17 @@ app.on('ready', function() {
     // Plugin management
     // Simply load all plugins...
     // TODO: move this into a seperate class, i.e. PluginManager
-    let pluginsPath = path.resolve(Backend.baseDir, 'plugins');
-    fs.readdir(pluginsPath, (err, dirs) => {
-        if (err)  return Pubsub.trigger('editor:plugins:error', err);
+    // let pluginsPath = path.resolve(Backend.baseDir, 'plugins');
+    // fs.readdir(pluginsPath, (err, dirs) => {
+    //     if (err)  return Pubsub.trigger('editor:plugins:error', err);
 
-        let plugins = [];
-        dirs.forEach(function(dir) {
-            let dirPath = path.resolve(pluginsPath, dir);
-            let plugin = require(dirPath);
-            plugins.push(plugin(window, Backend));
-        });
-    });
+    //     let plugins = [];
+    //     dirs.forEach(function(dir) {
+    //         let dirPath = path.resolve(pluginsPath, dir);
+    //         let plugin = require(dirPath);
+    //         plugins.push(plugin(window, Backend));
+    //     });
+    // });
 
     ipcMain.on('showOpenDialog', (event, options, id) => {
         if (id)

@@ -1,6 +1,6 @@
 import { Dropdown } from './../../../core/view/dropdown';
 import { Icon } from './../../../core/view/icon';
-import * as EDITOR from './../../globals';
+import EDITOR from './../../globals';
 import { Button } from '../../../core/view/button';
 import { Tree } from './../../../core/view/tree';
 import { View } from '../../../core/view/abstract';

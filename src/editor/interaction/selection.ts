@@ -1,5 +1,5 @@
 import { Layer } from './../../core/scene/layer';
-import * as EDITOR from '../globals';
+import EDITOR from '../globals';
 
 import Enums = require('./enums');
 import _ = require('underscore');
@@ -20,14 +20,26 @@ export var dragMode: Enums.EditType = Enums.EditType.DRAG;
 /** @type {boolean} Whether to snap the mouse position to the grid or not. */
 export var snapToGrid: boolean = false;
 
+export function setSnapToGrid(val: boolean) {
+    snapToGrid = val;
+}
+
 /** @type {boolean} Whether to snap the rotation to a certain angle or not. */
 export var snapToAngle: boolean = false;
+
+export function setSnapToAngle(val: boolean) {
+    snapToAngle = val;
+}
 
 /** @type {Object} The grid dimesions, containing width and height as properties. */
 export var grid = {width: 16, height: 16};
 
 /** @type {Object} The angle snap value. */
 export var angleSnap = 0;
+
+export function setAngleSnap(val: number) {
+    angleSnap = val;
+}
 
 /**
  * Snaps the given position to the grid.

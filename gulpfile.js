@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const shell = require('gulp-shell');
+var gulpSequence = require('gulp-sequence')
 const less = require('gulp-less');
 const path = require('path');
 const os = require('os');
@@ -40,4 +41,4 @@ gulp.task('less-watch', function() {
 
 gulp.task('dev', ['tsc-watch', 'less-watch', 'electron-watch']);
 gulp.task('build', ['tsc', 'less']);
-gulp.task('run', ['build', 'electron']);
+gulp.task('run', gulpSequence('build', 'electron'));

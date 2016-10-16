@@ -1,4 +1,4 @@
-import * as EDITOR from '../globals';
+import EDITOR from '../globals';
 
 import Backbone = require('backbone');
 import { Grid } from '../../core/graphics/grid';

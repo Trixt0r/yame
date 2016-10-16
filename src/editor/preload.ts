@@ -1,7 +1,11 @@
-import * as EDITOR from './globals';
+import EDITOR from './globals';
+import PluginManager from './pluginManager';
+import * as Backend from '../core/backend';
+
 declare var $, global;
 
 import * as PIXI from 'pixi.js';
+import {remote} from 'electron';
 
 import {Map} from '../core/scene/map';
 import {Camera} from '../core/scene/camera';
@@ -22,10 +26,7 @@ Math['degrees'] = function(radians) {
 };
 
 
-// If the document is ready setup the PIXI renderer and trigger all necessary
-// events for the client side code.
-window.onload = function (parameter) {
-    // $ = window['$'] = window['jQuery'] = require('jquery');
+let initGUI = function() {
     var $container = $('#pixi-container');
     $container.attr('draggable', true);
 
@@ -74,4 +75,15 @@ window.onload = function (parameter) {
     $(window).trigger('resize');
 
     Pubsub.trigger('renderer-ready', renderer, map, camera);
+};
+
+
+// If the document is ready setup the PIXI renderer and trigger all necessary
+// events for the client side code.
+window.onload = function (parameter) {
+
+    PluginManager.load().then(() => {
+        PluginManager.run(null, remote.getCurrentWindow(), Backend, Pubsub);
+        initGUI();
+    })
 }

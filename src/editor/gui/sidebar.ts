@@ -1,4 +1,4 @@
-import * as EDITOR from '../globals';
+import EDITOR from '../globals';
 
 import * as Backbone from 'backbone';
 import * as _ from 'underscore';

@@ -18,6 +18,9 @@
   },
   "devDependencies": {
     "gulp-less": "^3.1.0",
-    "gulp-shell": "^0.5.2"
-  }
+    "gulp-sequence": "^0.4.6",
+    "gulp-shell": "^0.5.2",
+    "yame-dev": "https://github.com/Trixt0r/yame-dev.git"
+  },
+  "install": "npm install electron typescript gulp-cli -g && tsc"
 }

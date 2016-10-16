@@ -3,7 +3,7 @@ import { Button, Group } from '../../core/view/button';
 import { Icon } from '../../core/view/icon';
 import { Tool } from '../interaction/tool';
 
-import * as EDITOR from '../globals';
+import EDITOR from '../globals';
 
 import * as _ from 'underscore';
 

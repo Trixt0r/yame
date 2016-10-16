@@ -5,6 +5,7 @@ export class Mesh extends PIXI.Container implements Entity {
 
     private _mesh: PIXI.mesh.Mesh;
     public id: string;
+    public layer: string;
 
     constructor(texture: PIXI.Texture, vertices: PIXI.Point[], uvs: PIXI.Point[]) {
         super();
@@ -40,5 +41,16 @@ export class Mesh extends PIXI.Container implements Entity {
     /** @inheritdoc */
     get type(): string {
         return 'Mesh';
+    }
+
+    /** @inheritdoc */
+    toJSON(): any {
+        // NOP
+        return {};
+    }
+
+    /** @inheritdoc */
+    parse(json: any, rootPath: string) {
+        // NOP
     }
 }

@@ -1,5 +1,5 @@
 import { Layer } from './../../core/scene/layer';
-import * as EDITOR from '../globals';
+import EDITOR from '../globals';
 import * as Selection from './selection';
 
 var Pubsub = require('backbone').Events;

@@ -12,9 +12,9 @@ export var Template = TemplateModule.Template;
 
 export var baseDir = path.resolve(__dirname, '..', '..');
 
-if (process.type === 'renderer') {
+if (process.type === 'renderer') {//
     var metas = document.getElementsByTagName('meta');
-    for (var i = 0;  i < metas.length; i++)
+    for (var i = 0; i < metas.length; i++)
         if (metas[i].getAttribute('baseDir'))
             baseDir = metas[i].getAttribute('baseDir');
 }
@@ -23,3 +23,4 @@ if (process.type === 'renderer') {
 export var appDir = path.resolve(baseDir, 'app');
 export var templateDir = path.resolve(baseDir, 'templates');
 export var cssDir = path.resolve(baseDir, 'css');
+export var nodeDir = path.resolve(baseDir, 'node_modules');
