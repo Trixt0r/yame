@@ -109,7 +109,7 @@ export class Template {
      * jQuery function for the DOM of this template.
      * @returns {jQuery}
      */
-    $(...args) {
+    $(...args): CheerioStatic {
         return cheerio.load(this.compile()).apply(cheerio, arguments);
     }
 }

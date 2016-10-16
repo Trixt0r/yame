@@ -1,7 +1,14 @@
-var gulp  = require('gulp');
-var shell = require('gulp-shell');
-var less = require('gulp-less');
-var path = require('path');
+const gulp = require('gulp');
+const shell = require('gulp-shell');
+const less = require('gulp-less');
+const path = require('path');
+const os = require('os');
+
+var electronArgs = '';
+
+if (os.type() == 'Linux')
+    electronArgs += ' --enable-transparent-visuals --disable-gpu';
+
 
 // Simply run tsc
 gulp.task('tsc', shell.task(['tsc']));
@@ -10,7 +17,7 @@ gulp.task('tsc', shell.task(['tsc']));
 gulp.task('tsc-watch', shell.task(['tsc --watch']));
 
 // Run the global electron app
-gulp.task('electron', shell.task(['electron ./']));
+gulp.task('electron', shell.task([`electron ./ ${electronArgs}`]));
 
 // Watch the main js for changes, and restart the whole electron app
 gulp.task('electron-watch', function() {

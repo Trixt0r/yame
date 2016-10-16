@@ -32,6 +32,7 @@ app.on('ready', function() {
         transparent: true,
         closable: false,
         alwaysOnTop: true,
+        resizable: false,
         frame: false
     });
     loading.loadURL('file:///' + path.resolve(Backend.templateDir, 'editor/loading.html'));
