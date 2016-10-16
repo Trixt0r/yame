@@ -34,7 +34,7 @@ app.on('ready', function() {
         alwaysOnTop: true,
         frame: false
     });
-    loading.loadURL(path.resolve(Backend.templateDir, 'editor/loading.html'));
+    loading.loadURL('file:///' + path.resolve(Backend.templateDir, 'editor/loading.html'));
     loading.show();
 
     let window = new Window('app/editor', { show: false, load: true });
@@ -58,7 +58,7 @@ app.on('ready', function() {
     // TODO: move this into a seperate class, i.e. PluginManager
     let pluginsPath = path.resolve(Backend.baseDir, 'plugins');
     fs.readdir(pluginsPath, (err, dirs) => {
-        if (err)  return Pubsub.trigger('editor:plugins:error', err); //
+        if (err)  return Pubsub.trigger('editor:plugins:error', err);
 
         let plugins = [];
         dirs.forEach(function(dir) {

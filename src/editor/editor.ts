@@ -1,3 +1,4 @@
+import * as console from 'console';
 import { Menu } from './gui/menu';
 import {Pixi} from './gui/pixi';
 import {Sidebar} from './gui/sidebar';
@@ -34,6 +35,8 @@ export class Editor {
         // this.tools.addTool(new Brush());
         // Notify everyone that the toolbar is ready to use
         Pubsub.trigger('tools:ready', this.tools);
+
+        console.log('test');
 
         // this.pixi.imageDropHandler.registerHandler((file, e) => this.sidebar.dropSprite(file));
     }

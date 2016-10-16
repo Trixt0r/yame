@@ -102,7 +102,7 @@ export class Template {
         var tmpFile = randomstring.generate(16) + '.html';
         var tmpPath = path.resolve(tmpDir, tmpFile);
         fs.writeFileSync(tmpPath, this.compile());
-        return tmpPath;
+        return 'file:///' + tmpPath;
     }
 
     /**

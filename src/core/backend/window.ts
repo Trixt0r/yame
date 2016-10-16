@@ -4,7 +4,7 @@ import _ = require('underscore');
 import Backbone = require('backbone');
 import {EventBus} from '../eventbus';
 
-import Backend = require('../backend');
+import { Template } from './template';
 
 /**
  * A class which wraps a default electron BrowserWindow into a class.
@@ -58,20 +58,20 @@ export abstract class Window extends EventBus {
 
     /**
      * Loads the given HTML path into this window object.
-     * @param  {String|Backend.Template} arg
-     * @returns {any}
+     * @param  {string | Template} arg
+     * @returns {void}
      */
-    load(arg: any) {
-        if (arg instanceof Backend.Template)
-            return this.window.loadURL(arg.save());
+    load(arg: string | Template) {
+        if (arg instanceof Template)
+            this.window.loadURL(arg.save());
         else
-            return this.window.loadURL(arg);
+            this.window.loadURL('file:///' + arg);
     }
 
     /**
      * @returns {Backend.Template} The template instance of this window.
      */
-    abstract getTemplate(): Backend.Template;
+    abstract getTemplate(): Template;
 
     /**
      * Wrapper for the electron window 'on' method.
