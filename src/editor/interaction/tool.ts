@@ -4,7 +4,7 @@ import { Tools } from '../gui/tools';
 
 import * as keyboardjs from 'keyboardjs';
 
-const Pubsub = require('Backbone').Events;
+const Pubsub = require('backbone').Events;
 
 
 export abstract class Tool extends EventBus {

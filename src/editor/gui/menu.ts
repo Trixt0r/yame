@@ -3,7 +3,7 @@ import { File } from './menu/file';
 import { View } from './../../core/view/abstract';
 
 
-const Pubsub = require('Backbone').Events;
+const Pubsub = require('backbone').Events;
 
 export class Menu extends View {
 
