@@ -28,6 +28,7 @@
     "yame-dev": "https://github.com/Trixt0r/yame-dev.git"
   },
   "scripts": {
-    "postinstall": "typings install && gulp build"
+    "postinstall": "typings install && gulp build",
+    "start": "node node_modules/electron/cli.js ./"
   }
 }
