@@ -12,5 +12,8 @@
         "lib",
         "node_modules",
         "plugins"
-    ]
+    ],
+    "paths": {
+        "yame/*": ["./app/*"]
+    }
 }

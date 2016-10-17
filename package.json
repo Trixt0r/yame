@@ -1,6 +1,7 @@
 {
-  "name": "map-editor",
-  "productName": "MapEditor",
+  "name": "yame",
+  "productName": "YAME",
+  "version": "0.0.1",
   "main": "app/main.js",
   "dependencies": {
     "backbone": ">= 1.2.3",
@@ -23,6 +24,6 @@
     "yame-dev": "https://github.com/Trixt0r/yame-dev.git"
   },
   "scripts": {
-    "postinstall": "npm install typescript typings gulp electron -g && typings install && gulp build"
+    "postinstall": "npm install typescript typings gulp-cli electron -g && typings install && gulp build"
   }
 }

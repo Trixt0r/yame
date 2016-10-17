@@ -1,8 +1,8 @@
 declare var global;
 
-import {Editor} from './editor/editor';
-import {Map} from './core/scene/map';
-import {Camera} from './core/scene/camera';
+import Editor from './editor/editor';
+import Map from './core/renderer/scene/map';
+import Camera from './core/renderer/scene/camera';
 
 var Pubsub = require('backbone').Events;
 

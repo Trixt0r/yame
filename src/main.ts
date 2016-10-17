@@ -1,14 +1,14 @@
 import * as process from 'process';
-import {BrowserWindow, app, dialog, ipcMain } from 'electron';
-
-import * as Backend from './core/backend';
-import  { Window } from './editor/window';
-
-import {Directory} from './core/file/directory';
-
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Promise from 'bluebird';
+
+import {BrowserWindow, app, dialog, ipcMain } from 'electron';
+
+import Env from './core/common/environment';
+import Window from './editor/main/window';
+
+import Directory from './core/common/io/directory';
 
 var Pubsub = require('backbone').Events;
 
@@ -36,7 +36,7 @@ app.on('ready', function() {
         resizable: false,
         frame: false
     });
-    loading.loadURL('file:///' + path.resolve(Backend.templateDir, 'editor/loading.html'));
+    loading.loadURL('file:///' + path.resolve(Env.templateDir, 'editor/loading.html'));
     loading.show();
 
     let window = new Window('app/editor', { show: false, load: true });
@@ -54,21 +54,6 @@ app.on('ready', function() {
                 loading.close();
         }, delay);
     });
-
-    // Plugin management
-    // Simply load all plugins...
-    // TODO: move this into a seperate class, i.e. PluginManager
-    // let pluginsPath = path.resolve(Backend.baseDir, 'plugins');
-    // fs.readdir(pluginsPath, (err, dirs) => {
-    //     if (err)  return Pubsub.trigger('editor:plugins:error', err);
-
-    //     let plugins = [];
-    //     dirs.forEach(function(dir) {
-    //         let dirPath = path.resolve(pluginsPath, dir);
-    //         let plugin = require(dirPath);
-    //         plugins.push(plugin(window, Backend));
-    //     });
-    // });
 
     ipcMain.on('showOpenDialog', (event, options, id) => {
         if (id)

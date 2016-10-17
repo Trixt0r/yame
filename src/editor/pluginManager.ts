@@ -5,7 +5,7 @@ import * as Promise from 'bluebird';
 import * as _ from 'underscore';
 
 
-import * as Backend from '../core/backend';
+import Env from '../core/common/environment';
 
 /**
  * The plugin manager is responsible for loading all editor plugins and
@@ -47,17 +47,16 @@ abstract class PluginManager {
         // Allow each prefix only once
         let prefixes = _.unique(pluginPrefixes);
         return new Promise((resolve, reject) => {
-            fs.readdir(Backend.nodeDir, (err, files) => {
+            fs.readdir(Env.nodeDir, (err, files) => {
                 if (err) return reject(err);
                 files.forEach(file => {
                     // Check if the file is a valid yame plugin
                     let found = _.find(prefixes, p => file.indexOf(p) === 0);
                     // If yes, check if the file is a directory and require it
                     if (found) {
-                        // let fullPath = path.resolve(Backend.nodeDir, file);
-                        // console.log(fullPath, stats.isDirectory());
+                        let fullPath = path.resolve(Env.nodeDir, file);
                         try {
-                            this._plugins[file] = require(file) || true;
+                            this._plugins[file] = require(fullPath) || true;
                         } catch (e) {
                             console.error(e);
                         }

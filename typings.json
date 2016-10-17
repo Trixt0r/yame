@@ -12,6 +12,7 @@
     "keyboardjs": "registry:dt/keyboardjs#2.2.0+20160405205951",
     "node": "registry:dt/node#6.0.0+20161014191813",
     "pixi.js": "registry:dt/pixi.js#3.0.9+20160825215559",
+    "randomstring": "registry:dt/randomstring#1.1.4+20160509083842",
     "underscore": "registry:dt/underscore#1.8.3+20160908111004"
   },
   "dependencies": {
