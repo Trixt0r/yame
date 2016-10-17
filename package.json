@@ -22,5 +22,7 @@
     "gulp-shell": "^0.5.2",
     "yame-dev": "https://github.com/Trixt0r/yame-dev.git"
   },
-  "install": "npm install electron typescript gulp-cli -g && tsc"
+  "scripts": {
+    "postinstall": "npm install typescript typings gulp -g && typings install && gulp build"
+  }
 }
