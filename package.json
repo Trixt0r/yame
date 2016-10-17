@@ -23,6 +23,6 @@
     "yame-dev": "https://github.com/Trixt0r/yame-dev.git"
   },
   "scripts": {
-    "postinstall": "npm install typescript typings gulp -g && typings install && gulp build"
+    "postinstall": "npm install typescript typings gulp electron -g && typings install && gulp build"
   }
 }
