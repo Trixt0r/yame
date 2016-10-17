@@ -29,6 +29,6 @@
   },
   "scripts": {
     "postinstall": "typings install && gulp build",
-    "start": "node node_modules/electron/cli.js ./"
+    "yame": "node node_modules/gulp/bin/gulp.js electron"
   }
 }
