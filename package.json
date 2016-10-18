@@ -30,6 +30,6 @@
   },
   "scripts": {
     "postinstall": "typings install && gulp build",
-    "yame": "node_modules/.bin/gulp electron"
+    "yame": "gulp electron"
   }
 }
