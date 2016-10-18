@@ -5,6 +5,8 @@ import * as path from 'path';
 import * as cheerio from 'cheerio';
 import * as randomstring from 'randomstring';
 
+import * as Utils from './utils';
+
 import Env from './environment';
 
 /**
@@ -60,6 +62,8 @@ export class Template {
                 var template = new Template(path.resolve(this.baseDir, 'templates', templatePath), values);
                 return template.compile();
             },
+            env: Env,
+            utils: Utils,
             data: {}
         };
 

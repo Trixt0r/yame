@@ -4,6 +4,8 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as Backbone from 'backbone';
 
+import * as Utils from '../../core/common/utils';
+
 import { Window as CoreWindow } from '../../core/main/window';
 import Template from '../../core/common/template';
 
@@ -45,13 +47,13 @@ export class Window extends CoreWindow {
 
         // Add all styles
         // Semantic ui
-        this.addStyle(path.resolve(Env.nodeDir, 'semantic-ui', 'dist', 'semantic.css'));
+        this.addStyle(path.resolve(Env.nodeDir, 'semantic-ui-css', 'semantic.css'));
         this.addStyle(path.resolve(Env.nodeDir, 'spectrum-colorpicker', 'spectrum.css'));
         this.addStyle(path.resolve(Env.nodeDir, 'jstree', 'dist', 'themes', 'default', 'style.css'));
 
         this.addScript({ body: 'require("backbone").$ = window.jQuery = window.$ = require("jquery");' });
         this.addScript({ attributes: {src: path.resolve(Env.nodeDir, 'pixi.js', 'bin', 'pixi.js')}});
-        this.addScript({ attributes: {src: path.resolve(Env.nodeDir, 'semantic-ui', 'dist', 'semantic.js')}});
+        this.addScript({ attributes: {src: path.resolve(Env.nodeDir, 'semantic-ui-css', 'semantic.js')}});
         this.addScript({ attributes: {src: path.resolve(Env.nodeDir, 'spectrum-colorpicker', 'spectrum.js')}});
         this.addScript({ attributes: {src: path.resolve(Env.baseDir, 'lib', 'range.js')}});
 

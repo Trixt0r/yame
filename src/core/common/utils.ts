@@ -1,4 +1,7 @@
 import * as fs from 'fs';
+import * as path from 'path';
+
+const isValid = require('is-valid-path');
 
 /**
  * @param {string} str
@@ -11,14 +14,22 @@ export function isURL(str: string): boolean {
     '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
     '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
     '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-    let res = pattern.test(str);
-    if (res)
-        return res;
-    else
-        try {
-            fs.accessSync(str);
-            return true;
-        } catch (e) {
-            return false;
-        }
+    return pattern.test(str);
+}
+
+/**
+ * @param {string} str
+ * @returns {boolean} Whether the given string is a path or not.
+ */
+export function isPath(str: string): boolean {
+    return isValid(str);
+}
+
+/**
+ * @export
+ * @param {string} str
+ * @returns {boolean} Whether the given string is an url or path.
+ */
+export function isPathOrUrl(str: string): boolean {
+    return isPath(str) || isURL(str);
 }

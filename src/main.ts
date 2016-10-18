@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Promise from 'bluebird';
 
-import {BrowserWindow, app, dialog, ipcMain } from 'electron';
+import { BrowserWindow, app, dialog, ipcMain } from 'electron';
 
 import Env from './core/common/environment';
 import Window from './editor/main/window';
@@ -28,16 +28,17 @@ app.on('ready', function() {
     // Create a loading window, so the user knows, that the main window is going
     // to be opened in a few seconds
     let loading = new BrowserWindow({
-        width: 200,
+        width: 400,
         height: 200,
+        show: false,
         transparent: true,
         closable: false,
         alwaysOnTop: true,
-        resizable: false,
+        // resizable: false,
         frame: false
     });
+    loading.webContents.on('did-finish-load', () => loading.show());
     loading.loadURL('file:///' + path.resolve(Env.templateDir, 'editor/loading.html'));
-    loading.show();
 
     let window = new Window('app/editor', { show: false, load: true });
 
