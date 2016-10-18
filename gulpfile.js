@@ -1,7 +1,11 @@
 const gulp = require('gulp');
+const gutil = require('gulp-util');
 const shell = require('gulp-shell');
-var gulpSequence = require('gulp-sequence')
+const gulpSequence = require('gulp-sequence');
+const argv = require('yargs').argv;
+const through = require('through2');
 const less = require('gulp-less');
+const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
@@ -39,6 +43,47 @@ gulp.task('less-watch', function() {
     gulp.watch('less/**/*.less', ['less']);
 });
 
+
+gulp.task('bundle', ['compile'], function(cb) {
+    var outFolder = argv.out === void 0 ? 'out' : argv.out;
+    outFolder = path.resolve(outFolder);
+    // Copy all compiled files to the output folder
+    gutil.log('Copying files...');
+    gulp.src('app/**/*.js')
+    .pipe(gulp.dest( path.resolve(outFolder, 'app') ));
+
+    gulp.src('css/**/*.css')
+    .pipe(gulp.dest( path.resolve(outFolder, 'css') ));
+
+    gulp.src('templates/**')
+    .pipe(gulp.dest( path.resolve(outFolder, 'templates') ));
+
+    gulp.src('lib/**')
+    .pipe(gulp.dest( path.resolve(outFolder, 'lib') ));
+
+    // Copy the package json and install all node modules
+    gulp.src('package.json')
+    .pipe(gulp.dest( path.resolve(outFolder) ))
+    // Remove all  dev dependencies and install scripts
+    .pipe(through.obj((file, enc, cb) => {
+        gutil.log('Removing dev dependencies...');
+        var json = JSON.parse(file.contents.toString());
+        delete json.scripts;
+        delete json.devDependencies;
+        file.contents = Buffer.from(JSON.stringify(json));
+        fs.writeFile(`${outFolder}/package.json`, JSON.stringify(json, null, 2), () => cb(null, file));
+    }))
+    // Run npm install without dev deps and no install scripts
+    .pipe(through.obj((file, enc, cb) => {
+        gutil.log('Installing node modules...');
+        var exec = require('child_process').exec;
+        exec(`cd ${outFolder} && npm install`, () => {
+         gutil.log(`App bundle created at ${outFolder}`);
+            cb(null, file);
+        });
+    }));
+});
+
 gulp.task('dev', ['tsc-watch', 'less-watch', 'electron-watch']);
-gulp.task('build', ['tsc', 'less']);
-gulp.task('run', gulpSequence('build', 'electron'));
+gulp.task('compile', ['tsc', 'less']);
+gulp.task('run', gulpSequence('compile', 'electron'));

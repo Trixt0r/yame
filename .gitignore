@@ -2,5 +2,6 @@
 app
 css
 node_modules
+out
 typings
 semantic.json
