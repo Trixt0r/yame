@@ -1,4 +1,3 @@
-import * as console from 'console';
 import { Menu } from './renderer/gui/menu';
 import {Pixi} from './renderer/gui/pixi';
 import {Sidebar} from './renderer/gui/sidebar';

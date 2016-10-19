@@ -205,13 +205,15 @@ export class Selection extends Tool {
             let rectBottomLeft = new PIXI.Point(rectPos.x, rectPos.y + rectSize.y);
             let rectBottomRight = new PIXI.Point(rectPos.x + rectSize.x, rectPos.y + rectSize.y);
             map.currentLayer.children.forEach((child: PIXI.Sprite | PIXI.Graphics) => {
-                let parent = child.parent;
                 let bounds = child.getLocalBounds();
+                // Get the actual internal size, so the other points get calculated properly
+                let width = bounds.x + bounds.width;
+                let height = bounds.y + bounds.height;
                 // Convert local bounds to global coordinates
                 let topLeft = child.toGlobal(new PIXI.Point(bounds.x, bounds.y));
-                let topRight = child.toGlobal(new PIXI.Point(bounds.x + bounds.width, bounds.y));
-                let bottomLeft = child.toGlobal(new PIXI.Point(bounds.x, bounds.y + bounds.height));
-                let bottomRight = child.toGlobal(new PIXI.Point(bounds.x + bounds.width, bounds.y + bounds.height));
+                let topRight = child.toGlobal(new PIXI.Point(bounds.x + width, bounds.y));
+                let bottomLeft = child.toGlobal(new PIXI.Point(bounds.x, bounds.y + height));
+                let bottomRight = child.toGlobal(new PIXI.Point(bounds.x + width, bounds.y + height));
                 // Check if bounds are inside the selection
                 let contains = selectionRect.contains(topLeft.x, topLeft.y) ||
                                 selectionRect.contains(topRight.x, topRight.y) ||
