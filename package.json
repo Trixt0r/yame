@@ -31,7 +31,7 @@
     "yargs": "^6.2.0"
   },
   "scripts": {
-    "postinstall": "typings install && gulp build",
+    "postinstall": "typings install && gulp compile",
     "yame": "gulp electron"
   }
 }
