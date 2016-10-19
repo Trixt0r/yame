@@ -9,8 +9,12 @@
     },
     "exclude": [
         "app",
+        "builds",
+        "bundle",
+        "css",
+        "less",
         "lib",
         "node_modules",
-        "plugins"
+        "templates"
     ]
 }
