@@ -32,7 +32,11 @@ let initGUI = function() {
 
     $('body').on('mouseover', (e) => $container.attr('data-focus', e.target == EDITOR.renderer.view));
 
-    var renderer = EDITOR.renderer = PIXI.autoDetectRenderer($container.outerWidth(), $container.outerHeight(),{backgroundColor : 0x1099bb});
+    let options = {
+        transparent:true
+    };
+
+    var renderer = EDITOR.renderer = PIXI.autoDetectRenderer($container.outerWidth(), $container.outerHeight(),options);
     $container.append($(renderer.view));
     var map = EDITOR.map = new Map();
     var camera = EDITOR.camera = new Camera();
@@ -77,13 +81,13 @@ let initGUI = function() {
     Pubsub.trigger('renderer-ready', renderer, map, camera);
 };
 
-
 // If the document is ready setup the PIXI renderer and trigger all necessary
 // events for the client side code.
-window.onload = function (parameter) {
-
+window.addEventListener('load', () => {
     PluginManager.load().then(() => {
         PluginManager.run(null, remote.getCurrentWindow(), Env, Pubsub);
         initGUI();
-    })
-}
+    });
+})
+// window.onload = function (parameter) {
+// }

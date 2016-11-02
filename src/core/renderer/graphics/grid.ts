@@ -21,7 +21,7 @@ export class Grid {
         camera.on('update', () => this.update($container.outerWidth(), $container.outerHeight()));
     }
 
-    screenToWorld(point) {
+    screenToWorld(point): PIXI.Point {
         var newPoint = this.camera.container.toLocal(point);
         newPoint.x = Math.floor(newPoint.x / this.width) * this.width;
         newPoint.y = Math.floor(newPoint.y / this.height) * this.height;
@@ -30,41 +30,37 @@ export class Grid {
 
     update(width:number, height: number) {
 
-        var topLeft = this.screenToWorld({ x: 0, y: 0 });
-        var botLeft = this.screenToWorld({ x: 0, y: height });
+        let topLeft = this.screenToWorld({ x: 0, y: 0 });
+        let botLeft = this.screenToWorld({ x: 0, y: height });
         botLeft.y += this.height;
-        var topRight = this.screenToWorld({ x: width, y: 0 });
+        let topRight = this.screenToWorld({ x: width, y: 0 });
         topRight.x += this.width;
-        var botRight = this.screenToWorld({ x: width + this.width, y: height});
+        let botRight = this.screenToWorld({ x: width + this.width, y: height});
         botRight.x += this.width; botRight.y += this.height;
 
-        width =  topRight.x - topLeft.x;
+        width = topRight.x - topLeft.x;
         height = botLeft.y - topLeft.y;
 
         this.graphics.clear();
-        this.graphics.lineStyle(Math.max(1/this.camera.zoom, 1), 0x4e4e4e);
 
-        var xSteps = Math.ceil(width/this.width);
-        var ySteps = Math.ceil(height/this.height);
+        let xSteps = Math.ceil(width/ this.width);
+        let ySteps = Math.ceil(height / this.height);
 
-        for (var x = 0; x <= xSteps; x++) {
-            var xx = topLeft.x + x*this.width;
+        this.graphics.beginFill(0x212121);
+        this.graphics.lineStyle(0, 0);
 
-            if ( xx % (this.steps.x * this.width) == 0) this.graphics.lineStyle(Math.max(5/this.camera.zoom, 5), 0x4e4e4e);
-            else this.graphics.lineStyle(Math.max(1/this.camera.zoom, 1), 0x4e4e4e);
-
-            this.graphics.moveTo(xx, topLeft.y);
-            this.graphics.lineTo(xx, topLeft.y + height);
+        for (let x = 0; x <= xSteps; x++) {
+            let xx = topLeft.x + x * this.width;
+            let xOff = Math.round(xx / this.width) * this.width;
+            for (let y = 0; y <= ySteps; y++) {
+                let yy = topLeft.y + y * this.height;
+                let yOff = Math.round(yy / this.height) * this.height;
+                if ( (xOff + yOff) % (this.width * 2 ) == 0 )
+                    continue;
+                this.graphics.drawRect(xx, yy, this.width, this.height );
+            }
         }
-        for (var y = 0; y <= ySteps; y++) {
-            var yy = topLeft.y +  y*this.height;
-
-            if ( yy % (this.steps.y * this.height) == 0) this.graphics.lineStyle(Math.max(5/this.camera.zoom, 5), 0x4e4e4e);
-            else this.graphics.lineStyle(Math.max(1/this.camera.zoom, 1), 0x4e4e4e);
-
-            this.graphics.moveTo(topLeft.x, yy);
-            this.graphics.lineTo(topLeft.x + width, yy);
-        }
+        this.graphics.endFill();
     }
 }
 

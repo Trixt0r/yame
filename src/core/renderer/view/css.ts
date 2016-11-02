@@ -47,7 +47,21 @@ export class Css extends EventBus {
 
     constructor(initial?: string | Object) {
         super();
-        this._css = {};
+        let proxy: ProxyHandler<any> = {};
+
+        proxy.set = (obj, name, value, receiver) => {
+            obj[name] = value;
+            this.trigger('set', name, value);
+            return true;
+        };
+        proxy.deleteProperty = (obj, name) => {
+            // Delete means, restore the default value
+            obj[name] = '';
+            this.trigger('delete', name);
+            return true;
+        };
+
+        this._css = new Proxy<any>({}, proxy);
         if (initial)
             this.set(initial);
     }

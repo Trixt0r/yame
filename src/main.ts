@@ -34,7 +34,6 @@ app.on('ready', function() {
         transparent: true,
         closable: false,
         alwaysOnTop: true,
-        // resizable: false,
         frame: false
     });
     loading.webContents.on('did-finish-load', () => loading.show());

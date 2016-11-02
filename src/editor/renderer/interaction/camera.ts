@@ -15,9 +15,9 @@ export var speed = 20;
  * @returns {void}
  */
 export function init() {
-    var renderer = EDITOR.renderer;
-    var map: Map = EDITOR.map;
-    var camera: Camera = EDITOR.camera;
+    let renderer = EDITOR.renderer;
+    let map: Map = EDITOR.map;
+    let camera: Camera = EDITOR.camera;
     speed = 20;
     initMouse();
 
@@ -27,23 +27,25 @@ export function init() {
      */
     function initMouse() {
         renderer.view.addEventListener("mousewheel", function (e) {
-            var data = (<any>renderer).plugins.interaction.eventData.data;
+            let data = (<any>renderer).plugins.interaction.eventData.data;
             camera.targetPosition = data.getLocalPosition(map.parent, null, {x: e.clientX, y: e.clientY});
             if (e.wheelDelta > 0)
                 camera.zoom = camera.maxZoom;
             else if (e.wheelDelta < 0)
                 camera.zoom = camera.minZoom;
+            // let canvas = $('#pixi-container canvas');
+            // canvas.css('background-size', `${camera.zoom*canvas.outerWidth()}px ${camera.zoom*canvas.outerHeight()}px`);
             }, false);
 
         renderer.view.addEventListener("mouseup", function (data) {
             EDITOR.map.clearClick();
         });
     }
-    var prevPos = null;
-    var camPos = null;
+    let prevPos = null;
+    let camPos = null;
     $(EDITOR.renderer.view).on('mousedown', e => {
         if (e.which !== 3) return; // Only listen for right click
-        var data = (<any>renderer).plugins.interaction.eventData.data;
+        let data = (<any>renderer).plugins.interaction.eventData.data;
         prevPos = data.getLocalPosition(EDITOR.map.parent, null, {x: e.clientX, y: e.clientY});
         camPos = new PIXI.Point(camera.position.x, camera.position.y);
     });
@@ -55,10 +57,13 @@ export function init() {
 
     $('body').on('mousemove', e => {
         if (e.which !== 3 || !prevPos) return; // Only listen for right click
-        var data = (<any>renderer).plugins.interaction.eventData.data;
-        var pos = data.getLocalPosition(map.parent, null, {x: e.clientX, y: e.clientY});
+        let data = (<any>renderer).plugins.interaction.eventData.data;
+        let pos = data.getLocalPosition(map.parent, null, {x: e.clientX, y: e.clientY});
         camera.position.x = camPos.x + (pos.x - prevPos.x);
-        camera.position.y = camPos.y  + (pos.y - prevPos.y);
+        camera.position.y = camPos.y + (pos.y - prevPos.y);
+        // let canvas = $('#pixi-container canvas');
+        // canvas.css('background-position-x', camera.position.x);
+        // canvas.css('background-position-y', camera.position.y);
         camera.trigger('update');
         Pubsub.trigger('camera:update', camera);
     });

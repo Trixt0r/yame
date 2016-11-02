@@ -6,6 +6,18 @@ import EventBus from '../../common/eventbus';
 import Template from '../../common/template';
 import Css from './css';
 
+// Attach a view to each DOM element, which is marked accordingly
+window.addEventListener('load', () => {
+    $('*[view]').each(function() {
+        let $el = $(this);
+        let viewName = $el.attr('view');
+        if (View.isDefined(viewName))
+            $el.data('view', View.instance(viewName, { el: $el.get(0) } ));
+        else
+            $el.data('view', new View( { el: $el.get(0) } ));
+    });
+});
+
 /**
  * Base class for any view.
  */
@@ -35,7 +47,9 @@ export class View extends Backbone.View<Backbone.Model> {
         this._css.on('change:*', (varName, value, prev) => {
             this.trigger('change:css:*', varName, value, prev);
             this.trigger(`change:css:${varName}`, value, prev);
-        })
+        });
+        // Listen for single attribute changes and update the elements css
+        this._css.on('set delete', () => this.$el.css(this._css.get()));
         this.views = [];
     }
 
@@ -338,6 +352,24 @@ export class View extends Backbone.View<Backbone.Model> {
         super.setElement(element);
         this.trigger('change:element', this.$el, $old);
         return this;
+    }
+
+    private static views: {[className: string]: typeof View } = { };
+
+    public static DOM(name: string): Function {
+        return function(target: typeof View) {
+            View.views[name] = target;
+        }
+    }
+
+    public static instance(name: string, ...args): View {
+        let instance = Object.create(View.views[name].prototype);
+        View.views[name].apply(instance, args);
+        return instance;
+    }
+
+    public static isDefined(name: string): boolean {
+        return View.instance[name] != void 0;
     }
 }
 

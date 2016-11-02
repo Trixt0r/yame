@@ -33,7 +33,7 @@ export abstract class Tool extends EventBus {
         return function() {
             if (!self._tools) return; // Skip if tools has not been set yet
             // Only run the handler if this tool is active
-            if (self._tools.isActive(self) && self._tools.hasFocus)
+            if (self._tools.isActive(self))
                 fn.apply(this, arguments);
         }
     }

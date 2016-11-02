@@ -7,6 +7,7 @@ import _ = require('underscore');
 /**
  * A title view for an accordion view.
  */
+@View.DOM('Accordion.Title')
 class Title extends View {
 
     private _icon: Icon;
@@ -38,6 +39,7 @@ class Title extends View {
 /**
  * A content view for an accordion view.
  */
+@View.DOM('Accordion.Content')
 class Content extends View {
     constructor() {
         super({ className: 'content' });
@@ -156,6 +158,7 @@ export class Group {
 /**
  * A group of accordion panels, i.e. an actual accordion.
  */
+@View.DOM('Accordion')
 export class Accordion extends View {
 
     private _groups: Group[];

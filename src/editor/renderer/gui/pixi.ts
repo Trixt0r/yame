@@ -2,7 +2,7 @@ import EDITOR from '../globals';
 
 import Backbone = require('backbone');
 import Grid from '../../../core/renderer/graphics/grid';
-import { Sprite } from '../../../core/renderer/graphics/sprite';
+import { Sprite } from 'core/renderer/graphics/sprite';
 import CameraInteraction = require('../interaction/camera');
 import Selection = require('../interaction/selection');
 import {Translation} from '../interaction/transformation/translation';

@@ -6,6 +6,7 @@ import View from './abstract';
  * Button view.
  * Trigger the `click` event if clicked and enabled.
  */
+@View.DOM('Button')
 export class Button extends View {
 
     private _disabled: boolean;
@@ -98,6 +99,7 @@ export class Button extends View {
 /**
  * A view containing buttons only.
  */
+@View.DOM('ButtonGroup')
 export class Group extends View {
     constructor(options = {}) {
         super(_.extend({

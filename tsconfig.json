@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es6",
         "module": "commonjs",
         "sourceMap": true,
         "outDir": "app",
         "rootDir": "src",
-        "sourceRoot": "app"
+        "sourceRoot": "app",
+        "baseUrl": "src",
+        "experimentalDecorators": true
     },
     "exclude": [
         "app",
