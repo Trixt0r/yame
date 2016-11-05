@@ -1,16 +1,18 @@
-import Layer from '../../../core/renderer/scene/layer';
+import Layer from 'core/renderer/scene/layer';
 import EDITOR from '../globals';
 
 import Enums = require('./enums');
 import * as _ from 'underscore';
 
-import Map from '../../../core/renderer/scene/map';
-import Camera from '../../../core/renderer/scene/camera';
+import Map from 'core/renderer/scene/map';
+import Camera from 'core/renderer/scene/camera';
 import Transformation from './transformation/interface';
 import Container from './transformation/container';
 
 import Sprite from '../../../core/renderer/graphics/sprite';
 import AbstractShape from '../../../core/renderer/graphics/shape/abstract';
+
+import * as Utils from '../../../core/common/utils';
 
 let Pubsub: Backbone.Events = require('backbone').Events;
 
@@ -219,17 +221,36 @@ export function clear(silent: boolean = false) {
     let children = [];
     selectionContainer.target.children.forEach((child) => {
         if (child instanceof Sprite || child instanceof AbstractShape) {
+            let bounds = child.getLocalBounds();
+            let width = bounds.x + bounds.width;
+            let height = bounds.y + bounds.height;
+            let origin = child.toGlobal(new PIXI.Point(bounds.x, bounds.y));
+            let right = child.toGlobal(new PIXI.Point(bounds.x + width, bounds.y));
+            let bottom = child.toGlobal(new PIXI.Point(bounds.x, bounds.y + height));
+
+            let localOrigin = world.currentLayer.toLocal(origin);
+            let horDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(right));
+            let vertDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(bottom));
+            child.scale.x = horDiff / width * Math.sign(selectionContainer.scale.x);
+            child.scale.y = vertDiff / height * Math.sign(selectionContainer.scale.y);
+
+            // TODO: Investigate more into the skewing issues
+            // let rotation = selectionContainer.rotation;
+            // let skewX = Math.PI/2 - Math.atan2( bottom.y - origin.y, bottom.x - origin.x ) + rotation;
+            // let skewY = Math.atan2( right.y - origin.y, right.x - origin.x ) - rotation;
+            // child.skew.x = skewX
+            // child.skew.y = skewY;
+
+            child.position = world.currentLayer.toLocal(selectionContainer.target.toGlobal(child.position));
+            // if (Math.round(skewX * 100000) / 100000 == 0 || Math.round(skewY * 100000) / 100000 == 0)
+            child.rotation += selectionContainer.rotation;
+
             children.push(child);
         }
     });
     selectionContainer.target.removeChildren();
-    children.forEach((child: PIXI.DisplayObject, i) => {
-        child.position = world.currentLayer.toLocal(selectionContainer.target.toGlobal(child.position));
-        child.scale.x *= selectionContainer.scale.x;
-        child.scale.y *= selectionContainer.scale.y;
-        child.rotation += selectionContainer.rotation;
-    });
 
+    // Assign all children to their layers again
     children.forEach(child => {
         let layer = world.layerById(child.layer);
         if (layer)

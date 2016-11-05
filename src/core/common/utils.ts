@@ -33,3 +33,17 @@ export function isPath(str: string): boolean {
 export function isPathOrUrl(str: string): boolean {
     return isPath(str) || isURL(str);
 }
+
+
+/**
+ * Calculates the distance between the two points.
+ *
+ * @export
+ * @param {PIXI.Point} p1
+ * @param {PIXI.Point} p2
+ * @returns {number}
+ */
+export function distance(p1: PIXI.Point, p2: PIXI.Point): number {
+    let diff = new PIXI.Point(p2.x - p1.x, p2.y - p1.y);
+    return Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+}
