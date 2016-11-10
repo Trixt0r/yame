@@ -54,8 +54,10 @@ export class Grid {
             let xOff = Math.round(xx / this.width) * this.width;
             for (let y = 0; y <= ySteps; y++) {
                 let yy = topLeft.y + y * this.height;
-                let yOff = Math.round(yy / this.height) * this.height;
-                if ( (xOff + yOff) % (this.width * 2 ) == 0 )
+                // Calculate the correct skip position, so we get a real grid
+                let yOff = Math.round(yy / this.height) * this.width;
+                let pos = xOff + yOff;
+                if ( pos % (this.width * 2 ) == 0 )
                     continue;
                 this.graphics.drawRect(xx, yy, this.width, this.height );
             }
