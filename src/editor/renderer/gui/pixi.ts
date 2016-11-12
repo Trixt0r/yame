@@ -41,7 +41,7 @@ var Pubsub = require('backbone').Events;
 
 export class Pixi extends Backbone.View<Backbone.Model> {
 
-    $container;
+    $container: JQuery;
     public imageDropHandler: Resources.ImageDropHandler;
     public grid: Grid;
     private preview: PIXI.DisplayObject;
@@ -69,9 +69,9 @@ export class Pixi extends Backbone.View<Backbone.Model> {
         handler.on('leave', payload => this.cancelPreview());
         this._dropManager.add(handler);
 
-        var grid = this.grid = new Grid(this.$container, EDITOR.camera);
+        var grid = this.grid = new Grid(EDITOR.map, EDITOR.renderer);
         Selection.grid = grid;
-        EDITOR.map.addChild(grid.graphics);
+        EDITOR.camera.on('update', () => grid.update(this.$container.outerWidth(), this.$container.outerHeight()));
         EDITOR.map.addChild((<any>EDITOR.map)._layersContainer);
         EDITOR.camera.trigger('update');
 
@@ -85,12 +85,13 @@ export class Pixi extends Backbone.View<Backbone.Model> {
 
         this.$container.on('dragover', (e) => {
             this.$container.css('cursor', 'point');
-            (<any>EDITOR.renderer).plugins.interaction.mapPositionToPoint(
-                (<any>EDITOR.renderer).plugins.interaction.mouse.global,
-                e.originalEvent.clientX,
-                e.originalEvent.clientY);
+            let originalEvent = (<any>e.originalEvent);
+            EDITOR.renderer.plugins.interaction.mapPositionToPoint(
+                EDITOR.renderer.plugins.interaction.mouse.global,
+                originalEvent.clientX,
+                originalEvent.clientY);
             if (this.preview)
-                this.preview.position = this.getMapPosition(e.originalEvent.clientX, e.originalEvent.clientY);
+                this.preview.position = this.getMapPosition(originalEvent.clientX, originalEvent.clientY);
         });
     }
 
@@ -136,7 +137,7 @@ export class Pixi extends Backbone.View<Backbone.Model> {
         this.previews.forEach(preview => EDITOR.map.removeChild(preview));
         this.previews = [];
         this.preview = null;
-        EDITOR.map.off('mousemove');
+        EDITOR.map.off('mousemove', null);
     }
 
     /**

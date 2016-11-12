@@ -1,3 +1,4 @@
+import { EventBus } from './eventbus';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -46,4 +47,17 @@ export function isPathOrUrl(str: string): boolean {
 export function distance(p1: PIXI.Point, p2: PIXI.Point): number {
     let diff = new PIXI.Point(p2.x - p1.x, p2.y - p1.y);
     return Math.sqrt(diff.x * diff.x + diff.y * diff.y);
+}
+
+/**
+ * Calculates the interpolated value between `a` and `b` based on `f`, i.e. the
+ * lerp function.
+ *
+ * @param {number} a Start value.
+ * @param {number} b End value.
+ * @param {number} f The step between 0 and 1.
+ * @returns {number} The interpolated value
+ */
+function lerp(a: number, b: number, f: number): number {
+    return (a * (1 - f)) + (b * f);
 }

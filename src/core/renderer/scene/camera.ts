@@ -4,16 +4,6 @@ import EventBus from '../../common/eventbus';
 
 var Pubsub: Backbone.Events = <any>Backbone.Events;
 
-function lerp(a: number, b: number, f: number) {
-    return (a * (1 - f)) + (b * f);
-}
-
-var sign = Math['sign'];
-
-var friction = 0.05;
-var maxHspeed = 150;
-var maxVspeed = 150;
-
 var localTargetPosition = new PIXI.Point();
 
 /**
@@ -31,7 +21,7 @@ export class Camera extends EventBus {
     constructor() {
         super();
         this._zoom = 1;
-        this._minZoom = 0.05;
+        this._minZoom = 0.1;
         this._maxZoom = 3;
         this.targetPosition = new PIXI.Point();
         this.zoomStep = 0.03;
