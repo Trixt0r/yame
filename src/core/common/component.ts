@@ -1,4 +1,3 @@
-import * as console from 'console';
 import { EventBus } from './eventbus';
 
 /**
@@ -89,6 +88,33 @@ export function isDefined(type: string): boolean {
  * @param {*} value
  * @returns {Component<T>} The created component instance.
  */
-export function create<T>(type: string, name: string, value: any ): Component<T> {
+export function create<T>(type: string, name: string, value: any): Component<T> {
     return new (<any>definitions[type])(name, value);
+}
+
+
+/**
+ * Function for decorating class members as components.
+ * Import the function and use `@comonent` before your class member.
+ * @export
+ * @param {Component<any>} target
+ * @param {string} key
+ */
+export function component(target: Component<any>, key: string): void {
+    let o = { };
+    o[key] = {
+        // Return the value which should be a component
+        get: function() {
+            return this.value[key];
+        },
+        // Set the actual value of the component
+        set: function(val) {
+            if (val != this.value[key].value) {
+                let old = this.value[key].value;
+                this.trigger(`change:${key}`, val, old);
+                this.value[key].value = val;
+            }
+        }
+    };
+    Object.defineProperties(target, o);
 }
