@@ -1,3 +1,4 @@
+import { Entity } from '../graphics/entity';
 import { ShapeFactory } from './../graphics/shapeFactory';
 import {Sprite} from '../graphics/sprite';
 import {AbstractShape} from '../graphics/shape/abstract';
@@ -14,7 +15,7 @@ export class Layer extends PIXI.Container {
 
     protected _id: string;
     protected _name: string;
-    protected _children: (Sprite | AbstractShape)[];
+    protected _children: Entity[];
     protected _sorted: boolean;
     protected _z: number;
 
@@ -35,7 +36,7 @@ export class Layer extends PIXI.Container {
      * @returns {void}
      */
     sort() {
-        let sorted = this._children.sort((a, b) => a.z - b.z );
+        let sorted = this._children.sort((a, b) => a.z.value - b.z.value );
         this._children = sorted;
         this.removeChildren();
         this._children.forEach(child => super.addChild(child));
@@ -44,10 +45,10 @@ export class Layer extends PIXI.Container {
     /** @inheritdoc */
     addChild(child: PIXI.DisplayObject): PIXI.DisplayObject {
         var re = super.addChild(child);
-        if ((child instanceof Sprite || child instanceof AbstractShape)) {
+        if ((child instanceof Entity)) {
             if (this._children.indexOf(<any>child) < 0) {
                 this._children.push(child);
-                child.layer = this._id;
+                child.layer.value = this._id;
                 this.emit('addChild', child);
                 Pubsub.trigger('layer:addChild', this, child);
             }
@@ -92,14 +93,14 @@ export class Layer extends PIXI.Container {
 
     /**
      * @param {string[]} ids List of ids to search for
-     * @returns {((Sprite | AbstractShape)[])} The found children
+     * @returns {Entity[]} The found children
      */
-    getChildren(ids: string[]): (Sprite | AbstractShape)[] {
-        return _.filter(this._children, child => ids.indexOf(child.id) >= 0);
+    getChildren(ids: string[]): Entity[] {
+        return _.filter(this._children, child => ids.indexOf(child.id.value) >= 0);
     }
 
     /** @returns {PIXI.DisplayObject[]} List of sprites or shapes. */
-    get objects(): (Sprite | AbstractShape)[] {
+    get objects(): Entity[] {
         return this._children.slice();
     }
 
@@ -112,7 +113,7 @@ export class Layer extends PIXI.Container {
         if (this._name != name) {
             let prev = this._name;
             this._name = name;
-            this._children.forEach(child => child.layer = this._name);
+            this._children.forEach(child => child.layer.value = this._name);
             this.emit('change:name', name, prev);
             Pubsub.trigger('layer:change:name', this, name, prev);
         }
@@ -162,7 +163,7 @@ export class Layer extends PIXI.Container {
             alpha: this.alpha,
             z: this.z,
             children: _.map(this._children, child => _.extend( {
-                type: child.type,
+                type: child.renderer.type,
                 layer: this.id
             }, child.toJSON(path)) )
         }

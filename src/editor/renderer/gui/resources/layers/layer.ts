@@ -1,4 +1,4 @@
-import Entity from '../../../../../core/common/entity';
+import Entity from '../../../../../core/renderer/graphics/entity';
 import Tree from '../../../../../core/renderer/view/tree';
 import View from '../../../../../core/renderer/view/abstract';
 import List from '../../../../../core/renderer/view/list';
@@ -32,7 +32,7 @@ export class LayerControl {
 
         this.layer.on('addChild', child => this.addChild(child));
         this.layer.on('removeChild', child => {
-             (<any>this.tree.$el.jstree(true)).delete_node('#' + child.id);
+             (<any>this.tree.$el.jstree(true)).delete_node('#' + child.id.value);
         });
         this.layer.on('parse', () => this.update());
     }
@@ -46,8 +46,8 @@ export class LayerControl {
         if (child instanceof Layer) console.log(child);
         else {
             let newNode = {
-                id: child.id,
-                text: child.id,
+                id: child.id.value,
+                text: child.id.value,
                 type: 'object'
             };
             this.tree.$el.jstree(true).create_node('#' + this.layer.id, newNode);
@@ -55,7 +55,7 @@ export class LayerControl {
     }
 
     update() {
-        let toRemove = _.map(this.layer.objects, obj => '#' + obj.id);
+        let toRemove = _.map(this.layer.objects, obj => '#' + obj.id.value);
         this.tree.$el.jstree(true).delete_node(toRemove);
         this.layer.objects.forEach(obj => this.addChild(<any>obj));
     }

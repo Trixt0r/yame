@@ -1,3 +1,4 @@
+import { Entity } from '../../../core/renderer/graphics/entity';
 import Layer from '../../../core/renderer/scene/layer';
 import EDITOR from '../globals';
 import * as Selection from './selection';
@@ -14,16 +15,16 @@ let nextPasteIsCut = false;
 /**
  * Removes the given objects from their layer and clears the them from the
  * current selection.
- * @param {any[]} [toRemove=Selection.get()]
+ * @param {Entity[]} [toRemove=Selection.get()]
  * @param {boolean} [clearCopy=true] Whether to clear the provided objects from
  * the previously copied object store.
  */
-export function remove(toRemove: any[] = Selection.get(), clearCopy: boolean = true) {
+export function remove(toRemove: Entity[] = Selection.get(), clearCopy: boolean = true) {
     let selection = Selection.getSelectionContainer().selection;
     toRemove = toRemove.slice();
     Selection.clear();
     toRemove.forEach(obj => {
-        EDITOR.map.layerById(obj.layer).deleteChild(obj);
+        EDITOR.map.layerById(obj.layer.value).deleteChild(obj);
         if (clearCopy) {
             let idx = copied.indexOf(obj);
             if (idx >= 0) copied.splice(idx, 1);
@@ -37,9 +38,9 @@ export function remove(toRemove: any[] = Selection.get(), clearCopy: boolean = t
 
 /**
  * Copies the given objects.
- * @param {any[]} [toCopy=Selection.get()]
+ * @param {Entity[]} [toCopy=Selection.get()]
  */
-export function copy(toCopy: any[] = Selection.get()) {
+export function copy(toCopy: Entity[] = Selection.get()) {
     let prev = Selection.get();
     Selection.clear(true);
     copied = EDITOR.map.copyChildren(toCopy);
@@ -52,9 +53,9 @@ export function copy(toCopy: any[] = Selection.get()) {
  * Cuts the given objects, i.e. stores them and removes them from the their
  * parents.
  *
- * @param {any[]} [toCut=Selection.get()]
+ * @param {Entity[]} [toCut=Selection.get()]
  */
-export function cut(toCut: any[] = Selection.get()) {
+export function cut(toCut: Entity[] = Selection.get()) {
     let prev = Selection.get();
     Selection.clear(true);
     copied =  toCut;
@@ -90,10 +91,10 @@ export function paste(target: Layer = EDITOR.map.currentLayer, cut: boolean = ne
  * Copies the given objects to the given layer.
  *
  * @param {Layer} target
- * @param {any[]} [objects=Selection.get()]
+ * @param {Entity[]} [objects=Selection.get()]
  * @returns
  */
-export function copyTo(target: Layer, objects: any[] = Selection.get()) {
+export function copyTo(target: Layer, objects: Entity[] = Selection.get()) {
     if (!target || !objects.length) return;
     copy(objects);
     paste(target);
@@ -103,10 +104,10 @@ export function copyTo(target: Layer, objects: any[] = Selection.get()) {
 /**
  * Moves the given objects to the given layer.
  * @param {Layer} target
- * @param {any[]} [objects=Selection.get()]
+ * @param {Entity[]} [objects=Selection.get()]
  * @returns
  */
-export function moveTo(target: Layer, objects: any[] = Selection.get()) {
+export function moveTo(target: Layer, objects: Entity[] = Selection.get()) {
     if (!target || !objects.length) return;
     cut(objects);
     paste(target);

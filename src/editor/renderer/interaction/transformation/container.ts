@@ -1,5 +1,4 @@
-import Sprite from '../../../../core/renderer/graphics/sprite';
-import AbstractShape from '../../../../core/renderer/graphics/shape/abstract';
+import Entity from '../../../../core/renderer/graphics/entity';
 import Observer from '../../../../core/renderer/graphics/observer';
 
 import * as _ from 'underscore';
@@ -12,10 +11,10 @@ export class Container extends Observer<PIXI.Container> {
         super(new PIXI.Container());
     }
 
-    get selection(): (Sprite | AbstractShape)[] {
+    get selection(): Entity[] {
         var arr = [];
         this._target.children.forEach(child => {
-            if (child instanceof Sprite || child instanceof AbstractShape)
+            if (child instanceof Entity)
                 arr.push(child);
         });
         return arr;

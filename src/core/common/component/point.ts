@@ -21,6 +21,37 @@ export class Point extends Component<any> {
     get type(): string {
         return 'point';
     }
+
+    /** @inheritdoc */
+    copy(): Point {
+        let copy = new Point(this._name);
+        copy.value.x = this.x.copy();
+        copy.value.y = this.y.copy();
+        return copy;
+    }
+
+    /**
+     * Applies the current values to the given PIXI point.
+     *
+     * @param {PIXI.Point} point
+     * @chainable
+     */
+    apply(point: PIXI.Point): Point {
+        point.set(this.x.value, this.y.value);
+        return this;
+    }
+
+    /**
+     * Applies the given PIXI point to this component.
+     *
+     * @param {PIXI.Point} point
+     * @chainable
+     */
+    sync(point: PIXI.Point): Point {
+        this.x.value = point.x;
+        this.y.value = point.y;
+        return this;
+    }
 }
 
 export default Point;

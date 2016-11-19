@@ -1,3 +1,4 @@
+import { Entity } from '../../../../core/renderer/graphics/entity';
 import Dropdown from '../../../../core/renderer/view/dropdown';
 import Icon from '../../../../core/renderer/view/icon';
 import EDITOR from './../../globals';
@@ -107,7 +108,7 @@ export class Layers {
             let $moveEl = dropdown.$('.item[data-value="move-to-layer"] .menu');
             let $copyEl = dropdown.$('.item[data-value="copy-to-layer"] .menu');
             let child = EDITOR.map.objectById(node.id);
-            let otherLayers = _.filter(EDITOR.map.layers, layer => layer.id != child.layer);
+            let otherLayers = _.filter(EDITOR.map.layers, layer => layer.id != child.layer.value);
             otherLayers.forEach(layer => {
                 $('<div></div>')
                     .attr('data-value', 'move-to-layer-' + layer.id)
@@ -140,7 +141,7 @@ export class Layers {
             if (node.type === 'object') {
                 let child = EDITOR.map.objectById(node.id);
                 if (Selection.has(child))
-                    moveNodes = _.map(Selection.get(), child => '#' + child.id);
+                    moveNodes = _.map(Selection.get(), child => '#' + child.id.value);
             }
 
             switch(value) {
@@ -153,7 +154,7 @@ export class Layers {
 
                                 let found = EDITOR.map.objectById(name);
                                 if (!found) {
-                                    EDITOR.map.objectById(node.id).id = name;
+                                    EDITOR.map.objectById(node.id).id.value = name;
                                     this.tree.$el.jstree(true).set_id(node, name);
                                 } else {
                                      this.tree.$el.jstree(true).rename_node(node, node.id);
@@ -195,7 +196,7 @@ export class Layers {
 
         this.tree.on('dropdown:change:object', (value: string, $el, node, $node) => {
             let child = EDITOR.map.objectById(node.id);
-            let clickedLayer = EDITOR.map.layerById(child.layer);
+            let clickedLayer = EDITOR.map.layerById(child.layer.value);
 
             let isInSelect = Selection.has(child);
             let selection = isInSelect ? Selection.get() : [child];
@@ -230,16 +231,16 @@ export class Layers {
         this.selecting = false;
         let selectedNodes = [];
 
-        Pubsub.on('selection:select', children =>  {
+        Pubsub.on('selection:select', children => {
             this.selecting = true;
-            selectedNodes = _.map(children, (child: any) => child.id);
+            selectedNodes = _.map(children, (child: Entity) => child.id.value);
             let map = _.map(selectedNodes, (id: string) => '#' + id);
-            (<any>this.tree.$el.jstree(true)).select_node(map);
+            this.tree.$el.jstree(true).select_node(map);
             this.selecting = false;
         });
         Pubsub.on('selection:unselect', () => {
-            (<any>this.tree.$el.jstree(true)).deselect_all();
-            (<any>this.tree.$el.jstree(true)).select_node('#' + EDITOR.map.currentLayer.id);
+            this.tree.$el.jstree(true).deselect_all();
+            this.tree.$el.jstree(true).select_node('#' + EDITOR.map.currentLayer.id);
             selectedNodes = [];
         });
 
@@ -249,7 +250,7 @@ export class Layers {
             Selection.clear(true);
             Selection.select(children);
             this.selecting = true;
-            (<any>this.tree.$el.jstree(true)).select_node('#' + EDITOR.map.currentLayer.id);
+            this.tree.$el.jstree(true).select_node('#' + EDITOR.map.currentLayer.id);
             this.selecting = false;
         };
 
@@ -263,12 +264,12 @@ export class Layers {
                     Selection.clear();
                     EDITOR.map.currentLayer = EDITOR.map.layerById(data.node.id);
                     selectedNodes = [];
-                    (<any>this.tree.$el.jstree(true)).deselect_all();
-                    (<any>this.tree.$el.jstree(true)).select_node('#' + EDITOR.map.currentLayer.id);
+                    this.tree.$el.jstree(true).deselect_all();
+                    this.tree.$el.jstree(true).select_node('#' + EDITOR.map.currentLayer.id);
                 } else
-                    selectedNodes = _.map(Selection.getSelectionContainer().selection, (child: any) => child.id);
+                    selectedNodes = _.map(Selection.getSelectionContainer().selection, (child: any) => child.id.value);
                 let map = _.map(selectedNodes, id => '#' + id);
-                (<any>this.tree.$el.jstree(true)).select_node(map);
+                this.tree.$el.jstree(true).select_node(map);
                 this.selecting = false;
                 return;
             }
@@ -282,7 +283,7 @@ export class Layers {
             let idx = selectedNodes.indexOf(data.node.id);
             selectedNodes = data.selected.slice();
             if (idx >= 0) {
-                (<any>this.tree.$el.jstree(true)).deselect_node(data.node);
+                this.tree.$el.jstree(true).deselect_node(data.node);
                 selectedNodes.splice(idx, 1);
             } else if (idx < 0) {
                 selectedNodes.push(data.node.id);
@@ -295,7 +296,7 @@ export class Layers {
             if (this.selecting) return;
             this.selecting = true;
             if (data.node.type == 'layer') {
-                (<any>this.tree.$el.jstree(true)).select_node('#' + EDITOR.map.currentLayer.id);
+                this.tree.$el.jstree(true).select_node('#' + EDITOR.map.currentLayer.id);
                 this.selecting = false;
                 return;
             }
@@ -314,13 +315,13 @@ export class Layers {
 
             nodes.forEach(id => {
                 let object = EDITOR.map.objectById(id);
-                let node = (<any>this.tree.$el.jstree(true)).get_node('#' + id);
-                let parent = (<any>this.tree.$el.jstree(true)).get_parent('#' + id);
+                let node = this.tree.$el.jstree(true).get_node('#' + id);
+                let parent = this.tree.$el.jstree(true).get_parent('#' + id);
                 let layer = EDITOR.map.layerById(parent);
 
                 if (object) {
-                    if (parent !== object.layer) {
-                        object.layer = parent;
+                    if (parent !== object.layer.value) {
+                        object.layer.value = parent;
                         (<Layer>object.parent).deleteChild(object);
                         layer.addChild(object);
                         let idx = selection.indexOf(object);
@@ -333,15 +334,17 @@ export class Layers {
             affectedLayers.forEach(layer => {
                 // Update the z index of each object
                 layer.objects.forEach(object => {
-                    let node = (<any>this.tree.$el.jstree(true)).get_node('#' + object.id, true);
+                    let node = this.tree.$el.jstree(true)
+                                .get_node('#' + object.id.value, true);
                     if (node)
-                        object.z = node.index() + 1;
+                        object.z.value = node.index() + 1;
                 });
                 layer.sort();
             });
             // Update z-index of the layers and sort them
             EDITOR.map.layers.forEach(layer => {
-                let node = (<any>this.tree.$el.jstree(true)).get_node('#' + layer.id, true);
+                let node = this.tree.$el.jstree(true)
+                            .get_node('#' + layer.id, true);
                 if (node)
                     layer.z = node.index() + 1;
             });
@@ -349,7 +352,7 @@ export class Layers {
 
             // Sort and restore the selection
             if (selection.length) {
-                selection = selection.sort((a, b) => a.z - b.z);
+                selection = selection.sort((a, b) => a.z.value - b.z.value);
                 Selection.select(selection, true);
             }
             this.selecting = false;

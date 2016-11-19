@@ -1,3 +1,4 @@
+import Entity from '../../../core/renderer/graphics/entity';
 import Layer from 'core/renderer/scene/layer';
 import EDITOR from '../globals';
 
@@ -220,7 +221,7 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
 export function clear(silent: boolean = false) {
     let children = [];
     selectionContainer.target.children.forEach((child) => {
-        if (child instanceof Sprite || child instanceof AbstractShape) {
+        if (child instanceof Entity) {
             let bounds = child.getLocalBounds();
             let width = bounds.x + bounds.width;
             let height = bounds.y + bounds.height;
@@ -246,6 +247,7 @@ export function clear(silent: boolean = false) {
             child.rotation += selectionContainer.rotation;
 
             children.push(child);
+            child.transformation.sync(child);
         }
     });
     selectionContainer.target.removeChildren();
@@ -281,9 +283,9 @@ export function selectLayer(layer: Layer) {
  * Convenience function for getting the currently selected objects.
  *
  * @export
- * @returns {((Sprite | AbstractShape)[])}
+ * @returns {Entity[]}
  */
-export function get(): (Sprite | AbstractShape)[] {
+export function get(): Entity[] {
     return getSelectionContainer().selection;
 }
 

@@ -2,6 +2,7 @@ import EDITOR from '../../globals';
 
 import Map from '../../../../core/renderer/scene/map';
 import Camera from '../../../../core/renderer/scene/camera';
+import Entity from 'core/renderer/graphics/entity';
 
 import Tool from '../tool';
 import Button from '../../gui/tools/button';
@@ -204,11 +205,11 @@ export class Selection extends Tool {
             let rectTopRight = new PIXI.Point(rectPos.x + rectSize.x, rectPos.y);
             let rectBottomLeft = new PIXI.Point(rectPos.x, rectPos.y + rectSize.y);
             let rectBottomRight = new PIXI.Point(rectPos.x + rectSize.x, rectPos.y + rectSize.y);
-            map.currentLayer.children.forEach((child: PIXI.Sprite | PIXI.Graphics) => {
+            map.currentLayer.children.forEach((child: Entity) => {
                 let bounds = child.getLocalBounds();
                 // Get the actual internal size, so the other points get calculated properly
-                let width = bounds.x + bounds.width;
-                let height = bounds.y + bounds.height;
+                let width = bounds.width;
+                let height = bounds.height;
                 // Convert local bounds to global coordinates
                 let topLeft = child.toGlobal(new PIXI.Point(bounds.x, bounds.y));
                 let topRight = child.toGlobal(new PIXI.Point(bounds.x + width, bounds.y));

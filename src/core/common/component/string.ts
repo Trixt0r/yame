@@ -7,6 +7,11 @@ export class String extends Component<string> {
     get type(): string {
         return 'string';
     }
+
+    /** @inheritdoc */
+    copy(): String {
+        return new String(this._name, this._value);
+    }
 }
 
 export default String;

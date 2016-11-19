@@ -48,6 +48,14 @@ export abstract class Component<T> extends EventBus {
      * @type {string} type The type of this type.
      */
     abstract get type(): string;
+
+    /**
+     * Creates a copy of this component and returns it.
+     *
+     * @abstract
+     * @returns {Component<T>} A copy of this component.
+     */
+    abstract copy(): Component<T>;
 }
 
 export default Component;
@@ -111,8 +119,9 @@ export function component(target: Component<any>, key: string): void {
         set: function(val) {
             if (val != this.value[key].value) {
                 let old = this.value[key].value;
+                this.value[key] = val;
+                this.trigger('change:*', key, val, old);
                 this.trigger(`change:${key}`, val, old);
-                this.value[key].value = val;
             }
         }
     };

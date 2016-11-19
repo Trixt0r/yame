@@ -1,5 +1,8 @@
 import { EventBus } from '../../common/eventbus';
-import Camera from '../scene/camera';
+
+import Environment from '../../common/environment';
+
+import * as path from 'path';
 
 /**
  * Class for rendering a grid in a specific 2D container.
@@ -17,46 +20,54 @@ export class Grid extends EventBus {
     /** @type {PIXI.Container} pContainer The container this grid is attached to. */
     private pContainer: PIXI.Container;
 
-    /** @type {PIXI.Container} gridContainer Container for rendering the grid. */
+    /** @type {PIXI.Container} gridContainer Container for rendering the grid.*/
     private gridContainer: PIXI.Container;
 
     /** @type {boolean} growingCache Whether the cache is growing. */
     private growingCache: boolean;
 
-    /** @type {PIXI.particles.ParticleContainer[]} cache Internal cache*/
-    private cache: PIXI.particles.ParticleContainer[];
+    /** @type {PIXI.Sprite[]} cache Internal cache of sprites. */
+    private cache: PIXI.Sprite[];
 
     /**
-     * @static
-     * @type {number} cacheGrowFactor Factor for generating the grid.
-     */
-    private static cacheGrowFactor: number = 100; // = 10'000 per container
-
-    /**
+     * NOTE: The grid texture consits of 16x16 rectangles
      * @static
      * @type {PIXI.Texture} spriteTexture Internal texture for the rectangles.
      */
     private static spriteTexture: PIXI.Texture;
 
-    private static renderTexture(renderer: PIXI.SystemRenderer) {
-        if (Grid.spriteTexture) return;
-        let graphics = new PIXI.Graphics();
-        graphics.beginFill(0x212121);
-        graphics.lineStyle(0, 0);
-        graphics.drawRect(0, 0, 16, 16);
-        graphics.endFill();
-        Grid.spriteTexture = renderer.generateTexture(graphics, 1, 1);
+    /**
+     * @static
+     * @type {PIXI.Point} rectangleCount Amount of rectangles on each axis
+     */
+    private static rectangleCount: PIXI.Point = new PIXI.Point();
+
+
+    /**
+     * @static
+     * @returns {PIXI.Texture} The grid texture.
+     */
+    public static getGridTexture(): PIXI.Texture {
+        if (Grid.spriteTexture) return Grid.spriteTexture;
+        Grid.spriteTexture = PIXI.Texture.fromImage(
+            path.resolve(Environment.baseDir, 'assets/core/grid.png'),
+            true,
+            PIXI.SCALE_MODES.NEAREST); // use pixelated filter
+        // Listen for the texture update and assign the rectangle size
+        Grid.spriteTexture.baseTexture
+            .on('update',
+            tex => Grid.rectangleCount.set(tex.width / 16, tex.height / 16) );
+        return Grid.spriteTexture;
     }
 
     constructor(container: PIXI.Container,
-                renderer: PIXI.SystemRenderer,
                 width: number = 32,
                 height: number = 32,
                 cacheSize: number = 64) {
         super();
-        if (!Grid.spriteTexture)
-            Grid.renderTexture(renderer);
-        this.gridContainer = new PIXI.Container();
+        // Make sure the grid texture gets loaded
+        Grid.getGridTexture();
+        this.gridContainer = new PIXI.particles.ParticleContainer();
         this.pWidth = width;
         this.pHeight = height;
         this.container = container;
@@ -72,26 +83,16 @@ export class Grid extends EventBus {
      */
     private growCache(amount: number) {
         this.growingCache = true;
+        if (Grid.spriteTexture.baseTexture.isLoading)
+            return Grid.spriteTexture.baseTexture
+                    .once('update', () => this.growCache(amount));
         // Trigger that we are going to grow the cache
         this.trigger('cache:growing');
         for (let i = 0; i < amount; i++)
-            setTimeout(() => {
-                let container = new PIXI.particles.ParticleContainer(Grid.cacheGrowFactor*Grid.cacheGrowFactor);
-                for (let x = 0; x < Grid.cacheGrowFactor; x++) {
-                    for (let y = 0; y < Grid.cacheGrowFactor; y++ ) {
-                        let sprite = new PIXI.Sprite(Grid.spriteTexture);
-                        sprite.position.set(x * 32 + 16 * (y % 2), y * 16);
-                        container.addChild(sprite);
-                    }
-                }
-                this.cache.push(container);
-            }, i * 1);
-
+            this.cache.push(new PIXI.Sprite(Grid.spriteTexture));
         // If we are done growing, trigger it
-        setTimeout(() => {
-            this.growingCache = false;
-            this.trigger('cache:grown');
-        }, amount * 1);
+        this.growingCache = false;
+        this.trigger('cache:grown');
     }
 
     /**
@@ -119,8 +120,8 @@ export class Grid extends EventBus {
             if (end) return;
             this.gridContainer.addChild(container);
             // Calculate the correct positions and offsets
-            let xx = topLeft.x + (col * Grid.cacheGrowFactor) * this.width * 2;
-            let yy = topLeft.y + (row * Grid.cacheGrowFactor) * this.height;
+            let xx = topLeft.x + (col * Grid.rectangleCount.x) * this.width;
+            let yy = topLeft.y + (row * Grid.rectangleCount.y) * this.height;
             let xOffset = -this.width * Math.sign(Math.abs(xx) % (this.width * 2 ));
             let yOffset = -this.height * Math.sign(Math.abs(yy) % (this.height * 2));
             container.position.set(xx + xOffset, yy + yOffset);
@@ -159,7 +160,7 @@ export class Grid extends EventBus {
         return this;
     }
 
-    /** @type {PIXI.Container} camera The camera */
+    /** @type {PIXI.Container} container The container this grid is attached to*/
     get container(): PIXI.Container {
         return this.pContainer;
     }
@@ -181,8 +182,8 @@ export class Grid extends EventBus {
     }
 
     set width(width: number) {
-        // We do not allow to fall below 16, since it causes issues and makes no sense
-        width = Math.max(16, width);
+        // We do not allow to fall below 4, since it causes issues and makes no sense
+        width = Math.max(4, width);
         this.change('width', this.pWidth, width, () => this.pWidth = width);
     }
 
@@ -192,8 +193,8 @@ export class Grid extends EventBus {
     }
 
     set height(height: number) {
-        // We do not allow to fall below 16, since it causes issues and makes no sense
-        height = Math.max(16, height);
+        // We do not allow to fall below 4, since it causes issues and makes no sense
+        height = Math.max(4, height);
         this.change('height', this.pHeight, height, () => this.pHeight = height);
     }
 }

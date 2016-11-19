@@ -5,7 +5,8 @@ import Image from '../../../core/renderer/view/image';
 import View from '../../../core/renderer/view/abstract';
 import Payload from '../../../core/renderer/drop/payload';
 import EventBus from '../../../core/common/eventbus';
-import Entity from '../../../core/common/entity';
+
+import Entity from '../../../core/renderer/graphics/entity';//
 
 /**
  * Converts the given payload into a resource.
@@ -58,7 +59,7 @@ export abstract class Resource extends EventBus {
      * @template E
      * @returns {Promise<E>}
      */
-    abstract create<E extends Entity>(): Promise<E>;
+    abstract create(): Promise<Entity>;
 
     private static converters: {[type: string]: Converter} = {};
 

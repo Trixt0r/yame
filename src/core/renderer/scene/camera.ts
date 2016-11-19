@@ -21,7 +21,7 @@ export class Camera extends EventBus {
     constructor() {
         super();
         this._zoom = 1;
-        this._minZoom = 0.1;
+        this._minZoom = 0.05;
         this._maxZoom = 3;
         this.targetPosition = new PIXI.Point();
         this.zoomStep = 0.03;

@@ -1,3 +1,6 @@
+
+import { Entity } from '../../renderer/graphics/entity';
+import { Container } from '../../../editor/renderer/interaction/transformation/container';
 import * as _ from 'underscore';
 
 import { Sprite } from '../graphics/sprite';
@@ -71,11 +74,11 @@ export class Map extends PIXI.Container {
      */
     cloneLayer(layer: string | Layer): Layer {
         if (typeof layer == 'string')
-            layer = this.layerById(<string>layer);
+            layer = this.layerById(layer);
         (<any>layer).copies = ((<any>layer).copies || 0) + 1;
-        let name = (<Layer>layer).name + '-copy-' +  (<any>layer).copies;
+        let name = (<Layer>layer).name + '-copy-' + (<any>layer).copies;
         let newLayer = this.createLayer(name);
-        (<Layer>layer).objects.forEach((obj: any) => newLayer.addChild(obj.copy()));
+        layer.objects.forEach(obj => newLayer.addChild(obj.copy()));
         return newLayer;
     }
 
@@ -121,12 +124,11 @@ export class Map extends PIXI.Container {
     /**
      * Creates a copy of the given array of objects.
      *
-     * @param {any[]} objects
-     * @returns {any[]}
+     * @param {Entity[]} objects
+     * @returns {Entity[]}
      */
-    copyChildren(children: any[]): any[] {
-        let newChildren = [];
-        children.forEach(original => newChildren.push(original.copy()));
+    copyChildren(children: Entity[]): Entity[] {
+        let newChildren = _.map(children, original => original.copy());
         return newChildren;
     }
 
@@ -158,10 +160,10 @@ export class Map extends PIXI.Container {
 
     /**
      * @param {string} id
-     * @returns {(Sprite | AbstractShape)} An object for the given id.
+     * @returns {Entity} An object for the given id.
      */
-    objectById(id: string): Sprite | AbstractShape {
-        let obj: Sprite | AbstractShape;
+    objectById(id: string): Entity {
+        let obj: Entity;
         _.each(this._layers, layer => {
             let arr = layer.getChildren([id]);
             if (arr.length && !obj) obj = arr[0];

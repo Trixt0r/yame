@@ -69,7 +69,7 @@ export class Pixi extends Backbone.View<Backbone.Model> {
         handler.on('leave', payload => this.cancelPreview());
         this._dropManager.add(handler);
 
-        var grid = this.grid = new Grid(EDITOR.map, EDITOR.renderer);
+        var grid = this.grid = new Grid(EDITOR.map);
         Selection.grid = grid;
         EDITOR.camera.on('update', () => grid.update(this.$container.outerWidth(), this.$container.outerHeight()));
         EDITOR.map.addChild((<any>EDITOR.map)._layersContainer);
@@ -152,17 +152,18 @@ export class Pixi extends Backbone.View<Backbone.Model> {
         Selection.clear();
 
         resource.create().then(entity => {
-            let instance = <PIXI.Container><any>entity;
-            (<any>instance).z = EDITOR.map.currentLayer.objects.length;
-            EDITOR.map.add(instance);
+            entity.z.value = EDITOR.map.currentLayer.objects.length;
+            EDITOR.map.add(entity);
+            let position: PIXI.Point;
             if (e)
-                instance.position = this.getMapPosition(e.originalEvent.clientX, e.originalEvent.clientY);
-            else {
-                instance.position = EDITOR.map.toLocal((<any>EDITOR.renderer).plugins.interaction.mouse.global);
-                if (Selection.snapToGrid)
-                    Selection.snapPosition(instance.position);
-            }
-            Selection.select([instance]);
+                position = this.getMapPosition(e.originalEvent.clientX, e.originalEvent.clientY);
+            else
+                position = EDITOR.map.toLocal((<any>EDITOR.renderer).plugins.interaction.mouse.global);
+            if (Selection.snapToGrid)
+                Selection.snapPosition(position);
+            entity.transformation.position.x.value = position.x;
+            entity.transformation.position.y.value = position.y;
+            Selection.select([entity]);
         });
     }
 

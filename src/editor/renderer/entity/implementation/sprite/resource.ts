@@ -1,3 +1,5 @@
+import { SpriteRenderer } from '../../../../../core/renderer/graphics/component/renderer';
+import { Entity } from '../../../../../core/renderer/graphics/entity';
 import * as path from 'path';
 import * as Promise from 'bluebird';
 
@@ -66,14 +68,16 @@ export class SpriteResource extends Resource {
     }
 
     /** @inheritdoc */
-    public create(): Promise<Sprite> {
-        return new Promise<Sprite>((resolve, reject) => {
-            let sprite = new Sprite(this.filePath);
-            sprite.texture.crop = new PIXI.Rectangle(0.5, 0.5, 1, 1);
-            if (sprite.ready)
-                resolve(sprite);
+    public create(): Promise<Entity> {
+        return new Promise<Entity>((resolve, reject) => {
+            let sprite = new PIXI.Sprite(PIXI.Texture.fromImage(this.filePath));
+            let renderer = new SpriteRenderer('sprite', sprite);
+            let entity = new Entity();
+            entity.components.renderer = renderer;
+            if (sprite.texture.baseTexture.hasLoaded)
+                resolve(entity);
             else
-                sprite.once('ready', () => resolve(sprite));
+                sprite.texture.once('update', () => resolve(entity));
         });
     }
 }

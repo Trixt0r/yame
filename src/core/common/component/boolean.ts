@@ -7,6 +7,11 @@ export class Boolean extends Component<boolean> {
     get type(): string {
         return 'boolean';
     }
+
+    /** @inheritdoc */
+    copy(): Boolean {
+        return new Boolean(this._name, this._value);
+    }
 }
 
 export default Boolean;
