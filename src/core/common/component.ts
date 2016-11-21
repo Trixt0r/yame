@@ -1,5 +1,7 @@
 import { EventBus } from './eventbus';
 
+import * as _ from 'underscore';
+
 /**
  * Abstract implementation of a component which has a type, name and a value.
  * @abstract
@@ -43,9 +45,56 @@ export abstract class Component<T> extends EventBus {
     }
 
     /**
+     * Serializes this component and returns it.
+     * Sub components are serialzed automatically.
+     * @param {*} [options={ }]
+     * @returns {*} The json represenation of this component
+     */
+    toJSON(options: any = { }): any {
+        let re: any = { };
+        if (typeof this._value == 'object' && this._value !== null) {
+            _.each(<any>this._value, (val, key) => {
+                if (val instanceof Component)
+                    re[val._name] = val.toJSON(options);
+                else {
+                    re[key] = val;
+                    this.trigger('toJSON', re, key, val, options);
+                }
+            });
+            return re;
+        }
+        else
+            return this._value;
+    }
+
+    /**
+     * Parses the given json object and applies it to this and all sub
+     * components.
+     *
+     * @param {*} json
+     * @param {*} [options={ }]
+     * @chainable
+     */
+    fromJSON(json: any, options: any = { }): Component<T> {
+        if (typeof this._value == 'object' && this._value !== null)
+            _.each(json, (val, key) => {
+                if (this._value[key] instanceof Component) {
+                    this._value[key].fromJSON(val, options);
+                }
+                else {
+                    this._value[key] = val;
+                    this.trigger('fromJSON', this._value, key, val, options);
+                }
+            });
+        else
+            this._value = json;
+        return this;
+    }
+
+    /**
      * @readonly
      * @abstract
-     * @type {string} type The type of this type.
+     * @type {string} type The type of this component.
      */
     abstract get type(): string;
 

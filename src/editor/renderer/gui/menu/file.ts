@@ -95,7 +95,7 @@ export class File extends View {
             let write = <any>Promise.promisify(fs.writeFile);
             let prev = Selection.get();
             Selection.clear(true);
-            let json = EDITOR.map.toJSON(path.dirname(fileName));
+            let json = EDITOR.map.toJSON({ parentPath: path.dirname(fileName) });
             Selection.select(prev, true);
             return write(fileName, JSON.stringify(json, null, 2) )
                 .then(() => document.title = 'YAME - ' + path.basename(fileName, '.yame') )
@@ -104,11 +104,9 @@ export class File extends View {
     }
 
     /**
-     * Opens a file
+     * Opens a file.
      *
      * @returns {Promise<string>}
-     *
-     * @memberOf File
      */
     open(): Promise<string> {
         let options = {
@@ -129,7 +127,7 @@ export class File extends View {
             return read(file).then(str => {
                 try {
                     let json = JSON.parse(str.toString());
-                    EDITOR.map.parse(json, path.dirname(file));
+                    EDITOR.map.parse(json, {parentPath: path.dirname(file) });
                 } catch(e) {
                     return Promise.reject(e);
                 }

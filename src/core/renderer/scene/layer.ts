@@ -156,7 +156,7 @@ export class Layer extends PIXI.Container {
         }
     }
 
-    toJSON(path: string): any {
+    toJSON(options?: any): any {
         return {
             id: this.id,
             name: this.name,
@@ -165,11 +165,11 @@ export class Layer extends PIXI.Container {
             children: _.map(this._children, child => _.extend( {
                 type: child.renderer.type,
                 layer: this.id
-            }, child.toJSON(path)) )
+            }, child.toJSON(options) ) )
         }
     }
 
-    parse(json: any, path: string): Layer {
+    parse(json: any, options?: any): Layer {
         this.clear();
         this._id = json.id;
         this._name = json.name;
@@ -177,12 +177,8 @@ export class Layer extends PIXI.Container {
         this.alpha = json.alpha || 1;
         let shapeFactory = new ShapeFactory();
         _.each(json.children, (json: any) => {
-            let obj;
-            if (json.type == 'Sprite')
-                obj = new Sprite(json.texture);
-            else
-                obj = shapeFactory.getInstance(json.type);
-            obj.parse(json, path);
+            let obj = new Entity();
+            obj.fromJSON(json, options);
             this.addChild(obj);
         });
         return this;

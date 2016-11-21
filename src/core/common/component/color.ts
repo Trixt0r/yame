@@ -3,7 +3,9 @@ import { Number } from './number';
 import { Component, define, component } from '../component';
 
 @define('color')
-export class Color extends Component<any> {
+export class Color
+       extends Component<{ alpha?: Number,
+                           hex?: String }> {
 
     /** @type {Number} alpha The transparency of the color. */
     @component alpha: Number;
@@ -11,10 +13,12 @@ export class Color extends Component<any> {
     /** @type {String} hex The hex representation of this color. */
     @component hex: String;
 
-    constructor(_name?: string) {
+    constructor(_name?: string,
+                color:  { alpha: number, hex: string } =
+                        { alpha: 1, hex: 'ffffff' }) {
         super(_name, { });
-        this._value.alpha = new Number('alpha', 1);
-        this._value.hex = new String('hex', 'ffff');
+        this._value.alpha = new Number('alpha', color.alpha);
+        this._value.hex = new String('hex', color.hex);
     }
 
     /** @inheritdoc */

@@ -171,21 +171,21 @@ export class Map extends PIXI.Container {
         return obj;
     }
 
-    toJSON(parentPath: string): any {
+    toJSON(options?: any): any {
         let re = {layers: []};
-        re.layers = _.map(this._layers, layer => layer.toJSON(parentPath) );
+        re.layers = _.map(this._layers, layer => layer.toJSON(options) );
         return re;
     }
 
-    parse(json: any, parentPath: string) {
+    parse(json: any, options?: any) {
         this._layers.forEach(layer => {
             layer.clear();
             this.removeLayer(layer);
         });
         this.currentLayer = null;
-        Pubsub.trigger('map:parsing', json, parentPath);
+        Pubsub.trigger('map:parsing', json, options);
         _.each(json.layers, (json: any) => {
-            let layer = this.createLayer(json, parentPath);
+            let layer = this.createLayer(json, options);
             layer.emit('parse');
             this.emit('parseLayer', layer);
             Pubsub.trigger('map:parseLayer', this, layer);

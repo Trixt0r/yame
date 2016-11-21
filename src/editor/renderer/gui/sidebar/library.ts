@@ -52,7 +52,7 @@ export class Library extends Content {
             });
         });
 
-        Pubsub.on('map:parsing', (json, filePath) => this._directory.load(filePath));
+        Pubsub.on('map:parsing', (json, options) => this._directory.load(options.parentPath));
 
         this._directory.on('select:file', payload => {
             Resource.fromPayload(payload)

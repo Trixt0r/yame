@@ -1,5 +1,5 @@
 import { String } from '../../common/component/string';
-import { Renderer } from './component/renderer';
+import { Renderer, SpriteRenderer } from './component/renderer';
 import { Component, component } from '../../common/component';
 import { Transformation } from './component/transformation';
 import { Number } from '../../common/component/number';
@@ -24,15 +24,15 @@ class EntityComponents extends Component<any> {
     @component transformation: Transformation;
 
     /** @type {Renderer} renderer The renderer of the component. */
-    @component renderer: Renderer<PIXI.Container>;
+    @component renderer: Renderer;
 
     constructor(_name?: string) {
         super(name, { });
-        this.value.id = new String('id', 'entity-' + randomstring.generate(8));
-        this.value.layer = new String('layer', null);
-        this.value.z = new Number('z', 0);
-        this.value.transformation = new Transformation('transformation');
-        this.value.renderer = new Renderer('renderer');
+        this._value.id = new String('id', 'entity-' + randomstring.generate(8));
+        this._value.layer = new String('layer', null);
+        this._value.z = new Number('z', 0);
+        this._value.transformation = new Transformation('transformation');
+        this._value.renderer = new Renderer('renderer', new PIXI.Container());
     }
 
     /** @inheritdoc */
@@ -90,8 +90,8 @@ export class Entity extends PIXI.Container {
         // Apply the current transformation to the PIXI attributes
         this.transformation.apply(this);
 
-        if (this.renderer.value) {
-            this.addChild(this.renderer.value);
+        if (this.renderer.displayObject) {
+            this.addChild(this.renderer.displayObject);
             var bounds = this.getLocalBounds();
             this.pivot.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
         }
@@ -151,7 +151,7 @@ export class Entity extends PIXI.Container {
      * @readonly
      * @type {Renderer} renderer Shortcut for accessing the renderer component.
      */
-    get renderer(): Renderer<PIXI.Container> {
+    get renderer(): Renderer {
         return this.comps.renderer;
     }
 
@@ -183,6 +183,34 @@ export class Entity extends PIXI.Container {
     copy(): Entity {
         let entity = new Entity(this.comps.copy());
         return entity;
+    }
+
+    /**
+     * Serializes this entity and returns a JSON object.
+     *
+     * @param {*} [options]
+     * @returns {*}
+     */
+    toJSON(options?: any): any {
+        return this.comps.toJSON(options);
+    }
+
+    /**
+     * Parses the given JSON object and applies it to this entity.
+     *
+     * @param {*} json
+     * @param {*} [options]
+     * @chainable
+     */
+    fromJSON(json: any, options?: any): Entity {
+        switch(json.type) {
+            case 'sprite': this.components.renderer = new SpriteRenderer('renderer', new PIXI.Sprite()); break;
+            default: console.warn('Renderer for type', json.type, 'not found!');
+        }
+        this.comps.fromJSON(json, options);
+        // Apply the current transformation to the PIXI attributes
+        this.transformation.apply(this);
+        return this;
     }
 }
 

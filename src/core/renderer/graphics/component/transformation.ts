@@ -3,7 +3,10 @@ import { Number } from '../../../common/component/number';
 import { Point } from '../../../common/component/point';
 
 @define('transformation')
-export class Transformation extends Component<any> {
+export class Transformation
+       extends Component<{ position?: Point,
+                           scale?: Point,
+                           rotation?: Number }> {
 
     /** @type {Point} position The position of the transformation. */
     @component position: Point;
@@ -49,7 +52,7 @@ export class Transformation extends Component<any> {
     }
 
     /**
-     * Applies given PIXI display object to this transformation component.
+     * Applies the given PIXI display object to this transformation component.
      *
      * @param {PIXI.DisplayObject} displayObject
      * @chainable

@@ -71,7 +71,7 @@ export class SpriteResource extends Resource {
     public create(): Promise<Entity> {
         return new Promise<Entity>((resolve, reject) => {
             let sprite = new PIXI.Sprite(PIXI.Texture.fromImage(this.filePath));
-            let renderer = new SpriteRenderer('sprite', sprite);
+            let renderer = new SpriteRenderer('renderer', sprite);
             let entity = new Entity();
             entity.components.renderer = renderer;
             if (sprite.texture.baseTexture.hasLoaded)
