@@ -1,5 +1,6 @@
 import { String } from '../../common/component/string';
-import { Renderer, SpriteRenderer } from './component/renderer';
+import { Renderer } from './component/renderer';
+import { SpriteRenderer } from './component/renderer/spriteRenderer';
 import { Component, component } from '../../common/component';
 import { Transformation } from './component/transformation';
 import { Number } from '../../common/component/number';

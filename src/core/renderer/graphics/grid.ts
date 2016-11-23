@@ -182,8 +182,8 @@ export class Grid extends EventBus {
     }
 
     set width(width: number) {
-        // We do not allow to fall below 4, since it causes issues and makes no sense
-        width = Math.max(4, width);
+        // We do not allow to fall below 8, since it causes issues and makes no sense
+        width = Math.max(8, width);
         this.change('width', this.pWidth, width, () => this.pWidth = width);
     }
 
@@ -193,8 +193,8 @@ export class Grid extends EventBus {
     }
 
     set height(height: number) {
-        // We do not allow to fall below 4, since it causes issues and makes no sense
-        height = Math.max(4, height);
+        // We do not allow to fall below 8, since it causes issues and makes no sense
+        height = Math.max(8, height);
         this.change('height', this.pHeight, height, () => this.pHeight = height);
     }
 }

@@ -145,7 +145,7 @@ export class Selection extends Tool {
             if (e.which === 3 && rightClick) {
                 rightClick = false;
                 let selection = SELECTION.get();
-                let id = mouseOverSelection ? selection[0].id : EDITOR.map.currentLayer.id;
+                let id = mouseOverSelection ? selection[0].id.value : EDITOR.map.currentLayer.id;
                 Pubsub.trigger('editor:interaction:tools:selection:context', e, '#' + id);
             }
         })

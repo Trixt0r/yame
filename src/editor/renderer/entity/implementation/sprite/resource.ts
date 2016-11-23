@@ -1,4 +1,4 @@
-import { SpriteRenderer } from '../../../../../core/renderer/graphics/component/renderer';
+import { SpriteRenderer } from '../../../../../core/renderer/graphics/component/renderer/spriteRenderer';
 import { Entity } from '../../../../../core/renderer/graphics/entity';
 import * as path from 'path';
 import * as Promise from 'bluebird';
