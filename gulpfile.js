@@ -55,6 +55,9 @@ gulp.task('bundle', ['compile'], (done) => {
     gulp.src('templates/**')
     .pipe(gulp.dest( path.resolve(destFolder, 'templates') ));
 
+    gulp.src('assets/**')
+    .pipe(gulp.dest( path.resolve(destFolder, 'assets') ));
+
     gulp.src('lib/**')
     .pipe(gulp.dest( path.resolve(destFolder, 'lib') ));
 
@@ -99,7 +102,7 @@ gulp.task('package', ['bundle'], () => {
         packageJson: packageJson,
         release: outFolder,
         cache: path.resolve(os.tmpdir(), 'yame-build', 'electron'),
-        version: 'v1.4.3',
+        version: 'v1.4.6',
         packaging: zip,
         token: argv.token,
         platforms: platform

@@ -103,7 +103,7 @@ export class Pixi extends Backbone.View<Backbone.Model> {
      */
     private getMapPosition(x: number, y: number): PIXI.Point {
         let position = new PIXI.Point();
-        (<any>EDITOR.renderer).plugins.interaction.mapPositionToPoint(position, x, y);
+        EDITOR.renderer.plugins.interaction.mapPositionToPoint(position, x, y);
         position = EDITOR.map.toLocal(position);
         if (Selection.snapToGrid)
             Selection.snapPosition(position);
@@ -124,7 +124,7 @@ export class Pixi extends Backbone.View<Backbone.Model> {
             if (e)
                 this.preview.position = this.getMapPosition(e.originalEvent.clientX, e.originalEvent.clientY);
             else
-                this.preview.position = EDITOR.map.toLocal((<any>EDITOR.renderer).plugins.interaction.mouse.global);
+                this.preview.position = EDITOR.map.toLocal(EDITOR.renderer.plugins.interaction.mouse.global);
             this.preview.alpha = .25;
             EDITOR.map.addChild(this.preview);
         });

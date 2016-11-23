@@ -65,44 +65,48 @@ export class Selection extends Tool {
             if (!this._tools.hasFocus) return;
             SELECTION.clear();
             SELECTION.select( pasted );
-            let mouse = (<any>renderer).plugins.interaction.eventData.data.global;
+            let mouse = renderer.plugins.interaction.eventData.data.global;
             let local = EDITOR.map.toLocal(mouse);
             if (SELECTION.snapToGrid)
                 SELECTION.snapPosition(local);
             selectionContainer.position.set(local.x, local.y);
         });
 
-        (<any>selectionContainer.target).mousedown = data => {
+        let clickPos = null;
+
+        selectionContainer.target.on('mousedown', data => {
             mouseOnRenderer = true;
             var target = data.target;
             containerSelection = true;
-            var position = data.data.getLocalPosition(map);
-            target.clickPos = {
-                x: position.x - selectionContainer.position.x,
-                y: position.y - selectionContainer.position.y
+            let position = EDITOR.map.toLocal(data.data.global);
+            let sPosition = selectionContainer.target.position;
+            clickPos = {
+                x: position.x - sPosition.x,
+                y: position.y - sPosition.y
             };
             if (SELECTION.getTransformation()) {
-                SELECTION.getTransformation().mousedown(target.clickPos);
+                SELECTION.getTransformation().mousedown(clickPos);
                 Pubsub.trigger('transformation:mousedown:' + SELECTION.dragMode);
             }
-        };
+        });
 
-        (<any>selectionContainer.target).mousemove = data => {
+        this.handle($('body'), 'mousemove', (e: JQueryEventObject) => {
             if (ctrlKey) return;
             if (!mouseOnRenderer) return;
-            var target = data.target;
-            if (target.clickPos) {
-                var position = data.data.getLocalPosition(map);
+            if (clickPos) {
+                let position = new PIXI.Point();
+                EDITOR.renderer.plugins.interaction.mapPositionToPoint(position, e.clientX, e.clientY);
+                position = EDITOR.map.toLocal(position);
                 if (SELECTION.getTransformation()) {
-                    SELECTION.getTransformation().mousemove(position, target.clickPos);
+                    SELECTION.getTransformation().mousemove(position, clickPos);
                     Pubsub.trigger('transformation:mousemove:' + SELECTION.dragMode);
                     camera.targetPosition = map.toGlobal(position);
                 }
                 renderSelection();
             }
-        };
+        });
 
-        (<any>selectionContainer.target).mouseup = () =>  setTimeout(() => {
+        (<any>selectionContainer.target).mouseup = () => setTimeout(() => {
             if (mouseOnRenderer) containerSelection = false;
         });
 
@@ -167,6 +171,7 @@ export class Selection extends Tool {
 
         this.handle($('body'), 'mouseup', e => {
             if (e.which !== 1) return;
+            clickPos = null;
             var prevDragMode = SELECTION.dragMode;
             SELECTION.dragMode = Enums.EditType.DRAG;
             if (!downOnRenderer || (e.target !== renderer.view && containerSelection)) {
@@ -175,7 +180,7 @@ export class Selection extends Tool {
                 return;
             }
             mouseOnRenderer = true;
-            (<any>renderer).plugins.interaction.mapPositionToPoint(mousePos, e.clientX, e.clientY);
+            renderer.plugins.interaction.mapPositionToPoint(mousePos, e.clientX, e.clientY);
             var pos = map.toLocal(mousePos);
             if (containerSelection && e.target === renderer.view && !ctrlKey) {
                 containerSelection = false;
