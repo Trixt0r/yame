@@ -1,20 +1,32 @@
+import { Color } from '../../common/component/color';
+import { Component } from './component';
 import * as _ from 'underscore';
 
 import View from './abstract';
 import Input from './input';
 
-export class ColorPicker extends View {
+interface Options extends Backbone.ViewOptions<Backbone.Model> {
+    component?: Color;
+    title?: string;
+    colorPicker?: any;
+}
+
+export class ColorPicker extends View implements Component<Color> {
 
     protected _input: Input;
     protected _title: View;
     protected spContainer: JQuery;
 
-    constructor(options: any = {title: ''}) {
+    protected _component: Color;
+
+    constructor(options: Options = {title: 'color'}) {
         super(_.extend({
             className: 'ui segment'
         }, options));
 
-        this._title = new View({ el: `<div class="ui tiny header">${options.title}</div>` });
+        this._title = new View({
+            el: `<div class="ui tiny header">${options.title}</div>`
+        });
         this.add(this._title);
 
         this._input = new Input();
@@ -22,7 +34,10 @@ export class ColorPicker extends View {
         let width = 0, height = 0, inTransition = false, intV;
 
         (<any>this._input.$el).spectrum(_.extend({
-            move: tinycolor => this.trigger('move', tinycolor),
+            move: tinycolor => {
+                this.apply();
+                this.trigger('move', tinycolor);
+            },
             show: tinycolor => {
                 this.trigger('show', tinycolor);
                 if (inTransition) return;
@@ -46,6 +61,7 @@ export class ColorPicker extends View {
                 });
             },
             hide: tinycolor => {
+                this.apply();
                 this.trigger('hide', tinycolor);
                 if (inTransition) return;
                 this.spContainer.css('width', `${width}px`);
@@ -72,14 +88,31 @@ export class ColorPicker extends View {
         this.spContainer = $('.sp-container').last();
         this.$('.sp-replacer').addClass('fluid ui button');
 
-        $('.sp-choose').removeClass().addClass('ui icon positive tiny button attached right').empty().append('<i style="font-size: 15px;" class="checkmark icon" />');
-        $('.sp-cancel').removeClass().addClass('ui icon negative tiny button attached left').empty().append('<i class="remove icon" />');
+        $('.sp-choose').removeClass()
+            .addClass('ui icon positive tiny button attached right')
+            .empty()
+            .append('<i style="font-size: 15px;" class="checkmark icon" />');
+        $('.sp-cancel').removeClass()
+            .addClass('ui icon negative tiny button attached left')
+            .empty()
+            .append('<i class="remove icon" />');
+
         this.on('done:render', () => {
             this._title.$el.prependTo(this.$el);
             inTransition = false;
             this.spContainer.css('height', '').css('width', '');
             clearInterval(intV);
         });
+
+        this.component = options.component || new Color(options.title);
+    }
+
+    /**
+     * Applies the view values to the component.
+     */
+    private apply(): void {
+        this.component.alpha.value = this.alpha;
+        this.component.hex.value = this.color.toHex();
     }
 
     /** @returns {Input} The input view. */
@@ -122,6 +155,31 @@ export class ColorPicker extends View {
     /** @returns {number} The current alpha value. */
     get alpha(): number {
         return (<any>this.color)._a;
+    }
+
+    /** @inheritdoc */
+    get component(): Color {
+        return this._component;
+    }
+
+    /** @inheritdoc */
+    set component(color) {
+        // Make sure the we unsubscribe to the previous component
+        if (this._component) {
+            this._component.alpha.off('change', null, this);
+            this._component.hex.off('change', null, this);
+            this._component.off('name', null, this);
+        }
+        // and register to the new one
+        this._component = color;
+        this.color = color.hex.value;
+        this.alpha = color.alpha.value;
+        this._component.hex.on('change', hex => {
+            this.color = hex;
+            this.alpha = this.component.alpha.value;
+        });
+        this._component.alpha.on('change', alpha => this.alpha = alpha );
+        this._title.$el.text(this._component.name);
     }
 }
 

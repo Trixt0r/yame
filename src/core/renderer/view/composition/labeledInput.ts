@@ -2,7 +2,7 @@ import Bindable from '../bindable';
 import Input from '../input';
 import Label from '../label';
 
-import _ = require('underscore');
+import * as _ from 'underscore';
 
 export class LabeledInput extends Bindable {
 
@@ -11,7 +11,12 @@ export class LabeledInput extends Bindable {
 
     constructor (options: any = {}) {
         super(_.extend( { className: 'ui fluid labeled input' }, options));
-        this.twoWayEvents = ['keyup input', 'keydown input', 'change input', 'mousewheel input'];
+        this.twoWayEvents = [
+            'keyup input',
+            'keydown input',
+            'change input',
+            'mousewheel input'
+        ];
         this._label = new Label(options.label);
         this._input = new Input(options.input);
         this.add(this._label);

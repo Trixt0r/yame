@@ -17,7 +17,7 @@ export class Value extends View {
 
         let instance = options.instance;
         let attribute = options.attribute;
-        let type = typeof attribute != 'number' ? 'text' : 'number;'
+        let type = typeof instance[attribute] != 'number' ? 'text' : 'number'
 
         this._title = new View({ el: `<div class="ui tiny header">${options.title}</div>` });
         this._value = new LabeledInput({

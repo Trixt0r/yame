@@ -1,6 +1,13 @@
 import { Number } from './number';
 import { Component, define, component } from '../component';
 
+/**
+ * A component which represents a 2d point.
+ * A point can hold an x and an y component.
+ * @class Point
+ * @extends {Component<{ x?: Number,
+ *                            y?: Number }>}
+ */
 @define('point')
 export class Point
        extends Component<{ x?: Number,

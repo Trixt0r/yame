@@ -1,5 +1,11 @@
 import { Component, define } from '../component';
 
+/**
+ * A component which can hold an array of arbitary values.
+ * @class Array
+ * @extends {Component<T[]>}
+ * @template T
+ */
 @define('array')
 export class Array<T> extends Component<T[]> {
 

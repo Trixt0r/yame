@@ -29,7 +29,7 @@ export class Selection extends View {
                 preferredFormat: 'hex',
                 showPalette: true,
                 showSelectionPalette: true,
-                localStorageKey: "spectrum.demo",
+                localStorageKey: "spectrum",
                 palette: [
                     ["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
                     "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],

@@ -10,17 +10,18 @@ export abstract class Bindable extends View {
 
     protected bindings: { [key:string]: EventBus; };
 
-    /** @type {string[]} List of events to listen for in a two way bound. */
-    protected twoWayEvents: string[];
+    /** @type {string[]} twoWayEvents List of events to listen for in a two way
+     *                                bound. */
+    public twoWayEvents: string[];
 
-    /***/
+    /** @type {string} twoWays List of twoWay bound bindings. */
     protected twoWays : string[];
 
     /** @type {string} Event name for a value change */
-    protected eventName: string;
+    public eventName: string;
 
     /** @type {string} Delimitter between event and attribute name. */
-    protected eventDelimitter: string;
+    public eventDelimitter: string;
 
     /**
      * Mapping function used when reading the value of the bound instance.
@@ -39,7 +40,7 @@ export abstract class Bindable extends View {
      */
     private _mapTo: Function;
 
-    constructor(options: any  = { }) {
+    constructor(options: any = { }) {
         super(options);
         this.twoWayEvents = ['keyup', 'keydown', 'change', 'blur', 'mousewheel'];
         this.eventName = 'change';
@@ -75,6 +76,8 @@ export abstract class Bindable extends View {
         }
     }
 
+    /** @type {Function} mapFrom The mapping function before displaying the
+     *                           bound value. */
     get mapFrom(): Function {
         return this._mapFrom;
     }
@@ -89,8 +92,8 @@ export abstract class Bindable extends View {
     }
 
     /**
-     * The mapTo function used for a two way binding.
-     * @type {Function}
+     * @type {Function} mappTo The mapping function used for a two way binding
+     *                         when applying the value to the bound instance.
      */
     get mapTo(): Function {
         return this._mapTo;
@@ -106,9 +109,12 @@ export abstract class Bindable extends View {
      *                              also update the eventbus attribute.
      * @chainable
      */
-    bindTo(instance: EventBus, attribute: string, twoWay: boolean = false): View {
+    bindTo(instance: EventBus, attribute: string, twoWay = false): View {
         this.bindings[attribute] = instance;
-        instance.on(`${this.eventName}${this.eventDelimitter}${attribute}`, val => this.getValue(attribute, val), this);
+        let eventName = `${this.eventName}`;
+        if (this.eventDelimitter)
+            eventName += `${this.eventDelimitter}${attribute}`;
+        instance.on(eventName, val => this.getValue(attribute, val), this);
         if (twoWay && this.twoWays.indexOf(attribute) < 0) {
             // Push the attribute instance combination to
             this.twoWays.push(attribute);
@@ -150,7 +156,7 @@ export abstract class Bindable extends View {
             let prevVal = this.val;
             if (val == void 0) {
                 var subs = attr.split('.');
-                var last = subs[subs.length-1];
+                var last = subs[subs.length - 1];
                 var obj = instance;
                 subs.forEach((sub, i) => {
                     if (i < subs.length - 1)
@@ -172,7 +178,7 @@ export abstract class Bindable extends View {
         _.each(this.bindings, (instance: EventBus, attribute: string) => {
             if (this.twoWays.indexOf(attribute) < 0) return;
             var subs = attribute.split('.');
-            var last = subs[subs.length-1];
+            var last = subs[subs.length - 1];
             var obj = instance;
             subs.forEach((sub, i) => {
                 if (i < subs.length - 1)
@@ -188,7 +194,7 @@ export abstract class Bindable extends View {
         let events = {};
         // Do this check since this method gets called before the property exists
         if (this.twoWayEvents)
-            this.twoWayEvents.forEach((name: string) => events[name] = this.applyValue);
+            this.twoWayEvents.forEach(name => events[name] = this.applyValue);
         return <Backbone.EventsHash> events;
    }
 }

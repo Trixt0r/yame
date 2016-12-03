@@ -1,5 +1,10 @@
 import { Component, define } from '../component';
 
+/**
+ * A component which can hold a boolean.
+ * @class Boolean
+ * @extends {Component<boolean>}
+ */
 @define('boolean')
 export class Boolean extends Component<boolean> {
 
