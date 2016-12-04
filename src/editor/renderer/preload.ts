@@ -5,6 +5,9 @@ import Env from '../../core/common/environment';
 declare var $, global;
 
 import * as PIXI from 'pixi.js';
+// Remove the console log
+(<any>PIXI.utils)._saidHello = true;
+
 import {remote} from 'electron';
 
 import Map from '../../core/renderer/scene/map';
