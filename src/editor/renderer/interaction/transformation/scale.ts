@@ -63,8 +63,8 @@ export class Scale implements Interface.Transformation {
                 origSize.height = this.container.scale.y * this.selection.height;
             };
         });
-        container.on(`change:scale.x`, () => this.updateScalerSize());
-        container.on(`change:scale.y`, () => this.updateScalerSize());
+        container.transformation.scale.x.on('change', () => this.updateScalerSize());
+        container.transformation.scale.y.on('change', () => this.updateScalerSize());
         Pubsub.on('camera:update', camera => this.zoom = camera.zoom);
         Pubsub.on('camera:update', this.updateScalerSize.bind(this));
     }
@@ -133,13 +133,13 @@ export class Scale implements Interface.Transformation {
         var diff = new PIXI.Point(_pos.x - initialClickPos.x, _pos.y - initialClickPos.y);
 
         // Calc the new scale
-        var newScale = {
-            x: (origSize.width + horDir * diff.x ) / this.selection.width,
-            y: (origSize.height + vertDir * diff.y) / this.selection.height
-        };
+        var newScale = new PIXI.Point(
+            (origSize.width + horDir * diff.x ) / this.selection.width,
+            (origSize.height + vertDir * diff.y) / this.selection.height
+        );
 
         // Update the scale
-        this.container.scale.set(newScale.x, newScale.y);
+        this.container.transformation.scale.sync(newScale);
 
         // Calculate the poistion shift
         var shift = {
@@ -149,8 +149,8 @@ export class Scale implements Interface.Transformation {
 
         // Get the position offset
         var offset = {
-            x: horDir*origSize.width/2,
-            y: vertDir*origSize.height/2
+            x: horDir * origSize.width * .5,
+            y: vertDir * origSize.height * .5
         };
 
         // Include the container angle when correcting the position
@@ -232,7 +232,7 @@ export class Scale implements Interface.Transformation {
         scalers.bottomMid.position.set(topLeft.x + this.selection.width/2 - scalers.bottomMid.width / 2,topLeft.y + this.selection.height - scalers.bottomMid.height / 2);
 
         // Append each scaler to the selection container
-        _.each(scalers, (graphic: PIXI.Graphics) => this.container.target.addChild(graphic));
+        _.each(scalers, (graphic: PIXI.Graphics) => this.container.addChild(graphic));
         this.updateScalerSize();
     }
 }

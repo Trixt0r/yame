@@ -45,8 +45,8 @@ export class Selection extends Tool {
         };
 
         map.addChild(box);
-        map.addChild(selectionContainer.target);
-        selectionContainer.target.interactive = true;
+        map.addChild(selectionContainer);
+        selectionContainer.interactive = true;
 
         let mouseOnRenderer = true;
 
@@ -74,12 +74,12 @@ export class Selection extends Tool {
 
         let clickPos = null;
 
-        selectionContainer.target.on('mousedown', data => {
+        selectionContainer.on('mousedown', data => {
             mouseOnRenderer = true;
             var target = data.target;
             containerSelection = true;
             let position = EDITOR.map.toLocal(data.data.global);
-            let sPosition = selectionContainer.target.position;
+            let sPosition = selectionContainer.position;
             clickPos = {
                 x: position.x - sPosition.x,
                 y: position.y - sPosition.y
@@ -106,13 +106,13 @@ export class Selection extends Tool {
             }
         });
 
-        (<any>selectionContainer.target).mouseup = () => setTimeout(() => {
+        (<any>selectionContainer).mouseup = () => setTimeout(() => {
             if (mouseOnRenderer) containerSelection = false;
         });
 
         let mouseOverSelection = false;
-        selectionContainer.target.on('mouseover', () => mouseOverSelection = true);
-        selectionContainer.target.on('mouseout', () => mouseOverSelection = false);
+        selectionContainer.on('mouseover', () => mouseOverSelection = true);
+        selectionContainer.on('mouseout', () => mouseOverSelection = false);
 
         let drag = false;
         let downOnRenderer = true;
@@ -137,8 +137,8 @@ export class Selection extends Tool {
             selectionRect.width = 0;
             selectionRect.height = 0;
             renderSelection();
-            map.removeChild(selectionContainer.target);
-            map.addChildAt(selectionContainer.target, map.children.length);
+            map.removeChild(selectionContainer);
+            map.addChildAt(selectionContainer, map.children.length);
             map.removeChild(box);
             map.addChildAt(box, map.children.length);
         });
@@ -239,7 +239,7 @@ export class Selection extends Tool {
                 }
             });
             SELECTION.select(addedChildren);
-            camera.targetPosition = selectionContainer.target.toGlobal(new PIXI.Point());
+            camera.targetPosition = selectionContainer.toGlobal(new PIXI.Point());
             box.clear();
         });
     }

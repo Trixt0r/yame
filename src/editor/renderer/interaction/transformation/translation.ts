@@ -18,8 +18,8 @@ export class Translation implements Interface.Transformation {
 
     /** @inheritdoc */
     mousemove(position: PIXI.Point, clickedPosition: PIXI.Point): boolean {
-        this.container.position.x = position.x - clickedPosition.x;
-        this.container.position.y = position.y - clickedPosition.y;
+        this.container.transformation.position.x.value = position.x - clickedPosition.x;
+        this.container.transformation.position.y.value = position.y - clickedPosition.y;
         if (Selection.snapToGrid)
             Selection.snapPosition(this.container.position);
         return true;

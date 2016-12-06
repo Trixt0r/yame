@@ -118,11 +118,11 @@ export function init(): void {
 export function select(children: PIXI.DisplayObject[], silent: boolean = false) {
     selectionContainer.position.set(0, 0);
     selectionContainer.scale.set(1, 1);
-    selectionContainer.target.pivot.set(0, 0);
+    selectionContainer.pivot.set(0, 0);
     selectionContainer.rotation = 0;
-    selectionContainer.target.hitArea = new PIXI.Rectangle(0,0,0,0);
+    selectionContainer.hitArea = new PIXI.Rectangle(0,0,0,0);
 
-    children.forEach(child => selectionContainer.target.addChild(child));
+    children.forEach(child => selectionContainer.addChild(child));
 
     var bounds: PIXI.Rectangle;
     if (children.length === 1) {
@@ -140,8 +140,8 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
     }
     if (children.length) {
 
-        var localBounds = selectionContainer.target.getLocalBounds();
-        let topLeft:any = world.toLocal(new PIXI.Point(localBounds.x, localBounds.y), selectionContainer.target);
+        var localBounds = selectionContainer.getLocalBounds();
+        let topLeft:any = world.toLocal(new PIXI.Point(localBounds.x, localBounds.y), selectionContainer);
         selectionRect.x = topLeft.x;
         selectionRect.y = topLeft.y;
         selectionRect.width = localBounds.width;
@@ -149,19 +149,19 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
 
          // Re-position container and children if there are multiple selections
         if (children.length > 1) {
-            selectionContainer.target.pivot.set(localBounds.width/2, localBounds.height/2);
+            selectionContainer.pivot.set(localBounds.width/2, localBounds.height/2);
             selectionContainer.position.x = topLeft.x + localBounds.width/2;
             selectionContainer.position.y = topLeft.y + localBounds.height/2;
-            children.forEach(child => child.position = selectionContainer.target.toLocal(child.position, world.currentLayer) );
+            children.forEach(child => child.position = selectionContainer.toLocal(child.position, world.currentLayer) );
             // Calc the local bounds after re-positioning children and set the hitArea
-            localBounds = selectionContainer.target.getLocalBounds();
+            localBounds = selectionContainer.getLocalBounds();
         }
 
         // Click area is always local bounds
-        selectionContainer.target.hitArea = localBounds;
+        selectionContainer.hitArea = localBounds;
 
         var gr = new PIXI.Graphics();
-        selectionContainer.target.addChild(gr);
+        selectionContainer.addChild(gr);
         gr.clear();
 
         topLeft = {
@@ -220,7 +220,7 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
  */
 export function clear(silent: boolean = false) {
     let children = [];
-    selectionContainer.target.children.forEach((child) => {
+    selectionContainer.children.forEach((child) => {
         if (child instanceof Entity) {
             let bounds = child.getLocalBounds();
             let width = bounds.x + bounds.width;
@@ -242,7 +242,7 @@ export function clear(silent: boolean = false) {
             // child.skew.x = skewX
             // child.skew.y = skewY;
 
-            child.position = world.currentLayer.toLocal(selectionContainer.target.toGlobal(child.position));
+            child.position = world.currentLayer.toLocal(selectionContainer.toGlobal(child.position));
             // if (Math.round(skewX * 100000) / 100000 == 0 || Math.round(skewY * 100000) / 100000 == 0)
             child.rotation += selectionContainer.rotation;
 
@@ -250,7 +250,7 @@ export function clear(silent: boolean = false) {
             child.transformation.sync(child);
         }
     });
-    selectionContainer.target.removeChildren();
+    selectionContainer.removeChildren();
 
     // Assign all children to their layers again
     children.forEach(child => {

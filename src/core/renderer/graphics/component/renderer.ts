@@ -1,12 +1,39 @@
-import { Component } from '../../../common/component';
+import { Boolean } from '../../../common/component/boolean';
+import { Number } from '../../../common/component/number';
+import { Component, component } from '../../../common/component';
+
+class Options extends Component<any> {
+
+    /** @inheritdoc */
+    get type(): string {
+        return 'rendererOptions';
+    }
+
+    /** @inheritdoc */
+    copy(): Options {
+        return new Options(this._name, JSON.parse(JSON.stringify(this._value)));
+    }
+}
 
 export class Renderer
        extends Component<{ displayObject?: PIXI.Container,
-                           options?: Component<any> }> {
+                           alpha?: Number,
+                           visible?: Boolean,
+                           options?: Options }> {
+
+    @component options: Component<any>;
+    @component alpha: Number;
+    @component visible: Boolean;
 
     constructor(name: string, displayObject: PIXI.Container) {
         super(name, { });
         this._value.displayObject = displayObject;
+        this._value.options = new Options('options', { });
+        this._value.alpha = new Number('alpha', displayObject.alpha);
+        this._value.visible = new Boolean('visible', displayObject.visible);
+
+        this.alpha.on('change', alpha => this.displayObject.alpha = alpha );
+        this.visible.on('change', visible => this.displayObject.visible = visible );
     }
 
     /** @inheritdoc */
@@ -31,7 +58,6 @@ export class Renderer
         value.position.set(this.displayObject.position.x, this.displayObject.position.y);
         value.scale.set(this.displayObject.scale.x, this.displayObject.scale.y);
         value.pivot.set(this.displayObject.pivot.x, this.displayObject.pivot.y);
-        value.skew.set(this.displayObject.skew.x, this.displayObject.skew.y);
         value.rotation = this.displayObject.rotation;
         value.alpha = this.displayObject.alpha;
         value.visible = this.displayObject.visible;
@@ -40,16 +66,9 @@ export class Renderer
 
     /** @inheritdoc */
     toJSON(options?: any): any {
-        return {
-            alpha: this.displayObject.alpha,
-            visible: this.displayObject.visible
-        };
-    }
-
-    /** @inheritdoc */
-    fromJSON(json: any, options?: any): Renderer {
-        this.displayObject.alpha = json.alpha === void 0 ? 1 : json.alpha;
-        this.displayObject.visible = json.visible === void 0 ? true : json.visible;
-        return this;
+        let re = super.toJSON(options);
+        // Make sure the deisplayObject gets not exported
+        delete re.displayObject;
+        return re;
     }
 }

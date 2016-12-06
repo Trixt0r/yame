@@ -1,3 +1,4 @@
+import { EventBus } from '../../common/eventbus';
 import { String } from '../../common/component/string';
 import { Renderer } from './component/renderer';
 import { SpriteRenderer } from './component/renderer/spriteRenderer';
@@ -10,7 +11,7 @@ import * as randomstring from 'randomstring';
 
 let tempPoint = new PIXI.Point();
 
-class EntityComponents extends Component<any> {
+class EntityComponents extends Component<any> implements EventBus {
 
     /** @type {String} id The id of the component. */
     @component id: String;
@@ -212,6 +213,11 @@ export class Entity extends PIXI.Container {
         // Apply the current transformation to the PIXI attributes
         this.transformation.apply(this);
         return this;
+    }
+
+    /** @inheritdoc */
+    trigger(event: string, ...args: any[]) {
+        return this.emit.apply(this, arguments);
     }
 }
 

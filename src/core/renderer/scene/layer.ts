@@ -175,7 +175,6 @@ export class Layer extends PIXI.Container {
         this._name = json.name;
         this._z = json.z;
         this.alpha = json.alpha || 1;
-        let shapeFactory = new ShapeFactory();
         _.each(json.children, (json: any) => {
             let obj = new Entity();
             obj.fromJSON(json, options);

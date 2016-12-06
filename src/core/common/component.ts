@@ -87,7 +87,7 @@ export abstract class Component<T> extends EventBus {
                 }
             });
         else
-            this._value = json;
+            this.value = json;
         return this;
     }
 

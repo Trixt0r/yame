@@ -1,3 +1,4 @@
+import { ColorPicker } from './colorPicker';
 import { View } from './abstract';
 import {Component as CompModel} from '../../common/component';
 
@@ -63,3 +64,4 @@ export class ComponentView extends View implements Component<CompModel<any>> {
 ComponentView.register('string', <any>String);
 ComponentView.register('number', <any>Number);
 ComponentView.register('boolean', <any>Boolean);
+ComponentView.register('color', <any>ColorPicker);
