@@ -68,7 +68,10 @@ export class Entity extends PIXI.Container {
         this.updateComponents();
 
         // If any component changes, update everything
-        this.comps.on('change:*', () => this.updateComponents());
+        this.comps.on('component.change:?', () => this.updateComponents());
+
+        // Delegate all cascaded component events
+        this.comps.on('change:?', (event, val, old) => this.trigger(event, val, old));
     }
 
     /**
@@ -81,13 +84,13 @@ export class Entity extends PIXI.Container {
         this.removeChildren();
 
         // Listen for changes on the transformation components and apply them
-        this.transformation.position.x.on('change', x => this.position.x = x);
-        this.transformation.position.y.on('change', y => this.position.y = y);
+        this.transformation.on('change:position.x', x => this.position.x = x);
+        this.transformation.on('change:position.y', y => this.position.y = y);
 
-        this.transformation.scale.x.on('change', x => this.scale.x = x);
-        this.transformation.scale.y.on('change', y => this.scale.y = y);
+        this.transformation.on('change:scale.x', x => this.scale.x = x);
+        this.transformation.on('change:scale.y', y => this.scale.y = y);
 
-        this.transformation.rotation.on('change', rot => this.rotation = rot);
+        this.transformation.on('change:rotation', rot => this.rotation = rot);
 
         // Apply the current transformation to the PIXI attributes
         this.transformation.apply(this);

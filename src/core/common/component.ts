@@ -159,18 +159,56 @@ export function create<T>(type: string, name: string, value: any): Component<T> 
  */
 export function component(target: Component<any>, key: string): void {
     let o = { };
+    // let handlerSet = false;
     o[key] = {
         // Return the value which should be a component
         get: function() {
+            if (this.value[key] && this.value[key] instanceof Component) {
+                if (!this.value[key].handlerSet) {
+                    // Listen for changes on the component
+                    this.value[key].on('change', (val, old) => {
+                        this.trigger('change:*', key, val, old);
+                        this.trigger('change:?', `change:${key}`, val, old);
+                        this.trigger(`change:${key}`, val, old);
+                    });
+
+                    // Allow cascaded event handlers, e.g. transformation.position.y
+                    let setUpChain = function(event, comp, k) {
+                        if (comp instanceof Component) {
+                            comp.off('change:*', null, this);
+                            comp.off('change', null, this);
+                            if (comp.value && typeof comp.value == 'object') {
+                                comp.on('change:*', (kk, val, old) => {
+                                    this.trigger('change:?', `${event}${k}.${kk}`, val, old);
+                                    this.trigger(`${event}${k}.${kk}`, val, old);
+                                }, this);
+                            }
+                            // Delegate on change
+                            comp.on('change', (val, old) => {
+                                this.trigger('change:?', `${event}${k}`, val, old);
+                                this.trigger(`${event}${k}`, val, old);
+                            }, this);
+                            // Extend the chain if there are still components to listen for
+                            if ( comp.value && typeof comp.value == 'object'
+                                    && comp.value[k] instanceof Component )
+                                _.each(comp.value[k].value, setUpChain.bind(this, `${event}${k}.`), this);
+                        }
+                    };
+                    _.each(this.value[key].value, setUpChain.bind(this, `change:${key}.`), this);
+                    this.value[key].handlerSet = true;
+                }
+            }
             return this.value[key];
         },
         // Set the actual value of the component
         set: function(val) {
-            if (val != this.value[key].value) {
+            if (val != this.value[key]) {
+                this.handlerSet = false;
                 let old = this.value[key].value;
                 this.value[key] = val;
-                this.trigger('change:*', key, val, old);
-                this.trigger(`change:${key}`, val, old);
+                this.trigger('component.change:?', `component.change:${key}`, val, old);
+                this.trigger(`component.change:*`, key, val, old);
+                this.trigger(`component.change:${key}`, val, old);
             }
         }
     };

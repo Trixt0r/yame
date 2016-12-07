@@ -1,3 +1,4 @@
+import { Container } from '../../../interaction/transformation/container';
 import View from '../../../../../core/renderer/view/abstract';
 import LabeledInput from '../../../../../core/renderer/view/composition/labeledInput';
 import EventBus from '../../../../../core/common/eventbus';
@@ -15,12 +16,12 @@ export class Properties extends View {
     hiding: Boolean;
     showing: Boolean;
 
-    constructor(private editable: EventBus) {
+    constructor(private editable: Container) {
         super({ className: 'ui segment properties' });
         this.hiding = false;
         this.showing = false;
         this.title = new View({ el: '<div class="ui small header">Properties</div>' });
-        this._properties = new Selection(<any>editable);
+        this._properties = new Selection(editable);
 
         this.$el.bind('transitionend', ev => {
             if (this.$el.hasClass('hidden')) {

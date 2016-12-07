@@ -36,7 +36,6 @@ export class SpriteRenderer extends Renderer {
 
         this.texture.on('change', texture => {
             this.sprite.texture = PIXI.Texture.fromImage(texture);
-            // this.sprite.texture.baseTexture.on('update', () => this.sprite.parent.pivot.set(this.sprite.texture.baseTexture.width/2, this.sprite.texture.baseTexture.height/2));
         });
     }
 
@@ -78,9 +77,6 @@ export class SpriteRenderer extends Renderer {
         // Resolve the relative path properly
         json.texture = path.resolve(options.parentPath, json.texture);
         super.fromJSON(json, options);
-        // this.sprite.parent.pivot.set(this.sprite.texture.baseTexture.width/2, this.sprite.texture.baseTexture.height/2);
-        // Make sure the anchor is always in the middle
-        // this.sprite.texture.baseTexture.on('update', () => this.sprite.parent.pivot.set(this.sprite.texture.baseTexture.width/2, this.sprite.texture.baseTexture.height/2));
         return this;
     }
 }

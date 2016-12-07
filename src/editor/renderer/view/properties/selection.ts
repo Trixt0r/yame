@@ -1,3 +1,4 @@
+import { Component } from '../../../../core/common/component';
 import { ComponentView } from '../../../../core/renderer/view/component';
 import * as _ from 'underscore';
 
@@ -5,8 +6,6 @@ import Entity from '../../../../core/renderer/graphics/entity';
 import View from '../../../../core/renderer/view/abstract';
 import ColorPicker from '../../../../core/renderer/view/colorPicker';
 import LabeledInput from '../../../../core/renderer/view/composition/labeledInput';
-import Point from './point';
-import Value from './value';
 import EventBus from '../../../../core/common/eventbus';
 import Container from '../../interaction/transformation/container';
 
@@ -17,16 +16,6 @@ export class Selection extends View {
 
     constructor(private container: Container) {
         super();
-
-        // let position = new Point( { title: 'Position', instance: container.position } );
-        // let scale = new Point( { title: 'Scale', instance: container.scale } );
-        // let rotation = new Value( {title: 'Rotation', instance: container, attribute: 'rotation'});
-        // let color = new ColorPicker({
-        //     title: 'Tint and alpha',
-        //     colorPicker: {
-        //         localStorageKey: "spectrum",
-        //     }
-        // });
 
         // position.x.mapFrom = val => Math.round(val);
         // position.y.mapFrom = val => Math.round(val);
@@ -39,15 +28,26 @@ export class Selection extends View {
         // rotation.value.mapFrom = val => (360 + Math.round((<any>Math).degrees(val))) % 360;
         // rotation.value.mapTo = val => (<any>Math).radians(val);
 
-        // this.add(position).add(scale).add(rotation);
-
         let ctx = {};
 
         Pubsub.on('selection:select', (children: Entity[]) => {
             this.empty();
             this.add(<any>ComponentView.get(container.transformation));
             if (children.length == 1) {
-                this.add(<any>ComponentView.get(children[0].renderer));
+                let filtered = _.filter(children[0].components.value, comp => {
+                    if (comp instanceof Component)
+                        return comp.name != 'transformation' &&
+                                comp.name != 'z' &&
+                                comp.name != 'id' &&
+                                comp.name != 'layer';
+                    else
+                        return false;
+                })
+                _.each(filtered, component =>
+                    {
+                    if (component instanceof Component)
+                        this.add(<any>ComponentView.get(component));
+                    });
             }
             // color.off('hide move', null, this);
 

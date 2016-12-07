@@ -160,6 +160,7 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
         // Click area is always local bounds
         selectionContainer.hitArea = localBounds;
 
+        // TODO: move the rendering into the container class
         var gr = new PIXI.Graphics();
         selectionContainer.addChild(gr);
         gr.clear();
@@ -185,21 +186,21 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
             gr.clear();
 
             gr.moveTo(topLeft.x, topLeft.y);
-            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.y) , color);
+            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.transformation.scale.y.value) , color);
             gr.lineTo(topLeft.x + localWidth, topLeft.y);
-            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.x) , color);
+            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.transformation.scale.x.value) , color);
             gr.lineTo(topLeft.x + localWidth, topLeft.y + localHeight);
-            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.y) , color);
+            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.transformation.scale.y.value) , color);
             gr.lineTo(topLeft.x, topLeft.y + localHeight);
-            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.x) , color);
+            gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.transformation.scale.x.value) , color);
             gr.lineTo(topLeft.x, topLeft.y);
         };
 
-        selectionContainer.off('change:scale.x', null, selectionContainer);
-        selectionContainer.off('change:scale.y', null, selectionContainer);
+        selectionContainer.off('change:transformation.scale.x', null, selectionContainer);
+        selectionContainer.off('change:transformation.scale.y', null, selectionContainer);
         camera.off('update', null, selectionContainer);
-        selectionContainer.on('change:scale.x', fn, selectionContainer);
-        selectionContainer.on('change:scale.y', fn, selectionContainer);
+        selectionContainer.on('change:transformation.scale.x', fn, selectionContainer);
+        selectionContainer.on('change:transformation.scale.y', fn, selectionContainer);
 
         camera.on('update', fn, selectionContainer);
 
@@ -230,20 +231,12 @@ export function clear(silent: boolean = false) {
             let bottom = child.toGlobal(new PIXI.Point(bounds.x, bounds.y + height));
 
             let localOrigin = world.currentLayer.toLocal(origin);
-            let horDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(right));
-            let vertDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(bottom));
+            let horDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(right)) * Math.sign(child.scale.x);
+            let vertDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(bottom)) * Math.sign(child.scale.y);
             child.scale.x = horDiff / width * Math.sign(selectionContainer.scale.x);
             child.scale.y = vertDiff / height * Math.sign(selectionContainer.scale.y);
 
-            // TODO: Investigate more into the skewing issues
-            // let rotation = selectionContainer.rotation;
-            // let skewX = Math.PI/2 - Math.atan2( bottom.y - origin.y, bottom.x - origin.x ) + rotation;
-            // let skewY = Math.atan2( right.y - origin.y, right.x - origin.x ) - rotation;
-            // child.skew.x = skewX
-            // child.skew.y = skewY;
-
             child.position = world.currentLayer.toLocal(selectionContainer.toGlobal(child.position));
-            // if (Math.round(skewX * 100000) / 100000 == 0 || Math.round(skewY * 100000) / 100000 == 0)
             child.rotation += selectionContainer.rotation;
 
             children.push(child);
