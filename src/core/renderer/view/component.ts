@@ -8,6 +8,8 @@ import { Boolean } from './component/boolean';
 
 import * as _ from 'underscore';
 
+let Pubsub = require('backbone').Events;
+
 export abstract class Component<T extends CompModel<any>> {
     component: T
 }
@@ -54,9 +56,8 @@ export class ComponentView extends View implements Component<CompModel<any>> {
             else
                 throw `View not defined for type '${component.type}'`;
         } else
-            re = new def({
-                component: component
-            });
+            re = new def({ component: component });
+        Pubsub.trigger('component:view', re);
         return re;
     }
 }

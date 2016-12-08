@@ -17,16 +17,25 @@ export class Selection extends View {
     constructor(private container: Container) {
         super();
 
-        // position.x.mapFrom = val => Math.round(val);
-        // position.y.mapFrom = val => Math.round(val);
+        let mapFrom = val => Math.round(val * 100);
+        let mapTo = val => val / 100;
 
-        // scale.x.mapFrom = val => Math.round(val * 100);
-        // scale.y.mapFrom = val => Math.round(val * 100);
-        // scale.x.mapTo = val => val / 100;
-        // scale.y.mapTo = val => val / 100;
-
-        // rotation.value.mapFrom = val => (360 + Math.round((<any>Math).degrees(val))) % 360;
-        // rotation.value.mapTo = val => (<any>Math).radians(val);
+        Pubsub.on('component:view', (view: View) => {
+            let component: Component<any> = (<any>view).component;
+            switch(component.name) {
+                case 'scale':
+                case 'skew':
+                    view.subviews().forEach(v => {
+                        (<any>v).mapFrom = mapFrom;
+                        (<any>v).mapTo = mapTo;
+                    });
+                break;
+                case 'rotation':
+                    (<any>view).mapFrom = val => (360 + Math.round((<any>Math).degrees(val))) % 360;
+                    (<any>view).mapTo = val => (<any>Math).radians(val);
+                break;
+            }
+        });
 
         let ctx = {};
 
