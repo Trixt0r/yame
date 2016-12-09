@@ -34,6 +34,9 @@ export class Renderer
 
         this.alpha.on('change', alpha => this.displayObject.alpha = alpha );
         this.visible.on('change', visible => this.displayObject.renderable = visible );
+
+        this.delegateOn('change', this.alpha)
+            .delegateOn('change', this.visible);
     }
 
     /** @inheritdoc */

@@ -54,6 +54,25 @@ export class EventBus {
     protected change(property: string, currentValue, newValue, fn?: Function): boolean {
         return this.triggerOnChange('change', property, currentValue, newValue, fn);
     }
+
+    /**
+     * Delegate the given event on the given event bus to this event bus.
+     * This means any event occurring in the given event bus will also be
+     * triggered in the current one.
+     *
+     * @param {string} event The event name on the given event bus
+     * @param {EventBus} obj The event bus to listen to
+     * @param {string} [alias=event]    Optional event name triggered on this
+     * @chainable
+     */
+    delegateOn(event: string, obj: EventBus, alias: string = event): this {
+        obj.on(event, function(){
+            let args = [alias];
+            args = args.concat(Array.prototype.slice.call(arguments));
+            this.trigger.apply(this, args);
+        }, this);
+        return this;
+    }
 }
 
 // Mixin the Backbone.Events behaviour

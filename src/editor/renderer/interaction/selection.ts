@@ -120,6 +120,7 @@ export function select(children: Entity[], silent: boolean = false) {
     selectionContainer.scale.set(1, 1);
     selectionContainer.pivot.set(0, 0);
     selectionContainer.rotation = 0;
+    selectionContainer.transformation.sync(selectionContainer);
     selectionContainer.hitArea = new PIXI.Rectangle(0,0,0,0);
 
     children.forEach(child => selectionContainer.addChild(child));
@@ -129,9 +130,10 @@ export function select(children: Entity[], silent: boolean = false) {
         let child = children[0];
         // The container obtains the child's scale and the child resets the
         // scale since it will retrieve the scale anyway on deselect
-        selectionContainer.scale.set(child.scale.x, child.scale.y);
-        selectionContainer.position.set(child.position.x, child.position.y);
-        selectionContainer.rotation = child.rotation;
+        selectionContainer.scale.set(child.transformation.scale.x.value, child.transformation.scale.y.value);
+        selectionContainer.position.set(child.transformation.position.x.value, child.transformation.position.y.value);
+        selectionContainer.rotation = child.transformation.rotation.value;
+        selectionContainer.transformation.sync(selectionContainer);
         child.scale.set(1,1);
         child.position.set(0, 0);
         child.rotation = 0;
@@ -156,34 +158,14 @@ export function select(children: Entity[], silent: boolean = false) {
             localBounds = selectionContainer.getLocalBounds();
         }
 
-        // Click area is always local bounds
-        selectionContainer.hitArea = localBounds;
-
         // TODO: move the rendering into the container class
         var gr = new PIXI.Graphics();
         selectionContainer.addChild(gr);
-        gr.clear();
-
-        topLeft = {
-            x: localBounds.x,
-            y: localBounds.y
-        };
         let localWidth = localBounds.width;
         let localHeight = localBounds.height;
 
-        gr.moveTo(topLeft.x, topLeft.y);
-        gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.y) , color);
-        gr.lineTo(topLeft.x + localWidth, topLeft.y);
-        gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.x) , color);
-        gr.lineTo(topLeft.x + localWidth, topLeft.y + localHeight);
-        gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.y) , color);
-        gr.lineTo(topLeft.x, topLeft.y + localHeight);
-        gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.scale.x) , color);
-        gr.lineTo(topLeft.x, topLeft.y);
-
-        var fn = () => {
+        let renderBounds = function() {
             gr.clear();
-
             gr.moveTo(topLeft.x, topLeft.y);
             gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.transformation.scale.y.value) , color);
             gr.lineTo(topLeft.x + localWidth, topLeft.y);
@@ -193,15 +175,41 @@ export function select(children: Entity[], silent: boolean = false) {
             gr.lineTo(topLeft.x, topLeft.y + localHeight);
             gr.lineStyle(lineWidth / camera.zoom / Math.abs(selectionContainer.transformation.scale.x.value) , color);
             gr.lineTo(topLeft.x, topLeft.y);
+        }
+
+        let setup = function() {
+            // Click area is always local bounds
+            selectionContainer.hitArea = localBounds;
+
+            topLeft = {
+                x: localBounds.x,
+                y: localBounds.y
+            };
+
+            renderBounds();
         };
+
+        setup();
+        children.forEach(child => child.on('change', function(a,b) {
+            process.nextTick(() => {
+                let selected = selectionContainer.selection;
+                clear(true);
+                localBounds = selectionContainer.getLocalBounds();
+                selectionContainer.hitArea = localBounds;
+                localWidth = localBounds.width;
+                localHeight = localBounds.height;
+                setup();
+                select(selected, true);
+            });
+        }, selectionContainer));
 
         selectionContainer.off('change:transformation.scale.x', null, selectionContainer);
         selectionContainer.off('change:transformation.scale.y', null, selectionContainer);
         camera.off('update', null, selectionContainer);
-        selectionContainer.on('change:transformation.scale.x', fn, selectionContainer);
-        selectionContainer.on('change:transformation.scale.y', fn, selectionContainer);
+        selectionContainer.on('change:transformation.scale.x', renderBounds, selectionContainer);
+        selectionContainer.on('change:transformation.scale.y', renderBounds, selectionContainer);
 
-        camera.on('update', fn, selectionContainer);
+        camera.on('update', renderBounds, selectionContainer);
 
         _.each(<any>transformations, (trans: Transformation) => trans.update(children));
         if (!silent)
@@ -222,6 +230,7 @@ export function clear(silent: boolean = false) {
     let children = [];
     selectionContainer.children.forEach((child) => {
         if (child instanceof Entity) {
+            child.off('change', null, selectionContainer);
             let bounds = child.getLocalBounds();
             let width = bounds.x + bounds.width;
             let height = bounds.y + bounds.height;

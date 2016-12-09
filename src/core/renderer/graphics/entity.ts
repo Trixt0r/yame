@@ -103,6 +103,8 @@ export class Entity extends PIXI.Container {
 
         // If the renderer changes, remove the previous and add the new one
         this.renderer.on('change', (val, old) => {
+            this.trigger('change');
+            if (!(val instanceof PIXI.DisplayObject)) return;
             if (old)
                 this.removeChild(old);
             this.addChild(val);

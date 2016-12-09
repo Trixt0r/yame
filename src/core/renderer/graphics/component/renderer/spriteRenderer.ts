@@ -34,9 +34,18 @@ export class SpriteRenderer extends Renderer {
         this.skew.x.on('change', x => this.sprite.skew.x = x);
         this.skew.y.on('change', y => this.sprite.skew.y = y);
 
+        this.delegateOn('change:x', this.skew, 'change')
+            .delegateOn('change:y', this.skew, 'change');
+
         this.texture.on('change', texture => {
             this.sprite.texture = PIXI.Texture.fromImage(path.resolve(texture));
         });
+
+        this.delegateOn('change:x', this.skew, 'change')
+            .delegateOn('change:y', this.skew, 'change')
+            .delegateOn('change:alpha', this.color, 'change')
+            .delegateOn('change:hex', this.color, 'change')
+            .delegateOn('change', this.texture);
     }
 
     /** @inheritdoc */
