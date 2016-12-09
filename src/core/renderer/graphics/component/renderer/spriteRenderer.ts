@@ -35,7 +35,7 @@ export class SpriteRenderer extends Renderer {
         this.skew.y.on('change', y => this.sprite.skew.y = y);
 
         this.texture.on('change', texture => {
-            this.sprite.texture = PIXI.Texture.fromImage(texture);
+            this.sprite.texture = PIXI.Texture.fromImage(path.resolve(texture));
         });
     }
 
