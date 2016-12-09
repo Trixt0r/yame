@@ -33,7 +33,7 @@ export class Renderer
         this._value.visible = new Boolean('visible', displayObject.visible);
 
         this.alpha.on('change', alpha => this.displayObject.alpha = alpha );
-        this.visible.on('change', visible => this.displayObject.visible = visible );
+        this.visible.on('change', visible => this.displayObject.renderable = visible );
     }
 
     /** @inheritdoc */

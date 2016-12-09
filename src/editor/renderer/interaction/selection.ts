@@ -115,7 +115,7 @@ export function init(): void {
  * @param  {PIXI.DisplayObject[]} children
  * @returns {void}
  */
-export function select(children: PIXI.DisplayObject[], silent: boolean = false) {
+export function select(children: Entity[], silent: boolean = false) {
     selectionContainer.position.set(0, 0);
     selectionContainer.scale.set(1, 1);
     selectionContainer.pivot.set(0, 0);
@@ -132,11 +132,10 @@ export function select(children: PIXI.DisplayObject[], silent: boolean = false) 
         selectionContainer.scale.set(child.scale.x, child.scale.y);
         selectionContainer.position.set(child.position.x, child.position.y);
         selectionContainer.rotation = child.rotation;
-        // selectionContainer.target.skew.set(child.skew.x, child.skew.y);
         child.scale.set(1,1);
-        // child.skew.set(0,0);
         child.position.set(0, 0);
         child.rotation = 0;
+        child.transformation.sync(child);
     }
     if (children.length) {
 
@@ -231,10 +230,8 @@ export function clear(silent: boolean = false) {
             let bottom = child.toGlobal(new PIXI.Point(bounds.x, bounds.y + height));
 
             let localOrigin = world.currentLayer.toLocal(origin);
-            let horDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(right)) * Math.sign(child.scale.x);
-            let vertDiff = Utils.distance(localOrigin, world.currentLayer.toLocal(bottom)) * Math.sign(child.scale.y);
-            child.scale.x = horDiff / width * Math.sign(selectionContainer.scale.x);
-            child.scale.y = vertDiff / height * Math.sign(selectionContainer.scale.y);
+            child.scale.x *= selectionContainer.scale.x;
+            child.scale.y *= selectionContainer.scale.y;
 
             child.position = world.currentLayer.toLocal(selectionContainer.toGlobal(child.position));
             child.rotation += selectionContainer.rotation;
