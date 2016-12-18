@@ -29,20 +29,15 @@ keyboardjs.on('ctrl', () => multiSelect = true, () => multiSelect = false);
 
 const Pubsub = require('backbone').Events;
 
-export class Layers {
+export class Layers extends Accordion {
 
     private tree: Tree;
-    private layers: Content;
-    private accordion: Accordion;
     private treeData: any[];
     private properties: View;
     private selecting: boolean;
 
-    constructor(tabMenu: Menu) {
-        var layers = this.layers = new Content();
-        var layersTab = tabMenu.tab('layers', layers);
-        layersTab.$el.text('Scene');
-        layers.active = true;
+    constructor(options: any = { }) {
+        super(_.extend({ className: 'ui styled accordion' }, options));
 
         let layersCount = EDITOR.map.layers.length;
 
@@ -371,12 +366,20 @@ export class Layers {
 
         this.addLayer(EDITOR.map.currentLayer);
 
+        this.properties = new Properties(Selection.getSelectionContainer());
 
-        let accordion = this.accordion = new Accordion({ className: 'ui styled accordion' });
-        let group = accordion.create('Layers');
+        var grid = new View({className: 'ui grid'});
+        var left = new View({ className: 'eight wide column' });
+        var right = new View({ className: 'eight wide column' });
+        grid.add([left, right]);
+        left.add(this.tree);
+        right.add(this.properties);
+
+
+        let group = this.create('Layers');
         group.active = true;
         group.setTitle('Layers');
-        group.setContent(this.tree);
+        group.setContent(grid);
 
         let button = new Button({className: 'mini ui right floated positive button'});
         button.add(new Icon({iconName: 'plus icon'}));
@@ -387,16 +390,11 @@ export class Layers {
             EDITOR.map.createLayer('layer-' + (layersCount++));
             e.stopPropagation();
         });
-
-        layers.add(accordion);
-
-        this.properties = new Properties(Selection.getSelectionContainer());
-        this.properties.hide();
-        layers.add(this.properties);
+        // layers.add(this.properties);
 
         this.updateSize();
         $(window).resize(() => this.updateSize());
-        this.accordion.on('change opening closing', this.updateSize, this);
+        this.on('change opening closing', this.updateSize, this);
 
         Pubsub.on('map:createLayer', (world: Map, layer) => this.addLayer(layer));
         Pubsub.on('map:removeLayer', (world: Map, layer: Layer) => this.tree.$el.jstree(true).delete_node('#' + layer.id) );
@@ -408,11 +406,11 @@ export class Layers {
      */
     updateSize() {
         // +48 because of segment padding & segment top margin
-        let anchorSize = (this.layers.anchor.$el.outerHeight(true) + 48) / window.innerHeight;
-        let leftSize = 1 - anchorSize;
-        let halfSize = (leftSize * .5) * 100;
-        this.accordion.css = `max-height: ${halfSize}%;`;
-        this.properties.css = `max-height: ${halfSize}%;`;
+        // let anchorSize = (this.layers.anchor.$el.outerHeight(true) + 48) / window.innerHeight;
+        // let leftSize = 1 - anchorSize;
+        // let halfSize = (leftSize * .5) * 100;
+        // this.accordion.css = `max-height: ${halfSize}%;`;
+        // this.properties.css = `max-height: ${halfSize}%;`;
     }
 
     /**

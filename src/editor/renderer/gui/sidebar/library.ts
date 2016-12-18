@@ -1,5 +1,5 @@
 import Directory from '../../../../core/renderer/view/directory';
-import Accordion from '../../../../core/renderer/view/accordion';
+import { default as Accordion, Group } from '../../../../core/renderer/view/accordion';
 import View from '../../../../core/renderer/view/abstract';
 import Button from '../../../../core/renderer/view/button';
 import { Content } from '../../../../core/renderer/view/tabs';
@@ -17,27 +17,32 @@ const Pubsub = require('backbone').Events;
 /**
  * A view for exploring the project directory.
  */
-export class Library extends Content {
+export class Library extends Accordion {
 
-    private _properties: View;
-    private _accordion: Accordion;
+    private _properties: Accordion;
     private _directory: Directory;
+    private propertiesGroup: Group;
 
     constructor(options: any = {}) {
-        super(options);
+        super(_.extend({ className: 'ui styled accordion' }, options));
         this._directory = new Directory();
-        this._accordion = new Accordion({ className: 'ui styled accordion' });
-        this.add(this._accordion);
+        this._properties = new Accordion({ className: 'ui styled accordion' });
 
-        this._properties = new View({ className: 'ui segment' });
-        this._properties.css = 'overflow-y: auto;';
-        this._properties.hide();
-        this.add(this._properties);
+        this.propertiesGroup = this._properties.create('Properties');
+        this.propertiesGroup.active = true;
+        this.propertiesGroup.setTitle('Properties');
 
-        let group = this._accordion.create('Explorer');
+        var grid = new View({className: 'ui grid'});
+        var left = new View({ className: 'eight wide column' });
+        var right = new View({ className: 'eight wide column' });
+        grid.add([left, right]);
+        left.add(this._directory);
+        right.add(this._properties);
+
+        let group = this.create('Explorer');
         group.active = true;
         group.setTitle('Explorer');
-        group.setContent(this._directory);
+        group.setContent(grid);
 
         let btn = new Button({className: 'ui button fluid'});
         btn.add(new View({el: '<p>Open folder</p>'}))
@@ -60,35 +65,32 @@ export class Library extends Content {
         });
         this.on('addedTo', () => this.updateSize());
         $(window).resize(() => this.updateSize());
+        this._properties.hide();
     }
 
     updateSize() {
         // +48 because of segment padding & segment top margin
-        let anchorSize = (this.anchor.$el.outerHeight(true) + 48) / window.innerHeight;
-        let leftSize = 1 - anchorSize;
-        let halfSize = (leftSize * .5) * 100;
-        this.accordion.css = `max-height: ${halfSize}%;`;
-        this._properties.css = `max-height: ${halfSize}%;`;
+        // let anchorSize = (this.anchor.$el.outerHeight(true) + 48) / window.innerHeight;
+        // let leftSize = 1 - anchorSize;
+        // let halfSize = (leftSize * .5) * 100;
+        // this.accordion.css = `max-height: ${halfSize}%;`;
+        // this._properties.css = `max-height: ${halfSize}%;`;
     }
 
     updateProperties(resource: Resource) {
-        this._properties.empty();
+        this.propertiesGroup.content.empty();
         if (resource) {
             this._properties.show();
-            this._properties.add(new View( {el: '<div class="ui small header">Properties</div>'}));
-            this._properties.add(resource.properties);
-        } else
+            this.propertiesGroup.setContent(resource.properties);
+        } else {
             this._properties.hide();
+            this.propertiesGroup.content.empty();
+        }
     }
 
     /** @returns {View} The properties container for a resource. */
-    get properties(): View {
+    get properties(): Accordion {
         return this._properties;
-    }
-
-    /** @returns {Accordion} The accordion to append resource views. */
-    get accordion(): Accordion {
-        return this._accordion;
     }
 
     /**

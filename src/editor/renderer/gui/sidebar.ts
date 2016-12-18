@@ -6,13 +6,13 @@ import * as _ from 'underscore';
 import { ImageDropHandler } from '../../../core/renderer/drop/image';
 import DropManager from '../../../core/renderer/drop/manager';
 import Library from './sidebar/library';
+import Layers from './sidebar/layers';
 
 import { Menu } from '../../../core/renderer/view/tabs';
 
 import View from '../../../core/renderer/view/abstract';
 import { Accordion, SubAccordion } from '../../../core/renderer/view/accordion';
 import Map from '../../../core/renderer/scene/map';
-import Layers from './resources/layers';
 
 import SpriteResource from '../entity/implementation/sprite/resource';
 import Resources from '../entity/resources';
@@ -29,17 +29,14 @@ export class Sidebar extends View {
 
     layers: Layers;
     lib: Library;
-    public properties: View;
+    properties: View;
 
     constructor() {
         super({ id: 'resources' });
 
-        let wrapper = new View({ className: 'wrapper' });
-        this.add(wrapper);
-
         let resizer = new View({ className: 'hor-resizer' });
         this.add(resizer);
-        let minWidth = 300, collapseThreshold = 100;
+        let minWidth = 600, collapseThreshold = 200;
         let prevEvent = null, prevWidth = minWidth;
         let sizeFactor = prevWidth/window.innerWidth;
         resizer.$el.on('mousedown', e => {
@@ -51,10 +48,14 @@ export class Sidebar extends View {
                 e.stopPropagation();
                 e.preventDefault();
                 let newWidth = prevWidth + prevEvent.clientX - e.clientX;
-                if (newWidth < minWidth - collapseThreshold)
-                    this.$el.css('width', '10px');
-                else
-                    this.$el.css('width', Math.min(window.innerWidth - ($('.zoom').first().outerWidth(true) + $('.zoom').first().position().left*2), Math.max(minWidth, newWidth)) + 'px');
+                if (newWidth < minWidth - collapseThreshold) {
+                    this.css['width'] = '10px';
+                    this.css['min-width'] = '10px';
+                }
+                else {
+                    this.css['min-width'] = minWidth + 'px';
+                    this.css['width'] = Math.min(window.innerWidth - ($('.zoom').first().outerWidth(true) + $('.zoom').first().position().left*2), Math.max(minWidth, newWidth)) + 'px';
+                }
             sizeFactor = this.$el.outerWidth(true)/window.innerWidth;
             }
         });
@@ -65,36 +66,13 @@ export class Sidebar extends View {
             if (newWidth <= minWidth) return;
 
             newWidth = window.innerWidth * sizeFactor;
-            this.$el.css('width', Math.min(window.innerWidth - ($('.zoom').first().outerWidth(true) + $('.zoom').first().position().left*2), Math.max(minWidth, newWidth)) + 'px');
-        })
+            this.css['width'] = Math.min(window.innerWidth - ($('.zoom').first().outerWidth(true) + $('.zoom').first().position().left*2), Math.max(minWidth, newWidth)) + 'px';
+        });
 
-        var tabMenu = new Menu();
-        wrapper.add(tabMenu);
-
-        this.layers = new Layers(tabMenu);
-
+        this.layers = new Layers();
         this.lib = new Library();
 
-        let test = tabMenu.tab('Resources', this.lib);
-        test.$el.append('Resources');
-
-
-        var dir = -1;
-        var rot = 90;
-
-        this.$el.bind('transitionend', ev => {
-            var $el = $(ev.target);
-            if ($el.css('right') == '0px') this.trigger('opened');
-            else this.trigger('closed');
-        });
-
-        this.$('.angle.double.icon').click(() => {
-            var width = this.$el.outerWidth();
-            var factor = Math.min(0, dir);
-            this.$el.css('right', (factor * width) + 'px');
-            this.$('.angle.double.icon').css('transform', 'rotate(' + (rot += 180) + 'deg)');
-            dir *= -1;
-        });
+        this.add([this.layers, this.lib]);
     }
 
     dropSprite(file) {

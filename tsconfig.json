@@ -5,7 +5,7 @@
         "sourceMap": true,
         "outDir": "app",
         "rootDir": "src",
-        "sourceRoot": "app",
+        "sourceRoot": "src",
         "baseUrl": "src",
         "experimentalDecorators": true
     },

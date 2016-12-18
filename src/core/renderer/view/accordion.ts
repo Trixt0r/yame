@@ -171,6 +171,9 @@ export class Accordion extends View {
 
         if (!options.noSemanticInit)
             (<any>this.$el).accordion({
+                selector: {
+                    trigger: '> .title'
+                },
                 exclusive: false,
                 onOpening: () => this.trigger('opening'),
                 onOpen: () => this.trigger('opening'),

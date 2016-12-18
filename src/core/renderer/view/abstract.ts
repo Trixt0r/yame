@@ -93,57 +93,78 @@ export class View extends Backbone.View<Backbone.Model> {
         return this;
     }
 
+    private viewsArrayFromArg<T extends View>(arg: (T | T[])): T[] {
+        let views: T[];
+        if (arg instanceof View)
+            views = [arg];
+        else
+            views = arg;
+        return views;
+    }
+
     /**
      * Adds the given view instance to this view as a child.
      * If the view is already a subview of this view nothing will happen.
-     * @param {View} view
+     * @param {View | View[]} view Single view or an array of views.
      * @param {boolean} render
      * @chainable
      */
-    add<T extends View>(view: T, render: boolean = true): View {
-        // Check if the view is already a subview
-        if (view._parent == this) return this;
-        view._parent = this;
-        this.views.push(view);
+    add<T extends View>(view: (T | T[]), render: boolean = true): View {
+        let views = this.viewsArrayFromArg(view);
+        let added = [];
+        views.forEach(view => {
+            // Check if the view is already a subview
+            if (view._parent == this) return;
+            view._parent = this;
+            this.views.push(view);
+            added.push(view);
+        });
         if (render)
             this.render();
-        this.trigger('add', view);
-        view.trigger('addedTo', this);
+
+        this.trigger('add', added);
+        added.forEach(view => view.trigger('addedTo', this));
         return this;
     }
 
     /**
      * Same as View#add, but will always re-append the view, no matter if the
      * given view is already a subview of this one.
-     * @param  {View} view
+     * @param {View | View[]} view Single view or an array of views.
      * @chainable
      */
-    append<T extends View>(view: T): View {
-        if (view._parent == this) {
-            var index = this.views.indexOf(view);
-            if (index >= 0) this.views.splice(index, 1);
-            view._parent = null;
-        }
-        this.add(view);
-        this.trigger('append', view);
-        view.trigger('appendedTo', this);
+    append<T extends View>(view: (T | T[])): View {
+        let views = this.viewsArrayFromArg(view);
+        views.forEach(view => {
+            if (view._parent == this) {
+                var index = this.views.indexOf(view);
+                if (index >= 0) this.views.splice(index, 1);
+                view._parent = null;
+            }
+        });
+        this.add(views);
+        this.trigger('append', views);
+        views.forEach(view => view.trigger('appendedTo', this));
         return this;
     }
 
     /**
      * Same as View#append but the other way around.
-     * @param  {View} view
+     * @param {View | View[]} view Single view or an array of views.
      * @chainable
      */
-    prepend <T extends View>(view: T): View {
-        if (view._parent == this) {
-            var index = this.views.indexOf(view);
-            if (index >= 0) this.views.splice(index, 1);
-        }
-        this.views.unshift(view);
+    prepend <T extends View>(view:  (T | T[])): View {
+        let views = this.viewsArrayFromArg(view);
+        views.forEach(view => {
+            if (view._parent == this) {
+                var index = this.views.indexOf(view);
+                if (index >= 0) this.views.splice(index, 1);
+            }
+        });
+        views.forEach(view => this.views.unshift(view));
         this.render();
-        this.trigger('prepend', view);
-        view.trigger('prependTo', this);
+        this.trigger('prepend', views);
+        views.forEach(view => view.trigger('prependTo', this));
         return this;
     }
 
@@ -157,24 +178,35 @@ export class View extends Backbone.View<Backbone.Model> {
      * @chainable
      */
     delete(view: View, remove: boolean = false): View {
-        var index = this.views.indexOf(view);
-        if (index >= 0)  {
-            this.views.splice(index, 1);
-            if (remove) {
-                view.remove();
-                this.trigger('remove', view);
-                view.trigger('removedFrom', this);
+        let views = this.viewsArrayFromArg(view);
+        let removed = [], detached = [];
+        views.forEach(view => {
+            var index = this.views.indexOf(view);
+            if (index >= 0) {
+                this.views.splice(index, 1);
+                if (remove) {
+                    view.remove();
+                    removed.push(view);
+                }
+                else {
+                    view.$el.detach();
+                    view.stopListening();
+                    detached.push(view);
+                }
+                view._parent = null;
             }
-            else {
-                view.$el.detach();
-                view.stopListening();
-                this.trigger('detach', view);
-                view.trigger('detachedFrom', this);
-            }
-            view._parent = null;
-            this.trigger('delete', view);
-            view.trigger('deletedFrom', this);
-        }
+        });
+        if (removed.length)
+            this.trigger('remove', removed);
+        if (detached.length)
+            this.trigger('detach', detached);
+        let deleted = removed.concat(detached);
+        if (deleted.length)
+            this.trigger('delete', deleted);
+
+        removed.forEach(view => view.trigger('removedFrom deletedFrom', this));
+        detached.forEach(view => view.trigger('detachedFrom deletedFrom', this));
+
         return this;
     }
 
