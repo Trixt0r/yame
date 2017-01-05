@@ -14,7 +14,9 @@ import Layer from '../../../../core/renderer/scene/layer';
 import LayerControl from './layers/layer';
 import Properties from './layers/properties';
 
-import Selection = require('../../interaction/selection');
+import {Selection as SelectionView} from '../../view/properties/selection';
+
+import * as Selection from '../../interaction/selection';
 import * as Utils from '../../interaction/utils';
 import {Content, Menu} from '../../../../core/renderer/view/tabs';
 
@@ -33,7 +35,7 @@ export class Layers extends Accordion {
 
     private tree: Tree;
     private treeData: any[];
-    private properties: View;
+    private properties: SelectionView;
     private selecting: boolean;
 
     constructor(options: any = { }) {
@@ -366,7 +368,8 @@ export class Layers extends Accordion {
 
         this.addLayer(EDITOR.map.currentLayer);
 
-        this.properties = new Properties(Selection.getSelectionContainer());
+        // this.properties = new Properties(Selection.getSelectionContainer());
+        this.properties = new SelectionView(Selection.getSelectionContainer());
 
         var grid = new View({className: 'ui grid'});
         var left = new View({ className: 'eight wide column' });

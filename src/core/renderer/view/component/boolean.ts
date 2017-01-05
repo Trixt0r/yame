@@ -21,11 +21,13 @@ export class Boolean extends Checkbox implements Component<Bool> {
 
     constructor(options: Options) {
         super(_.extend({
+            className: 'ui checkbox component',
             checked: options.component.value,
             text: options.component.name,
         }, options));
         this.eventDelimitter = '';
         this.component = options.component;
         this.bindTo(this.component, 'value', true);
+        this.css = 'margin: 1rem 0;';
     }
 }

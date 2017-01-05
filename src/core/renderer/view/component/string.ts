@@ -21,6 +21,7 @@ export class String extends LabeledInput implements Component<Str> {
 
     constructor(options: Options) {
         super(_.extend({
+            className: 'ui fluid labeled input component',
             label: { text: options.component.name },
             input: {
                 value: options.component.value,

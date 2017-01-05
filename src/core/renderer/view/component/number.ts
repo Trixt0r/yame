@@ -21,6 +21,7 @@ export class Number extends LabeledInput implements Component<No> {
 
     constructor(options: Options) {
         super(_.extend({
+            className: 'ui fluid labeled input component',
             label: { text: options.component.name },
             input: {
                 value: options.component.value,

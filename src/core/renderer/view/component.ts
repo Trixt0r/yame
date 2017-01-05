@@ -1,6 +1,7 @@
+import { Accordion, Group, SubAccordion } from './accordion';
 import { ColorPicker } from './colorPicker';
 import { View } from './abstract';
-import {Component as CompModel} from '../../common/component';
+import { Component as CompModel } from '../../common/component';
 
 import { Number } from './component/number';
 import { String } from './component/string';
@@ -14,45 +15,38 @@ export abstract class Component<T extends CompModel<any>> {
     component: T
 }
 
-interface Options extends Backbone.ViewOptions<Backbone.Model> {
-    component: CompModel<any>;
-}
-
-export class ComponentView extends View implements Component<CompModel<any>> {
+export class ComponentView extends Group implements Component<CompModel<any>> {
 
     component: CompModel<any>;
-    title: View;
 
-    private constructor(options: Options) {
-        super(_.extend({
-            className: 'ui segment'
-        }, options));
-        this.component = options.component;
-        this.title = new View({
-            el: `<div class="ui tiny header">${this.component.name}</div>`
-        });
-        this.add(this.title);
-    }
-
-    private static definitions: {[type: string]: typeof Component} = {};
+    private static definitions: { [type: string]: typeof Component } = {};
 
     static register(type: string, view: typeof Component) {
         ComponentView.definitions[type] = view;
     }
 
-    static get<T extends CompModel<any>>(component: T): Component<T> {
+    static get<T extends CompModel<any>>(component: T, parent: Accordion = new Accordion()): View | ComponentView {
         let type = component.type;
         let def = <any>ComponentView.definitions[type];
-        let re: Component<T>;
+        let re: View | ComponentView;
         if (!def) {
-            re = <any>new ComponentView({
-                component: component
-            });
-            if (typeof component.value == 'object')
+            re = new ComponentView(<any>parent);
+            re.component = component;
+            re.title.text.$el.text(component.name);
+            if (typeof component.value == 'object') {
+                let accordion = new SubAccordion({noSemanticInit: false});
                 _.each(component.value, val => {
-                    if (val instanceof CompModel)
-                        (<any>re).add(ComponentView.get(val));
+                    if (val instanceof CompModel) {
+                        let view = ComponentView.get(val);
+                        if (view instanceof View)
+                            (<ComponentView>re).content.add(view);
+                        else
+                            accordion.add(view.title).add(view.content);
+                    }
                 });
+                if (accordion.subviews().length)
+                    re.content.prepend(accordion);
+            }
             else
                 throw `View not defined for type '${component.type}'`;
         } else
@@ -62,6 +56,7 @@ export class ComponentView extends View implements Component<CompModel<any>> {
     }
 }
 
+// Primitive component view definitions
 ComponentView.register('string', <any>String);
 ComponentView.register('number', <any>Number);
 ComponentView.register('boolean', <any>Boolean);

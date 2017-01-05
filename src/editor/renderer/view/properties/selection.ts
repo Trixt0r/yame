@@ -1,3 +1,5 @@
+import { Bindable } from '../../../../core/renderer/view/bindable';
+import { Accordion, Group, SubAccordion } from '../../../../core/renderer/view/accordion';
 import { Component } from '../../../../core/common/component';
 import { ComponentView } from '../../../../core/renderer/view/component';
 import * as _ from 'underscore';
@@ -9,30 +11,42 @@ import LabeledInput from '../../../../core/renderer/view/composition/labeledInpu
 import EventBus from '../../../../core/common/eventbus';
 import Container from '../../interaction/transformation/container';
 
+import * as Select from '../../interaction/selection';
 
 let Pubsub: Backbone.Events = require('backbone').Events;
 
-export class Selection extends View {
+export class Selection extends Accordion {
+
+    private group: Group;
 
     constructor(private container: Container) {
-        super();
+        super({className: 'ui styled accordion'});
+
+        this.group = this.create('Properties');
+        this.group.active = true;
+        this.group.setTitle('Properties');
 
         let mapFrom = val => Math.round(val * 100);
         let mapTo = val => val / 100;
 
-        Pubsub.on('component:view', (view: View) => {
+        Pubsub.on('component:view', (view: View | ComponentView) => {
             let component: Component<any> = (<any>view).component;
             switch(component.name) {
                 case 'scale':
+                    // Disable scale for multiple selections
+                    if (Select.getSelectionContainer().selection.length > 1)
+                        (<ComponentView>view).disable();
                 case 'skew':
-                    view.subviews().forEach(v => {
-                        (<any>v).mapFrom = mapFrom;
-                        (<any>v).mapTo = mapTo;
+                    (<ComponentView>view).content.subviews().forEach((v: Bindable) => {
+                        v.mapFrom = mapFrom;
+                        v.mapTo = mapTo;
                     });
+                case 'position':
+                     (<ComponentView>view).active = true;
                 break;
                 case 'rotation':
-                    (<any>view).mapFrom = val => (360 + Math.round((<any>Math).degrees(val))) % 360;
-                    (<any>view).mapTo = val => (<any>Math).radians(val);
+                    (<Bindable>view).mapFrom = val => (360 + Math.round((<any>Math).degrees(val))) % 360;
+                    (<Bindable>view).mapTo = val => (<any>Math).radians(val);
                 break;
             }
         });
@@ -40,8 +54,15 @@ export class Selection extends View {
         let ctx = {};
 
         Pubsub.on('selection:select', (children: Entity[]) => {
-            this.empty();
-            this.add(<any>ComponentView.get(container.transformation));
+            this.group.content.empty();
+            if (!children.length) this.disable();
+            else this.group.enable();
+
+            let accordion = new SubAccordion({noSemanticInit: false});
+
+            let transformationView = <ComponentView>ComponentView.get(container.transformation);
+            accordion.add(transformationView.title);
+            accordion.add(transformationView.content);
             if (children.length == 1) {
                 let filtered = _.filter(children[0].components.value, comp => {
                     if (comp instanceof Component)
@@ -52,51 +73,32 @@ export class Selection extends View {
                     else
                         return false;
                 })
-                _.each(filtered, component =>
-                    {
-                    if (component instanceof Component)
-                        this.add(<any>ComponentView.get(component));
-                    });
+                _.each(filtered, component => {
+                    if (component instanceof Component) {
+                        let view = ComponentView.get(component);
+                        if (view instanceof Group)
+                            accordion.add([view.title, view.content]);
+                        else
+                            this.group.content.add(view);
+                    }
+                });
             }
-            // color.off('hide move', null, this);
-
-            // let applyColor = () => {
-            //     color.on('hide move', color => {
-            //         children.forEach((child: any) => {
-            //             child = <PIXI.Sprite>child;
-            //             child.alpha = color.getAlpha();
-            //             child.tint = parseInt(color.toHex(), 16);
-            //         });
-            //     }, this);
-            // };
-
-            // if (children.length === 1) {
-            //     scale.x.input.enable();
-            //     scale.y.input.enable();
-            //     let child = <PIXI.Sprite><any>children[0];
-            //     if ( typeof child.tint == 'number' ) {
-            //         this.add(color);
-            //         color.color = child.tint.toString(16);
-            //         color.alpha = child.alpha;
-            //         applyColor();
-            //     } else this.delete(color, false);
-            // }
-            // else {
-            //     let type = children[0].type;
-            //     let found = _.find(children, child => child.type != type);
-            //     if (found)
-            //         this.delete(color, false);
-            //     else {
-            //         this.add(color);
-            //         color.color = 'FFFFFF';
-            //         color.alpha = 1;
-            //         applyColor();
-            //     }
-            //     scale.x.input.disable();
-            //     scale.y.input.disable();
-            // }
-
+        if (accordion.subviews().length)
+            this.group.content.add(accordion);
+        if (children.length) {
+            this.group.active = true;
+            transformationView.active = true;
+        }
         });
+
+        Pubsub.on('selection:unselect', this.disable, this);
+        this.disable();
+    }
+
+    disable() {
+        if (this.group.title.$el.hasClass('active'))
+            this.group.title.$el.click();
+        this.group.disable();
     }
 }
 

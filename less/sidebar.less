@@ -1,7 +1,3 @@
-// @transition-speed: 300ms;
-// @transition-function: cubic-bezier(0, 2.15, 0.24, 0.15);
-// @transition-function: ease-out;
-
 .sidebar {
     min-width: 600px;
     height: 100%;
@@ -9,8 +5,7 @@
     position: absolute;
     right: 0;
     top: 0;
-    // transition: right @transition-speed;
-    // transition-timing-function: @transition-function;
+    overflow: scroll;
     ul {
         padding: 0;
     }
@@ -20,33 +15,9 @@
     a.glyphicon {
         float: right;
     }
-    // overflow: visible;
 
-    // .ui.accordion {
-    //     overflow: overlay;
-    //     width: auto;
-    // }
-
-    // div[data-tab="library"] > .accordion {
-    //     max-height: 50%;
-    //     &> .content {
-    //         min-height: 231px;
-    //         position: relative;
-    //         transition: padding @transition-speed @transition-function;
-    //         .panel-body-filler {
-    //             min-height: 200px;
-    //             border: 4px dashed #dadada;
-    //             border-radius: 4px;
-    //             color: #dadada;
-    //             pointer-events: none;
-    //             .panel-body-filler-text {
-    //                 top: 50%;
-    //                 margin-top: 55px;
-    //                 text-align: center;
-    //                 padding: 25px;
-    //                 pointer-events: none;
-    //             }
-    //         }
-    //     }
-    // }
+    .ui.accordion {
+        overflow: overlay;
+        width: 100%;
+    }
 }
