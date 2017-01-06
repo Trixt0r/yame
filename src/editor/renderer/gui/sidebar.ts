@@ -72,7 +72,7 @@ export class Sidebar extends View {
         this.layers = new Layers();
         this.lib = new Library();
 
-        this.add([this.layers, this.lib]);
+        this.add([this.lib, this.layers]);
     }
 
     dropSprite(file) {

@@ -1,4 +1,19 @@
-.ui.accordion {
+.accordion {
+    &.properties {
+        box-shadow: none !important;
+        margin-top: 0 !important;
+        &> .title {
+            padding: 0.5em 0 !important;
+        }
+
+        &> .content {
+            padding-top: 0 !important;
+            padding-bottom: 1em !important;
+             &:last-of-type {
+                 padding-bottom: 0.5em !important;
+             }
+        }
+    }
     .title.disabled {
         pointer-events: none;
     }

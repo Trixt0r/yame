@@ -371,10 +371,10 @@ export class Layers extends Accordion {
         // this.properties = new Properties(Selection.getSelectionContainer());
         this.properties = new SelectionView(Selection.getSelectionContainer());
 
-        var grid = new View({className: 'ui grid'});
+        var grid = new View({className: 'ui divided grid'});
         var left = new View({ className: 'eight wide column' });
         var right = new View({ className: 'eight wide column' });
-        grid.add([left, right]);
+        grid.add([left, new View({ className: 'ui vertical divider' }), right]);
         left.add(this.tree);
         right.add(this.properties);
 

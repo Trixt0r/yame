@@ -26,7 +26,7 @@ export class Library extends Accordion {
     constructor(options: any = {}) {
         super(_.extend({ className: 'ui styled accordion' }, options));
         this._directory = new Directory();
-        this._properties = new Accordion({ className: 'ui styled accordion' });
+        this._properties = new Accordion({ className: 'ui styled accordion properties' });
 
         this.propertiesGroup = this._properties.create('Properties');
         this.propertiesGroup.active = true;
@@ -35,7 +35,7 @@ export class Library extends Accordion {
         var grid = new View({className: 'ui grid'});
         var left = new View({ className: 'eight wide column' });
         var right = new View({ className: 'eight wide column' });
-        grid.add([left, right]);
+        grid.add([left, new View({ className: 'ui vertical divider' }), right]);
         left.add(this._directory);
         right.add(this._properties);
 
@@ -47,7 +47,10 @@ export class Library extends Accordion {
         let btn = new Button({className: 'ui button fluid'});
         btn.add(new View({el: '<p>Open folder</p>'}))
         group.addContent(btn);
-        this._directory.on('scan:done', () => group.content.delete(btn));
+        this._directory.on('scan:done', () => {
+            group.content.delete(btn);
+            grid.$el.addClass('divided');
+        });
         btn.on('click', () => {
             let id = _.uniqueId('opendir');
             ipcRenderer.send('showOpenDialog', { properties: ['openDirectory']}, id );

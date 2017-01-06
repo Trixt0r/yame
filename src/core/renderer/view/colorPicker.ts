@@ -21,11 +21,11 @@ export class ColorPicker extends View implements Component<Color> {
 
     constructor(options: Options = {title: 'color'}) {
         super(_.extend({
-            className: 'ui segment'
+            className: 'ui fluid labeled input component color'
         }, options));
 
         this._title = new View({
-            el: `<div class="ui tiny header">${options.title}</div>`
+            el: `<label class="ui label">${options.title}</label>`
         });
         this.add(this._title);
 
@@ -108,7 +108,7 @@ export class ColorPicker extends View implements Component<Color> {
 
         this._title.$el.prependTo(this.$el);
         this.spContainer = $('.sp-container').last();
-        this.$('.sp-replacer').addClass('fluid ui button');
+        this.$('.sp-replacer').addClass('ui fluid button');
 
         $('.sp-choose').removeClass()
             .addClass('ui icon positive tiny button attached right')

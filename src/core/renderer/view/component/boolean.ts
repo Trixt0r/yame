@@ -28,6 +28,5 @@ export class Boolean extends Checkbox implements Component<Bool> {
         this.eventDelimitter = '';
         this.component = options.component;
         this.bindTo(this.component, 'value', true);
-        this.css = 'margin: 1rem 0;';
     }
 }

@@ -1,3 +1,4 @@
+import { Point } from './component/point';
 import { Accordion, Group, SubAccordion } from './accordion';
 import { ColorPicker } from './colorPicker';
 import { View } from './abstract';
@@ -33,8 +34,13 @@ export class ComponentView extends Group implements Component<CompModel<any>> {
             re = new ComponentView(<any>parent);
             re.component = component;
             re.title.text.$el.text(component.name);
+        } else
+            re = new def({ parent: parent, component: component });
+
+
+        if (re instanceof Group) {
             if (typeof component.value == 'object') {
-                let accordion = new SubAccordion({noSemanticInit: false});
+                let accordion = new SubAccordion({className: 'accordion properties', noSemanticInit: false});
                 _.each(component.value, val => {
                     if (val instanceof CompModel) {
                         let view = ComponentView.get(val);
@@ -49,8 +55,7 @@ export class ComponentView extends Group implements Component<CompModel<any>> {
             }
             else
                 throw `View not defined for type '${component.type}'`;
-        } else
-            re = new def({ component: component });
+        }
         Pubsub.trigger('component:view', re);
         return re;
     }
@@ -60,4 +65,5 @@ export class ComponentView extends Group implements Component<CompModel<any>> {
 ComponentView.register('string', <any>String);
 ComponentView.register('number', <any>Number);
 ComponentView.register('boolean', <any>Boolean);
+ComponentView.register('point', <any>Point);
 ComponentView.register('color', <any>ColorPicker);

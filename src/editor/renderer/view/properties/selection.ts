@@ -1,3 +1,4 @@
+import { Point } from '../../../../core/common/component/point';
 import { Bindable } from '../../../../core/renderer/view/bindable';
 import { Accordion, Group, SubAccordion } from '../../../../core/renderer/view/accordion';
 import { Component } from '../../../../core/common/component';
@@ -20,7 +21,7 @@ export class Selection extends Accordion {
     private group: Group;
 
     constructor(private container: Container) {
-        super({className: 'ui styled accordion'});
+        super({className: 'ui styled accordion properties'});
 
         this.group = this.create('Properties');
         this.group.active = true;
@@ -33,9 +34,6 @@ export class Selection extends Accordion {
             let component: Component<any> = (<any>view).component;
             switch(component.name) {
                 case 'scale':
-                    // Disable scale for multiple selections
-                    if (Select.getSelectionContainer().selection.length > 1)
-                        (<ComponentView>view).disable();
                 case 'skew':
                     (<ComponentView>view).content.subviews().forEach((v: Bindable) => {
                         v.mapFrom = mapFrom;
@@ -43,12 +41,32 @@ export class Selection extends Accordion {
                     });
                 case 'position':
                      (<ComponentView>view).active = true;
+                     if (component.name == 'scale') {
+                        // Disable scale for multiple selections
+                        if (Select.getSelectionContainer().selection.length > 1) {
+                            (<ComponentView>view).disable();
+                            (<ComponentView>view).active = false;
+                        }
+                     }
                 break;
                 case 'rotation':
                     (<Bindable>view).mapFrom = val => (360 + Math.round((<any>Math).degrees(val))) % 360;
                     (<Bindable>view).mapTo = val => (<any>Math).radians(val);
+                    (<LabeledInput>view).label.$el.html('<i class="ui icon circle notched"></i>');
+                    component.off('change', null, this);
+                    component.on('change', val => (<LabeledInput>view).label.$('i').css('transform', `rotate(${val}rad)` ), this);
+                    (<LabeledInput>view).label.$('i').css('transform', `rotate(${component.value}rad)` );
+                    (<LabeledInput>view).label.$('i').css('margin', 0 );
                 break;
             }
+        // if (component instanceof Point) {
+        //     (<ComponentView>view).content.css = 'padding-left: 0.5em; padding-right: 0.5em;';
+        //     (<ComponentView>view).content.subviews().forEach((v: LabeledInput) => {
+        //         v.$el.removeClass('fluid');
+        //         v.css = 'width: 50%;';
+        //         v.input.css = 'width: 0';
+        //     });
+        // }
         });
 
         let ctx = {};
@@ -58,7 +76,7 @@ export class Selection extends Accordion {
             if (!children.length) this.disable();
             else this.group.enable();
 
-            let accordion = new SubAccordion({noSemanticInit: false});
+            let accordion = new SubAccordion({className: 'accordion properties', noSemanticInit: false});
 
             let transformationView = <ComponentView>ComponentView.get(container.transformation);
             accordion.add(transformationView.title);

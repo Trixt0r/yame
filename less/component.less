@@ -1,5 +1,39 @@
-.ui.labeled.input.component
+.ui.component {
+    margin-top: 1em;
+}
 
-.ui.styled.accordion.component {
+.accordion.properties + .ui.component {
+    margin-top: 0.5em;
+}
 
+.ui.labeled.input.component {
+    .ui.label, input {
+        padding: 5px;
+    }
+
+    &.color {
+        .sp-replacer {
+            background: transparent;
+            padding: 0;
+        }
+        .sp-preview {
+            height: 24px;
+        }
+    }
+}
+
+.content.component.point {
+    padding-left: 0.5em !important;
+    padding-right: 0.5em !important;
+
+    &> .ui.labeled.input.component {
+        width: 48%;
+        margin: 0;
+        &:first-child {
+            margin-right: 5px;
+        }
+        &> input {
+            width: 0;
+        }
+    }
 }
