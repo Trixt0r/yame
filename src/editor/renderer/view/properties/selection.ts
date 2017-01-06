@@ -59,28 +59,24 @@ export class Selection extends Accordion {
                     (<LabeledInput>view).label.$('i').css('margin', 0 );
                 break;
             }
-        // if (component instanceof Point) {
-        //     (<ComponentView>view).content.css = 'padding-left: 0.5em; padding-right: 0.5em;';
-        //     (<ComponentView>view).content.subviews().forEach((v: LabeledInput) => {
-        //         v.$el.removeClass('fluid');
-        //         v.css = 'width: 50%;';
-        //         v.input.css = 'width: 0';
-        //     });
-        // }
         });
 
         let ctx = {};
 
-        Pubsub.on('selection:select', (children: Entity[]) => {
-            this.group.content.empty();
-            if (!children.length) this.disable();
-            else this.group.enable();
 
-            let accordion = new SubAccordion({className: 'accordion properties', noSemanticInit: false});
+        let accordion = new SubAccordion({className: 'accordion properties', noSemanticInit: false});
+        this.group.content.add(accordion);
+        let selecting = false;
+
+        Pubsub.on('selection:select', (children: Entity[]) => {
+            selecting = true;
+            accordion.empty();
 
             let transformationView = <ComponentView>ComponentView.get(container.transformation);
-            accordion.add(transformationView.title);
-            accordion.add(transformationView.content);
+            accordion.add([transformationView.title, transformationView.content]);
+
+            if (!children.length) this.disable();
+            else this.group.enable();
             if (children.length == 1) {
                 let filtered = _.filter(children[0].components.value, comp => {
                     if (comp instanceof Component)
@@ -101,12 +97,13 @@ export class Selection extends Accordion {
                     }
                 });
             }
-        if (accordion.subviews().length)
-            this.group.content.add(accordion);
+
         if (children.length) {
-            this.group.active = true;
+            if (!this.group.content.$el.hasClass('active'))
+                this.group.active = true;
             transformationView.active = true;
         }
+        selecting = false;
         });
 
         Pubsub.on('selection:unselect', this.disable, this);
@@ -114,8 +111,7 @@ export class Selection extends Accordion {
     }
 
     disable() {
-        if (this.group.title.$el.hasClass('active'))
-            this.group.title.$el.click();
+        this.group.active = false;
         this.group.disable();
     }
 }

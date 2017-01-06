@@ -153,6 +153,7 @@ export function select(children: Entity[], silent: boolean = false) {
             selectionContainer.pivot.set(localBounds.width/2, localBounds.height/2);
             selectionContainer.position.x = topLeft.x + localBounds.width/2;
             selectionContainer.position.y = topLeft.y + localBounds.height/2;
+            selectionContainer.transformation.position.sync(selectionContainer.position);
             children.forEach(child => child.position = selectionContainer.toLocal(child.position, world.currentLayer) );
             // Calc the local bounds after re-positioning children and set the hitArea
             localBounds = selectionContainer.getLocalBounds();

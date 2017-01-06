@@ -125,7 +125,6 @@ export class Group {
      */
     set active(active: boolean) {
         if (active) {
-            this._parent.collapseAll();
             if (!this._title.$el.hasClass('active'))
                 this._title.$el.addClass('active');
             if (!this._content.$el.hasClass('active'))
@@ -134,6 +133,11 @@ export class Group {
             this._title.$el.removeClass('active');
             this._content.$el.removeClass('active');
         }
+    }
+
+    /** @return {boolean} Whether this group is active or not. */
+    get active(): boolean {
+        return this._title.$el.hasClass('active');
     }
 
     /**
