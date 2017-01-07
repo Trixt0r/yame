@@ -1,4 +1,4 @@
-import { String } from '../../../../common/component/string';
+import { File } from '../../../../common/component/file';
 import { Point } from '../../../../common/component/point';
 import { Color } from '../../../../common/component/color';
 import { Component, component } from '../../../../common/component';
@@ -15,14 +15,14 @@ export class SpriteRenderer extends Renderer {
 
     @component skew: Point;
 
-    @component texture: String;
+    @component texture: File;
 
     constructor(name: string, sprite: PIXI.Sprite) {
         super(name, sprite);
         sprite.anchor.set(0.5, 0.5);
         delete this._value.options;
         delete this._value.alpha;
-        this._value.texture = new String('texture', sprite.texture.baseTexture.imageUrl);
+        this._value.texture = new File('texture', sprite.texture.baseTexture.imageUrl);
         this._value.color = new Color('color', {
             alpha: sprite.alpha,
             hex: sprite.tint.toString(16)
@@ -37,15 +37,20 @@ export class SpriteRenderer extends Renderer {
         this.delegateOn('change:x', this.skew, 'change')
             .delegateOn('change:y', this.skew, 'change');
 
-        this.texture.on('change', texture => {
+        this.texture.on('change', (texture, old) => {
             this.sprite.texture = PIXI.Texture.fromImage(path.resolve(texture));
+            // Since texture get loaded asynchronously we also have to delegate
+            // the change event the same way
+            if (this.sprite.texture.baseTexture.isLoading)
+                this.sprite.texture.on('update', () => this.trigger('change', texture, old));
+            else
+                this.trigger('change', texture, old);
         });
 
         this.delegateOn('change:x', this.skew, 'change')
             .delegateOn('change:y', this.skew, 'change')
             .delegateOn('change:alpha', this.color, 'change')
-            .delegateOn('change:hex', this.color, 'change')
-            .delegateOn('change', this.texture);
+            .delegateOn('change:hex', this.color, 'change');
     }
 
     /** @inheritdoc */

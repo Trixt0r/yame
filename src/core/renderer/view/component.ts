@@ -7,6 +7,7 @@ import { Component as CompModel } from '../../common/component';
 import { Number } from './component/number';
 import { String } from './component/string';
 import { Boolean } from './component/boolean';
+import { File } from './component/file';
 
 import * as _ from 'underscore';
 
@@ -67,3 +68,4 @@ ComponentView.register('number', <any>Number);
 ComponentView.register('boolean', <any>Boolean);
 ComponentView.register('point', <any>Point);
 ComponentView.register('color', <any>ColorPicker);
+ComponentView.register('file', <any>File);
