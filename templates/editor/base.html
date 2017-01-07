@@ -28,7 +28,7 @@
                     <a class="item" data-tab="tab-settings"> Settings </a>
                 </div>
             </div>
-            <div class="twelve wide stretched column">
+            <div class="eight wide stretched column">
                 <div class="ui segment">
                     <div id="menu-file" class="ui tab active" data-tab="tab-file"><%= tpl('./editor/menu/file.html') %></div>
                     <div id="menu-settings" class="ui tab" data-tab="tab-settings"><%= tpl('./editor/menu/settings.html') %></div>
@@ -50,5 +50,6 @@
     </body>
     <script>
         $('#main-menu').sidebar('attach events', '#menu-button', 'show');
+        $('#main-menu .tabular.menu .item').tab();
     </script>
 </html>
