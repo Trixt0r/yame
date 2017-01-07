@@ -17,14 +17,14 @@ const Pubsub = require('backbone').Events;
 /**
  * A view for exploring the project directory.
  */
-export class Library extends Accordion {
+export class Library extends Group {
 
     private _properties: Accordion;
     private _directory: Directory;
     private propertiesGroup: Group;
 
     constructor(options: any = {}) {
-        super(_.extend({ className: 'ui styled accordion' }, options));
+        super();
         this._directory = new Directory();
         this._properties = new Accordion({ className: 'ui styled accordion properties' });
 
@@ -39,16 +39,16 @@ export class Library extends Accordion {
         left.add(this._directory);
         right.add(this._properties);
 
-        let group = this.create('Explorer');
-        group.active = true;
-        group.setTitle('Explorer');
-        group.setContent(grid);
+        // let group = this.create('Explorer');
+        this.setTitle('Explorer');
+        this.active = true;
+        this.setContent(grid);
 
         let btn = new Button({className: 'ui button fluid'});
         btn.add(new View({el: '<p>Open folder</p>'}))
-        group.addContent(btn);
+        this.addContent(btn);
         this._directory.on('scan:done', () => {
-            group.content.delete(btn);
+            this.content.delete(btn);
             grid.$el.addClass('divided');
         });
         btn.on('click', () => {
@@ -66,18 +66,7 @@ export class Library extends Accordion {
             Resource.fromPayload(payload)
                 .then(resource => this.updateProperties(resource));
         });
-        this.on('addedTo', () => this.updateSize());
-        $(window).resize(() => this.updateSize());
         this._properties.hide();
-    }
-
-    updateSize() {
-        // +48 because of segment padding & segment top margin
-        // let anchorSize = (this.anchor.$el.outerHeight(true) + 48) / window.innerHeight;
-        // let leftSize = 1 - anchorSize;
-        // let halfSize = (leftSize * .5) * 100;
-        // this.accordion.css = `max-height: ${halfSize}%;`;
-        // this._properties.css = `max-height: ${halfSize}%;`;
     }
 
     updateProperties(resource: Resource) {

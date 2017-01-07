@@ -66,10 +66,8 @@ export class Selection extends Accordion {
 
         let accordion = new SubAccordion({className: 'accordion properties', noSemanticInit: false});
         this.group.content.add(accordion);
-        let selecting = false;
 
         Pubsub.on('selection:select', (children: Entity[]) => {
-            selecting = true;
             accordion.empty();
 
             let transformationView = <ComponentView>ComponentView.get(container.transformation);
@@ -103,7 +101,6 @@ export class Selection extends Accordion {
                 this.group.active = true;
             transformationView.active = true;
         }
-        selecting = false;
         });
 
         Pubsub.on('selection:unselect', this.disable, this);

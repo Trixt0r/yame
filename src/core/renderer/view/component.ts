@@ -31,7 +31,7 @@ export class ComponentView extends Group implements Component<CompModel<any>> {
         let def = <any>ComponentView.definitions[type];
         let re: View | ComponentView;
         if (!def) {
-            re = new ComponentView(<any>parent);
+            re = new ComponentView();
             re.component = component;
             re.title.text.$el.text(component.name);
         } else

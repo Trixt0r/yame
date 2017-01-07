@@ -69,7 +69,7 @@ export class Group {
     /**
      * @param  {any} options If options.parent is not set, the panel will be attached to the body.
      */
-    constructor(private _parent: Accordion) {
+    constructor() {
         this._title = new Title();
         this._content = new Content();
     }
@@ -194,13 +194,24 @@ export class Accordion extends View {
      * @returns {Group} The group containing the added views.
      */
     create(title?: string, content?: View): Group {
-        var group = new Group(this);
+        var group = new Group();
         if (title) group.setTitle(title);
         if (content) group.setContent(content);
+        this.trigger('create:group', group);
+        this.addGroup(group);
+        return group;
+    }
+
+    /**
+     * Adds the given group to this accordion.
+     * @param {Group} group The group to add
+     * @chainable
+     */
+    addGroup(group: Group): Accordion {
         this._groups.push(group);
         this.add(group.title).add(group.content);
-        this.trigger('create:group', group);
-        return group;
+        this.trigger('add:group', group);
+        return this;
     }
 
     /**

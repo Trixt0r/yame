@@ -5,7 +5,7 @@ import EDITOR from './../../globals';
 import Button from '../../../../core/renderer/view/button';
 import Tree from '../../../../core/renderer/view/tree';
 import View from '../../../../core/renderer/view/abstract';
-import { Accordion, SubAccordion } from '../../../../core/renderer/view/accordion';
+import { Accordion, Group, SubAccordion } from '../../../../core/renderer/view/accordion';
 import Input from '../../../../core/renderer/view/input';
 import Map from '../../../../core/renderer/scene/map';
 import Layer from '../../../../core/renderer/scene/layer';
@@ -31,7 +31,7 @@ keyboardjs.on('ctrl', () => multiSelect = true, () => multiSelect = false);
 
 const Pubsub = require('backbone').Events;
 
-export class Layers extends Accordion {
+export class Layers extends Group {
 
     private tree: Tree;
     private treeData: any[];
@@ -39,7 +39,7 @@ export class Layers extends Accordion {
     private selecting: boolean;
 
     constructor(options: any = { }) {
-        super(_.extend({ className: 'ui styled accordion' }, options));
+        super();
 
         let layersCount = EDITOR.map.layers.length;
 
@@ -379,41 +379,25 @@ export class Layers extends Accordion {
         right.add(this.properties);
 
 
-        let group = this.create('Layers');
-        group.active = true;
-        group.setTitle('Layers');
-        group.setContent(grid);
+        this.active = true;
+        this.setTitle('Layers');
+        this.setContent(grid);
 
         let button = new Button({className: 'mini ui right floated positive button'});
         button.add(new Icon({iconName: 'plus icon'}));
+        button.css = 'margin-top: -5px';
+        button.$('i').css('margin', 0);
 
-        group.title.add(button);
+        this.title.add(button);
 
         button.on('click', e => {
             EDITOR.map.createLayer('layer-' + (layersCount++));
             e.stopPropagation();
         });
-        // layers.add(this.properties);
-
-        this.updateSize();
-        $(window).resize(() => this.updateSize());
-        this.on('change opening closing', this.updateSize, this);
 
         Pubsub.on('map:createLayer', (world: Map, layer) => this.addLayer(layer));
         Pubsub.on('map:removeLayer', (world: Map, layer: Layer) => this.tree.$el.jstree(true).delete_node('#' + layer.id) );
         Pubsub.on('map:currentLayer map:parse', (world: Map, layer: Layer) => this.tree.$el.jstree(true).select_node('#' + layer.id));
-    }
-
-    /**
-     * Updates the size of the accordion and property section.
-     */
-    updateSize() {
-        // +48 because of segment padding & segment top margin
-        // let anchorSize = (this.layers.anchor.$el.outerHeight(true) + 48) / window.innerHeight;
-        // let leftSize = 1 - anchorSize;
-        // let halfSize = (leftSize * .5) * 100;
-        // this.accordion.css = `max-height: ${halfSize}%;`;
-        // this.properties.css = `max-height: ${halfSize}%;`;
     }
 
     /**
@@ -425,7 +409,6 @@ export class Layers extends Accordion {
         this.tree.$el.jstree(true).create_node(null, layerControl.node);
         this.tree.$el.on('create_node.jstree', () => {
             this.tree.$el.jstree(true).select_node('#' + EDITOR.map.currentLayer.id);
-            this.updateSize();
         });
         layer.on('change:id', (id, old) => this.tree.$el.jstree(true).set_id(layerControl.node,  id));
     }
