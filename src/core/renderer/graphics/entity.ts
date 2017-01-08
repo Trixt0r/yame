@@ -8,6 +8,7 @@ import { Number } from '../../common/component/number';
 import { Point } from '../../common/component/point';
 
 import * as randomstring from 'randomstring';
+import * as _ from 'underscore';
 
 let tempPoint = new PIXI.Point();
 
@@ -45,10 +46,10 @@ class EntityComponents extends Component<any> implements EventBus {
     /** @inheritdoc */
     copy(): EntityComponents {
         let entity = new EntityComponents(this._name);
-        entity.value.transformation = this.transformation.copy();
-        entity.value.renderer = this.renderer.copy();
-        entity.value.layer = this.layer.copy();
-        entity.value.z = this.z.copy();
+        _.each(this._value, (value, key) => {
+            if (value instanceof Component)
+                entity.value[key] = value.copy();
+        });
         return entity;
     }
 }

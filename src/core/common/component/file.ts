@@ -12,11 +12,6 @@ export class File extends Component<string> {
     get type(): string {
         return 'file';
     }
-
-    /** @inheritdoc */
-    copy(): File {
-        return new File(this._name, this._value);
-    }
 }
 
 export default String;

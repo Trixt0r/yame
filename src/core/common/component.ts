@@ -101,10 +101,21 @@ export abstract class Component<T> extends EventBus {
     /**
      * Creates a copy of this component and returns it.
      *
-     * @abstract
      * @returns {Component<T>} A copy of this component.
      */
-    abstract copy(): Component<T>;
+    copy(): Component<T> {
+        let isNested = this._value && typeof this._value == 'object';
+        let copy = new (<any>this.constructor)(this._name, isNested ? { } : this._value);
+        // Populate all nested values into the new object
+        if (isNested)
+            _.each(<any>this._value, (value, key) => {
+                if (value instanceof Component)
+                    copy.value[key] = value.copy();
+                else
+                    copy.value[key] = value;
+            });
+        return copy;
+    }
 }
 
 export default Component;

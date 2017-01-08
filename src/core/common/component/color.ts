@@ -33,14 +33,6 @@ export class Color
     get type(): string {
         return 'color';
     }
-
-    /** @inheritdoc */
-    copy(): Color {
-        let copy = new Color(this._name);
-        copy.alpha = this.alpha.copy();
-        copy.hex = this.hex.copy();
-        return copy;
-    }
 }
 
 export default Color;

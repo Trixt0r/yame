@@ -29,15 +29,6 @@ export class Transformation
         return 'transformation';
     }
 
-    /** @inheritdoc */
-    copy(): Transformation {
-        let copy = new Transformation(this._name);
-        copy.value.position = this.position.copy();
-        copy.value.scale = this.scale.copy();
-        copy.value.rotation = this.rotation.copy();
-        return copy;
-    }
-
     /**
      * Applies all components to the given PIXI display object.
      *

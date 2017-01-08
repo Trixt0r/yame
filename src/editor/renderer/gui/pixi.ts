@@ -1,3 +1,5 @@
+import { Component } from '../../../core/common/component';
+import { String } from '../../../core/common/component/string';
 import EDITOR from '../globals';
 
 import Backbone = require('backbone');
@@ -22,6 +24,7 @@ import {SpriteResource} from '../entity/implementation/sprite/resource';
 
 
 import * as Promise from 'bluebird';
+import * as _ from 'underscore';
 
 // Set a converter for png files
 Resource.setConverter(['file:png', 'file:jpg'], (payload: Payload) => {

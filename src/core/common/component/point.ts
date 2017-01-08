@@ -32,14 +32,6 @@ export class Point
         return 'point';
     }
 
-    /** @inheritdoc */
-    copy(): Point {
-        let copy = new Point(this._name);
-        copy.value.x = this.x.copy();
-        copy.value.y = this.y.copy();
-        return copy;
-    }
-
     /**
      * Applies the current values to the given PIXI point.
      *

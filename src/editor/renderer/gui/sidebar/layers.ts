@@ -383,9 +383,8 @@ export class Layers extends Group {
         this.setTitle('Layers');
         this.setContent(grid);
 
-        let button = new Button({className: 'mini ui right floated positive button'});
+        let button = new Button({className: 'mini circular ui right floated icon button'});
         button.add(new Icon({iconName: 'plus icon'}));
-        button.css = 'margin-top: -5px';
         button.$('i').css('margin', 0);
 
         this.title.add(button);

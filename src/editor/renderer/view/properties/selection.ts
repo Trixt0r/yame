@@ -1,3 +1,5 @@
+import { Icon } from '../../../../core/renderer/view/icon';
+import { Button } from '../../../../core/renderer/view/button';
 import { Point } from '../../../../core/common/component/point';
 import { Bindable } from '../../../../core/renderer/view/bindable';
 import { Accordion, Group, SubAccordion } from '../../../../core/renderer/view/accordion';
@@ -26,6 +28,19 @@ export class Selection extends Accordion {
         this.group = this.create('Properties');
         this.group.active = true;
         this.group.setTitle('Properties');
+
+
+        let button = new Button({className: 'mini circular ui right floated icon button'});
+        button.add(new Icon({iconName: 'plus icon'}));
+        button.css = 'margin-top: -5px';
+        button.$('i').css('margin', 0);
+
+        this.group.title.add(button);
+
+        button.on('click', e => {
+            // EDITOR.map.createLayer('layer-' + (layersCount++));
+            e.stopPropagation();
+        });
 
         let mapFrom = val => Math.round(val * 100);
         let mapTo = val => val / 100;
@@ -68,10 +83,12 @@ export class Selection extends Accordion {
         this.group.content.add(accordion);
 
         Pubsub.on('selection:select', (children: Entity[]) => {
+            this.group.content.empty();
+            this.group.content.add(accordion);
             accordion.empty();
 
             let transformationView = <ComponentView>ComponentView.get(container.transformation);
-            accordion.add([transformationView.title, transformationView.content]);
+            accordion.addGroup(transformationView);
 
             if (!children.length) this.disable();
             else this.group.enable();
