@@ -1,10 +1,8 @@
 .vscode
-app
-css
+dist
 node_modules
 cache
 builds
 bundle
 out
 typings
-semantic.json
