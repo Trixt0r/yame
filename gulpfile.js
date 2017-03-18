@@ -138,6 +138,6 @@ gulp.task('electron-watch', function () {
   }, 5000);
 });
 
-gulp.task('dev', ['tsc-watch', 'less-watch', 'less-ng-watch', 'template-watch','electron-watch']);
 gulp.task('compile', ['tsc', 'less', 'template-copy', 'less-ng']);
 gulp.task('run', gulpSequence('compile', 'electron'));
+gulp.task('dev', ['compile', 'tsc-watch', 'less-watch', 'less-ng-watch', 'template-watch','electron-watch']);
