@@ -64,7 +64,7 @@ gulp.task('bundle', ['compile'], (done) => {
   destFolder = path.resolve(destFolder);
   // Copy all compiled files to the output folder
   gutil.log('Copying files...');
-  gulp.src('dist/**/*.js')
+  gulp.src('dist/**')
     .pipe(gulp.dest(path.resolve(destFolder, 'dist')));
 
   gulp.src('assets/**')
