@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+var clean = require('gulp-clean');
 const gutil = require('gulp-util');
 const shell = require('gulp-shell');
 const changed = require('gulp-changed');
@@ -10,9 +11,11 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const electron = require('electron-connect').server.create();
-// const electron = require('gulp-electron');
+const electronGulp = require('gulp-electron');
 
 var electronArgs = '';
+var bundleFolder = 'bundle';
+var buildsFolder = 'builds';
 
 
 // Simply run tsc
@@ -58,46 +61,77 @@ gulp.task('template-watch', () => gulp.watch('src/app/renderer/**/*.html', ['tem
 // Watch the less files
 gulp.task('less-watch', () => gulp.watch('src/less/**/*.less', ['less']));
 
+gulp.task('clean-bundle', () => {
+  gulp.src(argv.src === void 0 ? bundleFolder : argv.src, {read: false})
+    .pipe(clean({force: true}));
+});
 
-gulp.task('bundle', ['compile'], (done) => {
-  var destFolder = 'bundle';
-  destFolder = path.resolve(destFolder);
+gulp.task('clean-bundle-compile', cb => { gulpSequence('clean-bundle','compile', cb) });
+
+gulp.task('bundle', ['clean-bundle-compile'], (done) => {
+  bundleFolder = path.resolve(bundleFolder);
   // Copy all compiled files to the output folder
   gutil.log('Copying files...');
-  gulp.src('dist/**')
-    .pipe(gulp.dest(path.resolve(destFolder, 'dist')));
+  gulp.src('dist/**/*.js')
+    .pipe(gulp.dest(path.resolve(bundleFolder, 'dist')));
+  gulp.src('dist/**/*.css')
+    .pipe(gulp.dest(path.resolve(bundleFolder, 'dist')));
+  gulp.src('dist/**/*.html')
+    .pipe(gulp.dest(path.resolve(bundleFolder, 'dist')));
+
+  gulp.src('index.html')
+    .pipe(gulp.dest(path.resolve(bundleFolder)));
+  gulp.src('systemjs.config.js')
+    .pipe(gulp.dest(path.resolve(bundleFolder)));
 
   gulp.src('assets/**')
-    .pipe(gulp.dest(path.resolve(destFolder, 'assets')));
+    .pipe(gulp.dest(path.resolve(bundleFolder, 'assets')));
+
+  gulp.src('config.json')
+    .pipe(gulp.dest(path.resolve(bundleFolder)))
+    .pipe(through({objectMode: true}, (file, enc, cb) => {
+      gutil.log('Change config to production mode...');
+      var json = JSON.parse(file.contents.toString());
+      json.devMode = false;
+      json.debugMode = false;
+      file.contents = Buffer.from(JSON.stringify(json));
+      fs.writeFile(`${bundleFolder}/config.json`, JSON.stringify(json, null, 2), () => cb(null, file));
+    }))
 
   // Copy the package json and install all node modules
   gulp.src('package.json')
-    .pipe(gulp.dest(path.resolve(destFolder)))
+    .pipe(gulp.dest(path.resolve(bundleFolder)))
     // Remove all dev dependencies and install scripts
-    .pipe(through.obj((file, enc, cb) => {
+    .pipe(through({objectMode: true}, (file, enc, cb) => {
       gutil.log('Removing dev dependencies...');
       var json = JSON.parse(file.contents.toString());
       delete json.scripts;
       delete json.devDependencies;
       file.contents = Buffer.from(JSON.stringify(json));
-      fs.writeFile(`${destFolder}/package.json`, JSON.stringify(json, null, 2), () => cb(null, file));
+      fs.writeFile(`${bundleFolder}/package.json`, JSON.stringify(json, null, 2), () => cb(null, file));
     }))
     // Run npm install without dev deps and no install scripts
-    .pipe(through.obj((file, enc, cb) => {
+    .pipe(through({objectMode: true}, (file, enc, cb) => {
       gutil.log('Installing node modules...');
       var exec = require('child_process').exec;
-      exec(`cd ${destFolder} && npm install`, () => {
-        gutil.log(`App bundle created at ${destFolder}`);
+      exec(`cd ${bundleFolder} && npm install`, () => {
+        gutil.log(`App bundle created at ${bundleFolder}`);
         cb(null, file);
         done();
       });
     }));
 });
 
-gulp.task('package', ['bundle'], () => {
-  let srcFolder = argv.src === void 0 ? 'bundle' : argv.src;
+gulp.task('clean-builds', () => {
+  gulp.src(argv.out === void 0 ? buildsFolder : argv.out, {read: false})
+    .pipe(clean({force: true}));
+});
+gulp.task('clean-builds-bundle', cb => { gulpSequence('clean-builds','bundle', cb) });
+
+gulp.task('package', ['clean-builds-bundle'], () => {
+  let srcFolder = argv.src === void 0 ? bundleFolder : argv.src;
   let packageJson = require(path.resolve(srcFolder, 'package.json'));
-  let outFolder = argv.out === void 0 ? 'builds' : argv.out;
+  let outFolder = argv.out === void 0 ? buildsFolder : argv.out;
   let zip = !!(argv.zip);
   let platform = argv.platform;
   if (!platform)
@@ -106,12 +140,12 @@ gulp.task('package', ['bundle'], () => {
     platform = platform.split(',');
 
   gulp.src('bundle')
-    .pipe(electron({
+    .pipe(electronGulp({
       src: srcFolder,
       packageJson: packageJson,
       release: outFolder,
       cache: path.resolve(os.tmpdir(), 'yame-build', 'electron'),
-      version: 'v1.4.6',
+      version: 'v1.3.14',
       packaging: zip,
       token: argv.token,
       platforms: platform

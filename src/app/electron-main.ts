@@ -1,15 +1,15 @@
-// import * as process from 'process';
-// import * as fs from 'fs';
+import * as Promise from 'bluebird';
 import * as path from 'path';
-// import * as Promise from 'bluebird';
+import * as fs from 'fs';
+
+let readFile = Promise.promisify(fs.readFile);
+
 import {
   BrowserWindow,
   app,
   dialog,
   ipcMain
 } from 'electron';
-
-const client = require('electron-connect').client;
 
 /**
  * Handler for closing the application.
@@ -36,8 +36,22 @@ app.on('ready', function() {
   });
   window.setAutoHideMenuBar(true);
   window.setMenuBarVisibility(false);
-  window.loadURL(`file:///${path.resolve('index.html')}`);
-  client.create(window);
+  let appDir = path.resolve(__dirname, '..', '..');
+
+  window.loadURL(`file:///${path.resolve(appDir, 'index.html')}`);
+
+  readFile(path.resolve(appDir, 'config.json'))
+    .then((data) => {
+      try {
+        let json = JSON.parse(data.toString());
+        if (json.devMode === true) {
+          const client = require('electron-connect').client;
+          client.create(window);
+        }
+      } catch (e) {
+        console.error('Could not parse config file');
+      }
+    });
 });
 
 app.on('window-all-closed', () => app.quit());
