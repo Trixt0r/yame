@@ -29,10 +29,6 @@ app.on('ready', function() {
     height: 720,
     minWidth: 800,
     minHeight: 600,
-    // Disable node integration since we use system js on the renderer
-    webPreferences: {
-      nodeIntegration: false
-    }
   });
   window.setAutoHideMenuBar(true);
   window.setMenuBarVisibility(false);

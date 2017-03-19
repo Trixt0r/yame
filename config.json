@@ -1,4 +1,4 @@
 {
-  "devMode": false,
-  "debugMode": false
+  "devMode": true,
+  "debugMode": true
 }

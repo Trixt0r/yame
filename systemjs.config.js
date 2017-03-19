@@ -24,6 +24,13 @@
       '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
 
+      'electron': '@node/electron',
+      'fs': '@node/fs',
+      'path': '@node/path',
+      'os': '@node/os',
+      'lodash': '@node/lodash',
+      'bluebird': '@node/bluebird',
+
       // other libraries
       'angular-resizable-element': 'npm:angular-resizable-element/dist/umd/angular-resizable-element.js',
       'jquery':                    'npm:jquery/dist/jquery.js',
