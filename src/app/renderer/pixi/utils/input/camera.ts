@@ -21,9 +21,9 @@ export default function init (renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer
     let data = renderer.plugins.interaction.eventData.data;
     camera.targetPosition = data.getLocalPosition(target.parent, null, {x: e.clientX, y: e.clientY});
     if (e.wheelDelta > 0)
-        camera.zoom = camera.maxZoom;
+      camera.zoom = camera.maxZoom;
     else if (e.wheelDelta < 0)
-        camera.zoom = camera.minZoom;
+      camera.zoom = camera.minZoom;
     }, false);
 
   let prevPos: PIXI.Point = null;
