@@ -3,5 +3,36 @@
     (mousedown)="onMouseDown($event)"
     (window:mousemove)="onMouseMove($event)"
     (window:mouseup)="onMouseUp($event)">
+
 </div>
-Sidebar
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="layersHeading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" href="#layers" aria-expanded="true" aria-controls="layers">
+          Layers
+        </a>
+      </h4>
+    </div>
+    <div id="layers" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="layersHeading">
+      <div class="panel-body">
+        <!-- TODO: add a layer view here -->
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="filesHeading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" href="#files" aria-expanded="true" aria-controls="files">
+          Files
+        </a>
+      </h4>
+    </div>
+    <div id="files" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="filesHeading">
+      <div class="panel-body">
+        <!-- TODO: add a files view here -->
+      </div>
+    </div>
+  </div>
+</div>
