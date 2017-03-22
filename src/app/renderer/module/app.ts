@@ -1,18 +1,18 @@
+import { PixiService } from './pixi/service';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { PixiModule } from './pixi';
 
 import { AppComponent } from '../component/app';
-import { PixiComponent } from '../component/pixi';
 import { SidebarComponent } from '../component/sidebar';
-import { ResizableModule } from 'angular-resizable-element';
 
 @NgModule({
-  imports: [BrowserModule, ResizableModule],
+  imports: [BrowserModule, PixiModule],
   declarations: [
     AppComponent,
-    PixiComponent,
     SidebarComponent,
   ],
-  bootstrap: [AppComponent]
+  providers: [PixiService],
+  bootstrap: [AppComponent],
 })
 export class AppModule {}

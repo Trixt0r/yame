@@ -36,7 +36,7 @@ app.on('ready', function() {
 
   window.loadURL(`file:///${path.resolve(appDir, 'index.html')}`);
 
-  readFile(path.resolve(appDir, 'config.json'))
+  readFile(path.resolve(appDir, 'config.json'))//
     .then((data) => {
       try {
         let json = JSON.parse(data.toString());

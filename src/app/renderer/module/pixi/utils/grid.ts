@@ -1,4 +1,4 @@
-import EventEmitter from '../../../common/event-emitter';
+import EventEmitter from '../../../../common/event-emitter';
 import * as PIXI from 'pixi.js';
 
 /**

@@ -32,7 +32,6 @@
       'bluebird': '@node/bluebird',
 
       // other libraries
-      'angular-resizable-element': 'npm:angular-resizable-element/dist/umd/angular-resizable-element.js',
       'jquery':                    'npm:jquery/dist/jquery.js',
       'pixi.js':                   'npm:pixi.js/dist/pixi.js',
       'eventemitter3':             'npm:eventemitter3/index.js',

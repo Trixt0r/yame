@@ -1,12 +1,11 @@
-import EventEmitter from '../../../common/event-emitter';
-import PubSub from '../../../common/pubsub';
+import EventEmitter from '../../../../common/event-emitter';
 
 import * as PIXI from 'pixi.js';
 
 /**
  * A camera is responsible for updating the users view correctly.
  */
-export default class Camera extends EventEmitter {
+export class Camera extends EventEmitter {
 
   private _zoom: number;
   private _container: PIXI.DisplayObject;
@@ -79,7 +78,6 @@ export default class Camera extends EventEmitter {
       this._container.position.x = -(this.localTargetPosition.x * this._zoom) + this.targetPosition.x;
       this._container.position.y = -(this.localTargetPosition.y * this._zoom) + this.targetPosition.y;
       this.emit('update');
-      PubSub.emit('camera:update', this);
     }
   }
 
@@ -134,4 +132,18 @@ export default class Camera extends EventEmitter {
   get position(): PIXI.Point {
     return this._container.position;
   }
+
+  /**
+   * Sets the position of this camera, i.e. shifts the container this camera is attached to.
+   * @param  {number} value
+   * @returns {void}
+   */
+  set position(pos: PIXI.Point) {
+    if (this.position.x != pos.x || this.position.y != pos.y) {
+      this._container.position.set(pos.x, pos.y);
+      this.emit('update');
+    }
+  }
 }
+
+export default Camera;
