@@ -113,4 +113,8 @@ export abstract class ResizeableComponent extends AbstractComponent {
     if (this.maxVal >= 0) newVal = Math.min(newVal, this.maxVal);
     return newVal;
   }
+
+  ngAfterViewInit() {
+    this.updateValue(this.clampValue( parseFloat(this.$el.css(this.property))));
+  }
 }

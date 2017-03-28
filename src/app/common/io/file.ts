@@ -1,12 +1,13 @@
 import * as Promise from 'bluebird';
 import * as fs from 'fs';
+import * as path from 'path';
 
 require('./fs');
 
 /**
  * Defines a file.
  */
-export default class File {
+export class File {
 
   /** @type {number} lastModified Thhe last modification timestamp. */
   lastModified: number;
@@ -22,6 +23,15 @@ export default class File {
 
   /** @type {string} type The file type. */
   type: string;
+
+  constructor(filePath?: string) {
+    if (filePath) {
+      this.path = filePath;
+      let ext = path.extname(this.path);
+      this.type = ext.replace('.', '');
+      this.name = path.basename(this.path);
+    }
+  }
 
   /**
    * @returns {*} A JSON representation of this file.
@@ -54,3 +64,5 @@ export default class File {
     return fs.writeFileAsync(this.path, data);
   }
 }
+
+export default File;

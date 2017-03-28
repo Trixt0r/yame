@@ -1,0 +1,16 @@
+<ngb-panel title="Assets">
+  <template ngbPanelContent>
+    <button *ngIf="!nodes.length" class="btn btn-primary btn-block" (click)="openFolder()">
+      <i class="fa fa-folder"></i>
+      Open folder
+    </button>
+    <div *ngIf="nodes.length"  class="row">
+      <div class="col">
+        <tree-root [nodes]="nodes"></tree-root>
+      </div>
+      <div class="col">
+        Test
+      </div>
+    </div>
+  </template>
+</ngb-panel>

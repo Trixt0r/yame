@@ -36,6 +36,8 @@
       'pixi.js':                   'npm:pixi.js/dist/pixi.js',
       'eventemitter3':             'npm:eventemitter3/index.js',
       'rxjs':                      'npm:rxjs',
+      'angular-tree-component':    'npm:angular-tree-component/dist/angular-tree-component.umd.js',
+      '@ng-bootstrap/ng-bootstrap': 'npm:@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js',
       'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js',
     },
     // packages tells the System loader how to load when no filename and/or no extension

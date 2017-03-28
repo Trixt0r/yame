@@ -1,15 +1,11 @@
 import * as Promise from 'bluebird';
 import * as path from 'path';
 import * as fs from 'fs';
+import { BrowserWindow, app } from 'electron';
+import { File } from './common/io/file';
+import initIpc from './browser/ipc';
 
 let readFile = Promise.promisify(fs.readFile);
-
-import {
-  BrowserWindow,
-  app,
-  dialog,
-  ipcMain
-} from 'electron';
 
 /**
  * Handler for closing the application.
@@ -22,32 +18,36 @@ function quit() {
 
 app.commandLine.appendSwitch('disable-http-cache');
 
-app.on('ready', function() {
-  let window = new BrowserWindow({
-    backgroundColor: '#272B30',
-    width: 1280,
-    height: 720,
-    minWidth: 800,
-    minHeight: 600,
-  });
-  window.setAutoHideMenuBar(true);
-  window.setMenuBarVisibility(false);
-  let appDir = path.resolve(__dirname, '..', '..');
+app.on('ready', () => {
+  initIpc()
+    .finally(() => {
+      let window = new BrowserWindow({
+        backgroundColor: '#272B30',
+        width: 1280,
+        height: 720,
+        minWidth: 800,
+        minHeight: 600,
+      });
+      window.setAutoHideMenuBar(true);
+      window.setMenuBarVisibility(false);
+      let appDir = path.resolve(__dirname, '..', '..');
 
-  window.loadURL(`file:///${path.resolve(appDir, 'index.html')}`);
+      window.loadURL(`file:///${path.resolve(appDir, 'index.html')}`);
 
-  readFile(path.resolve(appDir, 'config.json'))//
-    .then((data) => {
-      try {
-        let json = JSON.parse(data.toString());
-        if (json.devMode === true) {
-          const client = require('electron-connect').client;
-          client.create(window);
-        }
-      } catch (e) {
-        console.error('Could not parse config file');
-      }
-    });
+      let file = new File(path.resolve(appDir, 'config.json'));
+      file.read()
+        .then((data) => {
+          try {
+            let json = JSON.parse(data.toString());
+            if (json.devMode === true) {
+              const client = require('electron-connect').client;
+              client.create(window);
+            }
+          } catch (e) {
+            console.error('Could not parse config file');
+          }
+        });
+      });
 });
 
 app.on('window-all-closed', () => app.quit());

@@ -1,3 +1,5 @@
+import { MainComponent } from './main';
+import { WorkspaceComponent } from './workspace';
 import { PixiService } from '../module/pixi/service';
 import { SidebarComponent } from './sidebar';
 import { PixiComponent } from '../module/pixi/component';
@@ -18,7 +20,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 export class AppComponent {
   name = 'YAME';
 
-  @ViewChild('pixi') pixi: PixiComponent;
+  @ViewChild('main') main: MainComponent;
   @ViewChild('sidebar') sidebar: SidebarComponent;
 
   constructor(public ref: ElementRef, private pixiService: PixiService) { }
@@ -26,6 +28,8 @@ export class AppComponent {
   /** @inheritdoc */
   ngAfterViewInit() {
     this.pixiService.initGrid().attachCamera();
+    this.sidebar.updateValue(window.innerWidth * .75);
+    this.main.workspace.updateValue(window.innerHeight * .75);
   }
 
   /**
@@ -33,7 +37,6 @@ export class AppComponent {
    * @param {number} left
    */
   sidebarUpdate(left: number): void {
-    this.pixi.$el.css('width', left);
-    this.pixi.onResize();
+    this.main.sidebarUpdate(left);
   }
 }

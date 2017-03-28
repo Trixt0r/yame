@@ -24,9 +24,10 @@ export class Directory extends EventEmitter {
    * Recursively scans this directory for files and sub directories.
    *
    * @param {boolean} [force=false]
+   * @param {boolean} [deep=true]
    * @returns {Promise<any>}
    */
-  scan(force: boolean = false): Promise<any> {
+  scan(force: boolean = false, deep: boolean = true): Promise<any> {
     // Skip scanning if we already scanned
     if (this.scanned && !force)
       return Promise.resolve();
@@ -45,15 +46,12 @@ export class Directory extends EventEmitter {
               this._children.push(dir);
               this.emit('scan:dir', dir);
               dir.once('scan:done', () => this.emit('scan:dir:done', dir) );
-              scans.push(dir.scan());
+              if (deep)
+                scans.push(dir.scan());
           }
           else if (stats.isFile() ){
-              let file = new File();
+              let file = new File(abs);
               this._children.push(file);
-              file.path = abs;
-              let ext = path.extname(filename);
-              file.type = ext.replace('.', '');
-              file.name = filename;
               this.emit('scan:file', file);
           }
         });

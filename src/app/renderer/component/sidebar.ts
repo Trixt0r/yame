@@ -1,20 +1,31 @@
+import { ViewChild } from '@angular/core';
+import { SidebarDirective } from './sidebar/directive';
+import { SidebarService } from '../service/sidebar';
 import { ResizeableComponent } from './utils/resizable';
-import { Component, ElementRef, HostListener } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 
 @Component({
   moduleId: module.id,
   selector: 'sidebar',
   templateUrl: 'sidebar.html',
   styleUrls: ['sidebar.css'],
+  providers: [SidebarService]
 })
 export class SidebarComponent extends ResizeableComponent {
 
-  constructor(public ref: ElementRef) {
-    super(ref, 'left', 640, window.innerWidth - 300);
+  @ViewChild(SidebarDirective) sidebarHost: SidebarDirective;
+
+  constructor(public ref: ElementRef, private service: SidebarService) {
+    super(ref, 'left', 640, window.innerWidth - 400);
   }
 
+  /** @override */
   onResize() {
-    this.maxVal = window.innerWidth - 300;
+    this.maxVal = window.innerWidth - 400;
     super.onResize();
+  }
+
+  loadComponents() {
+
   }
 }
