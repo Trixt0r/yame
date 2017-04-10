@@ -27,6 +27,7 @@ export class MainComponent extends AbstractComponent {
     this.$el.css('width', left);
     this.pixi.$el.css('width', left);
     this.pixi.onResize();
+    this.workspace.onResize();
   }
 
   sizeUpdated(top: number): void {

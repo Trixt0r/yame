@@ -1,2 +1,2 @@
 <main #main></main>
-<sidebar #sidebar (sizeUpdated)="sidebarUpdate($event)"></sidebar>
+<sidebar #sidebar  [property]="'left'" [minVal]="720" (sizeUpdated)="sidebarUpdate($event)"></sidebar>

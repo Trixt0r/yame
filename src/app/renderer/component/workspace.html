@@ -4,3 +4,29 @@
   (window:mousemove)="onMouseMove($event)"
   (window:mouseup)="onMouseUp($event)">
 </div>
+
+<button *ngIf="!nodes" class="btn btn-primary btn-block" (click)="openFolder()">
+  <i class="fa fa-folder"></i>
+  Open Folder
+</button>
+<div #row class="row">
+  <div #leftCol class="col">
+    <tree-root #tree (onActivate)="select($event)" *ngIf="nodes" [nodes]="nodes"></tree-root>
+  </div>
+  <assets #midCol class="col" [files]="selection" [path]="selectedPath" (select)="assetSelected($event)" (breadcrumb)="breadcrumbClick($event)"></assets>
+  <!--<div #midCol class="col">
+    <div style="margin: 0;" class="row" *ngIf="selection">
+      <template ngFor let-file [ngForOf]="selection">
+        <div class="col-3 text-center" *ngIf="!file.children">
+          <img width="50px" height="50px" [src]="sanitizeUrl(file.path)" />
+          <div>
+            {{ file.name }}
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>-->
+  <!--<div #rightCol class="col"></div>-->
+  <resizable #resizerLeft class="left" [property]="'left'" [maxVal]="'500'" [minVal]="'200'" (sizeUpdated)="updateColumnsFromLeft($event)"></resizable>
+  <!--<resizable #resizerRight class="right" [property]="'left'" [maxVal]="'900'" [minVal]="'500'" (sizeUpdated)="updateColumnsFromRight($event)"></resizable>-->
+</div>

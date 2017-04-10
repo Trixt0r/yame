@@ -1,0 +1,48 @@
+<ol class="breadcrumb" *ngIf="files">
+  <li class="breadcrumb-item" *ngFor="let dir of path; let i=index">
+    <a *ngIf="i < path.length - 1" href="javascript:void(0)" (click)="breadcrumbClick($event, i)">{{ dir }}</a>
+    <a *ngIf="i === path.length - 1">{{ dir }}</a>
+  </li>
+</ol>
+
+<div class="d-flex flex-wrap align-content-start" *ngIf="files">
+  <template ngFor let-file [ngForOf]="files">
+    <div [class]="(selection == file ? 'selected ' : '') + 'p-2 text-center'" (click)="click($event, file)">
+      <i class="fa fa-folder fa-3x" *ngIf="file.children"></i>
+      <img [src]="sanitize(file.path)" *ngIf="!file.children" />
+      <div>
+        {{ file.name }}
+      </div>
+    </div>
+  </template>
+</div>
+
+<div class="options">
+  <div class="row">
+    <div class="col">
+    <div class="btn-group btn-group-sm" role="group" aria-label="..." *ngIf="selection">
+      <button type="button" class="btn btn-secondary">
+        <i class="fa fa-info"></i>
+      </button>
+      <button type="button" class="btn btn-secondary">
+        <i class="fa fa-edit"></i>
+      </button>
+      <button type="button" class="btn btn-secondary">
+        <i class="fa fa-clone"></i>
+      </button>
+    </div>
+    </div>
+
+    <div class="col pull-right" *ngIf="files">
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search for..." (keyup)="filterFiles($event)">
+        <span class="input-group-btn">
+          <button class="btn btn-secondary btn-sm" type="button">
+            <i class="fa fa-search"></i>
+          </button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>

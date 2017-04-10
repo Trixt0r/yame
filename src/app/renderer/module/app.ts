@@ -1,3 +1,5 @@
+import { AssetsComponent } from '../component/workspace/assets';
+import { ResizeableComponent } from '../component/utils/resizable';
 import { MainComponent } from '../component/main';
 import { WorkspaceComponent } from '../component/workspace';
 import { SidebarDirective } from '../component/sidebar/directive';
@@ -15,9 +17,11 @@ import { SidebarComponent } from '../component/sidebar';
   imports: [BrowserModule, PixiModule, TreeModule, NgbModule.forRoot()],
   declarations: [
     AppComponent,
+    ResizeableComponent,
     MainComponent,
     SidebarComponent,
     WorkspaceComponent,
+    AssetsComponent,
     SidebarDirective
   ],
   providers: [PixiService],

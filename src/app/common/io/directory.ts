@@ -2,9 +2,15 @@ import * as Promise from 'bluebird';
 import * as path from 'path';
 import * as fs from 'fs';
 import EventEmitter from '../event-emitter';
-import File from './file';
+import { File, FileJSON } from './file';
 
 require('./fs');
+
+export interface DirectoryJSON {
+  path: string;
+  name: string;
+  children: Array<FileJSON|DirectoryJSON>
+}
 
 export class Directory extends EventEmitter {
 
@@ -99,7 +105,7 @@ export class Directory extends EventEmitter {
   /**
    * @returns {*} A JSON representation of this directory.
    */
-  toJSON(): any {
+  toJSON(): DirectoryJSON {
     return {
       path: this.path,
       name: path.basename(this.path),

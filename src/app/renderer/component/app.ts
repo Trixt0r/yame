@@ -28,8 +28,8 @@ export class AppComponent {
   /** @inheritdoc */
   ngAfterViewInit() {
     this.pixiService.initGrid().attachCamera();
-    this.sidebar.updateValue(window.innerWidth * .75);
-    this.main.workspace.updateValue(window.innerHeight * .75);
+    this.sidebar.updateValue(this.sidebar.clampValue(window.innerWidth * .75));
+    this.main.workspace.updateValue(this.main.workspace.clampValue(window.innerHeight * .75));
   }
 
   /**

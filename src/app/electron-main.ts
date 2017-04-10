@@ -19,6 +19,7 @@ function quit() {
 app.commandLine.appendSwitch('disable-http-cache');
 
 app.on('ready', () => {
+  console.log();
   initIpc()
     .finally(() => {
       let window = new BrowserWindow({

@@ -1,0 +1,68 @@
+@max-width: 100px;
+@max-height: 100px;
+@options-height: 2.15em;
+@bc-height: 25px;
+
+:host {
+  &:extend(div);
+  padding: 0 !important;
+  position: rela
+}
+
+.d-flex {
+  overflow-y: auto;
+  user-select: none;
+  max-height: calc(~'100% - (@{options-height} + @{bc-height})');
+  .p-2 {
+    position: relative;
+    transition: background .25s ease-out;
+    &:hover {
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.selected {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    img {
+      width: auto;
+      max-width: @max-width;
+      height: @max-height;
+    }
+    div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: @max-width;
+    }
+  }
+}
+
+.breadcrumb {
+  width: 100%;
+  background: #191c1d;
+  padding: 0;
+  height: @bc-height;
+  margin-bottom: 0;
+  border-radius: 0;
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+  }
+}
+
+.options {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: @options-height;
+  background: #191c1d;
+
+  input {
+    background: none;
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+    color: white;
+  }
+}

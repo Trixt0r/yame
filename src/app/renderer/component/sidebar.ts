@@ -16,7 +16,8 @@ export class SidebarComponent extends ResizeableComponent {
   @ViewChild(SidebarDirective) sidebarHost: SidebarDirective;
 
   constructor(public ref: ElementRef, private service: SidebarService) {
-    super(ref, 'left', 640, window.innerWidth - 400);
+    super(ref);
+    this.maxVal = window.innerWidth - 400;
   }
 
   /** @override */

@@ -1,5 +1,5 @@
 import { AbstractComponent } from '../abstract';
-import { Component, ElementRef, EventEmitter, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, Input } from '@angular/core';
 
 /**
  * Abstract component which is able to handle resizes.
@@ -10,7 +10,14 @@ import { Component, ElementRef, EventEmitter, Output } from '@angular/core';
  * @abstract
  * @class ResizeableComponent
  */
-export abstract class ResizeableComponent extends AbstractComponent {
+@Component({
+  moduleId: module.id,
+  templateUrl: 'resizable.html',
+  selector: 'resizable',
+  providers: null,
+  styles: ['div { witdh: 100%; height: 100%; }']
+})
+export class ResizeableComponent extends AbstractComponent {
 
   /**
    * @protected
@@ -20,17 +27,14 @@ export abstract class ResizeableComponent extends AbstractComponent {
 
   /**
    * @private
-   * @type {boolean} isVer Whether the property has to be calculated clientY.
-   */
-  private isVer: boolean;
-
-  /**
-   * @private
    * @type {number} number The property value on click.
    */
   private propVal: number;
 
   @Output() sizeUpdated = new EventEmitter();
+  @Input() property: string;
+  @Input() minVal: number;
+  @Input() maxVal: number;
 
   /**
    * Creates an instance of ResizeableComponent.
@@ -40,12 +44,16 @@ export abstract class ResizeableComponent extends AbstractComponent {
    * @param {number} [minVal=-1] The minimal value, -1 for no minVal
    * @param {number} [maxVal=-1] The maximum value, -1 for no maxVal
    */
-  constructor(protected ref: ElementRef,
-              protected property: string,
-              protected minVal: number = -1,
-              protected maxVal: number = -1) {
+  constructor(protected ref: ElementRef) {
     super(ref);
-    this.isVer = ['top', 'bottom', 'height'].indexOf(property) >= 0;
+  }
+
+  /**
+   * @private
+   * @type {boolean} isVer Whether the property has to be calculated clientY.
+   */
+  private get isVer(): boolean {
+    return ['top', 'bottom', 'height'].indexOf(this.property) >= 0;
   }
 
   /**

@@ -4,6 +4,14 @@ import * as path from 'path';
 
 require('./fs');
 
+export interface FileJSON {
+  lastModified: number;
+  name: string;
+  path: string;
+  size: number;
+  type: string;
+}
+
 /**
  * Defines a file.
  */
@@ -36,7 +44,7 @@ export class File {
   /**
    * @returns {*} A JSON representation of this file.
    */
-  toJSON(): any {
+  toJSON(): FileJSON {
     return {
       lastModified: this.lastModified,
       name: this.name,

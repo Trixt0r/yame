@@ -1,2 +1,2 @@
 <pixi #pixi></pixi>
-<workspace #workspace (sizeUpdated)="sizeUpdated($event)"></workspace>
+<workspace #workspace [property]="'top'" (sizeUpdated)="sizeUpdated($event)" [minVal]="100"></workspace>
