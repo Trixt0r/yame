@@ -1,3 +1,4 @@
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AssetsComponent } from '../component/workspace/assets';
 import { ResizeableComponent } from '../component/utils/resizable';
 import { MainComponent } from '../component/main';
@@ -14,7 +15,7 @@ import { AppComponent } from '../component/app';
 import { SidebarComponent } from '../component/sidebar';
 
 @NgModule({
-  imports: [BrowserModule, PixiModule, TreeModule, NgbModule.forRoot()],
+  imports: [BrowserModule, BrowserAnimationsModule, PixiModule, TreeModule, NgbModule.forRoot()],
   declarations: [
     AppComponent,
     ResizeableComponent,

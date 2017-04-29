@@ -66,3 +66,22 @@
     color: white;
   }
 }
+
+.btn {
+  transition: background .1s ease-out;
+  transition: color .1s ease-out;
+  &:active, &:focus { box-shadow: none; }
+  &:hover { background: darkgray }
+  &:active, &.active { background: #595959; color: white; }
+  border-radius: 0;
+  border: 1px solid black;
+  background: lightgray;
+  cursor: pointer;
+}
+
+#search {
+  position: absolute;
+  width: calc(~'100% - 31px');
+  padding: 10px;
+  top: 4px;
+}

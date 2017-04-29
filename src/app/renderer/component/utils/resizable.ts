@@ -1,5 +1,5 @@
 import { AbstractComponent } from '../abstract';
-import { Component, ElementRef, EventEmitter, Output, Input } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
 
 /**
  * Abstract component which is able to handle resizes.
@@ -17,7 +17,7 @@ import { Component, ElementRef, EventEmitter, Output, Input } from '@angular/cor
   providers: null,
   styles: ['div { witdh: 100%; height: 100%; }']
 })
-export class ResizeableComponent extends AbstractComponent {
+export class ResizeableComponent extends AbstractComponent implements OnChanges {
 
   /**
    * @protected
@@ -30,6 +30,12 @@ export class ResizeableComponent extends AbstractComponent {
    * @type {number} number The property value on click.
    */
   private propVal: number;
+
+  /**
+   * @private
+   * @type {boolean} isVer Whether the property has to be calculated clientY.
+   */
+  private isVer: boolean = false;
 
   @Output() sizeUpdated = new EventEmitter();
   @Input() property: string;
@@ -48,12 +54,10 @@ export class ResizeableComponent extends AbstractComponent {
     super(ref);
   }
 
-  /**
-   * @private
-   * @type {boolean} isVer Whether the property has to be calculated clientY.
-   */
-  private get isVer(): boolean {
-    return ['top', 'bottom', 'height'].indexOf(this.property) >= 0;
+  /** @inheritdoc */
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.property)
+      this.isVer = ['top', 'bottom', 'height'].indexOf(this.property) >= 0;
   }
 
   /**
@@ -123,6 +127,6 @@ export class ResizeableComponent extends AbstractComponent {
   }
 
   ngAfterViewInit() {
-    this.updateValue(this.clampValue( parseFloat(this.$el.css(this.property))));
+    setTimeout(() => this.updateValue(this.clampValue( parseFloat(this.$el.css(this.property)))));
   }
 }

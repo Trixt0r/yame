@@ -23,6 +23,9 @@
       '@angular/http': 'npm:@angular/http/bundles/http.umd.js',
       '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
+      '@angular/animations': 'npm:@angular/animations/bundles/animations.umd.js',
+      '@angular/animations/browser': 'npm:@angular/animations/bundles/animations-browser.umd.js',
+      '@angular/platform-browser/animations': 'npm:@angular/platform-browser/bundles/platform-browser-animations.umd.js',
 
       'electron': '@node/electron',
       'fs': '@node/fs',
@@ -34,6 +37,7 @@
       // other libraries
       'jquery':                    'npm:jquery/dist/jquery.js',
       'pixi.js':                   'npm:pixi.js/dist/pixi.js',
+      'keyboardjs':                'npm:keyboardjs/dist/keyboard.js',
       'eventemitter3':             'npm:eventemitter3/index.js',
       'rxjs':                      'npm:rxjs',
       'angular-tree-component':    'npm:angular-tree-component/dist/angular-tree-component.umd.js',

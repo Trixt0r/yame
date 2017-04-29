@@ -5,8 +5,8 @@
   </li>
 </ol>
 
-<div class="d-flex flex-wrap align-content-start" *ngIf="files">
-  <template ngFor let-file [ngForOf]="files">
+<div class="d-flex flex-wrap align-content-start" *ngIf="displayedFiles && displayedFiles.length">
+  <ng-template ngFor let-file [ngForOf]="displayedFiles">
     <div [class]="(selection == file ? 'selected ' : '') + 'p-2 text-center'" (click)="click($event, file)">
       <i class="fa fa-folder fa-3x" *ngIf="file.children"></i>
       <img [src]="sanitize(file.path)" *ngIf="!file.children" />
@@ -14,7 +14,16 @@
         {{ file.name }}
       </div>
     </div>
-  </template>
+  </ng-template>
+</div>
+
+<div *ngIf="displayedFiles && !displayedFiles.length">
+  <div *ngIf="!files.length" class="text-center mt-2">
+    Folder is empty.
+  </div>
+  <div *ngIf="files.length" class="text-center mt-2">
+    No files match the filter.
+  </div>
 </div>
 
 <div class="options">
@@ -34,14 +43,20 @@
     </div>
 
     <div class="col pull-right" *ngIf="files">
-      <div class="input-group">
-        <input type="text" class="form-control" placeholder="Search for..." (keyup)="filterFiles($event)">
-        <span class="input-group-btn">
-          <button class="btn btn-secondary btn-sm" type="button">
-            <i class="fa fa-search"></i>
-          </button>
-        </span>
+      <div class="input-group pull-left">
+        <input *ngIf="searching"
+                id="search"
+                #search
+                type="text"
+                class="form-control"
+                placeholder="Find..."
+                (keyup)="filterFiles($event)"
+                [@searchState]="searching"
+                (@searchState.done)="searchAnimDone($event)">
       </div>
+      <button class="btn btn-sm pull-right {{searching == 'active' ? 'active' : ''}}" *ngIf="files" (click)="toggleSearch()">
+        <i class="fa fa-search"></i>
+      </button>
     </div>
   </div>
 

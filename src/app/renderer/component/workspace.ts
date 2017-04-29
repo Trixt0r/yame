@@ -49,12 +49,14 @@ export class WorkspaceComponent extends ResizeableComponent {
 
   /** @override */
   onResize() {
-    this.maxVal = window.innerHeight - 100;
-    let fullWidth = $(this.row.nativeElement).outerWidth(true);
-    this.resizerLeft.maxVal = Math.min(Math.max(200, fullWidth - this.minWidth), fullWidth * .9);
-    super.onResize();
-    this.resizerLeft.onResize();
-    this.updateColumns();
+    if (this.row) {
+      this.maxVal = window.innerHeight - 100;
+      let fullWidth = $(this.row.nativeElement).outerWidth(true);
+      this.resizerLeft.maxVal = Math.min(Math.max(200, fullWidth - this.minWidth), fullWidth * .9);
+      super.onResize();
+      this.resizerLeft.onResize();
+      this.updateColumns();
+    }
   }
 
   openFolder() {
@@ -69,6 +71,8 @@ export class WorkspaceComponent extends ResizeableComponent {
             isExpanded: true,
             children: this.service.directories
           }];
+          this.select(json.path);
+          setTimeout(() => this.onResize());
         });
     });
   }
@@ -84,35 +88,23 @@ export class WorkspaceComponent extends ResizeableComponent {
     this.updateColumns();
   }
 
-  updateColumnsFromRight(width) {
-    this.rightWidth = width;
-    if (this.fixingSize) return;
-    let diff = width - this.leftWidth;
-    if (diff < this.minWidth) {
-      this.fixingSize = true;
-      this.resizerLeft.updateValue(this.resizerLeft.clampValue(width - this.minWidth));
-      this.fixingSize = false;
-    }
-    this.updateColumns();
-  }
-
   updateColumns() {
     let fullWidth = $(this.row.nativeElement).outerWidth(true);
     $(this.leftCol.nativeElement).css('width', this.leftWidth);
     $(this.leftCol.nativeElement).css('max-width', this.leftWidth);
     this.midCol.$el.css('left', this.leftWidth + 5);
-    this.midCol.$el.css('max-width', fullWidth - this.leftWidth + 10);
-    this.midCol.$el.css('width', fullWidth - this.leftWidth + 10);
+    this.midCol.$el.css('max-width', fullWidth - this.leftWidth - 5);
+    this.midCol.$el.css('width', fullWidth - this.leftWidth - 5);
   }
 
-  select(event) {
+  selectNode(event) {
     let node: TreeNode = event.node;
+    this.select(node.data.path);
+  }
 
-    console.log(node);
-
-    this.selectedPath = node.data.path.replace(this.nodes[0].path, 'Assets').split(path.sep);
-
-    this.selection = this.service.getFiles(node.data.path);
+  select(filePath: string) {
+    this.selectedPath = filePath.replace(this.nodes[0].path, 'Assets').split(path.sep);
+    this.selection = this.service.getFiles(filePath);
   }
 
   assetSelected(asset: DirectoryJSON | FileJSON) {
