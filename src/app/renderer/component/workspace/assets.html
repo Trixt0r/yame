@@ -1,13 +1,16 @@
-<ol class="breadcrumb" *ngIf="files">
+<ol #breadcrumbs class="breadcrumb" *ngIf="files">
   <li class="breadcrumb-item" *ngFor="let dir of path; let i=index">
-    <a *ngIf="i < path.length - 1" href="javascript:void(0)" (click)="breadcrumbClick($event, i)">{{ dir }}</a>
+    <a *ngIf="i < path.length - 1" href="javascript:void(0)" (click)="breadcrumbClick($event, i)" (keydown)="brKeyDown($event, i)">{{ dir }}</a>
     <a *ngIf="i === path.length - 1">{{ dir }}</a>
   </li>
 </ol>
 
-<div class="d-flex flex-wrap align-content-start" *ngIf="displayedFiles && displayedFiles.length">
+<div #filesContainer class="d-flex flex-wrap align-content-start" *ngIf="displayedFiles && displayedFiles.length">
   <ng-template ngFor let-file [ngForOf]="displayedFiles">
-    <div [class]="(selection == file ? 'selected ' : '') + 'p-2 text-center'" (click)="click($event, file)">
+    <div class="{{selection == file ? 'selected ' : ''}} p-2 text-center"
+        (click)="select($event, file)"
+        (keydown)="select($event, file)"
+        tabindex="0">
       <i class="fa fa-folder fa-3x" *ngIf="file.children"></i>
       <img [src]="sanitize(file.path)" *ngIf="!file.children" />
       <div>
@@ -17,7 +20,11 @@
   </ng-template>
 </div>
 
-<div *ngIf="displayedFiles && !displayedFiles.length">
+<div #noFilesContainer
+    class="files-empty"
+    *ngIf="displayedFiles && !displayedFiles.length"
+    (keydown)="select($event, null)"
+    tabindex="0">
   <div *ngIf="!files.length" class="text-center mt-2">
     Folder is empty.
   </div>
@@ -52,7 +59,8 @@
                 placeholder="Find..."
                 (keyup)="filterFiles($event)"
                 [@searchState]="searching"
-                (@searchState.done)="searchAnimDone($event)">
+                (@searchState.done)="searchAnimDone($event)"
+                disabled>
       </div>
       <button class="btn btn-sm pull-right {{searching == 'active' ? 'active' : ''}}" *ngIf="files" (click)="toggleSearch()">
         <i class="fa fa-search"></i>

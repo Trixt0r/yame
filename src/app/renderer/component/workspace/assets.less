@@ -16,13 +16,13 @@
   .p-2 {
     position: relative;
     transition: background .25s ease-out;
-    &:hover {
+    &:hover, &:focus {
       cursor: pointer;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.1);
     }
 
     &.selected {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.25);
     }
 
     img {
@@ -84,4 +84,8 @@
   width: calc(~'100% - 31px');
   padding: 10px;
   top: 4px;
+}
+
+.files-empty {
+  height: calc(~'100% - @{options-height} - 0.5rem');
 }

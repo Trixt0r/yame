@@ -44,7 +44,7 @@ export class KeyboardService {
   private components: { [id: string] : ComponentHash } = { };
 
   constructor() {
-    $(window).on('click', e => {
+    $(window).on('click focus', e => {
       let found = _.findKey(this.components, (component: ComponentHash, id) =>
         e.target == component.component.elementRef.nativeElement || component.component.$el.has(e.target).length);
       let ctx = 'global'
@@ -67,9 +67,10 @@ export class KeyboardService {
     if (this.components[id]) throw `A component with the id "${id}" is already registered!`;
     this.components[id] = {
       component: component,
-      handler: () => {
+      handler: e => {
         this.context = id;
         keyboardJS.setContext(id);
+        e.stopPropagation();
       }
     };
     component.$el.on('click focus', this.components[id].handler);

@@ -10,7 +10,8 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
-  AfterViewInit
+  AfterViewInit,
+  AnimationTransitionEvent
 } from '@angular/core';
 
 import {
@@ -25,6 +26,15 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { AbstractComponent } from '../abstract';
 
 
+/**
+ * Assets component responsible for controling the assets view.
+ *
+ * @export
+ * @class AssetsComponent
+ * @extends {AbstractComponent}
+ * @implements {OnChanges}
+ * @implements {AfterViewInit}
+ */
 @Component({
   moduleId: module.id,
   selector: 'assets',
@@ -46,11 +56,17 @@ import { AbstractComponent } from '../abstract';
 })
 export class AssetsComponent extends AbstractComponent implements OnChanges, AfterViewInit {
 
+  private handledByKeys: boolean;
+  private bcIdx = 0;
+
   @Input() files: (DirectoryJSON | FileJSON)[];
-  @Input() path: string;
-  @Output() select = new EventEmitter();
-  @Output() breadcrumb = new EventEmitter();
+  @Input() path: string[];
+  @Output('select') selectEvent = new EventEmitter();
+  @Output('breadcrumb') breadcrumbEvent = new EventEmitter();
   @ViewChild('search') search: ElementRef;
+  @ViewChild('breadcrumbs') breadcrumbs: ElementRef;
+  @ViewChild('filesContainer') filesContainer: ElementRef;
+  @ViewChild('noFilesContainer') noFilesContainer: ElementRef;
   private searching = 'inactive';
 
   private displayedFiles: (DirectoryJSON | FileJSON)[];
@@ -61,16 +77,98 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
     super(ref);
   }
 
-  sanitize(url: string) {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
+  /**
+   * @param {string} url
+   * @returns {string}
+   */
+  sanitize(url: string): string {
+    return <string>this.sanitizer.bypassSecurityTrustUrl(url);
   }
 
-  click(event, item: DirectoryJSON | FileJSON) {
+  /**
+   * Keyboard handler for breadcrumbs.
+   *
+   * @param {KeyboardEvent} event
+   * @param {number} idx
+   * @returns {void}
+   */
+  brKeyDown(event: KeyboardEvent, idx: number): void {
+    switch (event.keyCode) {
+      case 27:
+      case 8:
+      case 37: this.focusBcIdx(idx - 1); break;
+      case 39: this.focusBcIdx(idx + 1); break;
+      case 40: event.preventDefault(); // no scroll
+               this.focusFileIdx(this.displayedFiles.indexOf(this.selection)); break;
+    }
+  }
+
+  /**
+   * Focuses the given breadcrumb index.
+   *
+   * @param {number} idx
+   * @returns {void}
+   */
+  focusBcIdx(idx: number): void {
+    $($(this.breadcrumbs.nativeElement).find('a')[Math.max(0, Math.min(idx, this.path.length - 2))]).focus();
+  }
+
+  /**
+   * Handler for selection the given file item by clicking or using the keyboard.
+   *
+   * @param {(KeyboardEvent | MouseEvent)} event
+   * @param {(DirectoryJSON | FileJSON)} item
+   * @returns {void}
+   */
+  select(event: KeyboardEvent | MouseEvent, item: DirectoryJSON | FileJSON): void {
+    this.handledByKeys = event instanceof KeyboardEvent;
+    if (this.handledByKeys) {
+      let keyCode = (<KeyboardEvent>event).keyCode;
+      if (keyCode === 27 && this.searching === 'inactive') {
+        if (this.selection)
+          this.selection = null;
+        else
+          this.focusBcIdx(this.path.length - 2);
+      }
+      if (keyCode === 8 && this.path.length > 1)
+        $($(this.breadcrumbs.nativeElement).find('a')[this.path.length - 2]).focus();
+      // Arrow key navigation
+      if (this.filesContainer && keyCode >= 35 && keyCode <= 40) {
+        let $filesContainer = $(this.filesContainer.nativeElement);
+        let itemIdx = this.displayedFiles.indexOf(item);
+        let maxIdxRow = Math.floor($filesContainer.outerWidth() / $(event.target).outerWidth());
+        if (keyCode == 40 || keyCode == 38 || keyCode == 35 || keyCode == 36)
+          event.preventDefault(); // no scroll
+        switch(keyCode) {
+          case 35: this.focusFileIdx(this.displayedFiles.length); break;
+          case 36: this.focusFileIdx(0); break;
+          case 37: this.focusFileIdx(itemIdx - 1); break;
+          case 38: this.focusFileIdx(itemIdx - maxIdxRow); break;
+          case 39: this.focusFileIdx(itemIdx + 1); break;
+          case 40: this.focusFileIdx(itemIdx + maxIdxRow); break;
+        }
+      }
+      if (keyCode !== 13) return;
+    }
     if (item == this.selection)
       this.selection = null;
     else
       this.selection = item;
-    this.select.emit(this.selection);
+    this.selectEvent.emit(this.selection);
+  }
+
+  /**
+   * Focuses the file view with the given index.
+   *
+   * @param {number} idx
+   */
+  focusFileIdx(idx: number) {
+    if (this.filesContainer) {
+      let $filesContainer = $(this.filesContainer.nativeElement);
+      $($filesContainer.find('.p-2')[Math.min(this.displayedFiles.length - 1, Math.max(0, idx))]).focus();
+    }
+    else if (this.noFilesContainer)
+      $(this.noFilesContainer.nativeElement).focus();
   }
 
   /** @inheritdoc */
@@ -78,15 +176,41 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
     if (changes.files) {
       setTimeout(() => this.filterFiles());
       this.selection = null;
-      this.select.emit(this.selection);
+      this.selectEvent.emit(this.selection);
+      if (changes.path.previousValue) {
+        let prevL = changes.path.previousValue.length;
+        let prev = changes.path.previousValue[prevL - (prevL - changes.path.currentValue.length)];
+        setTimeout(() => {
+          if (this.filesContainer && this.handledByKeys) {
+            let idx = this.displayedFiles.findIndex(val => val.name == prev);
+            if (idx >= 0)
+              $($(this.filesContainer.nativeElement).find('.p-2')[idx]).focus();
+            else
+              $(this.filesContainer.nativeElement).find('.p-2').first().focus();
+          } else
+            this.focusFileIdx(0);
+        });
+      }
     }
   }
 
-  breadcrumbClick(event, i) {
-    this.breadcrumb.emit(i);
+  /**
+   * Breadcrumb click handler.
+   *
+   * @param {MouseEvent} event
+   * @param {number} i
+   */
+  breadcrumbClick(event: MouseEvent, i: number) {
+    this.breadcrumbEvent.emit(i);
   }
 
-  filterFiles(event?: KeyboardEvent) {
+  /**
+   * Filters the current bound files.
+   *
+   * @param {KeyboardEvent} [event]
+   * @returns {void}
+   */
+  filterFiles(event?: KeyboardEvent): void {
     if (!this.files) return;
     if (this.searching == 'active' && this.search.nativeElement.value) {
       let val = this.search.nativeElement.value.toLocaleLowerCase();
@@ -99,11 +223,18 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
       this.displayedFiles.push(this.selection);
   }
 
-  toggleSearch() {
+  /** @returns {void} Toggles the search mode. */
+  toggleSearch(): void {
     this.searching == 'inactive' ? this.activateSearch() : this.cancelSearch();
   }
 
-  searchAnimDone(event) {
+  /**
+   * Search animation done handler.
+   *
+   * @param {AnimationTransitionEvent} event
+   * @returns {void}
+   */
+  searchAnimDone(event: AnimationTransitionEvent): void {
     if (event.toState == 'active') {
       $(this.search.nativeElement).focus();
       this.filterFiles();
@@ -112,14 +243,18 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
     }
   }
 
+  /** @returns {void} Activates the search mode. */
   activateSearch() {
+    $(this.search.nativeElement).removeAttr('disabled');
     if (this.searching == 'active')
       $(this.search.nativeElement).focus();
     this.searching = 'active';
   }
 
+  /** @returns {void} Cancels the search mode. */
   cancelSearch() {
     this.searching = 'inactive';
+    $(this.search.nativeElement).attr('disabled', 1);
   }
 
   /** @inheritdoc */
@@ -127,7 +262,12 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
     this.keyboardService.register('assets', this)
       .begin('assets')
       .bind('ctrl > f', () => this.activateSearch())
-      .bind('esc', () => this.cancelSearch())
+      .bind('esc', () => {
+        if (this.searching === 'active') {
+          this.cancelSearch();
+          this.focusFileIdx(this.displayedFiles.indexOf(this.selection));
+        }
+      })
       .end();
   }
 
