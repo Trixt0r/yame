@@ -1,7 +1,10 @@
 <ol #breadcrumbs class="breadcrumb" *ngIf="files">
   <li class="breadcrumb-item" *ngFor="let dir of path; let i=index">
     <a *ngIf="i < path.length - 1" href="javascript:void(0)" (click)="breadcrumbClick($event, i)" (keydown)="brKeyDown($event, i)">{{ dir }}</a>
-    <a *ngIf="i === path.length - 1">{{ dir }}</a>
+    <a class="last" *ngIf="i === path.length - 1">{{ dir }}</a>
+  </li>
+  <li class="breadcrumb-item pl-2" *ngIf="selection">
+    {{ selection.name }}
   </li>
 </ol>
 
@@ -36,17 +39,17 @@
 <div class="options">
   <div class="row">
     <div class="col">
-    <div class="btn-group btn-group-sm" role="group" aria-label="..." *ngIf="selection">
-      <button type="button" class="btn btn-secondary">
-        <i class="fa fa-info"></i>
-      </button>
-      <button type="button" class="btn btn-secondary">
-        <i class="fa fa-edit"></i>
-      </button>
-      <button type="button" class="btn btn-secondary">
-        <i class="fa fa-clone"></i>
-      </button>
-    </div>
+      <div class="btn-group btn-group-sm" role="group" aria-label="..." *ngIf="selection">
+        <button type="button" class="btn btn-secondary">
+          <i class="fa fa-info"></i>
+        </button>
+        <button type="button" class="btn btn-secondary">
+          <i class="fa fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-secondary">
+          <i class="fa fa-clone"></i>
+        </button>
+      </div>
     </div>
 
     <div class="col pull-right" *ngIf="files">
