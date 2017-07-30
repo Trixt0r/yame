@@ -14,11 +14,11 @@
 
 
  <div #row class="fill-width" *ngIf="nodes">
-  <folders
+  <groups
     #leftCol
-    (opened)="select($event.folder.path)"
+    (opened)="select($event.group.path)"
     class="absolute fill-height">
-  </folders>
+  </groups>
   <assets #rightCol class="absolute fill-height" [files]="selection" [path]="selectedPath" (select)="assetSelected($event)" (breadcrumb)="breadcrumbClick($event)"></assets>
   <resizable #resizerLeft class="left" [property]="'left'" [maxVal]="'500'" [minVal]="'200'" (sizeUpdated)="updateColumnsFromLeft($event)"></resizable>
 </div>

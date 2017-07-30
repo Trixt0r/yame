@@ -4,7 +4,7 @@ import { UtilsModule } from "./utils";
 import { MaterialModule } from './material';
 
 import { AssetsComponent } from './workspace/component/assets';
-import { FoldersComponent } from './workspace/component/folders';
+import { GroupsComponent } from './workspace/component/groups';
 import { WorkspaceComponent } from './workspace/component';
 
 import { WorkspaceService } from './workspace/service';
@@ -13,13 +13,13 @@ import { WorkspaceService } from './workspace/service';
   imports: [BrowserModule, UtilsModule, MaterialModule],
   exports: [
     WorkspaceComponent,
-    FoldersComponent,
-    AssetsComponent
+    GroupsComponent,
+    AssetsComponent,
   ],
   declarations: [
     WorkspaceComponent,
-    FoldersComponent,
-    AssetsComponent
+    GroupsComponent,
+    AssetsComponent,
   ],
   providers: [ WorkspaceService ]
 })

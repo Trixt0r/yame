@@ -1,4 +1,4 @@
-import { FoldersComponent } from './component/folders';
+import { GroupsComponent } from './component/groups';
 import { DirectoryJSON } from '../../../common/io/directory';
 import { ResizeableComponent } from "../utils/component/resizable";
 import { FileJSON } from '../../../common/io/file';
@@ -34,7 +34,7 @@ export class WorkspaceComponent extends ResizeableComponent {
   nextSelection = null;
 
   @ViewChild('resizerLeft') resizerLeft: ResizeableComponent;
-  @ViewChild('leftCol') leftCol: FoldersComponent;
+  @ViewChild('leftCol') leftCol: GroupsComponent;
   @ViewChild('rightCol') rightCol: AssetsComponent;
   @ViewChild('row') row: ElementRef;
   @ViewChild('tree') tree: any;

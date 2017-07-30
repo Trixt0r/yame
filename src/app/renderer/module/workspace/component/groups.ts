@@ -6,30 +6,29 @@ import { MdButton } from '@angular/material'
 import { WorkspaceService } from '../service';
 
 import { DirectoryJSON } from '../../../../common/io/directory';
-import { FileJSON } from '../../../../common/io/file';
 import { AbstractComponent } from '../../../component/abstract';
 
 interface OpenEvent {
   previous: DirectoryJSON,
-  folder: DirectoryJSON,
+  group: DirectoryJSON,
   event: AnimationEvent
 }
 
 /**
- * The folders component.
+ * The groups component.
  *
- * Displays a list of the currently selected folder in the workspace.
+ * Displays a list of the currently selected group in the workspace.
  * Register yourself to the `opening` and `open` events to react on user actions.
  *
  * @export
- * @class FoldersComponent
+ * @class GroupsComponent
  * @extends {AbstractComponent}
  */
 @Component({
   moduleId: module.id,
-  selector: 'folders',
-  templateUrl: 'folders.html',
-  styleUrls: ['folders.css'],
+  selector: 'groups',
+  templateUrl: 'groups.html',
+  styleUrls: ['groups.css'],
   animations: [
     trigger('slideState', [
       state('open', style({ transform: 'translateX(-100%)' })),
@@ -40,9 +39,9 @@ interface OpenEvent {
     ])
   ]
 })
-export class FoldersComponent extends AbstractComponent implements OnInit {
+export class GroupsComponent extends AbstractComponent implements OnInit {
 
-  /** @type {EventEmitter<OpenEvent>} The opening event, triggered as soon as a click on a folder happens. */
+  /** @type {EventEmitter<OpenEvent>} The opening event, triggered as soon as a click on a group happens. */
   @Output('opening') opening: EventEmitter<OpenEvent> = new EventEmitter();
 
   /** @type {EventEmitter<OpenEvent>} The opened event, triggered as soon as the slide animation has been done. */
@@ -52,8 +51,8 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   @ViewChild('parentMenuTrigger') parentMenuTrigger: MdButton;
 
   // Internal vars which have not to be available to the public
-  private folders: (DirectoryJSON | FileJSON)[]; // Current files
-  private openingFolders: (DirectoryJSON | FileJSON)[]; // Preview of files which will be displayed on animation end
+  private groups: DirectoryJSON[]; // Current files
+  private openingGroups: DirectoryJSON[]; // Preview of files which will be displayed on animation end
   private slide = 'none'; // slide state, either 'none', 'open', 'close'
   private currentlyOpen: DirectoryJSON; // Current directory
   private previouslyOpen: DirectoryJSON; // Previous directory
@@ -65,20 +64,20 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   }
 
   /**
-   * Opens the given folder.
-   * A swipe animation will be started in the correct direction automatically based on the given folder and the
+   * Opens the given group.
+   * A swipe animation will be started in the correct direction automatically based on the given group and the
    * hierarchy.
    *
-   * @param {DirectoryJSON} folder The folder to open.
+   * @param {DirectoryJSON} group The group to open.
    */
-  open(folder: DirectoryJSON): void {
-    let close = this.parents.indexOf(folder) >= 0; // We close, if we open a parent folder
-    // Store the scroll state for each folder so we can restore it if the user moves back
+  open(group: DirectoryJSON): void {
+    let close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
+    // Store the scroll state for each group so we can restore it if the user moves back
     if (!close) this.previousScrolls.push(this.$el.scrollTop());
     this.slide = close ? 'close' : 'open';
-    this.openingFolders = this.service.getFiles(folder.path);
+    this.openingGroups = this.service.getDirectories(group);
     this.previouslyOpen = this.currentlyOpen;
-    this.currentlyOpen = folder;
+    this.currentlyOpen = group;
     this.currentParents = this.service.getParents(this.currentlyOpen).reverse();
   }
 
@@ -86,7 +85,7 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
    * Handler for clicking either the back button or its containing list item.
    *
    * On right mouse button click has been pressed,
-   * a list of all parents of the current folder will be displayed in a menu.
+   * a list of all parents of the current group will be displayed in a menu.
    *
    * @param {MouseEvent} event
    */
@@ -101,7 +100,7 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   ngOnInit() {
     super.ngOnInit();
     this.currentlyOpen = this.service.directory;
-    this.folders = this.service.getFiles(this.currentlyOpen);
+    this.groups = this.service.directories;
     this.currentParents = [];
   }
 
@@ -116,14 +115,14 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
     this.$el.addClass('no-overflow').scrollTop(0);
     this.opening.emit({
       previous: this.previous,
-      folder: this.current,
+      group: this.current,
       event: event
     });
   }
 
   /**
    * Handles the slide animation end.
-   * The scroll of the component will be fixed if a folder got closed.
+   * The scroll of the component will be fixed if a group got closed.
    *
    * @param {AnimationEvent} event
    */
@@ -131,18 +130,18 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
     if (event.fromState !== 'none') return; // React only if we come from the 'none' state
     this.$el.removeClass('no-overflow');
     this.fixScroll(event);
-    this.folders = this.openingFolders;
+    this.groups = this.openingGroups;
     this.slide = 'none';
     this.opened.emit({
       previous: this.previous,
-      folder: this.current,
+      group: this.current,
       event: event
     });
-    delete this.openingFolders;
+    delete this.openingGroups;
   }
 
   /**
-   * Fixes the scroll, i.e. restores the scroll state if we open a parent folder (close current folder).
+   * Fixes the scroll, i.e. restores the scroll state if we open a parent group (close current group).
    *
    * @private
    * @param {AnimationEvent} event
@@ -156,7 +155,7 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   }
 
   /**
-   * The currently selected folder.
+   * The currently selected group.
    *
    * @readonly
    * @type {DirectoryJSON}
@@ -166,7 +165,7 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   }
 
   /**
-   * The previously selected folder.
+   * The previously selected group.
    *
    * @readonly
    * @type {DirectoryJSON}
@@ -176,7 +175,7 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   }
 
   /**
-   * A parent list of the current folder.
+   * A parent list of the current group.
    *
    * @readonly
    * @type {DirectoryJSON[]}
@@ -186,7 +185,7 @@ export class FoldersComponent extends AbstractComponent implements OnInit {
   }
 
   /**
-   * Property used to display the back button, based on the current slide state and folder.
+   * Property used to display the back button, based on the current slide state and group.
    *
    * @readonly
    * @private

@@ -10,10 +10,10 @@
     </button>
     <div class="fill-width text-center">{{ current.name }}</div>
   </md-list-item>
-  <ng-template ngFor let-folder [ngForOf]="openingFolders">
-    <md-list-item *ngIf="folder.children">
+  <ng-template ngFor let-group [ngForOf]="openingGroups">
+    <md-list-item>
       <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ folder.name }} </h4>
+      <h4 md-line> {{ group.name }} </h4>
     </md-list-item>
   </ng-template>
 </md-list>
@@ -52,10 +52,10 @@
     </button>
   </md-menu>
 
-  <ng-template ngFor let-folder [ngForOf]="folders">
-    <md-list-item *ngIf="folder.children" (click)="open(folder)">
+  <ng-template ngFor let-group [ngForOf]="groups">
+    <md-list-item (click)="open(group)">
       <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ folder.name }} </h4>
+      <h4 md-line> {{ group.name }} </h4>
     </md-list-item>
   </ng-template>
 </md-nav-list>
@@ -71,10 +71,10 @@
     </button>
     <div class="fill-width text-center">{{ current.name }}</div>
   </md-list-item>
-  <ng-template ngFor let-folder [ngForOf]="openingFolders">
-    <md-list-item *ngIf="folder.children">
+  <ng-template ngFor let-group [ngForOf]="openingGroups">
+    <md-list-item>
       <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ folder.name }} </h4>
+      <h4 md-line> {{ group.name }} </h4>
     </md-list-item>
   </ng-template>
 </md-list>
