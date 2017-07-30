@@ -1,11 +1,11 @@
-import { DirectoryJSON } from '../../common/io/directory';
-import { FileJSON } from '../../common/io/file';
-import { AssetsComponent } from './workspace/assets';
+import { FoldersComponent } from './component/folders';
+import { DirectoryJSON } from '../../../common/io/directory';
+import { ResizeableComponent } from "../utils/component/resizable";
+import { FileJSON } from '../../../common/io/file';
+import { AssetsComponent } from './component/assets';
 import { TreeNode } from 'angular-tree-component/dist/models/tree-node.model';
-import { WindowRef } from '../service/window';
-import { WorkspaceService } from '../service/workspace';
-import { ResizeableComponent } from './utils/resizable';
-import { AbstractComponent } from './abstract';
+import { WindowRef } from '../../service/window';
+import { WorkspaceService } from './service';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ipcRenderer } from 'electron';
@@ -15,8 +15,8 @@ import * as path from 'path';
 @Component({
   moduleId: module.id,
   selector: 'workspace',
-  templateUrl: 'workspace.html',
-  styleUrls: ['workspace.css'],
+  templateUrl: 'component.html',
+  styleUrls: ['component.css'],
   providers: [WorkspaceService],
 })
 export class WorkspaceComponent extends ResizeableComponent {
@@ -31,10 +31,11 @@ export class WorkspaceComponent extends ResizeableComponent {
 
   fixingSize = false;
   selection = null;
+  nextSelection = null;
 
   @ViewChild('resizerLeft') resizerLeft: ResizeableComponent;
-  @ViewChild('leftCol') leftCol: ElementRef;
-  @ViewChild('midCol') midCol: AssetsComponent;
+  @ViewChild('leftCol') leftCol: FoldersComponent;
+  @ViewChild('rightCol') rightCol: AssetsComponent;
   @ViewChild('row') row: ElementRef;
   @ViewChild('tree') tree: any;
 
@@ -49,14 +50,15 @@ export class WorkspaceComponent extends ResizeableComponent {
 
   /** @override */
   onResize() {
+    this.maxVal = window.innerHeight - 100;
     if (this.row) {
-      this.maxVal = window.innerHeight - 100;
       let fullWidth = $(this.row.nativeElement).outerWidth(true);
-      this.resizerLeft.maxVal = Math.min(Math.max(200, fullWidth - this.minWidth), fullWidth * .9);
-      super.onResize();
-      this.resizerLeft.onResize();
-      this.updateColumns();
+      this.resizerLeft.maxVal = Math.min(Math.max(200, fullWidth - this.minWidth), fullWidth - 315);
     }
+    super.onResize();
+    if (this.resizerLeft)
+      this.resizerLeft.onResize();
+    this.updateColumns();
   }
 
   openFolder() {
@@ -89,17 +91,13 @@ export class WorkspaceComponent extends ResizeableComponent {
   }
 
   updateColumns() {
+    if (!this.row) return;
     let fullWidth = $(this.row.nativeElement).outerWidth(true);
-    $(this.leftCol.nativeElement).css('width', this.leftWidth);
-    $(this.leftCol.nativeElement).css('max-width', this.leftWidth);
-    this.midCol.$el.css('left', this.leftWidth + 5);
-    this.midCol.$el.css('max-width', fullWidth - this.leftWidth - 5);
-    this.midCol.$el.css('width', fullWidth - this.leftWidth - 5);
-  }
-
-  selectNode(event) {
-    let node: TreeNode = event.node;
-    this.select(node.data.path);
+    this.leftCol.$el.css('width', this.leftWidth);
+    this.leftCol.$el.css('max-width', this.leftWidth);
+    this.rightCol.$el.css('left', this.leftWidth + 5);
+    this.rightCol.$el.css('max-width', fullWidth - this.leftWidth - 5);
+    this.rightCol.$el.css('width', fullWidth - this.leftWidth - 5);
   }
 
   select(filePath: string) {
@@ -108,28 +106,13 @@ export class WorkspaceComponent extends ResizeableComponent {
   }
 
   assetSelected(asset: DirectoryJSON | FileJSON) {
-    if (!asset) return;
-
-    if ((<DirectoryJSON>asset).children !== void 0) {
-      let node = this.tree.treeModel.getNodeBy(node => node.data.path === asset.path);
-      if (node) {
-        node.parent.expand();
-        node.expand();
-        node.toggleActivated();
-      }
-    }
+    // TODO: implement this
   }
 
   breadcrumbClick(i: number) {
     let tmp = this.selectedPath.slice(0, i + 1);
     tmp[0] = this.nodes[0].path;
     let p = tmp.join(path.sep);
-    let node = this.tree.treeModel.getNodeBy(node => node.data.path === p);
-    if (node) {
-      node.parent.expand();
-      node.expand();
-      node.toggleActivated();
-    }
   }
 
 }

@@ -8,6 +8,7 @@ export interface FileJSON {
   lastModified: number;
   name: string;
   path: string;
+  simpleName: string;
   size: number;
   type: string;
 }
@@ -26,6 +27,9 @@ export class File {
   /** @type {string} path The path of the file. */
   path: string;
 
+  /** @type {string} simpleName The name of the file in simple form, i.e. without any extension. */
+  simpleName: string;
+
   /** @type {number} size The size of the file, in bytes. */
   size: number;
 
@@ -38,6 +42,7 @@ export class File {
       let ext = path.extname(this.path);
       this.type = ext.replace('.', '');
       this.name = path.basename(this.path);
+      this.simpleName = path.basename(this.path, ext);
     }
   }
 
@@ -49,6 +54,7 @@ export class File {
       lastModified: this.lastModified,
       name: this.name,
       path: this.path,
+      simpleName: this.simpleName,
       size: this.size,
       type: this.type
     };

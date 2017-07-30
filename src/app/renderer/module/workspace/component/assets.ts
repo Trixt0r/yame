@@ -1,6 +1,6 @@
-import { KeyboardService } from '../../service/keyboard';
-import { FileJSON } from '../../../common/io/file';
-import { DirectoryJSON } from '../../../common/io/directory';
+import { KeyboardService } from '../../../service/keyboard';
+import { FileJSON } from '../../../../common/io/file';
+import { DirectoryJSON } from '../../../../common/io/directory';
 import {
   Component,
   ElementRef,
@@ -23,8 +23,9 @@ import {
 } from '@angular/animations';
 
 import { DomSanitizer } from '@angular/platform-browser';
-import { AbstractComponent } from '../abstract';
 
+import * as path from 'path';
+import { AbstractComponent } from "../../../component/abstract";
 
 /**
  * Assets component responsible for controling the assets view.
@@ -83,6 +84,10 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
    */
   sanitize(url: string): string {
     return <string>this.sanitizer.bypassSecurityTrustUrl(url);
+  }
+
+  isImage(url: string): boolean {
+    return path.extname(url).indexOf('png') >= 0;
   }
 
   /**

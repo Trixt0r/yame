@@ -1,4 +1,5 @@
-import * as eventemitter3 from 'eventemitter3';
+import { EventEmitter as eventemitter3 } from 'eventemitter3';
+
 /**
  * Typescript compatible version of Backbone.Events for extending it.
  */

@@ -1,5 +1,5 @@
-import { AbstractComponent } from '../abstract';
 import { Component, ElementRef, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { AbstractComponent } from "../../../component/abstract";
 
 /**
  * Abstract component which is able to handle resizes.

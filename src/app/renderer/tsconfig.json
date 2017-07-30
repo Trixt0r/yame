@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceRoot": "src/app",
+    "outDir": "dist/app",
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "suppressImplicitAnyIndexErrors": true
+  },
+  "exclude": [
+    "assets",
+    "builds",
+    "bundle",
+    "dist",
+    "node_modules"
+  ]
+}

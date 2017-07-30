@@ -1,9 +1,8 @@
 import { MainComponent } from './main';
-import { WorkspaceComponent } from './workspace';
 import { PixiService } from '../module/pixi/service';
-import { SidebarComponent } from './sidebar';
 import { PixiComponent } from '../module/pixi/component';
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { SidebarComponent } from "../module/sidebar/component";
 
 /**
  * Entry point for the main application.

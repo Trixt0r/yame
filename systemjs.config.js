@@ -26,6 +26,8 @@
       '@angular/animations': 'npm:@angular/animations/bundles/animations.umd.js',
       '@angular/animations/browser': 'npm:@angular/animations/bundles/animations-browser.umd.js',
       '@angular/platform-browser/animations': 'npm:@angular/platform-browser/bundles/platform-browser-animations.umd.js',
+      '@angular/material': 'npm:@angular/material/bundles/material.umd.js',
+      '@angular/cdk': 'npm:@angular/cdk/bundles/cdk.umd.js',
 
       'electron': '@node/electron',
       'fs': '@node/fs',
@@ -38,7 +40,7 @@
       'jquery':                    'npm:jquery/dist/jquery.js',
       'pixi.js':                   'npm:pixi.js/dist/pixi.js',
       'keyboardjs':                'npm:keyboardjs/dist/keyboard.js',
-      'eventemitter3':             'npm:eventemitter3/index.js',
+      'eventemitter3':             'npm:eventemitter3/umd/eventemitter3.min.js',
       'rxjs':                      'npm:rxjs',
       'angular-tree-component':    'npm:angular-tree-component/dist/angular-tree-component.umd.js',
       '@ng-bootstrap/ng-bootstrap': 'npm:@ng-bootstrap/ng-bootstrap/bundles/ng-bootstrap.js',

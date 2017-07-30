@@ -1,0 +1,199 @@
+import { OnInit } from '@angular/core/public_api';
+import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
+import { MdButton } from '@angular/material'
+
+import { WorkspaceService } from '../service';
+
+import { DirectoryJSON } from '../../../../common/io/directory';
+import { FileJSON } from '../../../../common/io/file';
+import { AbstractComponent } from '../../../component/abstract';
+
+interface OpenEvent {
+  previous: DirectoryJSON,
+  folder: DirectoryJSON,
+  event: AnimationEvent
+}
+
+/**
+ * The folders component.
+ *
+ * Displays a list of the currently selected folder in the workspace.
+ * Register yourself to the `opening` and `open` events to react on user actions.
+ *
+ * @export
+ * @class FoldersComponent
+ * @extends {AbstractComponent}
+ */
+@Component({
+  moduleId: module.id,
+  selector: 'folders',
+  templateUrl: 'folders.html',
+  styleUrls: ['folders.css'],
+  animations: [
+    trigger('slideState', [
+      state('open', style({ transform: 'translateX(-100%)' })),
+      state('none', style({ transform: 'translateX(0)' })),
+      state('close', style({ transform: 'translateX(100%)' })),
+      transition('none => open, none => close', animate('200ms ease-in')),
+      transition('* => none, void => *', animate('0s')),
+    ])
+  ]
+})
+export class FoldersComponent extends AbstractComponent implements OnInit {
+
+  /** @type {EventEmitter<OpenEvent>} The opening event, triggered as soon as a click on a folder happens. */
+  @Output('opening') opening: EventEmitter<OpenEvent> = new EventEmitter();
+
+  /** @type {EventEmitter<OpenEvent>} The opened event, triggered as soon as the slide animation has been done. */
+  @Output('opened') opened: EventEmitter<OpenEvent> = new EventEmitter();
+
+  /** @type {MdButton} The menu trigger button for the parent menu, which is not visible. */
+  @ViewChild('parentMenuTrigger') parentMenuTrigger: MdButton;
+
+  // Internal vars which have not to be available to the public
+  private folders: (DirectoryJSON | FileJSON)[]; // Current files
+  private openingFolders: (DirectoryJSON | FileJSON)[]; // Preview of files which will be displayed on animation end
+  private slide = 'none'; // slide state, either 'none', 'open', 'close'
+  private currentlyOpen: DirectoryJSON; // Current directory
+  private previouslyOpen: DirectoryJSON; // Previous directory
+  private currentParents: DirectoryJSON[]; // List of parents of the current directory
+  private previousScrolls = []; // Scroll states for each directory
+
+  constructor(public ref: ElementRef, private service: WorkspaceService) {
+    super(ref);
+  }
+
+  /**
+   * Opens the given folder.
+   * A swipe animation will be started in the correct direction automatically based on the given folder and the
+   * hierarchy.
+   *
+   * @param {DirectoryJSON} folder The folder to open.
+   */
+  open(folder: DirectoryJSON): void {
+    let close = this.parents.indexOf(folder) >= 0; // We close, if we open a parent folder
+    // Store the scroll state for each folder so we can restore it if the user moves back
+    if (!close) this.previousScrolls.push(this.$el.scrollTop());
+    this.slide = close ? 'close' : 'open';
+    this.openingFolders = this.service.getFiles(folder.path);
+    this.previouslyOpen = this.currentlyOpen;
+    this.currentlyOpen = folder;
+    this.currentParents = this.service.getParents(this.currentlyOpen).reverse();
+  }
+
+  /**
+   * Handler for clicking either the back button or its containing list item.
+   *
+   * On right mouse button click has been pressed,
+   * a list of all parents of the current folder will be displayed in a menu.
+   *
+   * @param {MouseEvent} event
+   */
+  onBackClick(event: MouseEvent): void {
+    if (event.which === 3 && this.parents.length > 0)
+      $(this.parentMenuTrigger._getHostElement()).trigger('click');
+    else if (event.which === 1)
+      this.open(this.service.getParent(this.current));
+  }
+
+  /** @inheritdoc */
+  ngOnInit() {
+    super.ngOnInit();
+    this.currentlyOpen = this.service.directory;
+    this.folders = this.service.getFiles(this.currentlyOpen);
+    this.currentParents = [];
+  }
+
+  /**
+   * Handles the slide animation start.
+   * Triggers the opening event if we the slide state changes either to `close` or `open`.
+   *
+   * @param {AnimationEvent} event
+   */
+  slideAnimStart(event: AnimationEvent): void {
+    if (event.fromState !== 'none') return;
+    this.$el.addClass('no-overflow').scrollTop(0);
+    this.opening.emit({
+      previous: this.previous,
+      folder: this.current,
+      event: event
+    });
+  }
+
+  /**
+   * Handles the slide animation end.
+   * The scroll of the component will be fixed if a folder got closed.
+   *
+   * @param {AnimationEvent} event
+   */
+  slideAnimDone(event: AnimationEvent): void {
+    if (event.fromState !== 'none') return; // React only if we come from the 'none' state
+    this.$el.removeClass('no-overflow');
+    this.fixScroll(event);
+    this.folders = this.openingFolders;
+    this.slide = 'none';
+    this.opened.emit({
+      previous: this.previous,
+      folder: this.current,
+      event: event
+    });
+    delete this.openingFolders;
+  }
+
+  /**
+   * Fixes the scroll, i.e. restores the scroll state if we open a parent folder (close current folder).
+   *
+   * @private
+   * @param {AnimationEvent} event
+   */
+  private fixScroll(event: AnimationEvent) {
+    if (event.toState === 'close') {
+      let idx = this.service.getParents(this.previous).reverse().indexOf(this.current);
+      this.$el.finish().animate({ scrollTop: this.previousScrolls[idx] }, 'fast');
+      this.previousScrolls.splice(idx, this.previousScrolls.length - idx); // Clear all states from the found index
+    }
+  }
+
+  /**
+   * The currently selected folder.
+   *
+   * @readonly
+   * @type {DirectoryJSON}
+   */
+  get current(): DirectoryJSON {
+    return this.currentlyOpen ? this.currentlyOpen : this.service.directory;
+  }
+
+  /**
+   * The previously selected folder.
+   *
+   * @readonly
+   * @type {DirectoryJSON}
+   */
+  get previous(): DirectoryJSON {
+    return this.previouslyOpen ? this.previouslyOpen : this.service.directory;
+  }
+
+  /**
+   * A parent list of the current folder.
+   *
+   * @readonly
+   * @type {DirectoryJSON[]}
+   */
+  get parents(): DirectoryJSON[] {
+    return this.currentParents ? this.currentParents : [];
+  }
+
+  /**
+   * Property used to display the back button, based on the current slide state and folder.
+   *
+   * @readonly
+   * @private
+   * @type {boolean}
+   */
+  private get displayBack(): boolean {
+    return (this.slide === 'none' && this.current !== this.service.directory) ||
+            (this.slide !== 'none' && this.previous != this.service.directory);
+  }
+}

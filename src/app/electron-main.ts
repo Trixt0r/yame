@@ -22,7 +22,7 @@ app.on('ready', () => {
   initIpc()
     .finally(() => {
       let window = new BrowserWindow({
-        backgroundColor: '#272B30',
+        backgroundColor: '#303030',
         width: 1280,
         height: 720,
         minWidth: 800,

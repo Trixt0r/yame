@@ -73,7 +73,7 @@ export class KeyboardService {
         e.stopPropagation();
       }
     };
-    component.$el.on('click focus', this.components[id].handler);
+    component.$el.on(<any>'click focus', this.components[id].handler);
     return this;
   }
 
@@ -87,7 +87,7 @@ export class KeyboardService {
   unregister(component: AbstractComponent): KeyboardService {
     let found = this.findId(component);
     if (found) {
-      component.$el.off('click focus', this.components[found].handler);
+      component.$el.off(<any>'click focus', <any>this.components[found].handler);
       delete this.components[found];
       if (found === this.context) {
         this.context = 'global';

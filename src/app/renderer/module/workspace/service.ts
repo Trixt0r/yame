@@ -1,8 +1,9 @@
-import { FileJSON } from '../../common/io/file';
-import { DirectoryJSON } from '../../common/io/directory';
+import { FileJSON } from '../../../common/io/file';
+import { DirectoryJSON } from '../../../common/io/directory';
 import { Subject } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { ipcRenderer } from 'electron';
+import * as path from 'path';
 import * as _ from 'lodash';
 import * as Promise from 'bluebird';
 
@@ -62,6 +63,12 @@ export class WorkspaceService {
     });
   }
 
+  /**
+   * Scans recursively all directories for the given path and returns the found directory or file object.
+   *
+   * @param {string} path
+   * @returns {(DirectoryJSON | FileJSON)} The found directory or file.
+   */
   find(path: string): DirectoryJSON | FileJSON {
     if (path == this.internalFiles.path)
       return this.internalFiles;
@@ -94,12 +101,44 @@ export class WorkspaceService {
     return getDirectories(directory.children);
   }
 
-  getFiles(path: string): (DirectoryJSON | FileJSON)[] {
-    let found: DirectoryJSON | FileJSON = this.find(path);
+  /**
+   * Returns a list of all files (direct childs) in the given directory path.
+   *
+   * @param {string | DirectoryJSON} path Should be a directory path.
+   * @returns {(DirectoryJSON | FileJSON)[]} `null` will be returned if the path is not a directory.
+   */
+  getFiles(path: string | DirectoryJSON): (DirectoryJSON | FileJSON)[] {
+    let found: DirectoryJSON | FileJSON = this.find(typeof path === 'string' ? path : path.path);
     if (found && (<DirectoryJSON>found).children !== void 0)
       return (<DirectoryJSON>found).children;
     else
       return null;
+  }
+
+  /**
+   * Returns the parent object for the given file.
+   *
+   * @param {(string | DirectoryJSON | FileJSON)} file
+   * @returns {DirectoryJSON} `null` may be returned if the parent is not part of the workspace.
+   */
+  getParent(file: string | DirectoryJSON | FileJSON): DirectoryJSON {
+    let filePath = typeof file === 'string' ? file : file.path;
+    let re = <DirectoryJSON>this.find( path.dirname(filePath));
+    return re;
+  }
+
+  /**
+   * Returns all parents of the given file by climbing the hierarchy up.
+   *
+   * @param {(string | DirectoryJSON | FileJSON)} file
+   * @returns {DirectoryJSON[]} A list of all parents of the given file
+   */
+  getParents(file: string | DirectoryJSON | FileJSON): DirectoryJSON[] {
+    let parents = [];
+    let parent = file;
+    while (parent = this.getParent(parent))
+      parents.push(parent);
+    return parents;
   }
 
   /**

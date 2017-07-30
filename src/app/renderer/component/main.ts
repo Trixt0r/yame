@@ -1,8 +1,7 @@
-import { WorkspaceComponent } from './workspace';
 import { AbstractComponent } from './abstract';
 import { PixiComponent } from '../module/pixi/component';
-import { ResizeableComponent } from './utils/resizable';
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { WorkspaceComponent } from "../module/workspace/component";
 
 @Component({
   moduleId: module.id,

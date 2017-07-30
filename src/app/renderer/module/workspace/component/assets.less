@@ -1,7 +1,7 @@
-@max-width: 50px;
+@max-width: 100px;
 @max-height: 50px;
-@options-height: 31px;
-@bc-height: 28px;
+@options-height: 20px;
+@bc-height: 20px;
 @options-bg-color: #191c1d;
 
 :host {
@@ -10,10 +10,31 @@
   position: rela
 }
 
-.d-flex {
+.flex {
   overflow-y: auto;
   user-select: none;
-  max-height: calc(~'100% - (@{options-height} + @{bc-height})');
+  max-height: calc(~'100% - (@{options-height})');
+  md-card {
+    width: @max-width;
+    margin: 0 2.5px 5px 2.5px;
+    md-card-header {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      md-card-subtitle {
+        min-height: 16px;
+      }
+    }
+    .wrapper {
+      height: @max-height;
+      overflow: hidden;
+      md-icon.no-preview {
+        font-size: 100px;
+        width: 100%;
+        color: rgba(255, 255, 255, .7);
+      }
+    }
+  }
   .p-2 {
     position: relative;
     transition: background .25s ease-out;
@@ -79,7 +100,7 @@
       cursor: default;
     }
 
-    a[href]:hover {
+    a[href]:hover, a[href]:focus {
       cursor: pointer;
       text-decoration: none;
       background: rgba(255, 255, 255, 0.25);

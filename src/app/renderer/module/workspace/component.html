@@ -1,0 +1,24 @@
+<div class="resizer"
+  (window:resize)="onResize($event)"
+  (mousedown)="onMouseDown($event)"
+  (window:mousemove)="onMouseMove($event)"
+  (window:mouseup)="onMouseUp($event)">
+</div>
+
+
+<div id="init" class="relative fill-height" *ngIf="!nodes">
+  <button md-raised-button class="absolute vert-center" (click)="openFolder()">
+    Open folder
+  </button>
+</div>
+
+
+ <div #row class="fill-width" *ngIf="nodes">
+  <folders
+    #leftCol
+    (opened)="select($event.folder.path)"
+    class="absolute fill-height">
+  </folders>
+  <assets #rightCol class="absolute fill-height" [files]="selection" [path]="selectedPath" (select)="assetSelected($event)" (breadcrumb)="breadcrumbClick($event)"></assets>
+  <resizable #resizerLeft class="left" [property]="'left'" [maxVal]="'500'" [minVal]="'200'" (sizeUpdated)="updateColumnsFromLeft($event)"></resizable>
+</div>
