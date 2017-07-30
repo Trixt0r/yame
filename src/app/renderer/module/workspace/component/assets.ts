@@ -1,6 +1,4 @@
 import { KeyboardService } from '../../../service/keyboard';
-import { FileJSON } from '../../../../common/io/file';
-import { DirectoryJSON } from '../../../../common/io/directory';
 import {
   Component,
   ElementRef,
@@ -26,6 +24,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 import * as path from 'path';
 import { AbstractComponent } from "../../../component/abstract";
+import { DirectoryContent } from "../../../../common/content/directory";
+import { FileContent } from "../../../../common/content/file";
 
 /**
  * Assets component responsible for controling the assets view.
@@ -60,7 +60,7 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
   private handledByKeys: boolean;
   private bcIdx = 0;
 
-  @Input() files: (DirectoryJSON | FileJSON)[];
+  @Input() files: (DirectoryContent | FileContent)[];
   @Input() path: string[];
   @Output('select') selectEvent = new EventEmitter();
   @Output('breadcrumb') breadcrumbEvent = new EventEmitter();
@@ -70,9 +70,9 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
   @ViewChild('noFilesContainer') noFilesContainer: ElementRef;
   private searching = 'inactive';
 
-  private displayedFiles: (DirectoryJSON | FileJSON)[];
+  private displayedFiles: (DirectoryContent | FileContent)[];
 
-  private selection: DirectoryJSON | FileJSON;
+  private selection: DirectoryContent | FileContent;
 
   constructor(public ref: ElementRef, private sanitizer: DomSanitizer, private keyboardService: KeyboardService) {
     super(ref);
@@ -122,10 +122,10 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
    * Handler for selection the given file item by clicking or using the keyboard.
    *
    * @param {(KeyboardEvent | MouseEvent)} event
-   * @param {(DirectoryJSON | FileJSON)} item
+   * @param {(DirectoryContent | FileContent)} item
    * @returns {void}
    */
-  select(event: KeyboardEvent | MouseEvent, item: DirectoryJSON | FileJSON): void {
+  select(event: KeyboardEvent | MouseEvent, item: DirectoryContent | FileContent): void {
     this.handledByKeys = event instanceof KeyboardEvent;
     if (this.handledByKeys) {
       let keyCode = (<KeyboardEvent>event).keyCode;

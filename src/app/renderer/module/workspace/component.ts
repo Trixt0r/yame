@@ -1,7 +1,5 @@
 import { GroupsComponent } from './component/groups';
-import { DirectoryJSON } from '../../../common/io/directory';
 import { ResizeableComponent } from "../utils/component/resizable";
-import { FileJSON } from '../../../common/io/file';
 import { AssetsComponent } from './component/assets';
 import { TreeNode } from 'angular-tree-component/dist/models/tree-node.model';
 import { WindowRef } from '../../service/window';
@@ -11,6 +9,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ipcRenderer } from 'electron';
 import * as _ from 'lodash';
 import * as path from 'path';
+import { DirectoryContent } from "../../../common/content/directory";
+import { FileContent } from "../../../common/content/file";
 
 @Component({
   moduleId: module.id,
@@ -23,7 +23,7 @@ export class WorkspaceComponent extends ResizeableComponent {
 
   selectedPath: string[];
 
-  nodes: (DirectoryJSON | FileJSON)[] = null;
+  nodes: (DirectoryContent | FileContent)[] = null;
   minWidth = 300;
 
   leftWidth = 200;
@@ -105,7 +105,7 @@ export class WorkspaceComponent extends ResizeableComponent {
     this.selection = this.service.getFiles(filePath);
   }
 
-  assetSelected(asset: DirectoryJSON | FileJSON) {
+  assetSelected(asset: DirectoryContent | FileContent) {
     // TODO: implement this
   }
 

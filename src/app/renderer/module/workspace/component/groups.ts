@@ -5,12 +5,12 @@ import { MdButton } from '@angular/material'
 
 import { WorkspaceService } from '../service';
 
-import { DirectoryJSON } from '../../../../common/io/directory';
 import { AbstractComponent } from '../../../component/abstract';
+import { DirectoryContent } from "../../../../common/content/directory";
 
 interface OpenEvent {
-  previous: DirectoryJSON,
-  group: DirectoryJSON,
+  previous: DirectoryContent,
+  group: DirectoryContent,
   event: AnimationEvent
 }
 
@@ -51,12 +51,12 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
   @ViewChild('parentMenuTrigger') parentMenuTrigger: MdButton;
 
   // Internal vars which have not to be available to the public
-  private groups: DirectoryJSON[]; // Current files
-  private openingGroups: DirectoryJSON[]; // Preview of files which will be displayed on animation end
+  private groups: DirectoryContent[]; // Current files
+  private openingGroups: DirectoryContent[]; // Preview of files which will be displayed on animation end
   private slide = 'none'; // slide state, either 'none', 'open', 'close'
-  private currentlyOpen: DirectoryJSON; // Current directory
-  private previouslyOpen: DirectoryJSON; // Previous directory
-  private currentParents: DirectoryJSON[]; // List of parents of the current directory
+  private currentlyOpen: DirectoryContent; // Current directory
+  private previouslyOpen: DirectoryContent; // Previous directory
+  private currentParents: DirectoryContent[]; // List of parents of the current directory
   private previousScrolls = []; // Scroll states for each directory
 
   constructor(public ref: ElementRef, private service: WorkspaceService) {
@@ -68,9 +68,9 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * A swipe animation will be started in the correct direction automatically based on the given group and the
    * hierarchy.
    *
-   * @param {DirectoryJSON} group The group to open.
+   * @param {DirectoryContent} group The group to open.
    */
-  open(group: DirectoryJSON): void {
+  open(group: DirectoryContent): void {
     let close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
     // Store the scroll state for each group so we can restore it if the user moves back
     if (!close) this.previousScrolls.push(this.$el.scrollTop());
@@ -158,9 +158,9 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * The currently selected group.
    *
    * @readonly
-   * @type {DirectoryJSON}
+   * @type {DirectoryContent}
    */
-  get current(): DirectoryJSON {
+  get current(): DirectoryContent {
     return this.currentlyOpen ? this.currentlyOpen : this.service.directory;
   }
 
@@ -168,9 +168,9 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * The previously selected group.
    *
    * @readonly
-   * @type {DirectoryJSON}
+   * @type {DirectoryContent}
    */
-  get previous(): DirectoryJSON {
+  get previous(): DirectoryContent {
     return this.previouslyOpen ? this.previouslyOpen : this.service.directory;
   }
 
@@ -178,9 +178,9 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * A parent list of the current group.
    *
    * @readonly
-   * @type {DirectoryJSON[]}
+   * @type {DirectoryContent[]}
    */
-  get parents(): DirectoryJSON[] {
+  get parents(): DirectoryContent[] {
     return this.currentParents ? this.currentParents : [];
   }
 

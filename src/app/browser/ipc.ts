@@ -21,7 +21,7 @@ export default function(): Promise<any> {
 
   let proms = [];
 
-  ipcActions.forEach(action => proms.push(action.init()) );
+  ipcActions.forEach( action => proms.push(action.init()) );
 
   return Promise.all(proms);
 }

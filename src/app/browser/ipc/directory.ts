@@ -11,8 +11,8 @@ export class IpcDirectory implements IpcAction {
         let dir = new Directory(dirpath);
         dir.on('scan:file', file => event.sender.send(`directory:scan:${id}:file`, file) );
         dir.on('scan:dir', dir => event.sender.send(`directory:scan:${id}:dir`, dir.path) );
-        dir.on('scan:dir:done', dir => event.sender.send(`directory:scan:${id}:dir:done`, dir.toJSON()) );
-        dir.on('scan:done', () => event.sender.send(`directory:scan:${id}:done`, dir.toJSON()) );
+        dir.on('scan:dir:done', dir => event.sender.send(`directory:scan:${id}:dir:done`, dir.export()) );
+        dir.on('scan:done', () => event.sender.send(`directory:scan:${id}:done`, dir.export()) );
         dir.on('scan:fail', e => event.sender.send(`directory:scan:${id}:fail`, e) );
         dir.scan(false, deep);
     });

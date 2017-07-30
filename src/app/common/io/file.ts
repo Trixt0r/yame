@@ -2,38 +2,37 @@ import * as Promise from 'bluebird';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { FileContent } from '../content/file';
+import { Exportable } from "../interface/exportable";
+
 require('./fs');
 
-export interface FileJSON {
-  lastModified: number;
-  name: string;
-  path: string;
-  simpleName: string;
-  size: number;
-  type: string;
-}
-
 /**
- * Defines a file.
+ * A file represents a file in the file system.
+ *
+ * An instance is able to read the contents of the file in the fs and write content to it back.
+ *
+ * @export
+ * @class File
  */
-export class File {
+export class File implements FileContent, Exportable<FileContent> {
 
-  /** @type {number} lastModified Thhe last modification timestamp. */
+  /** @type {number} The last modification timestamp. */
   lastModified: number;
 
-  /** @type {string} name The name of the file. */
+  /** @type {string} The name of the file. */
   name: string;
 
-  /** @type {string} path The path of the file. */
+  /** @type {string} The path of the file. */
   path: string;
 
-  /** @type {string} simpleName The name of the file in simple form, i.e. without any extension. */
+  /** @type {string} The name of the file in simple form, i.e. without any extension. */
   simpleName: string;
 
-  /** @type {number} size The size of the file, in bytes. */
+  /** @type {number} The size of the file, in bytes. */
   size: number;
 
-  /** @type {string} type The file type. */
+  /** @type {string} The file type. */
   type: string;
 
   constructor(filePath?: string) {
@@ -47,9 +46,9 @@ export class File {
   }
 
   /**
-   * @returns {*} A JSON representation of this file.
+   * @returns {FileContent} A JSON representation of this file.
    */
-  toJSON(): FileJSON {
+  export(): FileContent {
     return {
       lastModified: this.lastModified,
       name: this.name,
@@ -77,6 +76,5 @@ export class File {
   write(data: any): Promise<void> {
     return fs.writeFileAsync(this.path, data);
   }
-}
 
-export default File;
+}

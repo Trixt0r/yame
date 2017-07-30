@@ -2,27 +2,38 @@ import * as Promise from 'bluebird';
 import * as path from 'path';
 import * as fs from 'fs';
 import EventEmitter from '../event-emitter';
-import { File, FileJSON } from './file';
+import { File } from './file';
+import { FileContent } from '../content/file';
+import { DirectoryContent } from '../content/directory';
+import { Exportable } from "../interface/exportable";
 
 require('./fs');
 
-export interface DirectoryJSON {
-  path: string;
-  name: string;
-  children: Array<FileJSON|DirectoryJSON>
-}
-
-export class Directory extends EventEmitter {
+/**
+ * A directory represents a directory in the file system.
+ *
+ * An instance is able to scan itself recursively and return a list of all its children.
+ * The children get emptied as soon as the path gets changed. In this case the scan has to be done again.
+ *
+ * @export
+ * @class Directory
+ * @extends {EventEmitter}
+ */
+export class Directory extends EventEmitter implements Exportable<DirectoryContent> {
 
   /** @type {((File | Directory)[])} Scanned children files and directories */
   private _children: (File | Directory)[];
 
-  /** @type {boolean} scanned Whether a scan has already been done or not. */
+  /** @type {boolean} Whether a scan has been done on the current set path. */
   private scanned: boolean;
+
+  /** @type {string} Cached basename */
+  private innerName: string;
 
   constructor(private pathName: string) {
     super();
     this._children = [];
+    this.innerName = path.basename(this.pathName);
     this.scanned = false;
   }
 
@@ -86,6 +97,7 @@ export class Directory extends EventEmitter {
     this.pathName = val;
     this._children = [];
     this.scanned = false;
+    this.innerName = path.basename(this.pathName);
     this.emit('change:path', val);
   }
 
@@ -103,15 +115,19 @@ export class Directory extends EventEmitter {
   }
 
   /**
-   * @returns {*} A JSON representation of this directory.
+   * @readonly
+   * @type {string} The name of the directory without the full path.
    */
-  toJSON(): DirectoryJSON {
+  get name(): string {
+    return this.innerName;
+  }
+
+  /** @returns {DirectoryContent} A JSON representation of this directory. */
+  export(): DirectoryContent {
     return {
       path: this.path,
-      name: path.basename(this.path),
-      children: this._children.map(child => child.toJSON())
+      name: this.name,
+      children: this._children.map(child => child.export())
     };
   }
 }
-
-export default Directory;

@@ -1,7 +1,11 @@
 import { EventEmitter as eventemitter3 } from 'eventemitter3';
 
 /**
- * Typescript compatible version of Backbone.Events for extending it.
+ * Event emitter with some more useful methods.
+ *
+ * @export
+ * @class EventEmitter
+ * @extends {eventemitter3}
  */
 export default class EventEmitter extends eventemitter3 {
 
@@ -60,4 +64,5 @@ export default class EventEmitter extends eventemitter3 {
     });
     return this;
   }
+
 }

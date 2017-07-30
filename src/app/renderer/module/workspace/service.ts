@@ -1,5 +1,5 @@
-import { FileJSON } from '../../../common/io/file';
-import { DirectoryJSON } from '../../../common/io/directory';
+import { FileContent } from '../../../common/content/file';
+import { DirectoryContent } from '../../../common/content/directory';
 import { Subject } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { ipcRenderer } from 'electron';
@@ -10,6 +10,8 @@ import * as Promise from 'bluebird';
 /**
  * The workspace service is holding a json representation of the workspace files.
  *
+ * This service provides a public api for accessing file and directory representations for file system paths.
+ *
  * @export
  * @class WorkspaceService
  * @todo Implement watch task on the directory
@@ -17,8 +19,8 @@ import * as Promise from 'bluebird';
 @Injectable()
 export class WorkspaceService {
 
-  private internalFiles: DirectoryJSON;
-  private internalFolders: DirectoryJSON[];
+  private internalFiles: DirectoryContent;
+  private internalFolders: DirectoryContent[];
   private internalState: 'init' | 'ready' | 'fail' = 'init';
   private internalError;
 
@@ -37,13 +39,13 @@ export class WorkspaceService {
    * @param {string} rootDir The full path of the workspace.
    * @returns {Promise}
    */
-  init(rootDir: string): Promise<DirectoryJSON> {
+  init(rootDir: string): Promise<DirectoryContent> {
     if (this.internalState !== 'init')
       return Promise.resolve(this.internalFiles);
     this.internalState = 'init';
     this.initSource.next();
-    return new Promise<DirectoryJSON>((resolve, reject) => {
-      let id = _.uniqueId('asset-service-');
+    return new Promise<DirectoryContent>((resolve, reject) => {
+      let id = _.uniqueId('workspace-service-');
       ipcRenderer.send('directory:scan', rootDir, id, true);
       ipcRenderer.once(`directory:scan:${id}:done`, (event, json) => {
         ipcRenderer.removeAllListeners(`directory:scan:${id}:fail`);
@@ -67,19 +69,19 @@ export class WorkspaceService {
    * Scans recursively all directories for the given path and returns the found directory or file object.
    *
    * @param {string} path
-   * @returns {(DirectoryJSON | FileJSON)} The found directory or file.
+   * @returns {(DirectoryContent | FileContent)} The found directory or file.
    */
-  find(path: string): DirectoryJSON | FileJSON {
+  find(path: string): DirectoryContent | FileContent {
     if (path == this.internalFiles.path)
       return this.internalFiles;
-    let found: DirectoryJSON | FileJSON = null;
-    let searchChildren = (children: (DirectoryJSON | FileJSON)[]) => {
+    let found: DirectoryContent | FileContent = null;
+    let searchChildren = (children: (DirectoryContent | FileContent)[]) => {
       let f = null;
       children.some(child => {
         if (child.path == path)
           f = child;
-        else if ((<DirectoryJSON>child).children !== void 0)
-          f = searchChildren((<DirectoryJSON>child).children);
+        else if ((<DirectoryContent>child).children !== void 0)
+          f = searchChildren((<DirectoryContent>child).children);
         return f !== null;
       });
       return f;
@@ -88,15 +90,15 @@ export class WorkspaceService {
   }
 
   /**
-   * @param {DirectoryJSON} directory
-   * @returns {DirectoryJSON[]} Filtered list of the given directory structure with directories only.
+   * @param {DirectoryContent} directory
+   * @returns {DirectoryContent[]} Filtered list of the given directory structure with directories only.
    */
-  getDirectories(directory: DirectoryJSON): DirectoryJSON[] {
-    let getDirectories = (children: (DirectoryJSON | FileJSON)[]) => {
-      let folders = children.filter(child => (<DirectoryJSON>child).children !== void 0);
-      folders = <DirectoryJSON[]>folders.map(folder=> _.extend({ }, folder));
-      folders.forEach(folder =>(<DirectoryJSON>folder).children = getDirectories( (<DirectoryJSON>folder).children ));
-      return <DirectoryJSON[]>folders;
+  getDirectories(directory: DirectoryContent): DirectoryContent[] {
+    let getDirectories = (children: (DirectoryContent | FileContent)[]) => {
+      let folders = children.filter(child => (<DirectoryContent>child).children !== void 0);
+      folders = <DirectoryContent[]>folders.map(folder=> _.extend({ }, folder));
+      folders.forEach(folder =>(<DirectoryContent>folder).children = getDirectories( (<DirectoryContent>folder).children ));
+      return <DirectoryContent[]>folders;
     };
     return getDirectories(directory.children);
   }
@@ -104,13 +106,13 @@ export class WorkspaceService {
   /**
    * Returns a list of all files (direct childs) in the given directory path.
    *
-   * @param {string | DirectoryJSON} path Should be a directory path.
-   * @returns {(DirectoryJSON | FileJSON)[]} `null` will be returned if the path is not a directory.
+   * @param {string | DirectoryContent} path Should be a directory path.
+   * @returns {(DirectoryContent | FileContent)[]} `null` will be returned if the path is not a directory.
    */
-  getFiles(path: string | DirectoryJSON): (DirectoryJSON | FileJSON)[] {
-    let found: DirectoryJSON | FileJSON = this.find(typeof path === 'string' ? path : path.path);
-    if (found && (<DirectoryJSON>found).children !== void 0)
-      return (<DirectoryJSON>found).children;
+  getFiles(path: string | DirectoryContent): (DirectoryContent | FileContent)[] {
+    let found: DirectoryContent | FileContent = this.find(typeof path === 'string' ? path : path.path);
+    if (found && (<DirectoryContent>found).children !== void 0)
+      return (<DirectoryContent>found).children;
     else
       return null;
   }
@@ -118,22 +120,22 @@ export class WorkspaceService {
   /**
    * Returns the parent object for the given file.
    *
-   * @param {(string | DirectoryJSON | FileJSON)} file
-   * @returns {DirectoryJSON} `null` may be returned if the parent is not part of the workspace.
+   * @param {(string | DirectoryContent | FileContent)} file
+   * @returns {DirectoryContent} `null` may be returned if the parent is not part of the workspace.
    */
-  getParent(file: string | DirectoryJSON | FileJSON): DirectoryJSON {
+  getParent(file: string | DirectoryContent | FileContent): DirectoryContent {
     let filePath = typeof file === 'string' ? file : file.path;
-    let re = <DirectoryJSON>this.find( path.dirname(filePath));
+    let re = <DirectoryContent>this.find( path.dirname(filePath));
     return re;
   }
 
   /**
    * Returns all parents of the given file by climbing the hierarchy up.
    *
-   * @param {(string | DirectoryJSON | FileJSON)} file
-   * @returns {DirectoryJSON[]} A list of all parents of the given file
+   * @param {(string | DirectoryContent | FileContent)} file
+   * @returns {DirectoryContent[]} A list of all parents of the given file
    */
-  getParents(file: string | DirectoryJSON | FileJSON): DirectoryJSON[] {
+  getParents(file: string | DirectoryContent | FileContent): DirectoryContent[] {
     let parents = [];
     let parent = file;
     while (parent = this.getParent(parent))
@@ -143,9 +145,9 @@ export class WorkspaceService {
 
   /**
    * @readonly
-   * @type {DirectoryJSON[]} folders A filtered version of WorkspaceService#files, which contains only directories.
+   * @type {DirectoryContent[]} folders A filtered version of WorkspaceService#files, which contains only directories.
    */
-  get directories(): DirectoryJSON[] {
+  get directories(): DirectoryContent[] {
     if (!this.internalFolders)
       throw 'Workspace not initialized yet!';
 
@@ -162,17 +164,17 @@ export class WorkspaceService {
 
   /**
    * @readonly
-   * @type {DirectoryJSON} directory The json representation of the workspace root folder.
+   * @type {DirectoryContent} directory The json representation of the workspace root folder.
    */
-  get directory(): DirectoryJSON {
+  get directory(): DirectoryContent {
     return this.internalFiles;
   }
 
   /**
    * @readonly
-   * @type {((DirectoryJSON | FileJSON)[])} files The list of files and directories at the workspace root.
+   * @type {((DirectoryContent | FileContent)[])} files The list of files and directories at the workspace root.
    */
-  get files(): (DirectoryJSON | FileJSON)[] {
+  get files(): (DirectoryContent | FileContent)[] {
     return this.internalFiles.children;
   }
 
