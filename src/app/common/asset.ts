@@ -1,3 +1,4 @@
+import { AssetGroup } from './asset/group';
 /**
  * The content details of an asset instance.
  *
@@ -30,5 +31,12 @@ export abstract class Asset {
 
   /** @type {AssetContent} The content of the asset. */
   content: AssetContent;
+
+  /** @type {AssetGroup<Asset>} The parent of this asset. Is `null` if it is the root group. */
+  parent: AssetGroup<Asset>;
+
+  constructor() {
+    this.content = { };
+  }
 
 }

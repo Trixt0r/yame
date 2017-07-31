@@ -133,7 +133,7 @@ export class WorkspaceService {
    * Returns all parents of the given file by climbing the hierarchy up.
    *
    * @param {(string | DirectoryContent | FileContent)} file
-   * @returns {DirectoryContent[]} A list of all parents of the given file
+   * @returns {DirectoryContent[]} A list of all parents of the given file.
    */
   getParents(file: string | DirectoryContent | FileContent): DirectoryContent[] {
     let parents = [];

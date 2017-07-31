@@ -9,6 +9,13 @@ import { GroupContent } from './group';
  * @extends {(AssetGroupContent<DirectoryAsset | FileAsset>)}
  */
 export interface DirectoryContent extends GroupContent<DirectoryContent | FileContent> {
+
+  /** @type {string} The full path of the directory. */
   path: string;
+
+  /** @type {string} The name of the directory. */
   name: string;
+
+  /** @type {string} The type, i.e. always directory. */
+  type: 'directory';
 }

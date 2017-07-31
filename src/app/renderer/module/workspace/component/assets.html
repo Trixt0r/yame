@@ -8,16 +8,16 @@
   </li>
 </ol> -->
 
-<div #filesContainer class="flex wrap" *ngIf="displayedFiles && displayedFiles.length">
-  <ng-template ngFor let-file [ngForOf]="displayedFiles">
-    <md-card class="example-card" *ngIf="!file.children">
+<div #filesContainer class="flex wrap" *ngIf="assets && assets.length">
+  <ng-template ngFor let-asset [ngForOf]="assets">
+    <md-card class="example-card">
       <md-card-header>
-        <md-card-title>{{ file.simpleName ? file.simpleName : file.name }}</md-card-title>
-        <md-card-subtitle>{{ file.children ? '' : file.type }}</md-card-subtitle>
+        <md-card-title>{{ asset.content.simpleName }}</md-card-title>
+        <md-card-subtitle>{{ asset.type }}</md-card-subtitle>
       </md-card-header>
       <div class="wrapper fill-width">
-        <img md-card-image [src]="sanitize(file.path)" *ngIf="isImage(file.path)">
-        <md-icon class="no-preview" *ngIf="!isImage(file.path)">{{ file.children ? 'folder' : 'web_asset' }}</md-icon>
+        <img md-card-image [src]="sanitize(asset.content.path)" *ngIf="isImage(asset.content.path)">
+        <md-icon class="no-preview" *ngIf="!isImage(asset.content.path)">{{ 'web_asset' }}</md-icon>
       </div>
       <md-card-actions class="text-right">
         <button md-icon-button [mdMenuTriggerFor]="menu">
@@ -53,14 +53,14 @@
 
 <div #noFilesContainer
     class="files-empty"
-    *ngIf="displayedFiles && !displayedFiles.length"
+    *ngIf="assets && !assets.length"
     (keydown)="select($event, null)"
     tabindex="0">
-  <div *ngIf="!files.length" class="text-center mt-2">
-    Folder is empty.
+  <div *ngIf="!assets.length" class="text-center mt-2">
+    Group is empty.
   </div>
-  <div *ngIf="files.length" class="text-center mt-2">
-    No files match the filter.
+  <div *ngIf="assets.length" class="text-center mt-2">
+    No assets match the filter.
   </div>
 </div>
 

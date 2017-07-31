@@ -5,15 +5,15 @@
   [@slideState]="slide"
   class="prev">
   <md-list-item>
-    <button md-icon-button *ngIf="current != service.directory" class="btn-back">
+    <button md-icon-button *ngIf="current.id != ws.directory.path" class="btn-back">
       <md-icon >keyboard_arrow_left</md-icon>
     </button>
-    <div class="fill-width text-center">{{ current.name }}</div>
+    <div class="fill-width text-center">{{ current.content.name }}</div>
   </md-list-item>
   <ng-template ngFor let-group [ngForOf]="openingGroups">
     <md-list-item>
       <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ group.name }} </h4>
+      <h4 md-line> {{ group.content.name }} </h4>
     </md-list-item>
   </ng-template>
 </md-list>
@@ -33,7 +33,7 @@
             class="btn-back">
       <md-icon>keyboard_arrow_left</md-icon>
     </button>
-    <div class="fill-width text-center">{{ slide == 'none' ? current.name : previous.name }}</div>
+    <div class="fill-width text-center">{{ slide == 'none' ? current.content.name : previous.content.name }}</div>
   </md-list-item>
 
   <button
@@ -48,14 +48,14 @@
   <md-menu #parentsMenu="mdMenu" [yPosition]="'above'">
     <button *ngFor="let parent of parents" md-menu-item (click)="open(parent)">
       <md-icon>folder_open</md-icon>
-      <span>{{ parent.name }}</span>
+      <span>{{ parent.content.name }}</span>
     </button>
   </md-menu>
 
   <ng-template ngFor let-group [ngForOf]="groups">
     <md-list-item (click)="open(group)">
       <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ group.name }} </h4>
+      <h4 md-line> {{ group.content.name }} </h4>
     </md-list-item>
   </ng-template>
 </md-nav-list>
@@ -69,12 +69,12 @@
     <button md-icon-button class="btn-back">
       <md-icon >keyboard_arrow_left</md-icon>
     </button>
-    <div class="fill-width text-center">{{ current.name }}</div>
+    <div class="fill-width text-center">{{ current.content.name }}</div>
   </md-list-item>
   <ng-template ngFor let-group [ngForOf]="openingGroups">
     <md-list-item>
       <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ group.name }} </h4>
+      <h4 md-line> {{ group.content.name }} </h4>
     </md-list-item>
   </ng-template>
 </md-list>

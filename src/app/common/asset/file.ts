@@ -10,7 +10,7 @@ import { Asset } from '../asset';
  * @class FileAsset
  * @implements {Asset}
  */
-export class FileAsset implements Asset {
+export class FileAsset extends Asset {
 
   /** @inheritdoc */
   id: string;

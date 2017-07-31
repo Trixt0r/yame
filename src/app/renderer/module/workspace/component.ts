@@ -1,3 +1,6 @@
+import { AssetGroup } from '../../../common/asset/group';
+import { DirectoryAsset } from '../../../common/asset/directory';
+import { AssetService } from './service/asset';
 import { GroupsComponent } from './component/groups';
 import { ResizeableComponent } from "../utils/component/resizable";
 import { AssetsComponent } from './component/assets';
@@ -5,12 +8,12 @@ import { TreeNode } from 'angular-tree-component/dist/models/tree-node.model';
 import { WindowRef } from '../../service/window';
 import { WorkspaceService } from './service';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { ipcRenderer } from 'electron';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { DirectoryContent } from "../../../common/content/directory";
 import { FileContent } from "../../../common/content/file";
+import { Asset } from "../../../common/asset";
 
 @Component({
   moduleId: module.id,
@@ -33,19 +36,17 @@ export class WorkspaceComponent extends ResizeableComponent {
   selection = null;
   nextSelection = null;
 
+  assetGroup: AssetGroup<Asset>;
+
   @ViewChild('resizerLeft') resizerLeft: ResizeableComponent;
   @ViewChild('leftCol') leftCol: GroupsComponent;
   @ViewChild('rightCol') rightCol: AssetsComponent;
   @ViewChild('row') row: ElementRef;
   @ViewChild('tree') tree: any;
 
-  constructor(public ref: ElementRef, private service: WorkspaceService, private sanitizer: DomSanitizer) {
+  constructor(public ref: ElementRef, private service: WorkspaceService, private assets: AssetService) {
     super(ref);
     this.maxVal = window.innerHeight - 100;
-  }
-
-  sanitizeUrl(url: string) {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
   }
 
   /** @override */
@@ -73,7 +74,7 @@ export class WorkspaceComponent extends ResizeableComponent {
             isExpanded: true,
             children: this.service.directories
           }];
-          this.select(json.path);
+          this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
           setTimeout(() => this.onResize());
         });
     });
@@ -100,9 +101,8 @@ export class WorkspaceComponent extends ResizeableComponent {
     this.rightCol.$el.css('width', fullWidth - this.leftWidth - 5);
   }
 
-  select(filePath: string) {
-    this.selectedPath = filePath.replace(this.nodes[0].path, 'Assets').split(path.sep);
-    this.selection = this.service.getFiles(filePath);
+  onGroupSelect(group: AssetGroup<Asset>) {
+    this.assetGroup = group;
   }
 
   assetSelected(asset: DirectoryContent | FileContent) {

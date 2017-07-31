@@ -1,3 +1,6 @@
+import { AssetService } from '../service/asset';
+import { Asset } from '../../../../common/asset';
+import { AssetGroup } from '../../../../common/asset/group';
 import { OnInit } from '@angular/core/public_api';
 import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
@@ -9,8 +12,8 @@ import { AbstractComponent } from '../../../component/abstract';
 import { DirectoryContent } from "../../../../common/content/directory";
 
 interface OpenEvent {
-  previous: DirectoryContent,
-  group: DirectoryContent,
+  previous: AssetGroup<Asset>,
+  group: AssetGroup<Asset>,
   event: AnimationEvent
 }
 
@@ -51,15 +54,15 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
   @ViewChild('parentMenuTrigger') parentMenuTrigger: MdButton;
 
   // Internal vars which have not to be available to the public
-  private groups: DirectoryContent[]; // Current files
-  private openingGroups: DirectoryContent[]; // Preview of files which will be displayed on animation end
+  private groups: AssetGroup<Asset>[]; // Current files
+  private openingGroups: AssetGroup<Asset>[]; // Preview of files which will be displayed on animation end
   private slide = 'none'; // slide state, either 'none', 'open', 'close'
-  private currentlyOpen: DirectoryContent; // Current directory
-  private previouslyOpen: DirectoryContent; // Previous directory
-  private currentParents: DirectoryContent[]; // List of parents of the current directory
+  private currentlyOpen: AssetGroup<Asset>; // Current directory
+  private previouslyOpen: AssetGroup<Asset>; // Previous directory
+  private currentParents: AssetGroup<Asset>[]; // List of parents of the current directory
   private previousScrolls = []; // Scroll states for each directory
 
-  constructor(public ref: ElementRef, private service: WorkspaceService) {
+  constructor(public ref: ElementRef, private ws: WorkspaceService, private assets: AssetService) {
     super(ref);
   }
 
@@ -68,17 +71,17 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * A swipe animation will be started in the correct direction automatically based on the given group and the
    * hierarchy.
    *
-   * @param {DirectoryContent} group The group to open.
+   * @param {AssetGroup<Asset>} group The group to open.
    */
-  open(group: DirectoryContent): void {
+  open(group: AssetGroup<Asset>): void {
     let close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
     // Store the scroll state for each group so we can restore it if the user moves back
     if (!close) this.previousScrolls.push(this.$el.scrollTop());
     this.slide = close ? 'close' : 'open';
-    this.openingGroups = this.service.getDirectories(group);
+    this.openingGroups = this.assets.getGroups(group);
     this.previouslyOpen = this.currentlyOpen;
     this.currentlyOpen = group;
-    this.currentParents = this.service.getParents(this.currentlyOpen).reverse();
+    this.currentParents = this.assets.getParents(this.currentlyOpen).reverse();
   }
 
   /**
@@ -93,14 +96,15 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
     if (event.which === 3 && this.parents.length > 0)
       $(this.parentMenuTrigger._getHostElement()).trigger('click');
     else if (event.which === 1)
-      this.open(this.service.getParent(this.current));
+      this.open(this.current.parent);
   }
 
   /** @inheritdoc */
   ngOnInit() {
     super.ngOnInit();
-    this.currentlyOpen = this.service.directory;
-    this.groups = this.service.directories;
+    this.currentlyOpen = <AssetGroup<Asset>>this.assets.fromFs(this.ws.directory);
+    this.previouslyOpen = this.currentlyOpen;
+    this.groups = this.assets.getGroups(this.currentlyOpen);
     this.currentParents = [];
   }
 
@@ -148,7 +152,7 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    */
   private fixScroll(event: AnimationEvent) {
     if (event.toState === 'close') {
-      let idx = this.service.getParents(this.previous).reverse().indexOf(this.current);
+      let idx = this.assets.getParents(this.previous).reverse().indexOf(this.current);
       this.$el.finish().animate({ scrollTop: this.previousScrolls[idx] }, 'fast');
       this.previousScrolls.splice(idx, this.previousScrolls.length - idx); // Clear all states from the found index
     }
@@ -158,10 +162,10 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * The currently selected group.
    *
    * @readonly
-   * @type {DirectoryContent}
+   * @type {AssetGroup<Asset>}
    */
-  get current(): DirectoryContent {
-    return this.currentlyOpen ? this.currentlyOpen : this.service.directory;
+  get current(): AssetGroup<Asset> {
+    return this.currentlyOpen;
   }
 
   /**
@@ -170,18 +174,18 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * @readonly
    * @type {DirectoryContent}
    */
-  get previous(): DirectoryContent {
-    return this.previouslyOpen ? this.previouslyOpen : this.service.directory;
+  get previous(): AssetGroup<Asset> {
+    return this.previouslyOpen;
   }
 
   /**
    * A parent list of the current group.
    *
    * @readonly
-   * @type {DirectoryContent[]}
+   * @type {AssetGroup<Asset>[]}
    */
-  get parents(): DirectoryContent[] {
-    return this.currentParents ? this.currentParents : [];
+  get parents(): AssetGroup<Asset>[] {
+    return this.currentParents;
   }
 
   /**
@@ -192,7 +196,7 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    * @type {boolean}
    */
   private get displayBack(): boolean {
-    return (this.slide === 'none' && this.current !== this.service.directory) ||
-            (this.slide !== 'none' && this.previous != this.service.directory);
+    return (this.slide === 'none' && this.current !== this.assets.fromFs(this.ws.directory)) ||
+            (this.slide !== 'none' && this.previous != this.assets.fromFs(this.ws.directory));
   }
 }

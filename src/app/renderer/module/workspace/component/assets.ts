@@ -1,3 +1,6 @@
+import { AssetService } from '../service/asset';
+import { AssetGroup } from '../../../../common/asset/group';
+import { Asset } from '../../../../common/asset';
 import { KeyboardService } from '../../../service/keyboard';
 import {
   Component,
@@ -60,21 +63,23 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
   private handledByKeys: boolean;
   private bcIdx = 0;
 
-  @Input() files: (DirectoryContent | FileContent)[];
-  @Input() path: string[];
+  @Input() group: AssetGroup<Asset>;
   @Output('select') selectEvent = new EventEmitter();
   @Output('breadcrumb') breadcrumbEvent = new EventEmitter();
   @ViewChild('search') search: ElementRef;
   @ViewChild('breadcrumbs') breadcrumbs: ElementRef;
   @ViewChild('filesContainer') filesContainer: ElementRef;
   @ViewChild('noFilesContainer') noFilesContainer: ElementRef;
+
+  private assets: Asset[];
+
   private searching = 'inactive';
 
-  private displayedFiles: (DirectoryContent | FileContent)[];
+  private displayedFiles: Asset[];
 
-  private selection: DirectoryContent | FileContent;
+  private selection: Asset;
 
-  constructor(public ref: ElementRef, private sanitizer: DomSanitizer, private keyboardService: KeyboardService) {
+  constructor(public ref: ElementRef, private sanitizer: DomSanitizer, private keyboardService: KeyboardService, private as: AssetService) {
     super(ref);
   }
 
@@ -98,14 +103,14 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
    * @returns {void}
    */
   brKeyDown(event: KeyboardEvent, idx: number): void {
-    switch (event.keyCode) {
-      case 27:
-      case 8:
-      case 37: this.focusBcIdx(idx - 1); break;
-      case 39: this.focusBcIdx(idx + 1); break;
-      case 40: event.preventDefault(); // no scroll
-               this.focusFileIdx(this.displayedFiles.indexOf(this.selection)); break;
-    }
+    // switch (event.keyCode) {
+    //   case 27:
+    //   case 8:
+    //   case 37: this.focusBcIdx(idx - 1); break;
+    //   case 39: this.focusBcIdx(idx + 1); break;
+    //   case 40: event.preventDefault(); // no scroll
+    //            this.focusFileIdx(this.displayedFiles.indexOf(this.selection)); break;
+    // }
   }
 
   /**
@@ -115,51 +120,51 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
    * @returns {void}
    */
   focusBcIdx(idx: number): void {
-    $($(this.breadcrumbs.nativeElement).find('a')[Math.max(0, Math.min(idx, this.path.length - 2))]).focus();
+    // $($(this.breadcrumbs.nativeElement).find('a')[Math.max(0, Math.min(idx, this.path.length - 2))]).focus();
   }
 
   /**
    * Handler for selection the given file item by clicking or using the keyboard.
    *
    * @param {(KeyboardEvent | MouseEvent)} event
-   * @param {(DirectoryContent | FileContent)} item
+   * @param {Asset} item
    * @returns {void}
    */
-  select(event: KeyboardEvent | MouseEvent, item: DirectoryContent | FileContent): void {
-    this.handledByKeys = event instanceof KeyboardEvent;
-    if (this.handledByKeys) {
-      let keyCode = (<KeyboardEvent>event).keyCode;
-      if (keyCode === 27 && this.searching === 'inactive') {
-        if (this.selection)
-          this.selection = null;
-        else
-          this.focusBcIdx(this.path.length - 2);
-      }
-      if (keyCode === 8 && this.path.length > 1)
-        $($(this.breadcrumbs.nativeElement).find('a')[this.path.length - 2]).focus();
-      // Arrow key navigation
-      if (this.filesContainer && keyCode >= 35 && keyCode <= 40) {
-        let $filesContainer = $(this.filesContainer.nativeElement);
-        let itemIdx = this.displayedFiles.indexOf(item);
-        let maxIdxRow = Math.floor($filesContainer.outerWidth() / $(event.target).outerWidth());
-        if (keyCode == 40 || keyCode == 38 || keyCode == 35 || keyCode == 36)
-          event.preventDefault(); // no scroll
-        switch(keyCode) {
-          case 35: this.focusFileIdx(this.displayedFiles.length); break;
-          case 36: this.focusFileIdx(0); break;
-          case 37: this.focusFileIdx(itemIdx - 1); break;
-          case 38: this.focusFileIdx(itemIdx - maxIdxRow); break;
-          case 39: this.focusFileIdx(itemIdx + 1); break;
-          case 40: this.focusFileIdx(itemIdx + maxIdxRow); break;
-        }
-      }
-      if (keyCode !== 13) return;
-    }
-    if (item == this.selection)
-      this.selection = null;
-    else
-      this.selection = item;
-    this.selectEvent.emit(this.selection);
+  select(event: KeyboardEvent | MouseEvent, item: Asset): void {
+    // this.handledByKeys = event instanceof KeyboardEvent;
+    // if (this.handledByKeys) {
+    //   let keyCode = (<KeyboardEvent>event).keyCode;
+    //   if (keyCode === 27 && this.searching === 'inactive') {
+    //     if (this.selection)
+    //       this.selection = null;
+    //     else
+    //       this.focusBcIdx(this.path.length - 2);
+    //   }
+    //   if (keyCode === 8 && this.path.length > 1)
+    //     $($(this.breadcrumbs.nativeElement).find('a')[this.path.length - 2]).focus();
+    //   // Arrow key navigation
+    //   if (this.filesContainer && keyCode >= 35 && keyCode <= 40) {
+    //     let $filesContainer = $(this.filesContainer.nativeElement);
+    //     let itemIdx = this.displayedFiles.indexOf(item);
+    //     let maxIdxRow = Math.floor($filesContainer.outerWidth() / $(event.target).outerWidth());
+    //     if (keyCode == 40 || keyCode == 38 || keyCode == 35 || keyCode == 36)
+    //       event.preventDefault(); // no scroll
+    //     switch(keyCode) {
+    //       case 35: this.focusFileIdx(this.displayedFiles.length); break;
+    //       case 36: this.focusFileIdx(0); break;
+    //       case 37: this.focusFileIdx(itemIdx - 1); break;
+    //       case 38: this.focusFileIdx(itemIdx - maxIdxRow); break;
+    //       case 39: this.focusFileIdx(itemIdx + 1); break;
+    //       case 40: this.focusFileIdx(itemIdx + maxIdxRow); break;
+    //     }
+    //   }
+    //   if (keyCode !== 13) return;
+    // }
+    // if (item == this.selection)
+    //   this.selection = null;
+    // else
+    //   this.selection = item;
+    // this.selectEvent.emit(this.selection);
   }
 
   /**
@@ -178,25 +183,28 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.files) {
-      setTimeout(() => this.filterFiles());
-      this.selection = null;
-      this.selectEvent.emit(this.selection);
-      if (changes.path.previousValue) {
-        let prevL = changes.path.previousValue.length;
-        let prev = changes.path.previousValue[prevL - (prevL - changes.path.currentValue.length)];
-        setTimeout(() => {
-          if (this.filesContainer && this.handledByKeys) {
-            let idx = this.displayedFiles.findIndex(val => val.name == prev);
-            if (idx >= 0)
-              $($(this.filesContainer.nativeElement).find('.p-2')[idx]).focus();
-            else
-              $(this.filesContainer.nativeElement).find('.p-2').first().focus();
-          } else
-            this.focusFileIdx(0);
-        });
-      }
+    if (changes.group) {
+      this.assets = this.as.getAssets(this.group);
     }
+    // if (changes.files) {
+    //   setTimeout(() => this.filterFiles());
+    //   this.selection = null;
+    //   this.selectEvent.emit(this.selection);
+    //   if (changes.path.previousValue) {
+    //     let prevL = changes.path.previousValue.length;
+    //     let prev = changes.path.previousValue[prevL - (prevL - changes.path.currentValue.length)];
+    //     setTimeout(() => {
+    //       if (this.filesContainer && this.handledByKeys) {
+    //         let idx = this.displayedFiles.findIndex(val => val.name == prev);
+    //         if (idx >= 0)
+    //           $($(this.filesContainer.nativeElement).find('.p-2')[idx]).focus();
+    //         else
+    //           $(this.filesContainer.nativeElement).find('.p-2').first().focus();
+    //       } else
+    //         this.focusFileIdx(0);
+    //     });
+    //   }
+    // }
   }
 
   /**
@@ -206,7 +214,7 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
    * @param {number} i
    */
   breadcrumbClick(event: MouseEvent, i: number) {
-    this.breadcrumbEvent.emit(i);
+    // this.breadcrumbEvent.emit(i);
   }
 
   /**
@@ -216,16 +224,16 @@ export class AssetsComponent extends AbstractComponent implements OnChanges, Aft
    * @returns {void}
    */
   filterFiles(event?: KeyboardEvent): void {
-    if (!this.files) return;
-    if (this.searching == 'active' && this.search.nativeElement.value) {
-      let val = this.search.nativeElement.value.toLocaleLowerCase();
-      this.displayedFiles = this.files.filter(child => child.name.toLocaleLowerCase().indexOf(val) >= 0 );
-    }
-    else
-      this.displayedFiles = this.files;
-    // Keep the selection, even we filter
-    if (this.selection && this.displayedFiles.indexOf(this.selection) < 0)
-      this.displayedFiles.push(this.selection);
+    // if (!this.assets) return;
+    // if (this.searching == 'active' && this.search.nativeElement.value) {
+    //   let val = this.search.nativeElement.value.toLocaleLowerCase();
+    //   this.displayedFiles = this.assets.filter(child => child.name.toLocaleLowerCase().indexOf(val) >= 0 );
+    // }
+    // else
+    //   this.displayedFiles = this.files;
+    // // Keep the selection, even we filter
+    // if (this.selection && this.displayedFiles.indexOf(this.selection) < 0)
+    //   this.displayedFiles.push(this.selection);
   }
 
   /** @returns {void} Toggles the search mode. */

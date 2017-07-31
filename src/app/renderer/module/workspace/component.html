@@ -16,9 +16,9 @@
  <div #row class="fill-width" *ngIf="nodes">
   <groups
     #leftCol
-    (opened)="select($event.group.path)"
+    (opened)="onGroupSelect($event.group)"
     class="absolute fill-height">
   </groups>
-  <assets #rightCol class="absolute fill-height" [files]="selection" [path]="selectedPath" (select)="assetSelected($event)" (breadcrumb)="breadcrumbClick($event)"></assets>
+  <assets #rightCol class="absolute fill-height" [group]="assetGroup"></assets>
   <resizable #resizerLeft class="left" [property]="'left'" [maxVal]="'500'" [minVal]="'200'" (sizeUpdated)="updateColumnsFromLeft($event)"></resizable>
 </div>

@@ -8,6 +8,7 @@ import { GroupsComponent } from './workspace/component/groups';
 import { WorkspaceComponent } from './workspace/component';
 
 import { WorkspaceService } from './workspace/service';
+import { AssetService } from './workspace/service/asset';
 
 @NgModule({
   imports: [BrowserModule, UtilsModule, MaterialModule],
@@ -21,6 +22,6 @@ import { WorkspaceService } from './workspace/service';
     GroupsComponent,
     AssetsComponent,
   ],
-  providers: [ WorkspaceService ]
+  providers: [ WorkspaceService, AssetService ]
 })
 export class WorkspaceModule { }

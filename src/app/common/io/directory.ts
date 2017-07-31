@@ -127,7 +127,8 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
     return {
       path: this.path,
       name: this.name,
-      children: this._children.map(child => child.export())
+      children: this._children.map(child => child.export()),
+      type: 'directory',
     };
   }
 }
