@@ -17,7 +17,7 @@ export class FileAsset extends Asset {
 
   /** @inheritdoc */
   get type(): string {
-    return 'file';
+    return this.content ? this.content.type : 'file';
   }
 
   /** @inheritdoc */

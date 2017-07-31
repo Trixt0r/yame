@@ -33,6 +33,8 @@ import { FileContent } from "../../../../common/content/file";
 /**
  * Assets component responsible for controling the assets view.
  *
+ * The assets component gets assigned a certain asset group to display.
+ *
  * @export
  * @class AssetsComponent
  * @extends {AbstractComponent}
