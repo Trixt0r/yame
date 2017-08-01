@@ -1,13 +1,3 @@
-<!-- <ol #breadcrumbs class="breadcrumb" *ngIf="files">
-  <li class="breadcrumb-item" *ngFor="let dir of path; let i=index">
-    <a *ngIf="i < path.length - 1" href="javascript:void(0)" (click)="breadcrumbClick($event, i)" (keydown)="brKeyDown($event, i)">{{ dir }}</a>
-    <a class="last" *ngIf="i === path.length - 1">{{ dir }}</a>
-  </li>
-  <li class="breadcrumb-item pl-2" *ngIf="selection">
-    {{ selection.name }}
-  </li>
-</ol> -->
-
 <div #filesContainer class="flex wrap" *ngIf="assets && assets.length">
   <ng-template ngFor let-asset [ngForOf]="assets">
     <md-card class="example-card">
@@ -16,39 +6,27 @@
         <md-card-subtitle>{{ asset.type }}</md-card-subtitle>
       </md-card-header>
       <div class="wrapper fill-width">
-         <ng-template [assetPreview]="asset"></ng-template>
-         <!-- <img md-card-image [src]="sanitize(asset.content.path)" *ngIf="isImage(asset.content.path)">
-        <md-icon class="no-preview" *ngIf="!isImage(asset.content.path)">{{ 'web_asset' }}</md-icon> -->
+        <ng-template [assetPreview]="asset"></ng-template>
       </div>
-      <md-card-actions class="text-right">
-        <button md-icon-button [mdMenuTriggerFor]="menu">
+      <md-card-actions *ngIf="getMenuOptions(asset).length" class="text-right">
+
+
+        <button *ngIf="getMenuOptions(asset).length == 1" md-button (click)="getMenuOptions(asset)[0].callback($event, asset)">
+          <md-icon *ngIf="getMenuOptions(asset)[0].icon">{{ getMenuOptions(asset)[0].icon }}</md-icon>
+          <span> {{ getMenuOptions(asset)[0].title }} </span>
+        </button>
+
+        <button *ngIf="getMenuOptions(asset).length > 1" md-icon-button [mdMenuTriggerFor]="menu">
           <md-icon>more_vert</md-icon>
         </button>
         <md-menu #menu="mdMenu">
-          <button md-menu-item>
-            <md-icon>edit</md-icon>
-            <span>Edit</span>
-          </button>
-          <button md-menu-item>
-            <md-icon>content_copy</md-icon>
-            <span>Copy</span>
-          </button>
-          <button md-menu-item disabled>
-            <span>...</span>
+          <button md-menu-item *ngFor="let option of getMenuOptions(asset)" (click)="option.callback($event, asset)">
+            <md-icon *ngIf="option.icon">{{ option.icon }}</md-icon>
+            <span> {{ option.title }} </span>
           </button>
         </md-menu>
       </md-card-actions>
     </md-card>
-    <!-- <div class="{{selection == file ? 'selected ' : ''}} p-2 text-center"
-        (click)="select($event, file)"
-        (keydown)="select($event, file)"
-        tabindex="0">
-      <i class="fa fa-folder fa-3x" *ngIf="file.children"></i>
-      <img [src]="sanitize(file.path)" *ngIf="!file.children" />
-      <div>
-        {{ file.name }}
-      </div>
-    </div> -->
   </ng-template>
 </div>
 
@@ -57,47 +35,7 @@
     *ngIf="assets && !assets.length"
     (keydown)="select($event, null)"
     tabindex="0">
-  <div *ngIf="!assets.length" class="text-center mt-2">
-    Group is empty.
-  </div>
-  <div *ngIf="assets.length" class="text-center mt-2">
-    No assets match the filter.
-  </div>
+  <md-card *ngIf="!assets.length" class="text-center">
+    Group is empty
+  </md-card>
 </div>
-
-<!-- <div class="options">
-  <div class="row">
-    <div class="col">
-      <div class="btn-group btn-group-sm" role="group" aria-label="..." *ngIf="selection">
-        <button type="button" class="btn btn-secondary">
-          <i class="fa fa-info"></i>
-        </button>
-        <button type="button" class="btn btn-secondary">
-          <i class="fa fa-edit"></i>
-        </button>
-        <button type="button" class="btn btn-secondary">
-          <i class="fa fa-clone"></i>
-        </button>
-      </div>
-    </div>
-
-    <div class="col pull-right" *ngIf="files">
-      <div class="input-group pull-left">
-        <input *ngIf="searching"
-                id="search"
-                #search
-                type="text"
-                class="form-control"
-                placeholder="Find..."
-                (keyup)="filterFiles($event)"
-                [@searchState]="searching"
-                (@searchState.done)="searchAnimDone($event)"
-                disabled>
-      </div>
-      <button class="btn btn-sm pull-right {{searching == 'active' ? 'active' : ''}}" *ngIf="files" (click)="toggleSearch()">
-        <i class="fa fa-search"></i>
-      </button>
-    </div>
-  </div>
-
-</div> -->

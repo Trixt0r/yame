@@ -5,7 +5,6 @@ import { DirectoryGroupComponent } from './renderer/module/workspace/component/g
 import { GroupComponentService } from './renderer/module/workspace/service/group-component';
 
 import { AssetService } from './renderer/module/workspace/service/asset';
-import { ReflectiveInjector } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import convertDirectory from './renderer/module/workspace/service/converter/directory';
@@ -22,4 +21,15 @@ platformBrowserDynamic()
     ref.injector.get(GroupComponentService).register('directory', DirectoryGroupComponent);
     ref.injector.get(AssetComponentService).registerPreview('file', FileAssetPreviewComponent);
     ref.injector.get(AssetComponentService).registerPreview('image', ImageAssetPreviewComponent);
+    ref.injector.get(AssetComponentService).registerMenuOptions('image', [
+      // {
+      //   icon: 'info',
+      //   title: 'Details',
+      //   callback: (event, asset) => {
+      //     let dialogRef = ref.injector.get(MdDialog).open(DialogContent);
+      //     dialogRef.componentInstance.asset = {   };
+      //     dialogRef.afterClosed().subscribe(result => console.log(result));
+      //   }
+      // },
+    ]);
   });
