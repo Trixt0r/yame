@@ -1,3 +1,6 @@
+import { GroupComponentService } from './workspace/service/group-component';
+import { GroupDirective } from './workspace/component/groups/directive/group';
+import { DirectoryGroupComponent } from './workspace/component/groups/component/group/directory';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { UtilsModule } from "./utils";
@@ -12,6 +15,9 @@ import { AssetService } from './workspace/service/asset';
 
 @NgModule({
   imports: [BrowserModule, UtilsModule, MaterialModule],
+  entryComponents: [
+    DirectoryGroupComponent
+  ],
   exports: [
     WorkspaceComponent,
     GroupsComponent,
@@ -21,7 +27,9 @@ import { AssetService } from './workspace/service/asset';
     WorkspaceComponent,
     GroupsComponent,
     AssetsComponent,
+    GroupDirective,
+    DirectoryGroupComponent
   ],
-  providers: [ WorkspaceService, AssetService ]
+  providers: [ WorkspaceService, AssetService, GroupComponentService ],
 })
 export class WorkspaceModule { }

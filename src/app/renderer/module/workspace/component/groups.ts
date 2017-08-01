@@ -1,16 +1,20 @@
 import { AssetService } from '../service/asset';
 import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
-import { OnInit } from '@angular/core/public_api';
-import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, OnInit } from '@angular/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
-import { MdButton } from '@angular/material'
+import { MdButton, MdListItem } from '@angular/material'
 
 import { WorkspaceService } from '../service';
 
 import { AbstractComponent } from '../../../component/abstract';
 import { DirectoryContent } from "../../../../common/content/directory";
 
+/**
+ * Open event definition.
+ *
+ * @interface OpenEvent
+ */
 interface OpenEvent {
   previous: AssetGroup<Asset>,
   group: AssetGroup<Asset>,
@@ -62,7 +66,10 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
   private currentParents: AssetGroup<Asset>[]; // List of parents of the current directory
   private previousScrolls = []; // Scroll states for each directory
 
-  constructor(public ref: ElementRef, private ws: WorkspaceService, private assets: AssetService) {
+  constructor(
+    public ref: ElementRef,
+    private ws: WorkspaceService,
+    private assets: AssetService) {
     super(ref);
   }
 

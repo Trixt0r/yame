@@ -18,7 +18,7 @@ interface FsConverter {
    * @param {FileContent | DirectoryContent} source The content to convert to an asset.
    * @returns {FileAsset | DirectoryAsset} The converted asset.
    */
-  (source: FileContent | DirectoryContent): FileAsset | DirectoryAsset;
+  (source: FileContent | DirectoryContent, service: AssetService): FileAsset | DirectoryAsset;
 
 }
 
@@ -30,6 +30,7 @@ interface FsConverter {
 interface Converters {
 
   [key: string]: FsConverter;
+
 }
 
 /**
@@ -57,23 +58,7 @@ interface Cache {
 export class AssetService {
 
   // Internal map of registered converters
-  private converters: Converters = {
-    'directory': (directory: DirectoryContent) => {
-      let asset = new DirectoryAsset();
-
-      asset.id = directory.path; // The asset id is the full path
-      asset.content.path = directory.path;
-      asset.content.name = directory.name;
-
-      // Recursively iterate over all sub directories
-      directory.children.forEach(child => {
-        let childAsset = this.fromFs(child);
-        childAsset.parent = asset;
-        asset.members.push( childAsset );
-      });
-      return asset;
-    }
-  };
+  private converters: Converters = { };
 
   // Internal cache for accessing assets directly without running any conversion
   private cache: Cache = { };
@@ -103,7 +88,7 @@ export class AssetService {
       return this.cache[source.path];
     let converter = this.converters[source.type];
     if (converter)
-      return this.cache[source.path] = converter(source);
+      return this.cache[source.path] = converter(source, this);
     else {
       let file = <FileContent>source;
       let asset = new FileAsset();
