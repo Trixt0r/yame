@@ -17,9 +17,4 @@ import { GroupComponent } from './abstract';
       <h4 md-line> {{ group.content.name }} </h4>
     </md-list-item>`
 })
-export class DirectoryGroupComponent extends GroupComponent {
-
-  /** @inheritdoc */
-  @Input() group: AssetGroup<Asset>;
-
-}
+export class DirectoryGroupComponent extends GroupComponent { }

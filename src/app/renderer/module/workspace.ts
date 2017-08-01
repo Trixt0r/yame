@@ -1,3 +1,7 @@
+import { ImageAssetPreviewComponent } from './workspace/component/assets/component/preview/image';
+import { AssetComponentService } from './workspace/service/asset-component';
+import { AssetPreviewDirective } from './workspace/component/assets/directive/asset-preview';
+import { FileAssetPreviewComponent } from './workspace/component/assets/component/preview/file';
 import { GroupComponentService } from './workspace/service/group-component';
 import { GroupDirective } from './workspace/component/groups/directive/group';
 import { DirectoryGroupComponent } from './workspace/component/groups/component/group/directory';
@@ -16,7 +20,9 @@ import { AssetService } from './workspace/service/asset';
 @NgModule({
   imports: [BrowserModule, UtilsModule, MaterialModule],
   entryComponents: [
-    DirectoryGroupComponent
+    DirectoryGroupComponent,
+    FileAssetPreviewComponent,
+    ImageAssetPreviewComponent,
   ],
   exports: [
     WorkspaceComponent,
@@ -28,8 +34,11 @@ import { AssetService } from './workspace/service/asset';
     GroupsComponent,
     AssetsComponent,
     GroupDirective,
-    DirectoryGroupComponent
+    AssetPreviewDirective,
+    DirectoryGroupComponent,
+    FileAssetPreviewComponent,
+    ImageAssetPreviewComponent,
   ],
-  providers: [ WorkspaceService, AssetService, GroupComponentService ],
+  providers: [ WorkspaceService, AssetService, GroupComponentService, AssetComponentService ],
 })
 export class WorkspaceModule { }

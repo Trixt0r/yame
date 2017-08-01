@@ -16,8 +16,9 @@
         <md-card-subtitle>{{ asset.type }}</md-card-subtitle>
       </md-card-header>
       <div class="wrapper fill-width">
-        <img md-card-image [src]="sanitize(asset.content.path)" *ngIf="isImage(asset.content.path)">
-        <md-icon class="no-preview" *ngIf="!isImage(asset.content.path)">{{ 'web_asset' }}</md-icon>
+         <ng-template [assetPreview]="asset"></ng-template>
+         <!-- <img md-card-image [src]="sanitize(asset.content.path)" *ngIf="isImage(asset.content.path)">
+        <md-icon class="no-preview" *ngIf="!isImage(asset.content.path)">{{ 'web_asset' }}</md-icon> -->
       </div>
       <md-card-actions class="text-right">
         <button md-icon-button [mdMenuTriggerFor]="menu">

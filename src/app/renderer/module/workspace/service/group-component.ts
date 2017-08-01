@@ -4,6 +4,11 @@ import { AssetGroup } from '../../../../common/asset/group';
 import { GroupComponent } from '../component/groups/component/group/abstract';
 import { Injectable, Type } from '@angular/core';
 
+/**
+ * Components map definition
+ *
+ * @interface Components
+ */
 interface Components {
 
   [key: string]: Type<GroupComponent>;

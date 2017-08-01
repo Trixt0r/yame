@@ -13,11 +13,8 @@ import { Asset } from '../asset';
 export class FileAsset extends Asset {
 
   /** @inheritdoc */
-  id: string;
-
-  /** @inheritdoc */
   get type(): string {
-    return this.content ? this.content.type : 'file';
+    return 'file';
   }
 
   /** @inheritdoc */

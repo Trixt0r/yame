@@ -87,15 +87,21 @@ export class AssetService {
     if (this.cache[source.path] && cache)
       return this.cache[source.path];
     let converter = this.converters[source.type];
-    if (converter)
-      return this.cache[source.path] = converter(source, this);
-    else {
-      let file = <FileContent>source;
-      let asset = new FileAsset();
-      asset.id = file.path;
-      asset.content = _.extend({}, file);
-      return this.cache[source.path] = asset;
-    }
+    return converter ? this.cache[source.path] = converter(source, this) : this.toFileAsset(source);
+  }
+
+  /**
+   * Creates a file asset from the given content.
+   *
+   * @param source The content to convert.
+   * @returns {FileAsset} The converted result
+   */
+  toFileAsset(source: FileContent | DirectoryContent): FileAsset {
+    let file = <FileContent>source;
+    let asset = new FileAsset();
+    asset.id = file.path;
+    asset.content = _.extend({}, file);
+    return this.cache[source.path] = asset;
   }
 
   /**
