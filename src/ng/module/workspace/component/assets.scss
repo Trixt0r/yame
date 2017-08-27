@@ -1,0 +1,175 @@
+$max-width: 100px;
+$max-height: 50px;
+$options-height: 20px;
+$bc-height: 20px;
+$options-bg-color: #191c1d;
+
+:host {
+  @extend div !optional;
+  padding: 0 !important;
+  position: relative;
+}
+
+.flex {
+  overflow-y: auto;
+  user-select: none;
+  max-height: calc(100% - #{$options-height});
+  md-card {
+    width: $max-width;
+    margin: 0 2.5px 5px 2.5px;
+    height: 138px;
+    md-card-header {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      md-card-subtitle {
+        min-height: 16px;
+      }
+    }
+    .wrapper {
+      height: $max-height;
+      overflow: hidden;
+    }
+  }
+  .p-2 {
+    position: relative;
+    transition: background .25s ease-out;
+    &:hover, &:focus {
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.selected {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    img {
+      width: auto;
+      max-width: $max-width;
+      height: $max-height;
+    }
+    div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: $max-width;
+    }
+  }
+}
+
+.breadcrumb {
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  background: #191c1d;
+  padding: 0;
+  height: $bc-height;
+  margin-bottom: 0;
+  border-radius: 0;
+  .breadcrumb-item {
+    display: inline;
+    &:first-child {
+      padding-left: 5px;
+      a {
+        padding-left: 5px;
+      }
+    }
+    &:last-child {padding-right: 5px; }
+    float: none;
+
+    a.last {
+      box-shadow: inset rgba(255, 255, 255, 0.25) 0px -3px 0px;
+    }
+
+    &+ .breadcrumb-item {
+      &::before {
+        content: none;
+      }
+    }
+
+    a {
+      position: relative;
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0 10px;
+      cursor: default;
+    }
+
+    a[href]:hover, a[href]:focus {
+      cursor: pointer;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    a::after {
+      content: " ";
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 0 solid transparent;
+      border-bottom: 24px solid transparent;
+      border-left: 8px solid $options-bg-color;
+      position: absolute;
+      top: 0;
+      margin-left: 4px;
+      left: 100%;
+      z-index: 1;
+    }
+
+    a::before {
+      content: " ";
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 24px solid transparent;
+      border-bottom: 0 solid transparent;
+      border-right: 8px solid $options-bg-color;
+      position: absolute;
+      top: 0;
+      margin-left: -8px;
+      left: 100%;
+      z-index: 1
+    }
+  }
+}
+
+.options {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: $options-height;
+  background: $options-bg-color;
+
+  input {
+    background: none;
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+    color: white;
+  }
+}
+
+.btn {
+  transition: background .1s ease-out;
+  transition: color .1s ease-out;
+  &:active, &:focus { box-shadow: none; }
+  &:hover { background: darkgray }
+  &:active, &.active { background: #595959; color: white; }
+  border-radius: 0;
+  border: 1px solid black;
+  background: lightgray;
+  cursor: pointer;
+}
+
+#search {
+  position: absolute;
+  width: calc(100% - 31px);
+  padding: 10px;
+  top: 4px;
+}
+
+.files-empty {
+  height: calc(100% - #{$options-height} - 0.5rem);
+}

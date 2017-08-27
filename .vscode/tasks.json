@@ -1,0 +1,26 @@
+{
+    "version": "0.1.0",
+    "command": "cmd",
+    "args": ["/C"],
+    "isShellCommand": true,
+    "showOutput": "always",
+    "suppressTaskName": true,
+    "tasks": [
+        {
+            "taskName": "yame run",
+            "args": ["gulp run"]
+        },
+        {
+            "taskName": "yame compile",
+            "args": ["gulp compile"]
+        },
+        {
+            "taskName": "yame dev",
+            "args": ["gulp dev"]
+        },
+        {
+            "taskName": "yame package",
+            "args": ["gulp package --zip --token 815358b9e814d7ae5d5dd59fed1b00d839eab2de && explorer ${workspaceRoot}\\builds"]
+        }
+    ]
+}

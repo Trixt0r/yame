@@ -1,23 +1,28 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "baseUrl": "src",
     "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "sourceRoot": "src/app",
-    "outDir": "dist/app",
+    "allowJs": true,
+    "target": "es6",
+    "types": [
+      "node",
+      "jasmine"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ],
     "lib": [
       "es2016",
       "dom"
-    ],
-    "suppressImplicitAnyIndexErrors": true
+    ]
   },
   "exclude": [
-    "assets",
-    "builds",
-    "bundle",
+    "app-builds",
     "dist",
     "node_modules"
   ]
