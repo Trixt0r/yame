@@ -1,12 +1,12 @@
-import { IpcDirectory } from './directory';
-describe('Dialog actions', function() {
+import { IpcDialog } from './dialog';
 
-  let action = new IpcDirectory();
+describe('Dialog ipc actions', function() {
 
-  it('Should initialize the scan', function() {
-    action.init();
+  let action = new IpcDialog();
+
+  it('Should initialize the ipc main handler for opening a file dialog', function() {
+    action.init(this.app.electron.remote);
     expect(action.isInitialized).toBe(true);
   });
-
 
 });

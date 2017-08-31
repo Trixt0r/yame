@@ -1,15 +1,16 @@
-import { IpcAction } from './interface';
-import { ipcMain, dialog } from 'electron';
+import { IpcAction } from './abstract';
+import * as electron from 'electron';
+declare type Electron = typeof electron;
 
 export class IpcDialog extends IpcAction {
 
   /** @inheritdoc */
-  public init(): Promise<any> {
-    ipcMain.on('dialog:open', (event, options, id) => {
+  public init(electron: Electron): Promise<any> {
+    electron.ipcMain.on('dialog:open', (event, options, id) => {
       if (id)
-        event.sender.send(`dialog:open:${id}`, dialog.showOpenDialog(options));
+        event.sender.send(`dialog:open:${id}`, electron.dialog.showOpenDialog(options));
       else
-        event.sender.send('dialog:open', dialog.showOpenDialog(options));
+        event.sender.send('dialog:open', electron.dialog.showOpenDialog(options));
     });
     this.internalInitialized = true;
     return Promise.resolve();

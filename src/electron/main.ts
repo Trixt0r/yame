@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import * as electron from 'electron';
 import { BrowserWindow, app } from 'electron';
 import { File } from '../common/io/file';
 import initIpc from './ipc';
@@ -52,7 +53,7 @@ function init() {
   }
 
 app.on('ready', () => {
-  initIpc()
+  initIpc(electron)
     .finally(init);
 });
 
