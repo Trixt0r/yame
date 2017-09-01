@@ -7,7 +7,7 @@ import { EventEmitter as eventemitter3 } from 'eventemitter3';
  * @class EventEmitter
  * @extends {eventemitter3}
  */
-export default class EventEmitter extends eventemitter3 {
+export class EventEmitter extends eventemitter3 {
 
   /**
    * Helper for triggering the given event for the given property.
@@ -47,7 +47,7 @@ export default class EventEmitter extends eventemitter3 {
   }
 
   /**
-   * Delegate the given event on the given event bus to this event bus.
+   * Delegates the given event on the given event bus to this event bus.
    * This means any event occurring in the given event bus will also be
    * triggered in the current one.
    *
@@ -66,3 +66,5 @@ export default class EventEmitter extends eventemitter3 {
   }
 
 }
+
+export default EventEmitter;

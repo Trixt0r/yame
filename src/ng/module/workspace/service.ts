@@ -95,7 +95,6 @@ export class WorkspaceService {
    */
   getDirectories(directory: DirectoryContent): DirectoryContent[] {
     let getDirectories = (children: (DirectoryContent | FileContent)[]) => {
-      console.log(children);
       let folders = children.filter(child => (<DirectoryContent>child).children !== void 0);
       folders = <DirectoryContent[]>folders.map(folder=> _.extend({ }, folder));
       folders.forEach(folder =>(<DirectoryContent>folder).children = getDirectories( (<DirectoryContent>folder).children ));

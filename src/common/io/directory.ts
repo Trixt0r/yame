@@ -1,13 +1,11 @@
 import * as Promise from 'bluebird';
 import * as path from 'path';
-import * as fs from 'fs';
+import fs from './fs';
 import EventEmitter from '../event-emitter';
 import { File } from './file';
 import { FileContent } from '../content/file';
 import { DirectoryContent } from '../content/directory';
 import { Exportable } from "../interface/exportable";
-
-import './fs';
 
 /**
  * A directory represents a directory in the file system.

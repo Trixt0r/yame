@@ -1,5 +1,7 @@
-import { EventEmitter } from 'eventemitter3';
+import { EventEmitter } from './event-emitter';
 
-let PubSub = new EventEmitter();
+let emitter = new EventEmitter();
 
-export default PubSub;
+export let Pubsub = emitter;
+
+export default emitter;

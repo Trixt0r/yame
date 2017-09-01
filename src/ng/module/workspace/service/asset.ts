@@ -111,7 +111,6 @@ export class AssetService {
    * @returns {AssetGroup<Asset>[]} All direct asset groups inside the given root.
    */
   getGroups(root: AssetGroup<Asset>): AssetGroup<Asset>[] {
-    console.log(root, root.members);
     if (!root.members) return [];
     return <AssetGroup<Asset>[]>root.members.filter(
       (member: any) => member instanceof AssetGroup || Array.isArray(member.members)
@@ -125,7 +124,6 @@ export class AssetService {
    * @returns {Asset[]} All direct assets (not groups) inside the given root.
    */
   getAssets(root: AssetGroup<Asset>): Asset[] {
-    // console.log(root, root.members);
     if (!root.members) return [];
     return <Asset[]>root.members.filter(
       (member: any) => !(member instanceof AssetGroup) && !Array.isArray(member.members)

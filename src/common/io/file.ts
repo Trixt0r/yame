@@ -1,11 +1,9 @@
-import * as Promise from 'bluebird';
-import * as fs from 'fs';
+import fs from './fs';
 import * as path from 'path';
 
 import { FileContent } from '../content/file';
 import { Exportable } from "../interface/exportable";
 
-require('./fs');
 
 /**
  * A file represents a file in the file system.

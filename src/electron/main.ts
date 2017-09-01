@@ -41,10 +41,6 @@ function init() {
     .then((data) => {
       try {
         let json = JSON.parse(data.toString());
-        if (json.devMode === true) {
-          const client = require('electron-connect').client;
-          client.create(window);
-        }
       } catch (e) {
         console.error('Could not parse config file');
       }
