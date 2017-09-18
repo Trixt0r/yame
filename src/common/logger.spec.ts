@@ -1,4 +1,4 @@
-import { Logger } from './logger';
+import { Logger, logger as defaultLogger } from './logger';
 
 describe('Logger', () => {
 
@@ -83,3 +83,13 @@ describe('Logger', () => {
   });
 
 });
+
+describe('Default logger', () => {
+  it('should implement the logger interface', () => {
+    expect(typeof defaultLogger.log).toBe('function');
+    expect(typeof defaultLogger.info).toBe('function');
+    expect(typeof defaultLogger.debug).toBe('function');
+    expect(typeof defaultLogger.error).toBe('function');
+    expect(typeof defaultLogger.warn).toBe('function');
+  });
+})

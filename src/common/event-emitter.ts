@@ -21,13 +21,13 @@ export class EventEmitter extends eventemitter3 {
    * @param {string} property Name of the property which changes.
    * @param {any} old The old value of the property.
    * @param {any} value The new value of the property
-   * @returns {boolean} `true` ifthe event has been triggered.
+   * @returns {boolean} `true` if the event has been triggered.
    */
   protected triggerOnChange(name: string, property: string, old: any, value: any, fn?: Function): boolean {
     if (old != value) {
       if (fn) fn.call(this);
       this.emit(name);
-      this.emit(`${name}:${property}`, old, value)
+      this.emit(`${name}:${property}`, old, value);
       return true;
     }
     else return false;

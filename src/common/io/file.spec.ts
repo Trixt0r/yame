@@ -14,6 +14,10 @@ describe('File', () => {
     return fs.writeFileAsync(readFilePath, readData)
   });
 
+  it('should not point to any path', () => {
+    expect(new File().path).toBeUndefined();
+  });
+
   it('should point to the correct path', () => {
     expect(new File(readFilePath).path).toBe(readFilePath);
   });
