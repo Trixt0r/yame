@@ -1,5 +1,6 @@
 import fs from './fs';
 import * as path from 'path';
+import * as Promise from 'bluebird';
 
 import { FileContent } from '../content/file';
 import { Exportable } from "../interface/exportable";
@@ -60,10 +61,19 @@ export class File implements FileContent, Exportable<FileContent> {
   /**
    * Reads the contents from disc and resolves them.
    * @param {string} [encoding]
+   * @param {boolean} [stats=false] Whether to read the file stats too
    * @returns {(Promise<string | Buffer>)}
    */
-  read(encoding?: string): Promise<string | Buffer> {
-    return fs.readFileAsync(this.path, encoding);
+  read(encoding?: string, stats = false): Promise<string | Buffer> {
+    return fs.readFileAsync(this.path, encoding).then(re => {
+      if (stats)
+        return fs.statAsync(this.path).then((stats: fs.Stats) => {
+          this.lastModified = stats.mtime.getTime();
+          this.size = stats.size;
+        });
+      else
+        return re;
+    });
   }
 
   /**
