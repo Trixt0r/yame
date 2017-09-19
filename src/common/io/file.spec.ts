@@ -1,5 +1,5 @@
 import { File } from './file';
-import fs from './fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -11,7 +11,7 @@ describe('File', () => {
 
   beforeAll(() => {
     spyOn(spy, 'fn');
-    return fs.writeFileAsync(readFilePath, readData)
+    return fs.writeFile(readFilePath, readData)
   });
 
   it('should not point to any path', () => {
@@ -83,11 +83,11 @@ describe('File', () => {
     let file = new File(writeFilePath);
     return file.write(JSON.stringify({bar: 'foo'}))
       .then(() => {
-        return fs.accessAsync(writeFilePath).then(spy.fn)
+        return fs.access(writeFilePath).then(spy.fn)
       })
       .finally(() => expect(spy.fn).toHaveBeenCalled())
-      .then(() => fs.unlinkAsync(writeFilePath));
+      .then(() => fs.unlink(writeFilePath));
   });
 
-  afterAll(() => fs.unlinkAsync(readFilePath));
+  afterAll(() => fs.unlink(readFilePath));
 });

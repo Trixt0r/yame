@@ -1,6 +1,7 @@
-import fs from './fs';
-import * as path from 'path';
 import * as Promise from 'bluebird';
+global.Promise = Promise;
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 import { FileContent } from '../content/file';
 import { Exportable } from "../interface/exportable";
@@ -65,11 +66,12 @@ export class File implements FileContent, Exportable<FileContent> {
    * @returns {(Promise<string | Buffer>)}
    */
   read(encoding?: string, stats = false): Promise<string | Buffer> {
-    return fs.readFileAsync(this.path, encoding).then(re => {
+    return fs.readFile(this.path, encoding).then(re => {
       if (stats)
-        return fs.statAsync(this.path).then((stats: fs.Stats) => {
+        return fs.stat(this.path).then((stats: fs.Stats) => {
           this.lastModified = stats.mtime.getTime();
           this.size = stats.size;
+          return re;
         });
       else
         return re;
@@ -82,7 +84,7 @@ export class File implements FileContent, Exportable<FileContent> {
    * @returns {Promise<void>}
    */
   write(data: any): Promise<void> {
-    return fs.writeFileAsync(this.path, data);
+    return fs.writeFile(this.path, data);
   }
 
 }

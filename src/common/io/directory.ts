@@ -1,11 +1,15 @@
 import * as Promise from 'bluebird';
+global.Promise = Promise;
 import * as path from 'path';
-import fs from './fs';
+import * as fs from 'fs-extra';
 import EventEmitter from '../event-emitter';
 import { File } from './file';
-import { FileContent } from '../content/file';
 import { DirectoryContent } from '../content/directory';
 import { Exportable } from "../interface/exportable";
+
+enum ScanState {
+  DONE, FAIL, NOOP
+}
 
 /**
  * A directory represents a directory in the file system.
@@ -28,6 +32,8 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
   /** @type {string} Cached basename */
   private innerName: string;
 
+  public static readonly ScanState = ScanState;
+
   constructor(private pathName: string) {
     super();
     this._children = [];
@@ -40,17 +46,17 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
    *
    * @param {boolean} [force=false]
    * @param {boolean} [deep=true]
-   * @returns {Promise<any>}
+   * @returns {Promise<ScanState>}
    */
-  scan(force: boolean = false, deep: boolean = true): Promise<any> {
+  scan(force: boolean = false, deep: boolean = true): Promise<ScanState> {
     // Skip scanning if we already scanned
     if (this.scanned && !force)
-      return Promise.resolve();
+      return Promise.resolve(ScanState.NOOP);
 
     this.scanned = false;
     // Notify any listener that we are scanning now
     this.emit('scan');
-    return fs.readdirAsync(this.pathName)
+    return fs.readdir(this.pathName)
       .then((files: string[]) => {
         let scans: Promise<any>[] = [];
         files.forEach(filename => {
@@ -86,8 +92,8 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
       return Promise.all(scans)
               .finally(() => this.scanned = true);
     })
-    .then(() => this.emit('scan:done')) // We are done
-    .catch(e => this.emit('scan:fail', e) ); // We failed
+    .then(() => { this.emit('scan:done'); return ScanState.DONE; }) // We are done
+    .catch(e => { this.emit('scan:fail', e); return ScanState.FAIL; } ); // We failed
   }
 
   /** Sets the path of this directory. Previously loaded files get lost. */
@@ -118,6 +124,14 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
    */
   get name(): string {
     return this.innerName;
+  }
+
+  /**
+   * @readonly
+   * @type {boolean} Whether this directory has been scanned.
+   */
+  get isScanned(): boolean {
+    return this.scanned;
   }
 
   /** @returns {DirectoryContent} A JSON representation of this directory. */
