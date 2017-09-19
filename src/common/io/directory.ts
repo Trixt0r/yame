@@ -70,24 +70,14 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
               if (deep)
                 scans.push(dir.scan());
           }
-          else if (stats.isFile() ){
+          else if (stats.isFile()) {
               let file = new File(abs);
               this._children.push(file);
               this.emit('scan:file', file);
           }
         });
 
-      // Sort files by filename and type
-      this._children.sort((a: File | Directory, b: File | Directory) => {
-        if (a instanceof Directory && b instanceof File)
-            return -1;
-        else if (a instanceof File && b instanceof Directory)
-            return 1;
-        else if (path.basename(a.path).toLowerCase() <= path.basename(b.path).toLowerCase())
-            return -1;
-        else
-            return 1;
-      });
+      Directory.sort(this._children);
 
       return Promise.all(scans)
               .finally(() => this.scanned = true);
@@ -136,11 +126,31 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
 
   /** @returns {DirectoryContent} A JSON representation of this directory. */
   export(): DirectoryContent {
+    let children = this._children.map(child => child.export());
     return {
       path: this.path,
       name: this.name,
-      children: this._children.map(child => child.export()),
+      children: children,
       type: 'directory',
     };
+  }
+
+  /**
+   * Sorts the given array of files and directories alphabetically.
+   * A folder will have always a lower index than a file.
+   * @param {(Directory | File)[]} children The array to sort.
+   * @returns {(Directory | File)[]} The sorted list of children.
+   */
+  static sort(children: (Directory | File)[]): (Directory | File)[] {
+    return children.sort((a: File | Directory, b: File | Directory) => {
+      if (a instanceof Directory && b instanceof File)
+          return -1;
+      else if (a instanceof File && b instanceof Directory)
+          return 1;
+      else if (path.basename(a.path).toLowerCase() <= path.basename(b.path).toLowerCase())
+          return -1;
+      else
+          return 1;
+    });
   }
 }

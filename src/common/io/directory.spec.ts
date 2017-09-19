@@ -10,7 +10,6 @@ describe('Directory', () => {
 
   let emptyDir = path.resolve(os.tmpdir(), 'yame-empty-dir');
   let dirWithFile = path.resolve(os.tmpdir(), 'yame-dir-with-file');
-  let dirWithFiles = path.resolve(os.tmpdir(), 'yame-dir-with-files');
   let dirWithFolders = path.resolve(os.tmpdir(), 'yame-dir-with-folders');
   let scanSpy;
   let subFolders = ['1', '2', '3'];
@@ -18,8 +17,6 @@ describe('Directory', () => {
   beforeAll(() => Promise.all([
     fs.ensureDir(emptyDir),
     fs.ensureFile(path.resolve(dirWithFile, 'a.file')),
-    fs.ensureFile(path.resolve(dirWithFiles, 'b.file')),
-    fs.ensureFile(path.resolve(dirWithFiles, 'a.file')),
     fs.ensureDir(path.resolve(dirWithFolders, subFolders.join(path.sep)))
   ]));
 
@@ -196,13 +193,6 @@ describe('Directory', () => {
             .finally(() => expect(scanSpy.fn).toHaveBeenCalled());
   });
 
-  it('should sort the children alphabetically', () => {
-    let dir = new Directory(dirWithFiles);
-    return dir.scan(false, true)
-            .finally(() => expect(dir.children.findIndex(file => file.name === 'a.file'))
-                            .toBeLessThan(dir.children.findIndex(file => file.name === 'b.file')));
-  })
-
   it('should fail', () => {
     let dir = new Directory(__dirname + '/no-path');
     let state;
@@ -218,10 +208,59 @@ describe('Directory', () => {
             .finally(() => expect(scanSpy.fn).toHaveBeenCalled());
   });
 
+  it('should sort files alphabetically', () => {
+    let children = [
+      new File(path.resolve(__dirname, 'b.file')),
+      new File(path.resolve(__dirname, 'a.file'))
+    ];
+    Directory.sort(children);
+    expect(children.findIndex(file => file.name === 'a.file'))
+          .toBeLessThan(children.findIndex(file => file.name === 'b.file'));
+  });
+
+  it('should sort directories alphabetically', () => {
+    let children = [
+      new Directory(path.resolve(__dirname, 'b.dir')),
+      new Directory(path.resolve(__dirname, 'a.dir'))
+    ];
+    Directory.sort(children);
+    expect(children.findIndex(file => file.name === 'a.dir'))
+          .toBeLessThan(children.findIndex(file => file.name === 'b.dir'));
+  });
+
+  it('should keep the order if the entities are already correctly sorted', () => {
+    let children = [
+      new Directory(path.resolve(__dirname, 'a.dir')),
+      new Directory(path.resolve(__dirname, 'b.dir')),
+    ];
+    Directory.sort(children);
+    expect(children.findIndex(file => file.name === 'a.dir'))
+          .toBeLessThan(children.findIndex(file => file.name === 'b.dir'));
+    });
+
+  it('should sort directories to the beginning', () => {
+    let children = [
+      new File(path.resolve(__dirname, 'a.file')),
+      new Directory(path.resolve(__dirname, 'b.dir'))
+    ];
+    Directory.sort(children);
+    expect(children.findIndex(file => file.name === 'b.dir'))
+          .toBeLessThan(children.findIndex(file => file.name === 'a.file'));
+  });
+
+  it('should keep the order if the directory is at the correct place', () => {
+    let children = [
+      new Directory(path.resolve(__dirname, 'b.dir')),
+      new File(path.resolve(__dirname, 'a.file')),
+    ];
+    Directory.sort(children);
+    expect(children.findIndex(file => file.name === 'b.dir'))
+          .toBeLessThan(children.findIndex(file => file.name === 'a.file'));
+  });
+
   afterAll(() => Promise.all([
     fs.remove(emptyDir),
     fs.remove(dirWithFile),
-    fs.remove(dirWithFiles),
     fs.remove(dirWithFolders)
   ]));
 
