@@ -5,9 +5,9 @@ import * as fs from 'fs-extra';
 import EventEmitter from '../event-emitter';
 import { File } from './file';
 import { DirectoryContent } from '../content/directory';
-import { Exportable } from "../interface/exportable";
+import { Exportable } from '../interface/exportable';
 
-enum ScanState {
+export enum ScanState {
   DONE, FAIL, NOOP
 }
 
@@ -32,8 +32,6 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
   /** @type {string} Cached basename */
   private innerName: string;
 
-  public static readonly ScanState = ScanState;
-
   constructor(private pathName: string) {
     super();
     this._children = [];
@@ -48,7 +46,7 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
    * @param {boolean} [deep=true]
    * @returns {Promise<ScanState>}
    */
-  scan(force: boolean = false, deep: boolean = true): Promise<ScanState> {
+  scan(force = false, deep = true): Promise<ScanState> {
     // Skip scanning if we already scanned
     if (this.scanned && !force)
       return Promise.resolve(ScanState.NOOP);
@@ -66,11 +64,9 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
               let dir = new Directory(abs);
               this._children.push(dir);
               this.emit('scan:dir', dir);
-              dir.once('scan:done', () => this.emit('scan:dir:done', dir) );
               if (deep)
-                scans.push(dir.scan());
-          }
-          else if (stats.isFile()) {
+                scans.push(dir.scan(force));
+          } else {
               let file = new File(abs);
               this._children.push(file);
               this.emit('scan:file', file);

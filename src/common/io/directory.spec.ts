@@ -1,7 +1,7 @@
 import { File } from './file';
 import * as Promise from 'bluebird';
 import { DirectoryContent } from '../content/directory';
-import { Directory } from './directory';
+import { Directory, ScanState } from './directory';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as os from 'os';
@@ -67,7 +67,7 @@ describe('Directory', () => {
     let state;
     return dir.scan(false, false)
             .then(s => state = s)
-            .finally(() => expect(state).toBe(Directory.ScanState.DONE));
+            .finally(() => expect(state).toBe(ScanState.DONE));
   });
 
   it('should be scanned', () => {
@@ -93,13 +93,19 @@ describe('Directory', () => {
   it('should not force a second scan', () => {
     let dir = new Directory(emptyDir);
     return dir.scan(false, false)
-            .finally(() => dir.scan(false, false).then(state => expect(state).toBe(Directory.ScanState.NOOP)));
+            .finally(() => dir.scan(false, false).then(state => expect(state).toBe(ScanState.NOOP)));
+  });
+
+  it('should not force a second scan by default', () => {
+    let dir = new Directory(emptyDir);
+    return dir.scan()
+            .finally(() => dir.scan().then(state => expect(state).toBe(ScanState.NOOP)));
   });
 
   it('should force a second scan', () => {
     let dir = new Directory(emptyDir);
     return dir.scan(false, false)
-            .finally(() => dir.scan(true, false).then(state => expect(state).toBe(Directory.ScanState.DONE)));
+            .finally(() => dir.scan(true, false).then(state => expect(state).toBe(ScanState.DONE)));
   });
 
   it('should not be scanned if the path changes', () => {
@@ -109,6 +115,13 @@ describe('Directory', () => {
               dir.path = './any-path';
               expect(dir.isScanned).toBe(false);
             });
+  });
+
+  it('should trigger the change:path event', () => {
+    let dir = new Directory(emptyDir);
+    dir.on('change:path', scanSpy.fn);
+    dir.path = './any-path';
+    expect(scanSpy.fn).toHaveBeenCalled();
   });
 
   it('should scan a directory and have no children', () => {
@@ -186,19 +199,12 @@ describe('Directory', () => {
             .finally(() => expect(sub instanceof Directory).toBe(true));
   });
 
-  it('should trigger the scan:dir:done event', () => {
-    let dir = new Directory(dirWithFolders);
-    dir.on('scan:dir:done', scanSpy.fn);
-    return dir.scan(false, true)
-            .finally(() => expect(scanSpy.fn).toHaveBeenCalled());
-  });
-
   it('should fail', () => {
     let dir = new Directory(__dirname + '/no-path');
     let state;
     return dir.scan(false, false)
             .then(s => state = s)
-            .finally(() => expect(state).toBe(Directory.ScanState.FAIL));
+            .finally(() => expect(state).toBe(ScanState.FAIL));
   });
 
   it('should trigger the scan:fail event', () => {
