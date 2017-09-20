@@ -1,11 +1,11 @@
+import { DirectoryContent } from '../content/directory';
 import { FileAsset } from './file';
 import { AssetGroup } from './group';
 import { Asset } from '../asset';
-import { DirectoryAssetContent } from "./content/directory";
 
 /**
  * A directory asset contains directory information, such as path and a list of its direct members.
- * @see {DirectoryAssetContent} for more information.
+ * @see {DirectoryContent} for more information.
  *
  * @export
  * @abstract
@@ -20,6 +20,6 @@ export class DirectoryAsset extends AssetGroup<DirectoryAsset | FileAsset> {
   }
 
   /** @inheritdoc */
-  content: DirectoryAssetContent;
+  content: DirectoryContent;
 
 }
