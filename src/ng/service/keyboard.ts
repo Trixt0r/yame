@@ -4,11 +4,10 @@ import { Injectable } from '@angular/core';
 import * as keyboardJS from 'keyboardjs';
 import { KeyEvent as KeyboardJSKeyEvent } from 'keyboardjs';
 import * as _ from 'lodash';
-import * as $ from 'jquery';
 
 interface ComponentHash {
   component: AbstractComponent;
-  handler: (eventObject?: JQueryEventObject) => any;
+  handler: (eventObject?: Event) => any;
 }
 
 interface KeyEvent extends KeyboardJSKeyEvent, KeyboardEvent {}
@@ -45,15 +44,16 @@ export class KeyboardService {
   private components: { [id: string] : ComponentHash } = { };
 
   constructor() {
-    $(window).on('click focus', e => {
-      let found = _.findKey(this.components, (component: ComponentHash, id) =>
-        e.target == component.component.elementRef.nativeElement || component.component.$el.has(e.target).length);
-      let ctx = 'global'
-      if (found)
-        ctx = found;
-      this.context = ctx;
-      keyboardJS.setContext(ctx);
-    });
+    // window.addEventListener('', )
+    // $(window).on('click focus', e => {
+    //   let found = _.findKey(this.components, (component: ComponentHash, id) =>
+    //     e.target == component.component.elementRef.nativeElement || component.component.$el.has(e.target).length);
+    //   let ctx = 'global'
+    //   if (found)
+    //     ctx = found;
+    //   this.context = ctx;
+    //   keyboardJS.setContext(ctx);
+    // });
   }
 
   /**
@@ -74,7 +74,7 @@ export class KeyboardService {
         e.stopPropagation();
       }
     };
-    component.$el.on(<any>'click focus', this.components[id].handler);
+    // component.$el.on(<any>'click focus', this.components[id].handler);
     return this;
   }
 
@@ -88,7 +88,7 @@ export class KeyboardService {
   unregister(component: AbstractComponent): KeyboardService {
     let found = this.findId(component);
     if (found) {
-      component.$el.off(<any>'click focus', <any>this.components[found].handler);
+      // component.$el.off(<any>'click focus', <any>this.components[found].handler);
       delete this.components[found];
       if (found === this.context) {
         this.context = 'global';

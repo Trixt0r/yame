@@ -1,6 +1,6 @@
 import { PixiService } from './service';
 import { AbstractComponent } from '../../component/abstract';
-import { Component, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 
 import * as PIXI from 'pixi.js';
 
@@ -20,6 +20,7 @@ import * as PIXI from 'pixi.js';
 export class PixiComponent extends AbstractComponent {
 
   @Output() resized = new EventEmitter();
+  @ViewChild('canvas') canvas: ElementRef;
 
   constructor(protected ref: ElementRef, protected pixiService: PixiService) {
     super(ref);
@@ -30,10 +31,8 @@ export class PixiComponent extends AbstractComponent {
    * @inheritdoc
    */
   ngOnInit() {
-    super.ngOnInit();
-    let $parent = this.$('canvas').parent();
-    this.pixiService.setUp($parent.outerWidth(), $parent.outerHeight(), {
-      view: <HTMLCanvasElement>this.$('canvas')[0],
+    this.pixiService.setUp(this.elementRef, {
+      view: <HTMLCanvasElement>this.canvas.nativeElement,
       transparent: true,
     });
   }

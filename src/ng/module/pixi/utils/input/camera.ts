@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import Camera from '../camera';
-import * as $ from 'jquery';
 
 /**
  * Initializes mouse handler for the given arguments.
@@ -32,19 +31,19 @@ export function init(renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer,
 
   let prevPos: PIXI.Point = null;
   let camPos: PIXI.Point = null;
-  $(renderer.view).on('mousedown', e => {
+  renderer.view.addEventListener('mousedown', e => {
     if (e.which !== 3) return; // Only listen for right click
     let data = renderer.plugins.interaction.eventData.data;
     prevPos = data.getLocalPosition(target.parent, null, {x: e.clientX, y: e.clientY});
     camPos = new PIXI.Point(camera.position.x, camera.position.y);
   });
 
-  $('body').on('mouseup', e => {
+  document.body.addEventListener('mouseup', e => {
     if (e.which !== 3) return; // Only listen for right click
     prevPos = null;
   });
 
-  $('body').on('mousemove', e => {
+  document.body.addEventListener('mousemove', e => {
     if (e.which !== 3 || !prevPos) return; // Only listen for right click
     let data = renderer.plugins.interaction.eventData.data;
     let pos = data.getLocalPosition(target.parent, null, {x: e.clientX, y: e.clientY});

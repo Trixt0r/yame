@@ -1,6 +1,5 @@
 import { Component, ElementRef, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { AbstractComponent } from "../../../component/abstract";
-import * as $ from 'jquery';
 
 /**
  * Abstract component which is able to handle resizes.
@@ -72,7 +71,8 @@ export class ResizeableComponent extends AbstractComponent implements OnChanges 
       y: event.clientY
     };
     // Cache the css value
-    this.propVal = parseFloat($(this.ref.nativeElement).css(this.property));
+    let style = window.getComputedStyle(this.ref.nativeElement);
+    this.propVal = parseFloat(style.getPropertyValue(this.property));
     // Prevents text selection
     event.preventDefault();
   }
@@ -102,7 +102,8 @@ export class ResizeableComponent extends AbstractComponent implements OnChanges 
 
   /** Handles window resize event. */
   onResize(): void {
-    let newVal = parseFloat($(this.ref.nativeElement).css(this.property));
+    let style = window.getComputedStyle(this.ref.nativeElement);
+    let newVal = parseFloat(style.getPropertyValue(this.property));
     this.updateValue(this.clampValue(newVal));
   }
 
@@ -111,7 +112,7 @@ export class ResizeableComponent extends AbstractComponent implements OnChanges 
    * @param {number} newVal
    */
   updateValue(newVal: number): void {
-    this.$el.css(this.property, newVal);
+    this.ref.nativeElement.style[this.property] = `${newVal}px`;
     this.sizeUpdated.emit(newVal);
   }
 
@@ -128,6 +129,10 @@ export class ResizeableComponent extends AbstractComponent implements OnChanges 
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this.updateValue(this.clampValue( parseFloat(this.$el.css(this.property)))));
+    setTimeout(() => {
+      let style = window.getComputedStyle(this.ref.nativeElement);
+      let val = parseFloat(style.getPropertyValue(this.property));
+       this.updateValue( this.clampValue(val));
+    });
   }
 }

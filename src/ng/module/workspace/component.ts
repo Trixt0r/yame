@@ -10,7 +10,6 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ipcRenderer } from 'electron';
 import * as _ from 'lodash';
 import * as path from 'path';
-import * as $ from 'jquery';
 import { DirectoryContent } from "../../../common/content/directory";
 import { FileContent } from "../../../common/content/file";
 import { Asset } from "../../../common/asset";
@@ -53,7 +52,7 @@ export class WorkspaceComponent extends ResizeableComponent {
   onResize() {
     this.maxVal = window.innerHeight - 100;
     if (this.row) {
-      let fullWidth = $(this.row.nativeElement).outerWidth(true);
+      let fullWidth = this.row.nativeElement.offsetWidth;
       this.resizerLeft.maxVal = Math.min(Math.max(200, fullWidth - this.minWidth), fullWidth - 315);
     }
     super.onResize();
@@ -93,12 +92,12 @@ export class WorkspaceComponent extends ResizeableComponent {
 
   updateColumns() {
     if (!this.row) return;
-    let fullWidth = $(this.row.nativeElement).outerWidth(true);
-    this.leftCol.$el.css('width', this.leftWidth);
-    this.leftCol.$el.css('max-width', this.leftWidth);
-    this.rightCol.$el.css('left', this.leftWidth + 5);
-    this.rightCol.$el.css('max-width', fullWidth - this.leftWidth - 5);
-    this.rightCol.$el.css('width', fullWidth - this.leftWidth - 5);
+    let fullWidth = this.row.nativeElement.offsetWidth;
+    this.leftCol.elementRef.nativeElement.style.width = `${this.leftWidth}px`;
+    this.leftCol.elementRef.nativeElement.style['max-width'] = `${this.leftWidth}px`;
+    this.rightCol.elementRef.nativeElement.style.left = `${this.leftWidth + 5}px`;
+    this.rightCol.elementRef.nativeElement.style['max-width'] = `${fullWidth - this.leftWidth - 5}px`;
+    this.rightCol.elementRef.nativeElement.style.width = `${fullWidth - this.leftWidth - 5}px`;
   }
 
   onGroupSelect(group: AssetGroup<Asset>) {

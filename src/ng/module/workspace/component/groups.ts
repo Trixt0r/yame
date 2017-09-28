@@ -9,7 +9,6 @@ import { WorkspaceService } from '../service';
 
 import { AbstractComponent } from '../../../component/abstract';
 import { DirectoryContent } from "../../../../common/content/directory";
-import * as $ from 'jquery';
 
 /**
  * Open event definition.
@@ -84,7 +83,7 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
   open(group: AssetGroup<Asset>): void {
     let close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
     // Store the scroll state for each group so we can restore it if the user moves back
-    if (!close) this.previousScrolls.push(this.$el.scrollTop());
+    if (!close) this.previousScrolls.push(this.elementRef.nativeElement.scrollTop);
     this.slide = close ? 'close' : 'open';
     this.openingGroups = this.assets.getGroups(group);
     this.previouslyOpen = this.currentlyOpen;
@@ -102,14 +101,13 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    */
   onBackClick(event: MouseEvent): void {
     if (event.which === 3 && this.parents.length > 0)
-      $(this.parentMenuTrigger._getHostElement()).trigger('click');
+      this.parentMenuTrigger._elementRef.nativeElement.click();
     else if (event.which === 1)
       this.open(this.current.parent);
   }
 
   /** @inheritdoc */
   ngOnInit() {
-    super.ngOnInit();
     this.currentlyOpen = <AssetGroup<Asset>>this.assets.fromFs(this.ws.directory);
     this.previouslyOpen = this.currentlyOpen;
     this.groups = this.assets.getGroups(this.currentlyOpen);
@@ -124,7 +122,8 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    */
   slideAnimStart(event: AnimationEvent): void {
     if (event.fromState !== 'none') return;
-    this.$el.addClass('no-overflow').scrollTop(0);
+    this.elementRef.nativeElement.classList.add('no-overflow');
+    this.elementRef.nativeElement.scrollTop = 0;
     this.opening.emit({
       previous: this.previous,
       group: this.current,
@@ -140,7 +139,7 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
    */
   slideAnimDone(event: AnimationEvent): void {
     if (event.fromState !== 'none') return; // React only if we come from the 'none' state
-    this.$el.removeClass('no-overflow');
+    this.elementRef.nativeElement.classList.remove('no-overflow');
     this.fixScroll(event);
     this.groups = this.openingGroups;
     this.slide = 'none';
@@ -161,7 +160,7 @@ export class GroupsComponent extends AbstractComponent implements OnInit {
   private fixScroll(event: AnimationEvent) {
     if (event.toState === 'close') {
       let idx = this.assets.getParents(this.previous).reverse().indexOf(this.current);
-      this.$el.finish().animate({ scrollTop: this.previousScrolls[idx] }, 'fast');
+      this.elementRef.nativeElement.scrollTop = this.previousScrolls[idx];
       this.previousScrolls.splice(idx, this.previousScrolls.length - idx); // Clear all states from the found index
     }
   }

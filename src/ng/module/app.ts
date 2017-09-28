@@ -2,7 +2,6 @@ import '../style.scss';
 import 'zone.js/dist/zone-mix';
 import 'reflect-metadata';
 import '../polyfills';
-import * as $ from 'jquery';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';

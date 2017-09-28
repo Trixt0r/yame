@@ -1,8 +1,7 @@
 import initCameraInput from './utils/input/camera';
 import { Grid } from './utils/grid';
 import { Camera } from './utils/camera';
-import { Injectable } from '@angular/core';
-import * as $ from 'jquery';
+import { ElementRef, Injectable } from '@angular/core';
 import * as PIXI from 'pixi.js';
 
 /**
@@ -22,7 +21,7 @@ export class PixiService {
   private internalScene: PIXI.Container;
   private internalCam: Camera;
   private internalGrid: Grid;
-  private $parent: JQuery;
+  private viewRef: ElementRef;
   private newSize = new PIXI.Point();
 
   /** @type {PIXI.Application} app The pixi js application instance. */
@@ -78,12 +77,14 @@ export class PixiService {
    * @param {number} height
    * @param {PIXI.IApplicationOptions} options
    */
-  setUp(width: number, height: number, options: PIXI.IApplicationOptions) {
+  setUp(viewRef: ElementRef, options: PIXI.IApplicationOptions) {
     if (this.internalApp) return;
-    this.internalApp = new PIXI.Application(width, height, options);
+    this.viewRef = viewRef;
+    this.internalApp = new PIXI.Application(viewRef.nativeElement.offsetWidth,
+                                            viewRef.nativeElement.offsetHeight,
+                                            options);
     this.internalScene = new PIXI.Container();
     this.internalApp.stage.addChild(this.internalScene);
-    this.$parent = $(this.view).parent();
   }
 
   /**
@@ -101,7 +102,9 @@ export class PixiService {
     if (interactive)
       initCameraInput(this.renderer, this.internalCam, this.scene);
     if (this.internalGrid)
-      this.internalCam.on('update', () => this.grid.update(this.$parent.outerWidth(), this.$parent.outerHeight()));
+      this.internalCam.on('update', () => {
+        this.grid.update(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
+      });
     return this;
   }
 
@@ -114,12 +117,14 @@ export class PixiService {
   initGrid(): PixiService {
     if (!this.internalApp) throw "Can't attach a camera if the pixi application is not initialized!";
     if (this.internalGrid) return this;
-    let width = this.$parent.outerWidth();
-    let height = this.$parent.outerHeight();
+    let width = this.viewRef.nativeElement.offsetWidth;
+    let height = this.viewRef.nativeElement.offsetHeight;
     this.internalGrid = new Grid(this.internalScene);
     this.internalGrid.update(width, height);
     if (this.internalCam)
-      this.internalCam.on('update', () => this.grid.update(this.$parent.outerWidth(), this.$parent.outerHeight()));
+      this.internalCam.on('update', () => {
+        this.grid.update(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
+      });
     return this;
   }
 
@@ -129,7 +134,7 @@ export class PixiService {
    * @returns {(boolean | PIXI.Point)}
    */
   resize(): boolean | PIXI.Point {
-    this.newSize.set(this.$parent.outerWidth(), this.$parent.outerHeight());
+    this.newSize.set(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
     if (this.renderer.width != this.newSize.x || this.renderer.height != this.newSize.y) {
       this.renderer.resize(this.newSize.x, this.newSize.y);
       if (this.internalGrid)

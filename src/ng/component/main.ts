@@ -23,14 +23,14 @@ export class MainComponent extends AbstractComponent {
    * @param {number} left
    */
   sidebarUpdate(left: number): void {
-    this.$el.css('width', left);
-    this.pixi.$el.css('width', left);
+    this.elementRef.nativeElement.style['width'] = `${left}px`;
+    this.pixi.elementRef.nativeElement.style['width'] = `${left}px`;
     this.pixi.onResize();
     this.workspace.onResize();
   }
 
   sizeUpdated(top: number): void {
-    this.pixi.$el.css('height', top);
+    this.pixi.elementRef.nativeElement.style['height'] = `${top}px`;
     this.pixi.onResize();
   }
 
