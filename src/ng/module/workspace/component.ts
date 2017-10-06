@@ -93,11 +93,11 @@ export class WorkspaceComponent extends ResizeableComponent {
   updateColumns() {
     if (!this.row) return;
     let fullWidth = this.row.nativeElement.offsetWidth;
-    this.leftCol.elementRef.nativeElement.style.width = `${this.leftWidth}px`;
-    this.leftCol.elementRef.nativeElement.style['max-width'] = `${this.leftWidth}px`;
-    this.rightCol.elementRef.nativeElement.style.left = `${this.leftWidth + 5}px`;
-    this.rightCol.elementRef.nativeElement.style['max-width'] = `${fullWidth - this.leftWidth - 5}px`;
-    this.rightCol.elementRef.nativeElement.style.width = `${fullWidth - this.leftWidth - 5}px`;
+    this.leftCol.ref.nativeElement.style.width = `${this.leftWidth}px`;
+    this.leftCol.ref.nativeElement.style['max-width'] = `${this.leftWidth}px`;
+    this.rightCol.ref.nativeElement.style.left = `${this.leftWidth + 5}px`;
+    this.rightCol.ref.nativeElement.style['max-width'] = `${fullWidth - this.leftWidth - 5}px`;
+    this.rightCol.ref.nativeElement.style.width = `${fullWidth - this.leftWidth - 5}px`;
   }
 
   onGroupSelect(group: AssetGroup<Asset>) {

@@ -1,4 +1,3 @@
-import { AbstractComponent } from '../component/abstract';
 import { Injectable } from '@angular/core';
 
 import * as keyboardJS from 'keyboardjs';
@@ -6,7 +5,7 @@ import { KeyEvent as KeyboardJSKeyEvent } from 'keyboardjs';
 import * as _ from 'lodash';
 
 interface ComponentHash {
-  component: AbstractComponent;
+  component: Object;
   handler: (eventObject?: Event) => any;
 }
 
@@ -60,10 +59,10 @@ export class KeyboardService {
    * Registers keyboard handling for the given component.
    *
    * @param {string} id The id to map the component to.
-   * @param {AbstractComponent} component The component to register the bindings for.
+   * @param {Object} component The component to register the bindings for.
    * @returns {KeyboardService}
    */
-  register(id: string, component: AbstractComponent): KeyboardService {
+  register(id: string, component: Object): KeyboardService {
     if (id == 'global') throw 'The "global" id is reserved!';
     if (this.components[id]) throw `A component with the id "${id}" is already registered!`;
     this.components[id] = {
@@ -82,10 +81,10 @@ export class KeyboardService {
    * Removes the keyboard handling for the given component.
    * All previously bound event handlers for the component will be unbound.
    *
-   * @param {AbstractComponent} component
+   * @param {Object} component
    * @returns {KeyboardService}
    */
-  unregister(component: AbstractComponent): KeyboardService {
+  unregister(component: Object): KeyboardService {
     let found = this.findId(component);
     if (found) {
       // component.$el.off(<any>'click focus', <any>this.components[found].handler);
@@ -99,10 +98,10 @@ export class KeyboardService {
   }
 
   /**
-   * @param {AbstractComponent} component
+   * @param {Object} component
    * @returns {string} The id for the given component.
    */
-  findId(component: AbstractComponent): string {
+  findId(component: Object): string {
     return _.findKey(this.components, (el: any) => el.component == component);
   }
 
@@ -110,14 +109,14 @@ export class KeyboardService {
    * Begins a binding session for the given context.
    * Call this before actually binding keyboard combinations.
    *
-   * @param {(string | AbstractComponent)} context
+   * @param {(string | Object)} context
    * @returns {KeyboardService}
    */
-  begin(context: string | AbstractComponent): KeyboardService {
+  begin(context: string | Object): KeyboardService {
     if (this.inBindingMode)
       throw 'Call end() before beginning a new binding session!';
     let ctx: string = <any>context;
-    if (context instanceof AbstractComponent) {
+    if (context instanceof Object) {
       ctx = this.findId(context);
       if (!ctx)
         throw 'The given component is not registered yet';

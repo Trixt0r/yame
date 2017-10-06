@@ -1,5 +1,4 @@
 import { Component, ElementRef, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
-import { AbstractComponent } from "../../../component/abstract";
 
 /**
  * Abstract component which is able to handle resizes.
@@ -17,7 +16,7 @@ import { AbstractComponent } from "../../../component/abstract";
   providers: null,
   styles: ['div { witdh: 100%; height: 100%; }']
 })
-export class ResizeableComponent extends AbstractComponent implements OnChanges {
+export class ResizeableComponent implements OnChanges {
 
   /**
    * @protected
@@ -50,8 +49,7 @@ export class ResizeableComponent extends AbstractComponent implements OnChanges 
    * @param {number} [minVal=-1] The minimal value, -1 for no minVal
    * @param {number} [maxVal=-1] The maximum value, -1 for no maxVal
    */
-  constructor(protected ref: ElementRef) {
-    super(ref);
+  constructor(public ref: ElementRef) {
   }
 
   /** @inheritdoc */

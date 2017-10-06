@@ -7,7 +7,6 @@ import * as path from 'path';
 import { AssetService } from '../service/asset';
 import { AssetGroup } from '../../../../common/asset/group';
 import { Asset } from '../../../../common/asset';
-import { AbstractComponent } from "../../../component/abstract";
 import { MenuOption } from './assets/interface/menu-option';
 
 /**
@@ -17,7 +16,6 @@ import { MenuOption } from './assets/interface/menu-option';
  *
  * @export
  * @class AssetsComponent
- * @extends {AbstractComponent}
  * @implements {OnChanges}
  * @implements {AfterViewInit}
  */
@@ -39,7 +37,7 @@ import { MenuOption } from './assets/interface/menu-option';
     ])
   ]
 })
-export class AssetsComponent extends AbstractComponent implements OnChanges {
+export class AssetsComponent implements OnChanges {
 
   /** @type {AssetGroup<Asset>} The group this component displays.*/
   @Input() group: AssetGroup<Asset>;
@@ -51,7 +49,6 @@ export class AssetsComponent extends AbstractComponent implements OnChanges {
   }
 
   constructor(public ref: ElementRef, private as: AssetService, private assetComponents: AssetComponentService) {
-    super(ref);
     // this.menuOptions.push({
     //   icon: 'edit',
     //   title: 'Edit',
