@@ -1,34 +1,28 @@
 import { PixiService } from './service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By }              from '@angular/platform-browser';
-import { DebugElement }    from '@angular/core';
+import { DebugElement, Injectable } from '@angular/core';
 import { PixiComponent } from './component';
+
+@Injectable()
+class FakePixiService {
+  public static RESIZEVAL = null;
+  setUp(ref, options) { /* NOOP */ }
+  resize() { return FakePixiService.RESIZEVAL; }
+}
 
 describe('PixiComponent', () => {
 
-    let comp:    PixiComponent;
+    let comp: PixiComponent;
     let fixture: ComponentFixture<PixiComponent>;
     let initSpy: jasmine.Spy;
     let resizeSpy: jasmine.Spy;
-    let resizeVal: any = { x: 0, y: 0 };
 
     beforeEach(() => {
 
-      const pixiServiceStub = {
-        setUp(ref, options) { /* NOOP */ console.log('stub called') },
-
-        initGrid() {
-          return {
-            attachCamera: () => {/* NOOP */}
-          };
-        },
-
-        resize() { return resizeVal; }
-      };
-
       TestBed.configureTestingModule({
         declarations: [ PixiComponent ],
-        providers: [ { provide: PixiService, useValue: pixiServiceStub } ],
+        providers: [ { provide: PixiService, useClass: FakePixiService } ],
       }).compileComponents();
 
       fixture = TestBed.createComponent(PixiComponent);
@@ -54,13 +48,13 @@ describe('PixiComponent', () => {
     });
 
     it('should emit the resize event when calling onResize() if a resize value has been returned', () => {
-      resizeVal = { x: 0, y: 0 };
+      FakePixiService.RESIZEVAL = { x: 0, y: 0 };
       comp.onResize();
       expect(resizeSpy.calls.any()).toBe(true, 'resize event has not been emitted');
     });
 
     it('should not emit the resize event when calling onResize() if no resize value has been returned', () => {
-      resizeVal = false;
+      FakePixiService.RESIZEVAL = false;
       comp.onResize();
       expect(resizeSpy.calls.any()).not.toBe(true, 'resize event has been emitted');
     });
