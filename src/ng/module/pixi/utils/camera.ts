@@ -17,6 +17,7 @@ export class Camera extends EventEmitter {
 
   constructor() {
     super();
+    this._container = null;
     this._zoom = 1;
     this._minZoom = 0.05;
     this._maxZoom = 3;
@@ -72,8 +73,8 @@ export class Camera extends EventEmitter {
     var diff = target - this._zoom;
     var diffAbs = Math.abs(diff);
     if (diffAbs > 0) {
-      (<any>this._container).toLocal(this.targetPosition, null, this.localTargetPosition);
-      this._zoom += (<any>Math).sign(diff) * Math.min(this.zoomStep, diffAbs);
+      this._container.toLocal(this.targetPosition, null, this.localTargetPosition);
+      this._zoom += Math.sign(diff) * Math.min(this.zoomStep, diffAbs);
       this._container.scale.set(this._zoom);
       this._container.position.x = -(this.localTargetPosition.x * this._zoom) + this.targetPosition.x;
       this._container.position.y = -(this.localTargetPosition.y * this._zoom) + this.targetPosition.y;
@@ -96,7 +97,7 @@ export class Camera extends EventEmitter {
     // Make sure the current zoom won't exceed the new maximum value
     if (this._zoom > this._maxZoom) {
       var prevStep = this.zoomStep;
-      this.zoomStep = this._maxZoom - this._zoom;
+      this.zoomStep = this._zoom - this._maxZoom;
       this.zoom = this._maxZoom;
       this.zoomStep = prevStep;
     }
