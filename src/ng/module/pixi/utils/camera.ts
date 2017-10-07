@@ -130,7 +130,7 @@ export class Camera extends EventEmitter {
 
   /** @returns {PIXI.Point} Shortcut for `container.position` */
   get position(): PIXI.Point {
-    return this._container.position;
+    return <PIXI.Point>this._container.position;
   }
 
   /**

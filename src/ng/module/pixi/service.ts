@@ -75,9 +75,9 @@ export class PixiService {
    *
    * @param {number} width
    * @param {number} height
-   * @param {PIXI.IApplicationOptions} options
+   * @param {PIXI.ApplicationOptions} options
    */
-  setUp(viewRef: ElementRef, options: PIXI.IApplicationOptions) {
+  setUp(viewRef: ElementRef, options: PIXI.ApplicationOptions) {
     if (this.internalApp) return;
     this.viewRef = viewRef;
     this.internalApp = new PIXI.Application(viewRef.nativeElement.offsetWidth,
