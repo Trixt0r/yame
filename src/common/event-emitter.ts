@@ -11,7 +11,7 @@ export class EventEmitter extends eventemitter3 {
 
   /**
    * Helper for triggering the given event for the given property.
-   * The event is named `name:property`. `o` and `n` get passed as arguments.
+   * The event is named `name:property`. `old` and `value` get passed as arguments.
    * Triggering happens only if the provided values are different (`!=`).
    * Also the event `name` gets triggered without any arguments before
    * `name:property`.
@@ -20,7 +20,8 @@ export class EventEmitter extends eventemitter3 {
    * @param {string} name The name of the event
    * @param {string} property Name of the property which changes.
    * @param {any} old The old value of the property.
-   * @param {any} value The new value of the property
+   * @param {any} value The new value of the property.
+   * @param {Function} [fn] Function to be called before the events get emitted.
    * @returns {boolean} `true` if the event has been triggered.
    */
   protected triggerOnChange(name: string, property: string, old: any, value: any, fn?: Function): boolean {
