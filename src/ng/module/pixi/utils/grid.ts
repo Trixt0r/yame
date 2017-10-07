@@ -99,8 +99,8 @@ export class Grid extends EventEmitter {
       return this.once('cache:grown', () => this.update(width, height));
     // Convert the viewport into container coordinates
     let topLeft = this.container.toLocal(new PIXI.Point());
-    topLeft.x = Math.floor(topLeft.x / this.width) * this.width;
-    topLeft.y = Math.floor(topLeft.y / this.height) * this.height;
+    topLeft.x = Math.floor(topLeft.x / this.pWidth) * this.pWidth;
+    topLeft.y = Math.floor(topLeft.y / this.pHeight) * this.pHeight;
 
     // Clear the sprite
     this.gridContainer.removeChildren();
@@ -111,12 +111,12 @@ export class Grid extends EventEmitter {
       container = this.cache[i];
       this.gridContainer.addChild(container);
       // Calculate the correct positions and offsets
-      let xx = topLeft.x + (col * Grid.rectangleCount.x) * this.width;
-      let yy = topLeft.y + (row * Grid.rectangleCount.y) * this.height;
-      let xOffset = -this.width * Math.sign(Math.abs(xx) % (this.width * 2 ));
-      let yOffset = -this.height * Math.sign(Math.abs(yy) % (this.height * 2));
+      let xx = topLeft.x + (col * Grid.rectangleCount.x) * this.pWidth;
+      let yy = topLeft.y + (row * Grid.rectangleCount.y) * this.pHeight;
+      let xOffset = -this.pWidth * Math.sign(Math.abs(xx) % (this.pWidth * 2 ));
+      let yOffset = -this.pHeight * Math.sign(Math.abs(yy) % (this.pHeight * 2));
       container.position.set(xx + xOffset, yy + yOffset);
-      container.scale.set(this.width / 16, this.height / 16);
+      container.scale.set(this.pWidth / 16, this.pHeight / 16);
 
       // Get the global coordinates of the bottom right point
       let bounds = container.getLocalBounds();
@@ -126,7 +126,7 @@ export class Grid extends EventEmitter {
       let isEnd = reachedWidth && reachedHeight;
 
       // If we did not fill up, increase the particle container cache
-      if (i == this.cache.length - 1 && !isEnd) {
+      if (i === this.cache.length - 1 && !isEnd) {
         done = false;
         this.growCache(1);
         this.update(width, height);
@@ -148,7 +148,12 @@ export class Grid extends EventEmitter {
     return this;
   }
 
-  /** @type {PIXI.Container} container The container this grid is attached to*/
+  /** @type {PIXI.Container} container The actual rendered grid. */
+  get renderedContainer(): PIXI.Container {
+    return this.gridContainer;
+  }
+
+  /** @type {PIXI.Container} container The container this grid is attached to. */
   get container(): PIXI.Container {
     return this.pContainer;
   }
