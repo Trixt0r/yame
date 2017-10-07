@@ -47,9 +47,8 @@ export class Grid extends EventEmitter {
     if (Grid.spriteTexture) return Grid.spriteTexture;
     Grid.spriteTexture = PIXI.Texture.fromImage('assets/grid.png', true, PIXI.SCALE_MODES.NEAREST);
     // Listen for the texture update and assign the rectangle size
-    Grid.spriteTexture.baseTexture
-      .on('update',
-      tex => Grid.rectangleCount.set(tex.width / 16, tex.height / 16) );
+    Grid.spriteTexture.baseTexture.on('update',
+                                      tex => Grid.rectangleCount.set(tex.width / 16, tex.height / 16) );
     return Grid.spriteTexture;
   }
 
@@ -81,7 +80,7 @@ export class Grid extends EventEmitter {
     // Trigger that we are going to grow the cache
     this.emit('cache:growing');
     for (let i = 0; i < amount; i++)
-        this.cache.push(new PIXI.Sprite(Grid.spriteTexture));
+      this.cache.push(new PIXI.Sprite(Grid.spriteTexture));
     // If we are done growing, trigger it
     this.growingCache = false;
     this.emit('cache:grown');
@@ -107,9 +106,9 @@ export class Grid extends EventEmitter {
     this.gridContainer.removeChildren();
 
     let row = 0, col = 0;
-    let end = false, done = true;
-    this.cache.forEach((container, i) => {
-      if (end) return;
+    let done = true, container: PIXI.Sprite;
+    for (let i = 0, l = this.cache.length; i < l; i++) {
+      container = this.cache[i];
       this.gridContainer.addChild(container);
       // Calculate the correct positions and offsets
       let xx = topLeft.x + (col * Grid.rectangleCount.x) * this.width;
@@ -128,24 +127,21 @@ export class Grid extends EventEmitter {
 
       // If we did not fill up, increase the particle container cache
       if (i == this.cache.length - 1 && !isEnd) {
-        end = true;
         done = false;
         this.growCache(1);
-        return this.update(width, height);
+        this.update(width, height);
+        break;
       }
       // Check if we reached the width of the screen
       if (reachedWidth) {
         // If we also reached the height, we cancel iteration here
-        if (reachedHeight)
-            end = true;
+        if (reachedHeight) break;
         // Otherwise we jump to the next row and fill it
-        else {
-            col = 0;
-            row++;
-        }
+        col = 0;
+        row++;
       } else // Jump to the next column and render it
         col++;
-    });
+    }
     // Trigger the event only if we completed the iterations without growing
     if (done)
       this.emit('update', width, height);
