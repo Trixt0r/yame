@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 /**
  * Abstract component which is able to handle resizes.
@@ -16,13 +16,13 @@ import { Component, ElementRef, EventEmitter, Output, Input, SimpleChanges, OnCh
   providers: null,
   styles: ['div { witdh: 100%; height: 100%; }']
 })
-export class ResizeableComponent implements OnChanges {
+export class ResizeableComponent implements OnChanges, AfterViewInit {
 
   /**
    * @protected
    * @type {{ x: number, y: number }} The click position
    */
-  protected position: { x: number, y: number }
+  protected position: { x: number, y: number };
 
   /**
    * @private
@@ -45,17 +45,16 @@ export class ResizeableComponent implements OnChanges {
    * Creates an instance of ResizeableComponent.
    *
    * @param {ElementRef} ref Injected by angular
-   * @param {string} property The css property to manipulate, e.g. 'left'
-   * @param {number} [minVal=-1] The minimal value, -1 for no minVal
-   * @param {number} [maxVal=-1] The maximum value, -1 for no maxVal
    */
   constructor(public ref: ElementRef) {
   }
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.property)
+    if (changes.property) {
       this.isVer = ['top', 'bottom', 'height'].indexOf(this.property) >= 0;
+      this.updateFromStyle();
+    }
   }
 
   /**
@@ -68,9 +67,6 @@ export class ResizeableComponent implements OnChanges {
       x: event.clientX,
       y: event.clientY
     };
-    // Cache the css value
-    let style = window.getComputedStyle(this.ref.nativeElement);
-    this.propVal = parseFloat(style.getPropertyValue(this.property));
     // Prevents text selection
     event.preventDefault();
   }
@@ -110,6 +106,7 @@ export class ResizeableComponent implements OnChanges {
    * @param {number} newVal
    */
   updateValue(newVal: number): void {
+    this.propVal = newVal;
     this.ref.nativeElement.style[this.property] = `${newVal}px`;
     this.sizeUpdated.emit(newVal);
   }
@@ -120,17 +117,32 @@ export class ResizeableComponent implements OnChanges {
    * @returns {number}
    */
   clampValue(value: number): number {
-    let newVal = value;
-    if (this.minVal >= 0) newVal = Math.max(newVal, this.minVal);
-    if (this.maxVal >= 0) newVal = Math.min(newVal, this.maxVal);
-    return newVal;
+    if (this.minVal >= 0) value = isNaN(value) ? this.minVal : Math.max(value, this.minVal);
+    if (this.maxVal >= 0) value = isNaN(value) ? this.maxVal : Math.min(value, this.maxVal);
+    return value;
   }
 
+  /** @inheritdoc */
   ngAfterViewInit() {
-    setTimeout(() => {
-      let style = window.getComputedStyle(this.ref.nativeElement);
-      let val = parseFloat(style.getPropertyValue(this.property));
-       this.updateValue( this.clampValue(val));
-    });
+    setTimeout(() => this.updateFromStyle());
+  }
+
+  /**
+   * Runs an update based on the current style value of the property
+   *
+   * @private
+   */
+  private updateFromStyle() {
+    let style = window.getComputedStyle(this.ref.nativeElement);
+    let val = parseFloat(style.getPropertyValue(this.property));
+    this.updateValue(this.clampValue(val));
+  }
+
+  /**
+   * @readonly
+   * @type number
+   */
+  get propertyValue(): number {
+    return this.propVal;
   }
 }
