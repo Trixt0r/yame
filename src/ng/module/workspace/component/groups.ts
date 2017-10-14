@@ -3,7 +3,7 @@ import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
 import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, OnInit } from '@angular/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
-import { MdButton, MdListItem } from '@angular/material'
+import { MatButton, MatListItem } from '@angular/material'
 
 import { WorkspaceService } from '../service';
 
@@ -52,8 +52,8 @@ export class GroupsComponent implements OnInit {
   /** @type {EventEmitter<OpenEvent>} The opened event, triggered as soon as the slide animation has been done. */
   @Output('opened') opened: EventEmitter<OpenEvent> = new EventEmitter();
 
-  /** @type {MdButton} The menu trigger button for the parent menu, which is not visible. */
-  @ViewChild('parentMenuTrigger') parentMenuTrigger: MdButton;
+  /** @type {MatButton} The menu trigger button for the parent menu, which is not visible. */
+  @ViewChild('parentMenuTrigger') parentMenuTrigger: MatButton;
 
   // Internal vars which have not to be available to the public
   private groups: AssetGroup<Asset>[]; // Current files

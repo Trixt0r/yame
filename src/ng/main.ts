@@ -31,7 +31,7 @@ platformBrowserDynamic()
       //   icon: 'info',
       //   title: 'Details',
       //   callback: (event, asset) => {
-      //     let dialogRef = ref.injector.get(MdDialog).open(DialogContent);
+      //     let dialogRef = ref.injector.get(MatDialog).open(DialogContent);
       //     dialogRef.componentInstance.asset = {   };
       //     dialogRef.afterClosed().subscribe(result => console.log(result));
       //   }
