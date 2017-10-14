@@ -18,6 +18,7 @@ import { SidebarComponent } from "../module/sidebar/component";
 })
 export class AppComponent {
   name = 'YAME';
+  private initialized = false;
 
   @ViewChild('main') main: MainComponent;
   @ViewChild('sidebar') sidebar: SidebarComponent;
@@ -29,6 +30,7 @@ export class AppComponent {
     this.pixiService.initGrid().attachCamera();
     this.sidebar.updateValue(this.sidebar.clampValue(window.innerWidth * .75));
     this.main.workspace.updateValue(this.main.workspace.clampValue(window.innerHeight * .75));
+    this.initialized = true;
   }
 
   /**
@@ -36,6 +38,7 @@ export class AppComponent {
    * @param {number} left
    */
   sidebarUpdate(left: number): void {
+    if (!this.initialized) return;
     this.main.sidebarUpdate(left);
   }
 }
