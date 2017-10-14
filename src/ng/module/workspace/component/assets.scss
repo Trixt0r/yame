@@ -14,15 +14,15 @@ $options-bg-color: #191c1d;
   overflow-y: auto;
   user-select: none;
   max-height: calc(100% - #{$options-height});
-  md-card {
+  mat-card {
     width: $max-width;
     margin: 0 2.5px 5px 2.5px;
     height: 138px;
-    md-card-header {
+    mat-card-header {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      md-card-subtitle {
+      mat-card-subtitle {
         min-height: 16px;
       }
     }

@@ -12,9 +12,9 @@ import { GroupComponent } from './abstract';
  */
 @Component({
   template: `
-    <md-list-item (click)="click($event)">
-      <md-icon md-list-icon>folder</md-icon>
-      <h4 md-line> {{ group.content.name }} </h4>
-    </md-list-item>`
+    <mat-list-item (click)="click($event)">
+      <mat-icon mat-list-icon>folder</mat-icon>
+      <h4 mat-line> {{ group.content.name }} </h4>
+    </mat-list-item>`
 })
 export class DirectoryGroupComponent extends GroupComponent { }

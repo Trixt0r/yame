@@ -4,9 +4,9 @@ import { AssetPreviewComponent } from './interface';
 import { Asset } from '../../../../../../../common/asset';
 
 @Component({
-  template: `<md-icon class="no-preview">{{ 'web_asset' }}</md-icon>`,
+  template: `<mat-icon class="no-preview">{{ 'web_asset' }}</mat-icon>`,
   styles: [
-    `md-icon {
+    `mat-icon {
       font-size: 100px;
       width: 100%;
       color: rgba(255, 255, 255, .7);

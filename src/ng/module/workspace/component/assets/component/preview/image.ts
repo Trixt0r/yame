@@ -6,7 +6,7 @@ import { Asset } from '../../../../../../../common/asset';
 
 @Component({
   moduleId: module.id,
-  template: `<img md-card-image [src]="sanitize(asset.content.path)" />`,
+  template: `<img mat-card-image [src]="sanitize(asset.content.path)" />`,
 })
 export class ImageAssetPreviewComponent implements AssetPreviewComponent {
 

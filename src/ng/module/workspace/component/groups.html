@@ -1,73 +1,73 @@
 <!-- Left slide -->
 
-<md-list
+<mat-list
   dense
   [@slideState]="slide"
   class="prev">
-  <md-list-item>
-    <button md-icon-button *ngIf="current.id != ws.directory.path" class="btn-back">
-      <md-icon >keyboard_arrow_left</md-icon>
+  <mat-list-item>
+    <button mat-icon-button *ngIf="current.id != ws.directory.path" class="btn-back">
+      <mat-icon >keyboard_arrow_left</mat-icon>
     </button>
     <div class="fill-width text-center">{{ current.content.name }}</div>
-  </md-list-item>
+  </mat-list-item>
   <ng-template ngFor let-group [ngForOf]="openingGroups">
     <ng-template [groupHost]="group">
     </ng-template>
   </ng-template>
-</md-list>
+</mat-list>
 
 <!-- Content -->
-<md-nav-list
+<mat-nav-list
   dense
   [@slideState]="slide"
   (@slideState.start)="slideAnimStart($event)"
   (@slideState.done)="slideAnimDone($event)"
   class="now">
-  <md-list-item [disableRipple]="true"
+  <mat-list-item [disableRipple]="true"
             (contextmenu)="onBackClick($event)">
-    <button md-icon-button
+    <button mat-icon-button
             *ngIf="displayBack"
             (click)="onBackClick($event)"
             class="btn-back">
-      <md-icon>keyboard_arrow_left</md-icon>
+      <mat-icon>keyboard_arrow_left</mat-icon>
     </button>
     <div class="fill-width text-center">{{ slide == 'none' ? current.content.name : previous.content.name }}</div>
-  </md-list-item>
+  </mat-list-item>
 
   <button
     #parentMenuTrigger
-    md-button
+    mat-button
     *ngIf="parents.length > 0"
-    [mdMenuTriggerFor]="parentsMenu"
+    [matMenuTriggerFor]="parentsMenu"
     id="menuTrigger"
     class="invisible">
   </button>
 
-  <md-menu #parentsMenu="mdMenu" [yPosition]="'above'">
-    <button *ngFor="let parent of parents" md-menu-item (click)="open(parent)">
-      <md-icon>folder_open</md-icon>
+  <mat-menu #parentsMenu="matMenu" [yPosition]="'above'">
+    <button *ngFor="let parent of parents" mat-menu-item (click)="open(parent)">
+      <mat-icon>folder_open</mat-icon>
       <span>{{ parent.content.name }}</span>
     </button>
-  </md-menu>
+  </mat-menu>
   <ng-template ngFor let-group [ngForOf]="groups">
     <ng-template [groupHost]="group" (click)="open(group)">
     </ng-template>
   </ng-template>
-</md-nav-list>
+</mat-nav-list>
 
 <!-- Right slider -->
-<md-list
+<mat-list
   dense
   [@slideState]="slide"
   class="next">
-  <md-list-item>
-    <button md-icon-button class="btn-back">
-      <md-icon >keyboard_arrow_left</md-icon>
+  <mat-list-item>
+    <button mat-icon-button class="btn-back">
+      <mat-icon >keyboard_arrow_left</mat-icon>
     </button>
     <div class="fill-width text-center">{{ current.content.name }}</div>
-  </md-list-item>
+  </mat-list-item>
   <ng-template ngFor let-group [ngForOf]="openingGroups">
     <ng-template [groupHost]="group">
     </ng-template>
   </ng-template>
-</md-list>
+</mat-list>

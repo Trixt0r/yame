@@ -1,32 +1,32 @@
 <div #filesContainer class="flex wrap" *ngIf="assets && assets.length">
   <ng-template ngFor let-asset [ngForOf]="assets">
-    <md-card class="example-card">
-      <md-card-header>
-        <md-card-title>{{ asset.content.simpleName }}</md-card-title>
-        <md-card-subtitle>{{ asset.type }}</md-card-subtitle>
-      </md-card-header>
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>{{ asset.content.simpleName }}</mat-card-title>
+        <mat-card-subtitle>{{ asset.type }}</mat-card-subtitle>
+      </mat-card-header>
       <div class="wrapper fill-width">
         <ng-template [assetPreview]="asset"></ng-template>
       </div>
-      <md-card-actions *ngIf="getMenuOptions(asset).length" class="text-right">
+      <mat-card-actions *ngIf="getMenuOptions(asset).length" class="text-right">
 
 
-        <button *ngIf="getMenuOptions(asset).length == 1" md-button (click)="getMenuOptions(asset)[0].callback($event, asset)">
-          <md-icon *ngIf="getMenuOptions(asset)[0].icon">{{ getMenuOptions(asset)[0].icon }}</md-icon>
+        <button *ngIf="getMenuOptions(asset).length == 1" mat-button (click)="getMenuOptions(asset)[0].callback($event, asset)">
+          <mat-icon *ngIf="getMenuOptions(asset)[0].icon">{{ getMenuOptions(asset)[0].icon }}</mat-icon>
           <span> {{ getMenuOptions(asset)[0].title }} </span>
         </button>
 
-        <button *ngIf="getMenuOptions(asset).length > 1" md-icon-button [mdMenuTriggerFor]="menu">
-          <md-icon>more_vert</md-icon>
+        <button *ngIf="getMenuOptions(asset).length > 1" mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
         </button>
-        <md-menu #menu="mdMenu">
-          <button md-menu-item *ngFor="let option of getMenuOptions(asset)" (click)="option.callback($event, asset)">
-            <md-icon *ngIf="option.icon">{{ option.icon }}</md-icon>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item *ngFor="let option of getMenuOptions(asset)" (click)="option.callback($event, asset)">
+            <mat-icon *ngIf="option.icon">{{ option.icon }}</mat-icon>
             <span> {{ option.title }} </span>
           </button>
-        </md-menu>
-      </md-card-actions>
-    </md-card>
+        </mat-menu>
+      </mat-card-actions>
+    </mat-card>
   </ng-template>
 </div>
 
@@ -35,7 +35,7 @@
     *ngIf="assets && !assets.length"
     (keydown)="select($event, null)"
     tabindex="0">
-  <md-card *ngIf="!assets.length" class="text-center">
+  <mat-card *ngIf="!assets.length" class="text-center">
     Group is empty
-  </md-card>
+  </mat-card>
 </div>
