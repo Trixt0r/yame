@@ -20,21 +20,27 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
 
   /**
    * @protected
-   * @type {{ x: number, y: number }} The click position
+   * @type {{ x: number, y: number }} position The click position
    */
   protected position: { x: number, y: number };
 
   /**
    * @private
+   * @type {number} The clicked value
+   */
+  private clickedVal: number;
+
+  /**
+   * @private
    * @type {number} number The property value on click.
    */
-  private propVal: number;
+  protected propVal: number;
 
   /**
    * @private
    * @type {boolean} isVer Whether the property has to be calculated clientY.
    */
-  private isVer: boolean = false;
+  protected isVer: boolean = false;
 
   @Output() sizeUpdated = new EventEmitter();
   @Input() property: string;
@@ -67,6 +73,7 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
       x: event.clientX,
       y: event.clientY
     };
+    this.clickedVal = this.propVal;
     // Prevents text selection
     event.preventDefault();
   }
@@ -81,9 +88,9 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
       if (this.isVer) diff = event.clientY - this.position.y;
       else diff = event.clientX - this.position.x;
       // Add the difference and clamp
-      let newVal = this.clampValue(this.propVal + diff);
+      let newVal = this.clampValue(this.clickedVal + diff);
       // Skip if nothing changed
-      if (Math.abs(this.propVal - newVal) === 0) return;
+      if (Math.abs(this.clickedVal - newVal) === 0) return;
       this.updateValue(newVal);
     }
   }
