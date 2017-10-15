@@ -1,0 +1,65 @@
+import { MockedService } from './mocked-service';
+import { DialogProviderException } from '../exception/provider/dialog';
+import { DialogProvider } from './dialog';
+
+describe('DialogProvider', () => {
+
+  let service: MockedService;
+  let provider: DialogProvider;
+  let sendSpy: jasmine.Spy;
+  let onceSpy: jasmine.Spy;
+
+  beforeEach(() => {
+    service = new MockedService();
+    provider = new DialogProvider(service);
+    sendSpy = spyOn(service.ipc, 'send');
+    onceSpy = spyOn(service.ipc, 'once');
+  });
+
+  describe('open', () => {
+    it('should return a promise', () => {
+      expect(provider.open({ }) instanceof Promise).toBe(true, 'No promise returned');
+    });
+
+    it('should send "dialog:open" event', () => {
+      provider.open({ });
+      expect(sendSpy.calls.any()).toBe(true, 'An event has not been sent');
+      expect(sendSpy.calls.mostRecent().args.length).toBe(3, 'The correct amount of args has not been passed');
+      expect(sendSpy.calls.mostRecent().args[0]).toBe('dialog:open', '"dialog:open" has not been sent');
+    });
+
+    it('should register a "dialog:open:id" handler', () => {
+      provider.open({ });
+      let id = sendSpy.calls.mostRecent().args[2];
+      expect(onceSpy.calls.any()).toBe(true, 'An event handler has not been registered');
+      expect(onceSpy.calls.mostRecent().args.length).toBe(2, 'The correct amount of args has not been passed');
+      expect(onceSpy.calls.mostRecent().args[0]).toBe(`dialog:open:${id}`,
+                                                    `An event handler for "dialog:open:${id}" has not been registered`);
+    });
+
+    it('should resolve the files on "dialog:open:id"', () => {
+      let promise = provider.open({ });
+      let id = sendSpy.calls.mostRecent().args[2];
+      setTimeout(() => service.ipc.emit(`dialog:open:${id}`, ['file1', 'dir1']));
+      return promise
+              .then(files => {
+                expect(files).toBeDefined('No files defined');
+                expect(files.length).toBe(2, 'Not the correct amount of files have been resolved');
+              });
+    }, 10);
+
+    it('should reject if the files are empty on "dialog:open:id"', () => {
+      let promise = provider.open({ });
+      let id = sendSpy.calls.mostRecent().args[2];
+      setTimeout(() => service.ipc.emit(`dialog:open:${id}`, []));
+      return promise.then(files => { throw 'No exception'; })
+              .catch(e => {
+                expect(e instanceof DialogProviderException).toBe(true,
+                                              'No DirectoryProviderException exception rejected');
+                expect(e.message).toBeDefined('No message defined');
+                expect(e.message).toEqual('No files chosen', 'Incorrect message rejected');
+              });
+    }, 10);
+  })
+
+});

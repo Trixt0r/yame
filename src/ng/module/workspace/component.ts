@@ -65,17 +65,16 @@ export class WorkspaceComponent extends ResizeableComponent {
     let provider = this.electron.getProvider(DialogProvider);
     return provider.open({ properties: ['openDirectory'] })
       .then(files => {
-        if (files && files.length)
-          this.service.init(files[0]).then(json => {
-            this.nodes = <any>[{
-              name: 'Assets',
-              path: json.path,
-              isExpanded: true,
-              children: this.service.directories
-            }];
-            this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
-            setTimeout(() => this.onResize());
-          });
+        this.service.init(files[0]).then(json => {
+          this.nodes = <any>[{
+            name: 'Assets',
+            path: json.path,
+            isExpanded: true,
+            children: this.service.directories
+          }];
+          this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
+          setTimeout(() => this.onResize());
+        });
       });
   }
 

@@ -1,3 +1,4 @@
+import { DirectoryProviderException } from '../exception/provider/directory';
 import { DirectoryContent } from '../../../../common/content/directory';
 import { ElectronProvider } from '../provider';
 import * as _ from 'lodash';
@@ -21,7 +22,7 @@ export class DirectoryProvider extends ElectronProvider {
       });
       this.ipc.once(`directory:scan:${id}:fail`, (event, e) => {
         this.ipc.removeAllListeners(`directory:scan:${id}:done`);
-        reject(e);
+        reject(new DirectoryProviderException(e.message));
       });
     });
   }
