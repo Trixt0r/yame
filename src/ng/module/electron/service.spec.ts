@@ -1,3 +1,5 @@
+import { ElectronProviderNotFound } from './exception/service/not-found';
+import { ElectronProviderAlreadyRegistered } from './exception/service/registered';
 import { ElectronProvider } from './provider';
 import { ElectronService } from './service';
 
@@ -19,15 +21,20 @@ describe('ElectronService', () => {
 
   it('should register MyProvider', () => {
     expect(() => service.registerProvider(MyProvider))
-      .not.toThrow('Provider with name MyProvider has been already registered');
+      .not.toThrowError('Provider with name MyProvider has been already registered');
   });
 
   it('should be able to register MyProvider twice', () => {
-    expect(() => {
+    let thrown = false;
+    try {
       service.registerProvider(MyProvider);
       service.registerProvider(MyProvider);
-    })
-    .toThrow('Provider with name MyProvider has been already registered');
+    } catch (e) {
+      expect(e instanceof ElectronProviderAlreadyRegistered ).toBe(true);
+      expect(e.message).toEqual('Provider with name MyProvider has been already registered');
+      thrown = true;
+    }
+    expect(thrown).toBe(true, 'ElectronProviderAlreadyRegistered has not been thrown');
   });
 
   it('should have an instance for MyProvider', () => {
@@ -42,8 +49,16 @@ describe('ElectronService', () => {
     expect(inst2).toBe(inst1, 'The provider instances are not the same');
   });
 
-  it('should have an instance for MyProvider2', () => {
-    expect(service.getProvider(MyProvider2)).toBeUndefined('MyProvider2 is defined');
+  it('should not have an instance for MyProvider2', () => {
+    let thrown = false;
+    try {
+      service.getProvider(MyProvider2);
+    } catch (e) {
+      expect(e instanceof ElectronProviderNotFound ).toBe(true);
+      expect(e.message).toEqual('No electron provider found for MyProvider2');
+      thrown = true;
+    }
+    expect(thrown).toBe(true, 'ElectronProviderNotFound has not been thrown');
   });
 
 });

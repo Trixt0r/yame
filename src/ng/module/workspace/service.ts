@@ -1,8 +1,10 @@
+import { WorkspaceNotInitializedException } from './exception/service/not-initialized';
+import { DirectoryProvider } from '../electron/provider/directory';
+import { ElectronService } from '../electron/service';
 import { FileContent } from '../../../common/content/file';
 import { DirectoryContent } from '../../../common/content/directory';
 import { Subject } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
-import { ipcRenderer } from 'electron';
 import * as path from 'path';
 import * as _ from 'lodash';
 import * as Promise from 'bluebird';
@@ -32,6 +34,8 @@ export class WorkspaceService {
   ready$ = this.readySource.asObservable();
   fail$ = this.failSource.asObservable();
 
+  constructor(private electron: ElectronService) { }
+
   /**
    * Initializes the given directory as the workspace directory.
    * The loaded json representation gets resolved on success.
@@ -44,25 +48,21 @@ export class WorkspaceService {
       return Promise.resolve(this.internalFiles);
     this.internalState = 'init';
     this.initSource.next();
-    return new Promise<DirectoryContent>((resolve, reject) => {
-      let id = _.uniqueId('workspace-service-');
-      ipcRenderer.send('directory:scan', rootDir, id, true);
-      ipcRenderer.once(`directory:scan:${id}:done`, (event, json) => {
-        ipcRenderer.removeAllListeners(`directory:scan:${id}:fail`);
+    let provider = this.electron.getProvider(DirectoryProvider);
+    return provider.scan(rootDir)
+      .then(json => {
         this.internalFiles = json;
         this.internalFolders = this.getDirectories(this.internalFiles);
         this.internalState = 'ready';
         this.readySource.next();
-        resolve(this.internalFiles);
-      });
-      ipcRenderer.once(`directory:scan:${id}:fail`, (event, e) => {
-        ipcRenderer.removeAllListeners(`directory:scan:${id}:done`);
+        return json;
+      })
+      .catch(e => {
         this.internalState = 'fail';
         this.internalError = e;
         this.failSource.next();
-        reject(e);
+        throw e;
       });
-    });
   }
 
   /**
@@ -149,7 +149,7 @@ export class WorkspaceService {
    */
   get directories(): DirectoryContent[] {
     if (!this.internalFolders)
-      throw 'Workspace not initialized yet!';
+      throw new WorkspaceNotInitializedException('Directories are not ready, yet!');
 
     return this.internalFolders;
   }

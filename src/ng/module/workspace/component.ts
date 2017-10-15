@@ -1,3 +1,5 @@
+import { DialogProvider } from '../electron/provider/dialog';
+import { ElectronService } from '../electron/service';
 import { AssetGroup } from '../../../common/asset/group';
 import { DirectoryAsset } from '../../../common/asset/directory';
 import { AssetService } from './service/asset';
@@ -7,7 +9,6 @@ import { AssetsComponent } from './component/assets';
 import { WindowRef } from '../../service/window';
 import { WorkspaceService } from './service';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { ipcRenderer } from 'electron';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { DirectoryContent } from "../../../common/content/directory";
@@ -19,7 +20,6 @@ import { Asset } from "../../../common/asset";
   selector: 'workspace',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
-  providers: [WorkspaceService],
 })
 export class WorkspaceComponent extends ResizeableComponent {
 
@@ -43,7 +43,7 @@ export class WorkspaceComponent extends ResizeableComponent {
   @ViewChild('row') row: ElementRef;
   @ViewChild('tree') tree: any;
 
-  constructor(public ref: ElementRef, private service: WorkspaceService, private assets: AssetService) {
+  constructor(public ref: ElementRef, private service: WorkspaceService, private assets: AssetService, private electron: ElectronService) {
     super(ref);
     this.maxVal = window.innerHeight - 100;
   }
@@ -62,21 +62,21 @@ export class WorkspaceComponent extends ResizeableComponent {
   }
 
   openFolder() {
-    let id = _.uniqueId('assets-');
-    ipcRenderer.send('dialog:open', {properties: ['openDirectory']}, id );
-    ipcRenderer.once(`dialog:open:${id}`, (event, files) => {
-      if (files && files.length)
-        this.service.init(files[0]).then(json => {
-          this.nodes = <any>[{
-            name: 'Assets',
-            path: json.path,
-            isExpanded: true,
-            children: this.service.directories
-          }];
-          this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
-          setTimeout(() => this.onResize());
-        });
-    });
+    let provider = this.electron.getProvider(DialogProvider);
+    return provider.open({ properties: ['openDirectory'] })
+      .then(files => {
+        if (files && files.length)
+          this.service.init(files[0]).then(json => {
+            this.nodes = <any>[{
+              name: 'Assets',
+              path: json.path,
+              isExpanded: true,
+              children: this.service.directories
+            }];
+            this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
+            setTimeout(() => this.onResize());
+          });
+      });
   }
 
   updateColumnsFromLeft(width) {

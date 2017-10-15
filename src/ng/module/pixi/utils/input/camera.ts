@@ -1,3 +1,4 @@
+import { InvalidCameraTargetException } from '../../exception/invalid-camera-target';
 import * as PIXI from 'pixi.js';
 import Camera from '../camera';
 
@@ -16,7 +17,7 @@ export function init(renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer,
                               camera: Camera,
                               target: PIXI.DisplayObject) {
   // We allow only targets with parents
-  if (!target.parent) throw 'Only targets with a parent allowed';
+  if (!target.parent) throw new InvalidCameraTargetException('Only targets with a parent allowed');
 
   let tmpPos = new PIXI.Point();
 

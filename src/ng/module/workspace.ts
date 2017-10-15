@@ -17,6 +17,9 @@ import { WorkspaceComponent } from './workspace/component';
 import { WorkspaceService } from './workspace/service';
 import { AssetService } from './workspace/service/asset';
 
+import convertDirectory from './workspace/service/converter/directory';
+import convertImage from './workspace/service/converter/image';
+
 @NgModule({
   imports: [BrowserModule, UtilsModule, MaterialModule],
   entryComponents: [
@@ -41,4 +44,26 @@ import { AssetService } from './workspace/service/asset';
   ],
   providers: [ WorkspaceService, AssetService, GroupComponentService, AssetComponentService ],
 })
-export class WorkspaceModule { }
+export class WorkspaceModule {
+  constructor(workspace: WorkspaceService, assets: AssetService,
+              groupComps: GroupComponentService, assetComps: AssetComponentService) {
+
+    // Register default directory converter and component
+    assets.registerFsConverter('directory', convertDirectory);
+    assets.registerFsConverter('png', convertImage);
+    groupComps.register('directory', DirectoryGroupComponent);
+    assetComps.registerPreview('file', FileAssetPreviewComponent);
+    assetComps.registerPreview('image', ImageAssetPreviewComponent);
+    assetComps.registerMenuOptions('image', [
+      // {
+      //   icon: 'info',
+      //   title: 'Details',
+      //   callback: (event, asset) => {
+      //     let dialogRef = ref.injector.get(MatDialog).open(DialogContent);
+      //     dialogRef.componentInstance.asset = {   };
+      //     dialogRef.afterClosed().subscribe(result => console.log(result));
+      //   }
+      // },
+    ]);
+  }
+}

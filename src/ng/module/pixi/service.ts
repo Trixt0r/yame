@@ -1,3 +1,4 @@
+import { PixiAppNotInitializedException } from './exception/service/not-initialized';
 import initCameraInput from './utils/input/camera';
 import { Grid } from './utils/grid';
 import { Camera } from './utils/camera';
@@ -96,7 +97,7 @@ export class PixiService {
    * @chainable
    */
   attachCamera(interactive = true): PixiService {
-    if (!this.internalApp) throw "Can't attach a camera if the pixi application is not initialized!";
+    if (!this.internalApp) throw new PixiAppNotInitializedException("Can't attach a camera");
     if (this.internalCam) return this;
     this.internalCam = new Camera();
     this.internalCam.attach(this.internalScene);
@@ -116,7 +117,7 @@ export class PixiService {
    * @chainable
    */
   initGrid(): PixiService {
-    if (!this.internalScene) throw "Can't initialize a grid if the pixi application is not initialized!";
+    if (!this.internalScene) throw new PixiAppNotInitializedException("Can't initialize a grid");
     if (this.internalGrid) return this;
     let width = this.viewRef.nativeElement.offsetWidth;
     let height = this.viewRef.nativeElement.offsetHeight;
@@ -135,7 +136,7 @@ export class PixiService {
    * @returns {(boolean | PIXI.Point)}
    */
   resize(): boolean | PIXI.Point {
-    if (!this.viewRef) throw "Can't resize if the pixi application is not initialized!";
+    if (!this.viewRef) throw new PixiAppNotInitializedException("Can't resize");
     this.newSize.set(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
     if (this.renderer.width != this.newSize.x || this.renderer.height != this.newSize.y) {
       this.renderer.resize(this.newSize.x, this.newSize.y);

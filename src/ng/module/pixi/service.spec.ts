@@ -1,3 +1,4 @@
+import { PixiAppNotInitializedException } from './exception/service/not-initialized';
 import { Grid } from './utils/grid';
 import { Camera } from './utils/camera';
 import { PixiService } from './service';
@@ -49,14 +50,21 @@ describe('PixiService', () => {
 
   describe('attachCamera', () => {
     it('should not be able to initialize a camera before setUp', () => {
-      expect(() => service.attachCamera(false))
-        .toThrow("Can't attach a camera if the pixi application is not initialized!");
+      let thrown = false;
+      try {
+        service.attachCamera(false);
+      } catch(e) {
+        expect(e instanceof PixiAppNotInitializedException).toBe(true);
+        expect(e.message).toEqual("Can't attach a camera");
+        thrown = true;
+      }
+      expect(thrown).toBe(true, 'PixiAppNotInitializedException has not been thrown');
     });
 
     it('should be able to initialize a camera after setUp', () => {
       service.setUp(viewRef, { });
       expect(() => service.attachCamera(false))
-        .not.toThrow("Can't attach a camera if the pixi application is not initialized!");
+        .not.toThrowError("Can't attach a camera");
     });
 
     it('should have a camera instance after attaching it', () => {
@@ -92,14 +100,21 @@ describe('PixiService', () => {
 
   describe('initGrid', () => {
     it('should not be able to initialize a grid before setUp', () => {
-      expect(() => service.initGrid())
-        .toThrow("Can't initialize a grid if the pixi application is not initialized!");
+      let thrown = false;
+      try {
+        service.initGrid();
+      } catch(e) {
+        expect(e instanceof PixiAppNotInitializedException).toBe(true);
+        expect(e.message).toEqual("Can't initialize a grid");
+        thrown = true;
+      }
+      expect(thrown).toBe(true, 'PixiAppNotInitializedException has not been thrown');
     });
 
     it('should be able to initialize a grid after setUp', () => {
       service.setUp(viewRef, { });
       expect(() => service.initGrid())
-        .not.toThrow("Can't initialize a grid if the pixi application is not initialized!");
+        .not.toThrowError("Can't initialize a grid");
     });
 
     it('should have a grid instance after initializing it', () => {
@@ -135,14 +150,21 @@ describe('PixiService', () => {
 
   describe('resize', () => {
     it('should not be able to resize before setUp', () => {
-      expect(() => service.resize())
-        .toThrow("Can't resize if the pixi application is not initialized!");
+      let thrown = false;
+      try {
+        service.resize();
+      } catch(e) {
+        expect(e instanceof PixiAppNotInitializedException).toBe(true);
+        expect(e.message).toEqual("Can't resize");
+        thrown = true;
+      }
+      expect(thrown).toBe(true, 'PixiAppNotInitializedException has not been thrown');
     });
 
     it('should be able to resize after setUp', () => {
       service.setUp(viewRef, { });
       expect(() => service.resize())
-        .not.toThrow("Can't resize if the pixi application is not initialized!");
+        .not.toThrowError("Can't resize");
     });
 
     it('should not resize if nothing changed', () => {
