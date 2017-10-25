@@ -7,22 +7,6 @@ class MockedIpc extends EventEmitter {
   send(channel: string, ...args: any[]) { };
   sendSync(channel: string, ...args: any[]) { };
   sendToHost(channel: string, ...args: any[]) { };
-  on(channel: string, listener) {
-    super.on(channel, listener);
-    return this;
-  };
-  once(channel: string, listener) {
-    super.once(channel, listener);
-    return this;
-  };
-  removeAllListeners(channel?: string) {
-    super.removeAllListeners(channel);
-    return this;
-  };
-  removeListener(channel: string, listener) {
-    super.removeListener(channel, listener);
-    return this;
-  };
 }
 
 /**

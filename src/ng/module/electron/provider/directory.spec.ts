@@ -7,13 +7,11 @@ describe('DirectoryProvider', () => {
   let service: MockedService;
   let provider: DirectoryProvider;
   let sendSpy: jasmine.Spy;
-  let onceSpy: jasmine.Spy;
 
   beforeEach(() => {
     service = new MockedService();
     provider = new DirectoryProvider(service);
     sendSpy = spyOn(service.ipc, 'send');
-    onceSpy = spyOn(service.ipc, 'once');
   });
 
   describe('scan', () => {
@@ -29,6 +27,7 @@ describe('DirectoryProvider', () => {
     });
 
     it('should register a "directory:scan:id:done" handler', () => {
+      let onceSpy = spyOn(service.ipc, 'once');
       provider.scan('myDir');
       let id = sendSpy.calls.mostRecent().args[2];
       expect(onceSpy.calls.any()).toBe(true, 'An event handler has not been registered');
@@ -38,6 +37,7 @@ describe('DirectoryProvider', () => {
     });
 
     it('should register a "directory:scan:${id}:fail" handler', () => {
+      let onceSpy = spyOn(service.ipc, 'once');
       provider.scan('myDir');
       let id = sendSpy.calls.mostRecent().args[2];
       expect(onceSpy.calls.any()).toBe(true, 'An event handler has not been registered');
@@ -46,23 +46,26 @@ describe('DirectoryProvider', () => {
                                             `An event handler for "directory:scan:${id}:fail" has not been registered`);
     });
 
-    it('should resolve the scanned json on "directory:scan:id:done"', () => {
+    it('should resolve the scanned json on "directory:scan:id:done"', done => {
       let promise = provider.scan('myDir');
       let id = sendSpy.calls.mostRecent().args[2];
-      setTimeout(() => service.ipc.emit(`directory:scan:${id}:done`, { }));
-      return promise.then(json => expect(json).toBeDefined('No json resolved'));
+      setTimeout(() => service.ipc.emit(`directory:scan:${id}:done`, {}, { }));
+      promise
+        .then(json => expect(json).toBeDefined('No json resolved'))
+        .then(done);
     }, 10);
 
-    it('should reject if "directory:scan:id:fail" go emitted', () => {
+    it('should reject if "directory:scan:id:fail" go emitted', done => {
       let promise = provider.scan('myDir');
       let id = sendSpy.calls.mostRecent().args[2];
-      setTimeout(() => service.ipc.emit(`directory:scan:${id}:fail`, new Error('Some scan error')));
-      return promise.then(files => { throw 'No exception'; })
+      setTimeout(() => service.ipc.emit(`directory:scan:${id}:fail`, {}, new Error('Some scan error')));
+      promise.then(files => { throw 'No exception'; })
               .catch(e => {
                 expect(e instanceof DirectoryProviderException).toBe(true,
                                                             'No DirectoryProviderException exception rejected');
                 expect(e.message).toBeDefined('No message defined');
                 expect(e.message).toEqual('Some scan error', 'Incorrect message reject');
+                done();
               });
     }, 10);
   })
