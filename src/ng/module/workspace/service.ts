@@ -125,7 +125,7 @@ export class WorkspaceService {
    */
   getParent(file: string | DirectoryContent | FileContent): DirectoryContent {
     let filePath = typeof file === 'string' ? file : file.path;
-    let re = <DirectoryContent>this.find( path.dirname(filePath));
+    let re = <DirectoryContent>this.find(path.dirname(filePath));
     return re;
   }
 
