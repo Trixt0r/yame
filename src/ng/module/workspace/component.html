@@ -6,19 +6,29 @@
 </div>
 
 
-<div id="init" class="relative fill-height" *ngIf="!nodes">
-  <button mat-raised-button class="absolute vert-center" (click)="openFolder()">
+<div id="init" class="relative fill-height" *ngIf="!content">
+  <button mat-raised-button
+          class="absolute vert-center"
+          (click)="openFolder()">
     Open folder
   </button>
 </div>
 
 
- <div #row class="fill-width" *ngIf="nodes">
-  <groups
-    #leftCol
-    (opened)="onGroupSelect($event.group)"
-    class="absolute fill-height">
+ <div #row class="fill-width" *ngIf="content">
+  <groups #groupsComponent
+          (opened)="onGroupSelect($event.group)"
+          class="absolute fill-height">
   </groups>
-  <assets #rightCol class="absolute fill-height" [group]="assetGroup"></assets>
-  <resizable #resizerLeft class="left" [property]="'left'" [maxVal]="'500'" [minVal]="'200'" (sizeUpdated)="updateColumnsFromLeft($event)"></resizable>
+  <assets #assetsComponent
+          class="absolute fill-height"
+          [group]="assetGroup">
+  </assets>
+  <resizable #resizer
+            class="left"
+            [property]="'left'"
+            [maxVal]="'500'"
+            [minVal]="'200'"
+            (sizeUpdated)="updateColumns($event)">
+  </resizable>
 </div>

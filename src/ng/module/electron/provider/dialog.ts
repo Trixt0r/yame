@@ -15,7 +15,7 @@ export class DialogProvider extends ElectronProvider {
       let id = _.uniqueId('dialog-');
       this.ipc.send('dialog:open', options, id);
       this.ipc.once(`dialog:open:${id}`, (event, files) => {
-        if (files.length) resolve(files);
+        if (files && files.length) resolve(files);
         else reject(new DialogProviderException('No files chosen'));
       });
     });

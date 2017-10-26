@@ -15,6 +15,17 @@ import { DirectoryContent } from "../../../common/content/directory";
 import { FileContent } from "../../../common/content/file";
 import { Asset } from "../../../common/asset";
 
+/**
+ * The workspace component represents the workspace.
+ *
+ * It holds the groups component and the assets component.
+ * The workspace component is meant to linke the groups and assets component.
+ * The assets component renders always the content of the currently selected asset group.
+ *
+ * @export
+ * @class WorkspaceComponent
+ * @extends {ResizeableComponent}
+ */
 @Component({
   moduleId: module.id,
   selector: 'workspace',
@@ -23,27 +34,45 @@ import { Asset } from "../../../common/asset";
 })
 export class WorkspaceComponent extends ResizeableComponent {
 
-  selectedPath: string[];
+  /**
+   * @type {((DirectoryContent | FileContent)[])} All currently loaded content.
+   */
+  content: (DirectoryContent | FileContent)[] = null;
 
-  nodes: (DirectoryContent | FileContent)[] = null;
+  /**
+   * @type {number} The minimum width for each column.
+   */
   minWidth = 300;
 
-  leftWidth = 200;
-  rightWidth = 300;
-
-  fixingSize = false;
-  selection = null;
-  nextSelection = null;
-
+  /**
+   * @type {AssetGroup<Asset>} The currently selected asset group.
+   */
   assetGroup: AssetGroup<Asset>;
 
-  @ViewChild('resizerLeft') resizerLeft: ResizeableComponent;
-  @ViewChild('leftCol') leftCol: GroupsComponent;
-  @ViewChild('rightCol') rightCol: AssetsComponent;
-  @ViewChild('row') row: ElementRef;
-  @ViewChild('tree') tree: any;
+  /**
+   * @type {ResizeableComponent} The resizer between both inner components.
+   */
+  @ViewChild('resizer') resizer: ResizeableComponent;
 
-  constructor(public ref: ElementRef, private service: WorkspaceService, private assets: AssetService, private electron: ElectronService) {
+  /**
+   * @type {GroupsComponent} The groups component, on the left.
+   */
+  @ViewChild('groupsComponent') groupsComponent: GroupsComponent;
+
+  /**
+   * @type {AssetsComponent} The assets component, on the right.
+   */
+  @ViewChild('assetsComponent') assetsComponent: AssetsComponent;
+
+  /**
+   * @type {ElementRef} The row, which is wrapped around all inner components.
+   */
+  @ViewChild('row') row: ElementRef;
+
+  constructor(public ref: ElementRef,
+              private service: WorkspaceService,
+              private assets: AssetService,
+              private electron: ElectronService) {
     super(ref);
     this.maxVal = window.innerHeight - 100;
   }
@@ -53,20 +82,26 @@ export class WorkspaceComponent extends ResizeableComponent {
     this.maxVal = window.innerHeight - 100;
     if (this.row) {
       let fullWidth = this.row.nativeElement.offsetWidth;
-      this.resizerLeft.maxVal = Math.min(Math.max(200, fullWidth - this.minWidth), fullWidth - 315);
+      this.resizer.maxVal = Math.max(200, fullWidth - (this.minWidth + 15));
     }
     super.onResize();
-    if (this.resizerLeft)
-      this.resizerLeft.onResize();
-    this.updateColumns();
+    if (this.resizer) {
+      this.resizer.onResize();
+      this.updateColumns(this.resizer.propertyValue);
+    }
   }
 
+  /**
+   * Opens a dialog for opening a folder.
+   *
+   * @returns {Promise<boolean>} Resolves `true` if a folder has been opened. `false otherwise`.
+   */
   openFolder() {
     let provider = this.electron.getProvider(DialogProvider);
     return provider.open({ properties: ['openDirectory'] })
       .then(files => {
-        this.service.init(files[0]).then(json => {
-          this.nodes = <any>[{
+        return this.service.init(files[0]).then(json => {
+          this.content = <any>[{
             name: 'Assets',
             path: json.path,
             isExpanded: true,
@@ -74,43 +109,34 @@ export class WorkspaceComponent extends ResizeableComponent {
           }];
           this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
           setTimeout(() => this.onResize());
+          return true;
         });
-      });
+      })
+      .catch(e =>false);
   }
 
-  updateColumnsFromLeft(width) {
-    this.leftWidth = width;
-    if (this.fixingSize) return;
-    let diff = this.rightWidth - width;
-    if (diff < this.minWidth) {
-      this.fixingSize = true;
-      this.fixingSize = false;
-    }
-    this.updateColumns();
-  }
-
-  updateColumns() {
-    if (!this.row) return;
+  /**
+   * Update the size of the columns.
+   * @param {number} size
+   * @returns {boolean} `true` if the size has been applied, `false` otherwise.
+   */
+  updateColumns(size: number) {
+    if (!this.row) return false;
     let fullWidth = this.row.nativeElement.offsetWidth;
-    this.leftCol.ref.nativeElement.style.width = `${this.leftWidth}px`;
-    this.leftCol.ref.nativeElement.style['max-width'] = `${this.leftWidth}px`;
-    this.rightCol.ref.nativeElement.style.left = `${this.leftWidth + 5}px`;
-    this.rightCol.ref.nativeElement.style['max-width'] = `${fullWidth - this.leftWidth - 5}px`;
-    this.rightCol.ref.nativeElement.style.width = `${fullWidth - this.leftWidth - 5}px`;
+    this.groupsComponent.ref.nativeElement.style.width = `${size}px`;
+    this.groupsComponent.ref.nativeElement.style['max-width'] = `${size}px`;
+    this.assetsComponent.ref.nativeElement.style.left = `${size + 5}px`;
+    this.assetsComponent.ref.nativeElement.style['max-width'] = `${fullWidth - size - 5}px`;
+    this.assetsComponent.ref.nativeElement.style.width = `${fullWidth - size - 5}px`;
+    return true
   }
 
+  /**
+   * Handles the group selection by the user.
+   *
+   * @param {AssetGroup<Asset>} group The selected group.
+   */
   onGroupSelect(group: AssetGroup<Asset>) {
     this.assetGroup = group;
   }
-
-  assetSelected(asset: DirectoryContent | FileContent) {
-    // TODO: implement this
-  }
-
-  breadcrumbClick(i: number) {
-    let tmp = this.selectedPath.slice(0, i + 1);
-    tmp[0] = this.nodes[0].path;
-    let p = tmp.join(path.sep);
-  }
-
 }

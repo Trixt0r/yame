@@ -62,6 +62,20 @@ describe('DialogProvider', () => {
           done();
         });
     });
+
+    it('should reject if the files are not set on "dialog:open:id"', done => {
+      let promise = provider.open({ });
+      let id = sendSpy.calls.mostRecent().args[2];
+      setTimeout(() => service.ipc.emit(`dialog:open:${id}`, {}));
+      promise.then(files => { throw 'No exception'; })
+        .catch(e => {
+          expect(e instanceof DialogProviderException).toBe(true,
+                                        'No DirectoryProviderException exception rejected');
+          expect(e.message).toBeDefined('No message defined');
+          expect(e.message).toEqual('No files chosen', 'Incorrect message rejected');
+          done();
+        });
+    });
   })
 
 });
