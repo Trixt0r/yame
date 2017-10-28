@@ -54,16 +54,16 @@ export class WorkspaceModule {
     groupComps.register('directory', DirectoryGroupComponent);
     assetComps.registerPreview('file', FileAssetPreviewComponent);
     assetComps.registerPreview('image', ImageAssetPreviewComponent);
-    assetComps.registerMenuOptions('image', [
-      // {
-      //   icon: 'info',
-      //   title: 'Details',
-      //   callback: (event, asset) => {
-      //     let dialogRef = ref.injector.get(MatDialog).open(DialogContent);
-      //     dialogRef.componentInstance.asset = {   };
-      //     dialogRef.afterClosed().subscribe(result => console.log(result));
-      //   }
-      // },
-    ]);
+    // assetComps.registerMenuOptions('image', [
+    //   {
+    //     icon: 'info',
+    //     title: 'Details',
+    //     callback: (event, asset) => {
+    //       let dialogRef = ref.injector.get(MatDialog).open(DialogContent);
+    //       dialogRef.componentInstance.asset = {   };
+    //       dialogRef.afterClosed().subscribe(result => console.log(result));
+    //     }
+    //   },
+    // ]);
   }
 }

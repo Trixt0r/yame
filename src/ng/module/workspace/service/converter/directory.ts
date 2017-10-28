@@ -9,7 +9,7 @@ import { DirectoryAsset } from '../../../../../common/asset/directory';
  * @param {DirectoryContent} directory
  * @returns {DirectoryAsset} The converted directory asset.
  */
-export default function(directory: DirectoryContent, service: AssetService): DirectoryAsset {
+export default function(directory: DirectoryContent, service: AssetService): Promise<DirectoryAsset> {
   let asset = new DirectoryAsset();
 
   asset.id = directory.path; // The asset id is the full path
@@ -17,10 +17,15 @@ export default function(directory: DirectoryContent, service: AssetService): Dir
   asset.content.name = directory.name;
 
   // Recursively iterate over all sub directories
+  let promises = [];
   directory.children.forEach(child => {
-    let childAsset = service.fromFs(child);
-    childAsset.parent = asset;
-    asset.members.push( childAsset );
+    promises.push(
+      service.fromFs(child)
+        .then(childAsset => {
+          childAsset.parent = asset;
+          asset.members.push(childAsset);
+        })
+    );
   });
-  return asset;
+  return Promise.all(promises).then(() => asset);
 }

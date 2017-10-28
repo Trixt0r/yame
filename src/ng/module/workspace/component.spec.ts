@@ -170,26 +170,30 @@ describe('WorkspaceComponent', () => {
       loadSuccess();
     });
 
-    it('should apply the selection from the groups component to the workspace', () => {
+    it('should apply the selection from the groups component to the workspace', done => {
       let dir = {
         path: 'myDir',
         children: [],
         type: 'directory'
       };
-      comp.groupsComponent.open(<any>assetService.fromFs(<any>dir));
-      fixture.detectChanges();
-      expect(comp.assetGroup).toBe(comp.groupsComponent.current, 'The asset groups do not match');
+      assetService.fromFs(<any>dir)
+        .then(group => comp.groupsComponent.open(<any>group))
+        .then(() => fixture.detectChanges())
+        .then(() => expect(comp.assetGroup).toBe(comp.groupsComponent.current, 'The asset groups do not match'))
+        .then(done);
     });
 
-    it('should assign the selected asset group to the assets component', () => {
+    it('should assign the selected asset group to the assets component', done => {
       let dir = {
         path: 'myDir',
         children: [],
         type: 'directory'
       };
-      comp.onGroupSelect(<any>assetService.fromFs(<any>dir));
-      fixture.detectChanges();
-      expect(comp.assetsComponent.group).toBe(comp.assetGroup, 'The asset groups do not match');
+      assetService.fromFs(<any>dir)
+        .then(group => comp.groupsComponent.open(<any>group))
+        .then(() => fixture.detectChanges())
+        .then(() => expect(comp.assetsComponent.group).toBe(comp.assetGroup, 'The asset groups do not match'))
+        .then(done);
     });
   });
 

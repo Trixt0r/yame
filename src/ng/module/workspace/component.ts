@@ -107,9 +107,10 @@ export class WorkspaceComponent extends ResizeableComponent {
             isExpanded: true,
             children: this.service.directories
           }];
-          this.onGroupSelect(<AssetGroup<Asset>>this.assets.fromFs(json));
-          setTimeout(() => this.onResize());
-          return true;
+          return this.assets.fromFs(json)
+                  .then(group => this.onGroupSelect(<AssetGroup<Asset>>group))
+                  .then(() => setTimeout(() => this.onResize()))
+                  .then(() => true);
         });
       })
       .catch(e =>false);

@@ -5,10 +5,10 @@
   [@slideState]="slide"
   class="prev">
   <mat-list-item>
-    <button mat-icon-button *ngIf="current.id != ws.directory.path" class="btn-back">
+    <button mat-icon-button *ngIf="current && current.id != ws.directory.path" class="btn-back">
       <mat-icon >keyboard_arrow_left</mat-icon>
     </button>
-    <div class="fill-width text-center">{{ current.content.name }}</div>
+    <div class="fill-width text-center">{{ current ? current.content.name : '' }}</div>
   </mat-list-item>
   <ng-template ngFor let-group [ngForOf]="openingGroups">
     <ng-template [groupHost]="group">
@@ -31,13 +31,13 @@
             class="btn-back">
       <mat-icon>keyboard_arrow_left</mat-icon>
     </button>
-    <div class="fill-width text-center">{{ slide == 'none' ? current.content.name : previous.content.name }}</div>
+    <div *ngIf="current && previous" class="fill-width text-center">{{ slide == 'none' ? current.content.name : previous.content.name }}</div>
   </mat-list-item>
 
   <button
     #parentMenuTrigger
     mat-button
-    *ngIf="parents.length > 0"
+    *ngIf="parents && parents.length > 0"
     [matMenuTriggerFor]="parentsMenu"
     id="menuTrigger"
     class="invisible">
@@ -64,7 +64,7 @@
     <button mat-icon-button class="btn-back">
       <mat-icon >keyboard_arrow_left</mat-icon>
     </button>
-    <div class="fill-width text-center">{{ current.content.name }}</div>
+    <div class="fill-width text-center">{{ current ? current.content.name : '' }}</div>
   </mat-list-item>
   <ng-template ngFor let-group [ngForOf]="openingGroups">
     <ng-template [groupHost]="group">

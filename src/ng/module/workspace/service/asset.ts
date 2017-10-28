@@ -18,7 +18,7 @@ interface FsConverter {
    * @param {FileContent | DirectoryContent} source The content to convert to an asset.
    * @returns {FileAsset | DirectoryAsset} The converted asset.
    */
-  (source: FileContent | DirectoryContent, service: AssetService): FileAsset | DirectoryAsset;
+  (source: FileContent | DirectoryContent, service: AssetService): Promise<FileAsset | DirectoryAsset>;
 
 }
 
@@ -83,11 +83,11 @@ export class AssetService {
    * @param {boolean} [cache=true] Whether to use cached assets if available.
    * @returns {(FileAsset | DirectoryAsset)} The converted result.
    */
-  fromFs(source: FileContent | DirectoryContent, cache: boolean = true): FileAsset | DirectoryAsset {
+  fromFs(source: FileContent | DirectoryContent, cache: boolean = true): Promise<FileAsset | DirectoryAsset> {
     if (this.cache[source.path] && cache)
-      return this.cache[source.path];
+      return Promise.resolve(this.cache[source.path]);
     let converter = this.converters[source.type];
-    return converter ? this.cache[source.path] = converter(source, this) : this.toFileAsset(source);
+    return converter ? converter(source, this).then(re => this.cache[source.path] = re) : this.toFileAsset(source);
   }
 
   /**
@@ -96,12 +96,12 @@ export class AssetService {
    * @param source The content to convert.
    * @returns {FileAsset} The converted result
    */
-  toFileAsset(source: FileContent | DirectoryContent): FileAsset {
+  toFileAsset(source: FileContent | DirectoryContent): Promise<FileAsset> {
     let file = <FileContent>source;
     let asset = new FileAsset();
     asset.id = file.path;
     asset.content = _.extend({}, file);
-    return this.cache[source.path] = asset;
+    return Promise.resolve(this.cache[source.path] = asset);
   }
 
   /**

@@ -105,10 +105,13 @@ export class GroupsComponent implements OnInit {
 
   /** @inheritdoc */
   ngOnInit() {
-    this.currentlyOpen = <AssetGroup<Asset>>this.assets.fromFs(this.ws.directory);
-    this.previouslyOpen = this.currentlyOpen;
-    this.groups = this.assets.getGroups(this.currentlyOpen);
-    this.currentParents = [];
+    return this.assets.fromFs(this.ws.directory)
+            .then(group => {
+              this.currentlyOpen = <AssetGroup<Asset>>group;
+              this.previouslyOpen = this.currentlyOpen;
+              this.groups = this.assets.getGroups(this.currentlyOpen);
+              this.currentParents = [];
+            });
   }
 
   /**
@@ -200,7 +203,7 @@ export class GroupsComponent implements OnInit {
    * @type {boolean}
    */
   private get displayBack(): boolean {
-    return (this.slide === 'none' && this.current !== this.assets.fromFs(this.ws.directory)) ||
-            (this.slide !== 'none' && this.previous != this.assets.fromFs(this.ws.directory));
+    return (this.slide === 'none' && this.current && this.current.id !== this.ws.directory.path) ||
+            (this.slide !== 'none' && this.previous && this.previous.id != this.ws.directory.path)
   }
 }
