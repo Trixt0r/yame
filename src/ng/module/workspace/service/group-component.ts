@@ -1,3 +1,4 @@
+import { InvalidGroupComponentException } from '../exception/service/invalid-group-component';
 import { DirectoryGroupComponent } from '../component/groups/component/group/directory';
 import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
@@ -35,6 +36,9 @@ export class GroupComponentService {
    * @param {Type<GroupComponent>} clazz The group component class
    */
   register(type: string, clazz: Type<GroupComponent>) {
+    if (!(clazz.prototype instanceof GroupComponent)) {
+      throw new InvalidGroupComponentException('The group component class has to extend GroupComponent');
+    }
     this.components[type] = clazz;
   }
 

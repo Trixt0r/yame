@@ -1,4 +1,4 @@
-import { EmptyAssetComponentMenuOptions } from '../exception/service/empty-asset-component-menu-options';
+import { EmptyAssetComponentMenuOptionsException } from '../exception/service/empty-asset-component-menu-options';
 import { MenuOption } from '../component/assets/interface/menu-option';
 import { AssetPreviewComponent } from '../component/assets/component/preview/interface';
 import { DirectoryGroupComponent } from '../component/groups/component/group/directory';
@@ -72,7 +72,7 @@ export class AssetComponentService {
    */
   registerMenuOptions(type: string, options: MenuOption[]) {
     if (!options || options.length === 0) {
-      throw new EmptyAssetComponentMenuOptions('Make sure you have at least one option defined!');
+      throw new EmptyAssetComponentMenuOptionsException('Make sure you have at least one option defined!');
     }
     this.menuOptions[type] = options;
   }

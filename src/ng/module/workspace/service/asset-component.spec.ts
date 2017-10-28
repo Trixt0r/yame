@@ -1,4 +1,4 @@
-import { EmptyAssetComponentMenuOptions } from '../exception/service/empty-asset-component-menu-options';
+import { EmptyAssetComponentMenuOptionsException } from '../exception/service/empty-asset-component-menu-options';
 import { AssetPreviewComponent } from '../component/assets/component/preview/interface';
 import { AssetComponentService } from './asset-component';
 
@@ -37,7 +37,7 @@ describe('AssetComponentService', () => {
     });
   });
 
-  describe('preview', () => {
+  describe('menuOptions', () => {
     it ('should register menu options for the type "myType"', () => {
       let options = [{ title: 'test', callback: () => { } }];
       service.registerMenuOptions('myType', options);
@@ -51,7 +51,7 @@ describe('AssetComponentService', () => {
       try {
         service.registerMenuOptions('myType', options);
       } catch (e) {
-        expect(e instanceof EmptyAssetComponentMenuOptions).toBe(true, 'No instance of EmptyAssetComponentMenuOptions has been thrown');
+        expect(e instanceof EmptyAssetComponentMenuOptionsException).toBe(true, 'No instance of EmptyAssetComponentMenuOptionsException has been thrown');
       }
       expect(() => service.registerMenuOptions('myType', options)).toThrowError('Make sure you have at least one option defined!');
     });

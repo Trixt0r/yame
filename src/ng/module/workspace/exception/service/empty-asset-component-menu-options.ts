@@ -1,3 +1,3 @@
 import { WorkspaceServiceException } from '../service';
 
-export class EmptyAssetComponentMenuOptions extends WorkspaceServiceException { }
+export class EmptyAssetComponentMenuOptionsException extends WorkspaceServiceException { }
