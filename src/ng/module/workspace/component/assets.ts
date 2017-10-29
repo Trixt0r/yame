@@ -1,6 +1,5 @@
 import { AssetComponentService } from '../service/asset-component';
 import { Component, ElementRef, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { trigger, state, style, animate, transition } from '@angular/animations';
 
 import * as path from 'path';
 
@@ -23,19 +22,7 @@ import { MenuOption } from './assets/interface/menu-option';
   moduleId: module.id,
   selector: 'assets',
   templateUrl: 'assets.html',
-  styleUrls: ['./assets.scss'],
-  animations: [
-    trigger('searchState', [
-      state('inactive', style({
-        transform: 'translate(205%)'
-      })),
-      state('active', style({
-        transform: 'translate(0)'
-      })),
-      transition('inactive => active', animate('200ms ease-in')),
-      transition('active => inactive', animate('200ms ease-out'))
-    ])
-  ]
+  styleUrls: ['./assets.scss']
 })
 export class AssetsComponent implements OnChanges {
 
@@ -44,24 +31,7 @@ export class AssetsComponent implements OnChanges {
 
   private assets: Asset[]; // The assets, we are displaying
 
-  getMenuOptions(asset: Asset): MenuOption[] {
-    return this.assetComponents.getMenuOptions(asset);
-  }
-
   constructor(public ref: ElementRef, private as: AssetService, private assetComponents: AssetComponentService) {
-    // this.menuOptions.push({
-    //   icon: 'edit',
-    //   title: 'Edit',
-    //   callback: (event, asset) => alert('edit' + asset.id)
-    // }, {
-    //   icon: 'content_copy',
-    //   title: 'Copy',
-    //   callback: (event, asset) => alert('Copy' + asset.id)
-    // }, {
-    //   icon: 'folder',
-    //   title: 'aaaaa',
-    //   callback: (event, asset) => alert('aaaaa' + asset.id)
-    // });
   }
 
   /** @inheritdoc */
@@ -71,8 +41,13 @@ export class AssetsComponent implements OnChanges {
     }
   }
 
-
-  // menuClick(event: MouseEvent, asset: Asset, option: MenuOption) {
-  //   console.log(event, asset);
-  // }
+  /**
+   * Returns the menu options for the given asset.
+   *
+   * @param asset The asset to get the menu options for
+   * @returns {MenuOption[]} The menu options for the given asset.
+   */
+  getMenuOptions(asset: Asset): MenuOption[] {
+    return this.assetComponents.getMenuOptions(asset);
+  }
 }
