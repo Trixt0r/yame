@@ -1,9 +1,19 @@
+import { GroupComponent } from '../component/group/abstract';
 import { GroupComponentService } from '../../../service/group-component';
 import { AssetService } from '../../../service/asset';
 import { Asset } from '../../../../../../common/asset';
 import { AssetGroup } from '../../../../../../common/asset/group';
 
-import {  Input, Output, EventEmitter, Directive, ViewContainerRef, ComponentFactoryResolver, OnInit } from '@angular/core';
+import {
+  ComponentFactoryResolver,
+  ComponentRef,
+  Directive,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewContainerRef,
+} from '@angular/core';
 
 /**
  * The groupHost directive is used to render arbitary types of asset groups.
@@ -42,16 +52,17 @@ export class GroupDirective {
   /**
    * Renders the group item, if a component type for the currently set group is registered.
    *
-   * @returns {void}
+   * @returns {ComponentRef<GroupComponent>} The created component reference or `null` if no component found for the current group.
    */
-  render(): void {
+  render(): ComponentRef<GroupComponent> {
     let compType = this.groups.get(this.group);
-    if (!compType) return;
+    if (!compType) return null;
     let componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
     let viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
     let componentRef = viewContainerRef.createComponent(componentFactory);
     componentRef.instance.group = this.group;
     componentRef.instance.clickEvent.subscribe(event => this.click.emit(event));
+    return componentRef;
   }
 }

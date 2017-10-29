@@ -1,4 +1,4 @@
-import { EventEmitter,} from '@angular/core';
+import { EventEmitter } from '@angular/core';
 import { Asset } from '../../../../../../../common/asset';
 import { AssetGroup } from '../../../../../../../common/asset/group';
 
