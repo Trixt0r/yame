@@ -1,3 +1,4 @@
+import { DirectoryAsset } from '../../../../common/asset/directory';
 import { AssetService } from '../service/asset';
 import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
@@ -104,7 +105,7 @@ export class GroupsComponent implements OnInit {
   }
 
   /** @inheritdoc */
-  ngOnInit() {
+  ngOnInit(): Promise<void> {
     return this.assets.fromFs(this.ws.directory)
             .then(group => {
               this.currentlyOpen = <AssetGroup<Asset>>group;
@@ -199,10 +200,9 @@ export class GroupsComponent implements OnInit {
    * Property used to display the back button, based on the current slide state and group.
    *
    * @readonly
-   * @private
    * @type {boolean}
    */
-  private get displayBack(): boolean {
+  public get displayBack(): boolean {
     return (this.slide === 'none' && this.current && this.current.id !== this.ws.directory.path) ||
             (this.slide !== 'none' && this.previous && this.previous.id != this.ws.directory.path);
   }
