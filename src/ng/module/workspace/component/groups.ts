@@ -204,6 +204,6 @@ export class GroupsComponent implements OnInit {
    */
   private get displayBack(): boolean {
     return (this.slide === 'none' && this.current && this.current.id !== this.ws.directory.path) ||
-            (this.slide !== 'none' && this.previous && this.previous.id != this.ws.directory.path)
+            (this.slide !== 'none' && this.previous && this.previous.id != this.ws.directory.path);
   }
 }

@@ -11,7 +11,7 @@ import * as _ from 'lodash';
  * @param {FileContent} file
  * @returns {ImageAsset} The converted image asset.
  */
-export default function(file: FileContent, service: AssetService): Promise<ImageAsset> {
+export default function(file: FileContent, service?: AssetService): Promise<ImageAsset> {
   let asset = new ImageAsset();
 
   asset.id = file.path; // The asset id is the full path
