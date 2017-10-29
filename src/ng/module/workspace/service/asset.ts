@@ -75,6 +75,16 @@ export class AssetService {
   }
 
   /**
+   * Returns the fs converter for the given asset type.
+   *
+   * @param type The asset type to check for
+   * @returns {FsConverter} The fs converter for the given asset type or `undefined`.
+   */
+  getFsConverter(type: string): FsConverter {
+    return this.converters[type];
+  }
+
+  /**
    * Converts the given content to a file or directory asset.
    *
    * If no converter is registered for the content type, a plain file asset will be returned.
@@ -87,7 +97,8 @@ export class AssetService {
     if (this.cache[source.path] && cache)
       return Promise.resolve(this.cache[source.path]);
     let converter = this.converters[source.type];
-    return converter ? converter(source, this).then(re => this.cache[source.path] = re) : this.toFileAsset(source);
+    return (converter ? converter(source, this) : this.toFileAsset(source))
+            .then(re => this.cache[source.path] = re)
   }
 
   /**
@@ -101,7 +112,7 @@ export class AssetService {
     let asset = new FileAsset();
     asset.id = file.path;
     asset.content = _.extend({}, file);
-    return Promise.resolve(this.cache[source.path] = asset);
+    return Promise.resolve(asset);
   }
 
   /**
@@ -118,7 +129,7 @@ export class AssetService {
   }
 
   /**
-   * Filers out all assets for the given root group, i.e. non-groups and returns them.
+   * Filters out all assets for the given root group, i.e. non-groups and returns them.
    *
    * @param {AssetGroup<Asset>} root
    * @returns {Asset[]} All direct assets (not groups) inside the given root.

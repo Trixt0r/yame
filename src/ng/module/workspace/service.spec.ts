@@ -51,14 +51,17 @@ describe('WorkspaceService', () => {
     it('should return a promise', () => {
       expect(service.init('myDir') instanceof Promise).toBe(true, 'No promise returned');
     });
+
     it('should be in init state', () => {
       service.init('myDir');
       expect(service.state).toEqual('init', 'No in init state');
     });
+
     it('should emit the init event', () => {
       service.init('myDir');
       expect(initSpy.calls.all().length).toBe(1, 'Init event has not been emitted');
     });
+
     it('should be ready after the directory got scanned successfully', done => {
       setTimeout(() => {
         let id = sendSpy.calls.mostRecent().args[2];
@@ -69,6 +72,7 @@ describe('WorkspaceService', () => {
         done();
       });
     });
+
     it('should emit the ready event after the directory got scanned successfully', done => {
       setTimeout(() => {
         let id = sendSpy.calls.mostRecent().args[2];
@@ -79,6 +83,7 @@ describe('WorkspaceService', () => {
         done();
       });
     });
+
     it('should be in fail state after the directory scan failed', done => {
       setTimeout(() => {
         let id = sendSpy.calls.mostRecent().args[2];
@@ -89,6 +94,7 @@ describe('WorkspaceService', () => {
         done();
       });
     });
+
     it('should emit the fail event after the directory scan failed', done => {
       setTimeout(() => {
         let id = sendSpy.calls.mostRecent().args[2];
@@ -99,6 +105,7 @@ describe('WorkspaceService', () => {
         done();
       });
     });
+
     it('should have an error instance if the directory scan failed', done => {
       setTimeout(() => {
         let id = sendSpy.calls.mostRecent().args[2];
@@ -147,18 +154,21 @@ describe('WorkspaceService', () => {
       expect(found.type).toEqual('directory', 'Did not found a directory');
       expect(found.path).toEqual('myDir', 'Did not found the correct path');
     });
+
     it('should find the first file in the root', () => {
       let found = service.find('myDir/firstFile');
       expect(found).not.toBeNull('No file found');
       expect(found.type).toEqual('file', 'Did not found a file');
       expect(found.path).toEqual('myDir/firstFile', 'Did not found the correct path');
     });
+
     it('should find the first file in the first sub directory', () => {
       let found = service.find('myDir/firstDir/firstFile');
       expect(found).not.toBeNull('No file found');
       expect(found.type).toEqual('file', 'Did not found a file');
       expect(found.path).toEqual('myDir/firstDir/firstFile', 'Did not found the correct path');
     });
+
     it('should not find a file which is not a member of the root directory', () => {
       let found = service.find('randomFileNotInRootDir');
       expect(found).toBeNull('Found a file which is not member of the root directory');
@@ -213,6 +223,7 @@ describe('WorkspaceService', () => {
       });
       expect(directories.length).toBe(2, 'Incorrect amount of directories found');
     });
+
     it('should find no directories in the first sub folder', () => {
       let directories = service.getDirectories(service.directory);
       let found = service.getDirectories(directories[0]);
@@ -255,17 +266,20 @@ describe('WorkspaceService', () => {
       expect(files).not.toBeNull('Files found');
       expect(files.length).toBe(3, 'Incorrect amount of files found');
     });
+
     it('should find all files in the root folder with a string as an argument', () => {
       let files = service.getFiles('myDir');
       expect(files).not.toBeNull('Files found');
       expect(files.length).toBe(3, 'Incorrect amount of files found');
     });
+
     it('should find no files in the first sub folder', () => {
       let directories = service.getDirectories(service.directory);
       let files = service.getFiles(directories[0]);
       expect(files).toBeDefined('No array defined');
       expect(files.length).toBe(0, 'Files found in first sub directory');
     });
+
     it('should return null if the argument is not a directory', () => {
       let files = service.getFiles('myDir/firstFile');
       expect(files).toBeNull('A file has been treated as a directory');
@@ -296,6 +310,7 @@ describe('WorkspaceService', () => {
       expect(parent.type).toBe('directory', 'The parent is not a directory');
       expect(parent.path).toBe('myDir', 'The wrong parent path has been found');
     });
+
     it('should not find a parent for the root directory', () => {
       let parent = service.getParent('myDir');
       expect(parent).toBeNull('Parent found');
@@ -345,10 +360,12 @@ describe('WorkspaceService', () => {
       });
       expect(parents.length).toBe(2, 'The wrong amount of parents has been returned');
     });
+
     it('should order the parent by hierarchy', () => {
       let parents = service.getParents('myDir/firstDir/firstFile');
       expect(parents[1]).toBe(service.getParents(parents[0])[0], 'The parents are not in hierarchical order');
     });
+
     it('should find only one parent for the first file in the root directory', () => {
       let parents = service.getParents('myDir/firstDir');
       expect(parents).not.toBeNull('No parent found');
