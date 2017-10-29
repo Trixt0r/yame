@@ -44,4 +44,8 @@ describe('DirectoryGroupComponent', () => {
     expect(headerDe).not.toBeNull('No header visible');
     expect(headerDe.nativeElement.innerHTML).toEqual(' TestDir ', 'No name set');
   });
+
+  afterAll(() => {
+    document.body.removeChild(fixture.componentRef.location.nativeElement);
+  });
 })
