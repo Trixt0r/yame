@@ -52,7 +52,8 @@ export class GroupDirective {
   /**
    * Renders the group item, if a component type for the currently set group is registered.
    *
-   * @returns {ComponentRef<GroupComponent>} The created component reference or `null` if no component found for the current group.
+   * @returns {ComponentRef<GroupComponent>} The created component reference or `null`
+   *                                          if no component found for the current group.
    */
   render(): ComponentRef<GroupComponent> {
     let compType = this.groups.get(this.group);
