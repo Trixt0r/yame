@@ -1,5 +1,4 @@
 import { PixiAppNotInitializedException } from './exception/service/not-initialized';
-import initCameraInput from './utils/input/camera';
 import { Grid } from './utils/grid';
 import { Camera } from './utils/camera';
 import { ElementRef, Injectable } from '@angular/core';
@@ -87,47 +86,6 @@ export class PixiService {
     this.internalScene = new PIXI.Container();
     this.internalApp.stage.addChild(this.internalScene);
     this.resize();
-  }
-
-  /**
-   * Attaches a camera to the previously initialized scene.
-   * By default the attached camera will be interactive, i.e. the user will be able to move and zoom.
-   *
-   * @param {boolean} [interactive=true]
-   * @chainable
-   */
-  attachCamera(interactive = true): PixiService {
-    if (!this.internalApp) throw new PixiAppNotInitializedException("Can't attach a camera");
-    if (this.internalCam) return this;
-    this.internalCam = new Camera();
-    this.internalCam.attach(this.internalScene);
-    if (interactive)
-      initCameraInput(this.renderer, this.internalCam, this.scene);
-    if (this.internalGrid)
-      this.internalCam.on('update', () => {
-        this.grid.update(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
-      });
-    return this;
-  }
-
-  /**
-   * Creates a grid for the previously initialized scene.
-   * The grid will automatically re-render itself on resize actions and camera interactions.
-   *
-   * @chainable
-   */
-  initGrid(): PixiService {
-    if (!this.internalScene) throw new PixiAppNotInitializedException("Can't initialize a grid");
-    if (this.internalGrid) return this;
-    let width = this.viewRef.nativeElement.offsetWidth;
-    let height = this.viewRef.nativeElement.offsetHeight;
-    this.internalGrid = new Grid(this.internalScene);
-    this.internalGrid.update(width, height);
-    if (this.internalCam)
-      this.internalCam.on('update', () => {
-        this.internalGrid.update(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
-      });
-    return this;
   }
 
   /**

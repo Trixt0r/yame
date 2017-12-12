@@ -1,6 +1,8 @@
 import { PixiComponent } from '../module/pixi/component';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { WorkspaceComponent } from "../module/workspace/component";
+import { PixiCameraDirective } from 'ng/module/pixi/directive/camera';
+import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
 
 @Component({
   moduleId: module.id,
@@ -8,10 +10,12 @@ import { WorkspaceComponent } from "../module/workspace/component";
   templateUrl: 'main.html',
   styleUrls: ['./main.scss']
 })
-export class MainComponent {
+export class MainComponent implements AfterViewInit {
 
   @ViewChild('pixi') pixi: PixiComponent;
   @ViewChild('workspace') workspace: WorkspaceComponent;
+  @ViewChild(PixiCameraDirective) pixiCamera: PixiCameraDirective;
+  @ViewChild(PixiGridDirective) pixiGrid: PixiGridDirective;
 
   constructor(public ref: ElementRef) {
   }
@@ -30,6 +34,11 @@ export class MainComponent {
   sizeUpdated(top: number): void {
     this.pixi.ref.nativeElement.style['height'] = `${top}px`;
     this.pixi.onResize();
+  }
+
+  /** @inheritdoc */
+  ngAfterViewInit() {
+    this.pixiGrid.listenToCamera(this.pixiCamera.camera);
   }
 
 }

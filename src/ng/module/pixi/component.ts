@@ -1,5 +1,5 @@
 import { PixiService } from './service';
-import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
 
 import * as PIXI from 'pixi.js';
 
@@ -20,7 +20,7 @@ export class PixiComponent {
   @Output() resized = new EventEmitter();
   @ViewChild('canvas') canvas: ElementRef;
 
-  constructor(public ref: ElementRef, protected pixiService: PixiService) {
+  constructor(public ref: ElementRef, public pixiService: PixiService) {
   }
 
   /**
@@ -35,6 +35,7 @@ export class PixiComponent {
   }
 
   /** @returns {void} Handler for resizing the canvas. Delegate to the pixi service. */
+  @HostListener('window:resize')
   onResize() {
     let newSize;
     if (newSize = this.pixiService.resize())
