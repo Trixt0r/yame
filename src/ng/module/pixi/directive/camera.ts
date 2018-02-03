@@ -5,7 +5,9 @@ import { AfterViewInit, Directive, ElementRef, HostListener, Input } from '@angu
 let tmpPos = new PIXI.Point();
 
 /**
- *
+ * Directive which can be attached to a pixi component.
+ * This directive will add a camera to the scene,
+ * handle mouse input and update the camera according to the input.
  */
 @Directive({
   selector: 'pixi[pixiCamera]'
@@ -18,7 +20,9 @@ export class PixiCameraDirective implements AfterViewInit {
   private prevPos: PIXI.Point;
   private camPos: PIXI.Point;
 
-  constructor(private host: PixiComponent) { }
+  constructor(private host: PixiComponent) {
+    this.prevPos = null;
+  }
 
   @HostListener('mousewheel', ['$event'])
   onMouseWheel(event: MouseWheelEvent) {

@@ -16,8 +16,12 @@ module.exports = function (config) {
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     files: [
-      { pattern: './src/ng/test.ts', watched: false }
+      { pattern: './src/ng/test.ts', watched: false },
+      { pattern: './src/ng/assets/**', watched: false, included: false, nocache: false, served: true }
     ],
+    proxies: {
+      '/assets/': '/_karma_webpack_/assets/'
+    },
     preprocessors: {
       './src/ng/test.ts': ['@angular/cli']
     },
