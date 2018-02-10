@@ -19,8 +19,6 @@ export class PixiService {
 
   private internalApp: PIXI.Application;
   private internalScene: PIXI.Container;
-  private internalCam: Camera;
-  private internalGrid: Grid;
   private viewRef: ElementRef;
   private newSize = new PIXI.Point();
 
@@ -59,16 +57,6 @@ export class PixiService {
     return this.internalApp.screen;
   }
 
-  /** @type {Camera} camera The attached camera. Maybe `null`.*/
-  get camera(): Camera {
-    return this.internalCam;
-  }
-
-  /** @type {Grid} camera The rendered grid. Maybe `null`.*/
-  get grid(): Grid {
-    return this.internalGrid;
-  }
-
   /**
    * Initializes a pixi js application.
    * Call this method can only be called one.
@@ -98,8 +86,6 @@ export class PixiService {
     this.newSize.set(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
     if (this.renderer.width != this.newSize.x || this.renderer.height != this.newSize.y) {
       this.renderer.resize(this.newSize.x, this.newSize.y);
-      if (this.internalGrid)
-        this.internalGrid.update(this.newSize.x, this.newSize.y);
       return this.newSize;
     }
     return false;
