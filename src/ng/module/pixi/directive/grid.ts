@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostListener } from '@angular/core';
 import { PixiComponent } from '../component';
 import { Grid } from '../utils/grid';
 import { Camera } from '../utils/camera';
@@ -39,7 +39,9 @@ export class PixiGridDirective implements AfterViewInit {
    * Updates the grid, i.e. re-renders the grid based on the host's dimensions.
    * @returns {void}
    */
+  @HostListener('resized')
   update() {
+    if (!this.internalGrid) return;
     let parent = (<HTMLElement>this.host.ref.nativeElement);
     this.internalGrid.update(parent.offsetWidth, parent.offsetHeight);
   }

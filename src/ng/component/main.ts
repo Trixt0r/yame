@@ -31,8 +31,14 @@ export class MainComponent implements AfterViewInit {
     this.workspace.onResize();
   }
 
+  /**
+   * Handles the size update event of the workspace.
+   * @param {number} top The top value of the workspace.
+   * @returns {void}
+   */
   sizeUpdated(top: number): void {
     this.pixi.ref.nativeElement.style['height'] = `${top}px`;
+    this.pixiGrid.update();
     this.pixi.onResize();
   }
 

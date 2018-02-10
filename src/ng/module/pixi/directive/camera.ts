@@ -29,7 +29,7 @@ export class PixiCameraDirective implements AfterViewInit {
     if (!this.interactive) return;
     let service = this.host.pixiService;
     let data = service.renderer.plugins.interaction.eventData.data;
-    this.cam.targetPosition = data.getLocalPosition(service.scene, null, {x: event.clientX, y: event.clientY});
+    this.cam.targetPosition = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
     if (event.wheelDelta > 0)
       this.cam.zoom = this.cam.maxZoom;
     else if (event.wheelDelta < 0)
