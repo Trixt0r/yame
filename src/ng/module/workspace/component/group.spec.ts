@@ -11,6 +11,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By }              from '@angular/platform-browser';
 import { DebugElement, Injectable, NgModule } from '@angular/core';
 import convertDirectory from '../service/converter/directory';
+import { DndModule } from 'ng2-dnd';
 
 @Injectable()
 class FakeWorkspaceService {
@@ -64,6 +65,7 @@ describe('GroupComponent', () => {
       imports: [
         NoopAnimationsModule,
         MaterialModule,
+        DndModule,
         TestModule
       ],
       providers: [

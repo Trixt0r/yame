@@ -2,7 +2,7 @@ import { PixiAppNotInitializedException } from './exception/service/not-initiali
 import { ElementRef, Injectable } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { Asset } from '../../../common/asset';
-import { ImageAsset } from 'common/asset/image';
+import { PixiAssetConverter } from './service/converter';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
@@ -19,6 +19,7 @@ export class PixiService {
   private internalScene: PIXI.Container;
   private viewRef: ElementRef;
   private newSize = new PIXI.Point();
+  private internalAssetConverter = new PixiAssetConverter();
 
   /** @type {PIXI.Application} app The pixi js application instance. */
   get app(): PIXI.Application {
@@ -53,6 +54,11 @@ export class PixiService {
   /** @type {PIXI.Rectangle} screen The pixi js scree, i.e. current dimensions.*/
   get screen(): PIXI.Rectangle {
     return this.internalApp.screen;
+  }
+
+  /** @type {PixiAssetConverter} The asset converter. */
+  get assetConverter(): PixiAssetConverter {
+    return this.internalAssetConverter;
   }
 
   /**
@@ -102,34 +108,12 @@ export class PixiService {
 
   /**
    * Creates a display object from the given asset.
-   * For now we only know how to create sprites from image assets.
+   * This is a proxy an alias for `this.assetConverter.get(asset)`.
    *
-   * @todo Make this more generic, so other modules can provide implementations for different assets.
    * @param {Asset} asset The asset to create the display object from.
-   * @returns {PIXI.DisplayObject} The created display object
+   * @returns {Promise<PIXI.DisplayObject>} Resolves the created object.
    */
   createFromAsset(asset: Asset): Promise<PIXI.DisplayObject> {
-    if (!(asset instanceof ImageAsset))
-      return Promise.reject(new Error(`Asset of type '${asset.type}' is not supported`));
-    let sprite = new PIXI.Sprite(PIXI.Texture.fromImage(asset.content.path));
-    sprite.anchor.set(0.5);
-    let baseTexture = sprite.texture.baseTexture;
-    if (baseTexture.hasLoaded)
-      return Promise.resolve(sprite);
-    else if (baseTexture.isLoading)
-      {
-      return new Promise((resolve, reject) => {
-        baseTexture.once('loaded', () => {
-          baseTexture.off('error', null, this);
-          resolve(sprite);
-        }, this);
-        baseTexture.once('error', e => {
-          baseTexture.off('loaded', null, this);
-          reject(e);
-        }, this);
-      });
-      }
-    else
-      return Promise.reject(new Error('Texture for ' + asset.content.path + 'could not be created'));
+    return this.internalAssetConverter.get(asset);
   }
 }

@@ -49,6 +49,6 @@ export class GroupComponentService {
    * @returns {Type<GroupComponent>} The group component class
    */
   get(typeOrGroup: string | AssetGroup<Asset>): Type<GroupComponent> {
-    return this.components[ typeof typeOrGroup === 'string' ? typeOrGroup : typeOrGroup.type ];
+    return this.components[typeof typeOrGroup === 'string' ? typeOrGroup : typeOrGroup.type];
   }
 }

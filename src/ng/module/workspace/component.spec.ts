@@ -23,6 +23,7 @@ import { MockedService } from '../electron/provider/mocked-service';
 import { WorkspaceComponent } from './component';
 import convertDirectory from './service/converter/directory';
 import convertImage from './service/converter/image';
+import { DndModule } from 'ng2-dnd';
 
 describe('WorkspaceComponent', () => {
   let comp: WorkspaceComponent;
@@ -68,6 +69,7 @@ describe('WorkspaceComponent', () => {
       imports: [
         NoopAnimationsModule,
         UtilsModule,
+        DndModule,
         MaterialModule
       ],
       providers: [

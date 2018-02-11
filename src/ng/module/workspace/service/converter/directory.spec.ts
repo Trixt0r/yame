@@ -2,7 +2,7 @@ import { DirectoryAsset } from '../../../../../common/asset/directory';
 import { AssetService } from '../asset';
 import convertDir from './directory';
 
-describe('convert directory', () => {
+describe('Workspace directory converter function', () => {
 
   let assetService = new AssetService();
 

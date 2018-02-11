@@ -11,6 +11,7 @@ import { AssetService } from '../service/asset';
 import { FileAssetPreviewComponent } from './assets/component/preview/file';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgModule, SimpleChange } from '@angular/core';
+import { DndModule, DragDropService, DragDropConfig } from 'ng2-dnd';
 
 
 
@@ -29,7 +30,13 @@ describe('AssetsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [NoopAnimationsModule, UtilsModule, MaterialModule, TestModule],
+      imports: [
+        NoopAnimationsModule,
+        UtilsModule,
+        MaterialModule,
+        DndModule,
+        TestModule
+      ],
       declarations: [
         AssetsComponent,
         AssetPreviewDirective,
@@ -37,7 +44,9 @@ describe('AssetsComponent', () => {
       ],
       providers: [
         AssetService,
-        AssetComponentService
+        AssetComponentService,
+        DragDropService,
+        DragDropConfig
       ],
     }).compileComponents();
 

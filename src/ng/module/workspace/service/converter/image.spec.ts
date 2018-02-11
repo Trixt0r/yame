@@ -1,7 +1,7 @@
 import { ImageAsset } from '../../../../../common/asset/image';
 import convertImg from './image';
 
-describe('convert image', () => {
+describe('Workspace image converter function', () => {
 
   const fileContent = {
     path: '/myImg.png',

@@ -5,6 +5,7 @@ import { PixiComponent } from '../component';
 import { PixiService } from '../service';
 import { PixiGridDirective } from './grid';
 import { Camera } from '../utils/camera';
+import { DndModule, DragDropService, DragDropConfig } from 'ng2-dnd';
 
 @Component({
   template: `<pixi pixiGrid></pixi>`
@@ -21,8 +22,9 @@ describe('PixiGridDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [ DndModule ],
       declarations: [ TestGroupHostComponent, PixiComponent, PixiGridDirective ],
-      providers: [ PixiService ]
+      providers: [ PixiService, DragDropService, DragDropConfig ]
     }).compileComponents();
     fixture = TestBed.createComponent(TestGroupHostComponent);
     comp = fixture.componentInstance;

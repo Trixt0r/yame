@@ -27,6 +27,11 @@ export class PixiComponent {
   constructor(public ref: ElementRef, public pixiService: PixiService) {
   }
 
+  /** @type {PIXI.DisplayObject} The current drag and drop preview. */
+  get dndPreview(): PIXI.DisplayObject {
+    return this.preview;
+  }
+
   /**
    * Initializes the pixi service.
    * @inheritdoc
@@ -51,16 +56,17 @@ export class PixiComponent {
    * Creates a new display object by using the pixi service and adds it to the scene at the mouse position.
    *
    * @param {DragDropData} event
-   * @returns {void}
+   * @returns {Promise<PIXI.DisplayObject>}
    */
-  onDrop(event: DragDropData) {
+  onDrop(event: DragDropData): Promise<PIXI.DisplayObject> {
     var asset: Asset = event.dragData;
-    this.pixiService.createFromAsset(asset)
+    return this.pixiService.createFromAsset(asset)
       .then(object => {
         this.pixiService.scene.addChild(object);
         object.position.copy(this.pixiService.toScene(event.mouseEvent));
         this.onDragLeave(event);
-      }).catch(() => {}); // TODO: Log the error somewhere
+        return object;
+      });
   }
 
   /**
@@ -68,17 +74,18 @@ export class PixiComponent {
    * Creates a preview for the dragged asset by using the pixi service.
    *
    * @param {DragDropData} event
-   * @returns {void}
+   * @returns {Promise<PIXI.DisplayObject>}
    */
-  onDragEnter(event: DragDropData) {
+  onDragEnter(event: DragDropData): Promise<PIXI.DisplayObject> {
     var asset: Asset = event.dragData;
-    this.pixiService.createFromAsset(asset)
+    return this.pixiService.createFromAsset(asset)
       .then(object => {
         this.preview = object;
         this.preview.alpha = 0.5;
         this.pixiService.scene.addChild(object);
         object.position.copy(this.pixiService.toScene(event.mouseEvent));
-      }).catch(() => {}); // TODO: Log the error somewhere
+        return object;
+      });
   }
 
   /**
@@ -91,6 +98,7 @@ export class PixiComponent {
   onDragLeave(event: DragDropData) {
     if (!this.preview) return;
     this.pixiService.scene.removeChild(this.preview);
+    delete this.preview;
   }
 
   /**
