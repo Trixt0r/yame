@@ -19,9 +19,10 @@ import { AssetService } from './workspace/service/asset';
 
 import convertDirectory from './workspace/service/converter/directory';
 import convertImage from './workspace/service/converter/image';
+import { DndModule } from 'ng2-dnd';
 
 @NgModule({
-  imports: [BrowserModule, UtilsModule, MaterialModule],
+  imports: [BrowserModule, UtilsModule, MaterialModule, DndModule.forRoot()],
   entryComponents: [
     DirectoryGroupComponent,
     FileAssetPreviewComponent,

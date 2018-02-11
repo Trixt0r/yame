@@ -3,6 +3,7 @@ import '../style.scss';
 import 'zone.js/dist/zone-mix';
 import 'reflect-metadata';
 import '../polyfills';
+import '../../../node_modules/ng2-dnd/bundles/style.css';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';

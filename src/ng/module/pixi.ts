@@ -5,9 +5,10 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { PixiComponent } from './pixi/component';
+import { DndModule } from 'ng2-dnd';
 
 @NgModule({
-  imports: [BrowserModule],
+  imports: [BrowserModule, DndModule.forRoot()],
   exports: [
     PixiCameraDirective,
     PixiGridDirective,

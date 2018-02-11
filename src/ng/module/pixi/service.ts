@@ -1,15 +1,13 @@
 import { PixiAppNotInitializedException } from './exception/service/not-initialized';
-import { Grid } from './utils/grid';
-import { Camera } from './utils/camera';
 import { ElementRef, Injectable } from '@angular/core';
 import * as PIXI from 'pixi.js';
+import { Asset } from '../../../common/asset';
+import { ImageAsset } from 'common/asset/image';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
  * The service needs to be initialized with the PixiService#setUp method.
  * Preferably in the ngOnInit method of your (pixi js) component.
- * Furthermore it provides utility methods such as rendering a grid in the scene
- * and attaching a camera to it.
  * @todo: Log stuff
  * @export
  * @class PixiService
@@ -89,5 +87,49 @@ export class PixiService {
       return this.newSize;
     }
     return false;
+  }
+
+  /**
+   * Converts the mouse coordinates from the given mouse event to local scene coordinates.
+   *
+   * @param {MouseEvent} event The mouse event from which to convert the coordinates.
+   * @param {PIXI.PointLike} [point] Optional parameter to store the result
+   * @returns {PIXI.PointLike}
+   */
+  toScene(event: MouseEvent, point?: PIXI.PointLike): PIXI.PointLike {
+    return this.scene.toLocal(<PIXI.PointLike>{ x: event.clientX, y: event.clientY }, void 0, point);
+  }
+
+  /**
+   * Creates a display object from the given asset.
+   * For now we only know how to create sprites from image assets.
+   *
+   * @todo Make this more generic, so other modules can provide implementations for different assets.
+   * @param {Asset} asset The asset to create the display object from.
+   * @returns {PIXI.DisplayObject} The created display object
+   */
+  createFromAsset(asset: Asset): Promise<PIXI.DisplayObject> {
+    if (!(asset instanceof ImageAsset))
+      return Promise.reject(new Error(`Asset of type '${asset.type}' is not supported`));
+    let sprite = new PIXI.Sprite(PIXI.Texture.fromImage(asset.content.path));
+    sprite.anchor.set(0.5);
+    let baseTexture = sprite.texture.baseTexture;
+    if (baseTexture.hasLoaded)
+      return Promise.resolve(sprite);
+    else if (baseTexture.isLoading)
+      {
+      return new Promise((resolve, reject) => {
+        baseTexture.once('loaded', () => {
+          baseTexture.off('error', null, this);
+          resolve(sprite);
+        }, this);
+        baseTexture.once('error', e => {
+          baseTexture.off('loaded', null, this);
+          reject(e);
+        }, this);
+      });
+      }
+    else
+      return Promise.reject(new Error('Texture for ' + asset.content.path + 'could not be created'));
   }
 }
