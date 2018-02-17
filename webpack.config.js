@@ -236,7 +236,7 @@ module.exports = {
         "loader": "source-map-loader",
         "exclude": [
           /\/node_modules\//,
-          path.join(__dirname, 'node_modules', '@angular/compiler')
+          path.join(process.cwd(), 'node_modules')
         ]
       },
       {
