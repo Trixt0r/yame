@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Entity, EntityData } from "./entity";
+import { Entity, EntityData, EntityType } from "./entity";
 
 interface GroupData extends EntityData {
   entities: EntityData[];
@@ -14,6 +14,7 @@ interface GroupData extends EntityData {
  * @class Group
  * @extends {Entity}
  */
+@EntityType()
 export class Group<T extends Entity> extends Entity {
 
   exportData: GroupData; // Override the type of the export data.
@@ -87,7 +88,7 @@ export class Group<T extends Entity> extends Entity {
       this.internalEntities.push(entity);
       this.addChild(entity);
       entity.parentEntity = this;
-      this.emit('entity:added', entity);
+      this.emit('added:entity', entity);
       return entity;
     });
   }
@@ -103,7 +104,7 @@ export class Group<T extends Entity> extends Entity {
     let promises = entitiesOrData.map(val => this.addEntity(val));
     return Promise.all(promises)
             .then(entities => {
-              this.emit('entities:added', entities);
+              this.emit('added:entities', entities);
               return entities;
             });
   }
@@ -124,7 +125,7 @@ export class Group<T extends Entity> extends Entity {
     this.removeChild(entity);
     this.internalEntities.splice(idx, 1);
     entity.parentEntity = null;
-    this.emit('entity:removed', entity);
+    this.emit('removed:entity', entity);
     return Promise.resolve(entity);
   }
 
@@ -140,7 +141,7 @@ export class Group<T extends Entity> extends Entity {
     let promises = entitiesOrIds.map(val => this.removeEntity(val));
     return Promise.all(promises)
             .then(entities => {
-              this.emit('entities:removed', entities);
+              this.emit('removed:entities', entities);
               return entities;
             }) as Promise<T[]>;
   }
@@ -160,6 +161,3 @@ export class Group<T extends Entity> extends Entity {
   }
 
 }
-
-// Make sure the group type gets registered
-Entity.registerEntityType(Group);

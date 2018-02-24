@@ -1,8 +1,7 @@
 import { Group } from "./group";
-import { Entity } from "./entity";
+import { Entity, EntityType } from "./entity";
 
+@EntityType()
 export class Layer extends Group<Entity> {
 
 }
-
-Entity.registerEntityType(Layer);
