@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import { Entity, EntityData, EntityType } from "./entity";
+import { GroupException } from '../exception/entity/group';
 
 interface GroupData extends EntityData {
   entities: EntityData[];
@@ -27,6 +28,11 @@ export class Group<T extends Entity> extends Entity {
     return this.internalEntities.slice();
   }
 
+  /** @type {number} The amount of direct entities, this group has. */
+  get length(): number {
+    return this.internalEntities.length;
+  }
+
   /** @inheritdoc */
   export(target: string): Promise<GroupData> {
     let entities = this.internalEntities.map(entity => entity.export(target));
@@ -40,16 +46,10 @@ export class Group<T extends Entity> extends Entity {
   /** @inheritdoc */
   parse(data: GroupData, from: string): Promise<Group<T>> {
     let entities = data.entities || [];
-    if (!Array.isArray(entities)) return Promise.reject(new Error('No valid entities provided'));
-    // Create an instance for each entity and parse it
-    let parsers = entities.map(entityData => {
-      let clazz = Entity.getEntityType(entityData.type);
-      let instance = new clazz();
-      return instance.parse(entityData, from);
-    });
-    let prevEntities = this.internalEntities.slice();
+    if (!Array.isArray(entities)) return Promise.reject(new GroupException('No valid entities provided'));
+    let prevEntities = this.entities;
     return this.clear()
-            .then(() => this.addEntities(entities))
+            .then(() => this.addEntities(entities, from))
             .then(entities => super.parse(data, from))
             .catch(e => this.addEntities(prevEntities)
                         .then(() => Promise.reject(e)) ) as Promise<Group<T>>;
@@ -71,20 +71,23 @@ export class Group<T extends Entity> extends Entity {
    * Emits the `entity:added` event with the added entity as a parameter.
    *
    * @param {(T | EntityData)} entityOrData The entity or entity data to add to this group.
+   * @param {string} [from=''] Has to be provided, if you add raw data instead of an entity instance.
    * @returns {Promise<T>} Resolves the added entity.
    */
-  addEntity(entityOrData: T | EntityData): Promise<T> {
+  addEntity(entityOrData: T | EntityData, from = ''): Promise<T> {
     let promise: Promise<T>;
     if (entityOrData instanceof Entity) {
       promise = Promise.resolve(entityOrData);
     } else {
+      if (typeof from !== 'string')
+        throw new GroupException(`The 'from' value has to be a string`);
       let clazz = Entity.getEntityType(entityOrData.type);
       let instance = new clazz();
-      promise = instance.parse(entityOrData, '') as Promise<T>;
+      promise = instance.parse(entityOrData, from) as Promise<T>;
     }
     return promise.then(entity => {
-      let found = this.internalEntities.findIndex(ent => entity.id === ent.id);
-      if (found) throw new Error(`Duplicate entity id ${entity.id} within group not allowed!`);
+      let found = this.indexOf(entity);
+      if (found >= 0) throw new GroupException(`Duplicate entity id ${entity.id} within group not allowed!`);
       this.internalEntities.push(entity);
       this.addChild(entity);
       entity.parentEntity = this;
@@ -98,10 +101,11 @@ export class Group<T extends Entity> extends Entity {
    * Emits the `entities:added` event with the added entities as a parameter.
    *
    * @param {((T | EntityData)[])} entitiesOrData
+   * @param {string} [from=''] Has to be provided, if you add raw data instead of an entity instance.
    * @returns {Promise<T[]>} Resolves the added entities.
    */
-  addEntities(entitiesOrData: (T | EntityData)[]): Promise<T[]> {
-    let promises = entitiesOrData.map(val => this.addEntity(val));
+  addEntities(entitiesOrData: (T | EntityData)[], from = ''): Promise<T[]> {
+    let promises = entitiesOrData.map(val => this.addEntity(val, from));
     return Promise.all(promises)
             .then(entities => {
               this.emit('added:entities', entities);
@@ -117,10 +121,11 @@ export class Group<T extends Entity> extends Entity {
    * @returns {Promise<T>} Resolves the deleted entity.
    */
   removeEntity(entityOrId: T | string): Promise<T> {
-    let entityId = entityOrId instanceof Entity ? entityOrId.id : entityOrId;
-    let idx = this.internalEntities.findIndex(entity => entity.id === entityId);
-    if (idx < 0)
-      return Promise.reject(new Error(`Entity for id ${entityId} not found.`));
+    let idx = this.indexOf(entityOrId);
+    if (idx < 0) {
+      let entityId = entityOrId instanceof Entity ? entityOrId.id : entityOrId;
+      return Promise.reject(new GroupException(`Entity for id ${entityId} not found.`));
+    }
     let entity = this.internalEntities[idx];
     this.removeChild(entity);
     this.internalEntities.splice(idx, 1);
@@ -158,6 +163,19 @@ export class Group<T extends Entity> extends Entity {
               this.emit('cleared', entities);
               return entities;
             });
+  }
+
+  /**
+   * Searches for the given entity
+   *
+   * @param {(T | string)} entityOrId
+   * @returns {number} The index of the given entitiy or id.
+   */
+  indexOf(entityOrId: T | string): number {
+    if (entityOrId instanceof Entity)
+      return this.internalEntities.indexOf(entityOrId);
+    else
+      return this.internalEntities.findIndex(entity => entity.id === entityOrId);
   }
 
 }

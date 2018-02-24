@@ -3,6 +3,7 @@ import { Type } from "@angular/core";
 import * as _ from 'lodash';
 import { Property } from "./property";
 import * as PIXI from 'pixi.js';
+import { EntityException } from "../exception/entity/entity";
 
 interface EntityTypes {
   [key: string]: Type<Entity>;
@@ -94,7 +95,7 @@ export abstract class Entity extends PIXI.Container {
    * @returns {Promise<Entity>} Resolves this entity on success.
    */
   parse(data: EntityData, from: string): Promise<Entity> {
-    if (!data.id) return Promise.reject(new Error('No id provided for parsing'));
+    if (!data.id) return Promise.reject(new EntityException('No id provided for parsing'));
     this.id = data.id;
     this.name = data.name;
     this.emit('parsed', data); // Notify any listeners that we parsed data

@@ -11,6 +11,12 @@ class MyEntity extends Entity {
   }
 }
 
+class MyOtherEntity extends Entity {
+  clone(): Promise<Entity> {
+    throw new Error("Method not implemented.");
+  }
+}
+
 describe('Scene', () => {
 
   describe('Property', () => {
@@ -57,7 +63,7 @@ describe('Scene', () => {
     });
 
     it('should not trigger the change event on no change', () => {
-      let spy = { fn: function(value, previous) { expect(value).toEqual('test', 'The value has not changed properly'); } };
+      let spy = { fn: function(value, previous) { } };
       spyOn(spy, 'fn');
       entity.myProperty = 'test';
       entity.once('change:myProperty', spy.fn);
@@ -73,6 +79,11 @@ describe('Scene', () => {
     it('should not export the set data to the export data of the entity if not marked', () => {
       entity.myInternalProperty = 'some data';
       expect(entity.exportData.myInternalProperty).toBeUndefined('Property has been exported');
+    });
+
+    it('should make sure that inherited properties do not collied', () => {
+      let other = new MyOtherEntity();
+      expect(other.id).not.toEqual(entity.id, 'Property collision');
     });
 
   });

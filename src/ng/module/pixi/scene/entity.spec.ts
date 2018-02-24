@@ -1,6 +1,7 @@
 import { Entity, EntityType } from "./entity";
+import { EntityException } from "../exception/entity/entity";
 
-@EntityType()
+@EntityType('mytestentity')
 class MyEntity extends Entity {
 
   clone(): Promise<Entity> {
@@ -18,12 +19,12 @@ describe('Scene', () => {
 
     describe('Decorator', () => {
       it('should define the new entity type', () => {
-        expect(Entity.getEntityType('myentity')).toBeDefined('No entity type defined');
-        expect(Entity.getEntityType('myentity')).toBe(MyEntity, 'Wrong entity type defined');
+        expect(Entity.getEntityType('mytestentity')).toBeDefined('No entity type defined');
+        expect(Entity.getEntityType('mytestentity')).toBe(MyEntity, 'Wrong entity type defined');
       });
 
       it('should find the correct entity type for an entity instance', () => {
-        expect(Entity.getEntityTypeOf(entity)).toEqual('myentity');
+        expect(Entity.getEntityTypeOf(entity)).toEqual('mytestentity');
       });
     });
 
@@ -81,7 +82,7 @@ describe('Scene', () => {
         const data = {
           id: 'test',
           name: 'noname',
-          type: 'myentity'
+          type: 'mytestentity'
         };
         entity.parse(data, '')
           .then(res => {
@@ -97,7 +98,7 @@ describe('Scene', () => {
         const data = {
           id: 'test',
           name: 'noname',
-          type: 'myentity'
+          type: 'mytestentity'
         };
         let spy = { fn: function(parsed) { expect(data).toBe(parsed, 'The incorrect value has been emitted'); } };
         spyOn(spy, 'fn');
@@ -112,11 +113,14 @@ describe('Scene', () => {
         const data = {
           id: '',
           name: 'noname',
-          type: 'myentity'
+          type: 'mytestentity'
         };
         entity.parse(data, '')
           .then(() => fail('Should fail while parsing'))
-          .catch(e => expect(e.message).toEqual('No id provided for parsing'))
+          .catch(e => {
+            expect(e instanceof EntityException).toBe(true, 'Wrong exception type rejected');
+            expect(e.message).toEqual('No id provided for parsing');
+          })
           .then(done);
       });
     });

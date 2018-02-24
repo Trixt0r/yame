@@ -11,18 +11,24 @@ import { Entity } from "./entity";
  */
 export function Property(exportData: boolean): (target: Entity, key: string) => void {
   return (target: Entity, key: string) => {
-    let internalValue = target[key];
     const definition = {
       set: function(value) {
+        if (!this.internalValues)
+          this.internalValues = { };
+        let internalValue = this.internalValues[key];
         if (internalValue !== value) {
           let prevVal = internalValue;
-          internalValue = value;
+          this.internalValues[key] = value;
           if (exportData)
             this.internalExportData[key] = value;
           this.emit(`change:${key}`, value, prevVal);
         }
       },
-      get: () => internalValue
+      get: function() {
+        if (!this.internalValues)
+          this.internalValues = { };
+        return this.internalValues[key];
+      }
     };
     Object.defineProperty(target, key, definition);
   }
