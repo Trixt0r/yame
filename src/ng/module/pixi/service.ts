@@ -3,6 +3,8 @@ import { ElementRef, Injectable } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { Asset } from '../../../common/asset';
 import { PixiAssetConverter } from './service/converter';
+import { Map } from './scene/map';
+import { Entity } from './scene/entity';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
@@ -16,7 +18,7 @@ import { PixiAssetConverter } from './service/converter';
 export class PixiService {
 
   private internalApp: PIXI.Application;
-  private internalScene: PIXI.Container;
+  private internalScene: Map;
   private viewRef: ElementRef;
   private newSize = new PIXI.Point();
   private internalAssetConverter = new PixiAssetConverter();
@@ -31,8 +33,8 @@ export class PixiService {
     return this.internalApp.renderer;
   }
 
-  /** @type {PIXI.Container} scene The scene container. Attach your content there.*/
-  get scene(): PIXI.Container {
+  /** @type {Map} scene The scene container. Attach your content there.*/
+  get scene(): Map {
     return this.internalScene;
   }
 
@@ -75,7 +77,7 @@ export class PixiService {
     this.internalApp = new PIXI.Application(viewRef.nativeElement.offsetWidth,
                                             viewRef.nativeElement.offsetHeight,
                                             options);
-    this.internalScene = new PIXI.Container();
+    this.internalScene = new Map();
     this.internalApp.stage.addChild(this.internalScene);
     this.resize();
   }
@@ -107,13 +109,13 @@ export class PixiService {
   }
 
   /**
-   * Creates a display object from the given asset.
+   * Creates an entity from the given asset.
    * This is a proxy an alias for `this.assetConverter.get(asset)`.
    *
    * @param {Asset} asset The asset to create the display object from.
-   * @returns {Promise<PIXI.DisplayObject>} Resolves the created object.
+   * @returns {Promise<Entity>} Resolves the created entity.
    */
-  createFromAsset(asset: Asset): Promise<PIXI.DisplayObject> {
+  createFromAsset(asset: Asset): Promise<Entity> {
     return this.internalAssetConverter.get(asset);
   }
 }

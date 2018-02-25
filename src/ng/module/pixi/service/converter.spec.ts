@@ -3,6 +3,7 @@ import { PixiAssetConverter } from './converter';
 import { Asset } from '../../../../common/asset';
 import { PixiInvalidConverterException } from '../exception/service/invalid-converter';
 import { PixiAssetNotSupportedException } from '../exception/service/asset-not-supported';
+import { Entity } from '../scene/entity';
 
 class MyAsset extends Asset {
   type = 'myType';
@@ -12,12 +13,24 @@ class UnkownAsset extends Asset {
   type = 'unkownType';
 }
 
-function convert(asset: Asset): Promise<PIXI.DisplayObject> {
-  return Promise.resolve(new PIXI.DisplayObject());
+class MyEntity extends Entity {
+  clone(): Promise<Entity> {
+    throw new Error("Method not implemented.");
+  }
 }
 
-function convert2(asset: Asset): Promise<PIXI.DisplayObject> {
-  return Promise.resolve(new PIXI.Container());
+class MyEntity2 extends Entity {
+  clone(): Promise<Entity> {
+    throw new Error("Method not implemented.");
+  }
+}
+
+function convert(asset: Asset): Promise<MyEntity> {
+  return Promise.resolve(new MyEntity());
+}
+
+function convert2(asset: Asset): Promise<MyEntity2> {
+  return Promise.resolve(new MyEntity2());
 }
 
 describe('PixiAssetConverter', () => {
@@ -35,7 +48,7 @@ describe('PixiAssetConverter', () => {
         .then((object) => {
           expect(object).toBeDefined('Nothing resolved');
           expect(object).not.toBeNull('Resolved object is null');
-          expect(object instanceof PIXI.DisplayObject).toBe(true, 'No display object resolved');
+          expect(object instanceof Entity).toBe(true, 'No entity object resolved');
           done();
         }).catch(() => {
           fail('Nothing resolved');
@@ -66,12 +79,12 @@ describe('PixiAssetConverter', () => {
       let asset = new MyAsset();
       converter.get(asset)
         .then(re => {
-          expect(!(re instanceof PIXI.Container)).toBe(true, 'The incorrect converter is defined');
+          expect(!(re instanceof MyEntity2)).toBe(true, 'The incorrect converter is defined');
           converter.register('myType', convert2);
           return converter.get(asset)
         })
         .then((re) => {
-          expect(re instanceof PIXI.Container).toBe(true, 'The converter has not been overriden');
+          expect(re instanceof MyEntity2).toBe(true, 'The converter has not been overriden');
           done();
         })
       .catch(() => fail('No object has been resolved'));

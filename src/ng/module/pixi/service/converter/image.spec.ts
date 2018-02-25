@@ -1,6 +1,7 @@
 import convert from './image';
 import { ImageAsset } from '../../../../../common/asset/image';
 import * as PIXI from 'pixi.js';
+import { SpriteEntity } from '../../scene/sprite';
 
 describe('ImageAsset to Sprite converter function', () => {
 
@@ -12,18 +13,18 @@ describe('ImageAsset to Sprite converter function', () => {
   it('should resolve a sprite for an image which is not loaded yet', done => {
     convert(image)
       .then(sprite => {
-        expect(sprite instanceof PIXI.Sprite).toBe(true, 'No sprite resolved');
+        expect(sprite instanceof SpriteEntity).toBe(true, 'No sprite resolved');
         done();
       })
       .catch(e => fail('Nothing resolved'));
   });
 
   it('should resolve a sprite if is already loaded', done => {
-    let spr = new PIXI.Sprite(PIXI.Texture.fromImage(image.content.path));
+    let spr = new SpriteEntity(PIXI.Texture.fromImage(image.content.path));
     expect(spr.texture.baseTexture.hasLoaded).toBe(true, 'Texture has not been loaded');
     convert(image)
       .then(sprite => {
-        expect(sprite instanceof PIXI.Sprite).toBe(true, 'No sprite resolved');
+        expect(sprite instanceof SpriteEntity).toBe(true, 'No sprite resolved');
         done();
       })
       .catch(e => fail('Nothing resolved'));
@@ -34,7 +35,7 @@ describe('ImageAsset to Sprite converter function', () => {
       .then(() => fail('Should not resovle anything'))
       .catch(e => {
         expect(e instanceof Error).toBe(true, 'No error rejected');
-        expect(e.message).toBe(`Texture for '' could not be created`, 'Wrong error message');
+        expect(e.message).toBe(`Source failed to load`, 'Wrong error message');
         done();
       });
   });
@@ -47,7 +48,7 @@ describe('ImageAsset to Sprite converter function', () => {
           .then(() => fail('Should not resovle anything'))
           .catch(e => {
             expect(e instanceof Error).toBe(true, 'No error rejected');
-            expect(e.message).toBe(`Texture for '' could not be created`, 'Wrong error message');
+            expect(e.message).toBe(`Source failed to load`, 'Wrong error message');
             done();
           });
       });

@@ -4,6 +4,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } 
 import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from '../../../common/asset';
+import { Entity } from './scene/entity';
 
 /**
  * A pixi component provides a canvas element and initializes the injected pixi service.
@@ -56,16 +57,18 @@ export class PixiComponent {
    * Creates a new display object by using the pixi service and adds it to the scene at the mouse position.
    *
    * @param {DragDropData} event
-   * @returns {Promise<PIXI.DisplayObject>}
+   * @returns {Entity}
    */
-  onDrop(event: DragDropData): Promise<PIXI.DisplayObject> {
+  onDrop(event: DragDropData): Promise<Entity> {
     var asset: Asset = event.dragData;
     return this.pixiService.createFromAsset(asset)
-      .then(object => {
-        this.pixiService.scene.addChild(object);
-        object.position.copy(this.pixiService.toScene(event.mouseEvent));
-        this.onDragLeave(event);
-        return object;
+      .then(entity => {
+        return this.pixiService.scene.addEntity(entity)
+                .then(() => {
+                  entity.position.copy(this.pixiService.toScene(event.mouseEvent));
+                  this.onDragLeave(event);
+                  return entity;
+                });
       });
   }
 
@@ -74,15 +77,15 @@ export class PixiComponent {
    * Creates a preview for the dragged asset by using the pixi service.
    *
    * @param {DragDropData} event
-   * @returns {Promise<PIXI.DisplayObject>}
+   * @returns {Promise<Entity>}
    */
-  onDragEnter(event: DragDropData): Promise<PIXI.DisplayObject> {
+  onDragEnter(event: DragDropData): Promise<Entity> {
     var asset: Asset = event.dragData;
     return this.pixiService.createFromAsset(asset)
       .then(object => {
         this.preview = object;
         this.preview.alpha = 0.5;
-        this.pixiService.scene.addChild(object);
+        this.pixiService.scene.addChild(object); // Do not add it as an entity, since it is just a preview
         object.position.copy(this.pixiService.toScene(event.mouseEvent));
         return object;
       });

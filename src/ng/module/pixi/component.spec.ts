@@ -4,16 +4,25 @@ import { By }              from '@angular/platform-browser';
 import { DebugElement, Injectable } from '@angular/core';
 import { PixiComponent } from './component';
 import { DndModule, DragDropService, DragDropConfig, DragDropData } from 'ng2-dnd';
+import { Map } from './scene/map';
+import { Entity, EntityType } from './scene/entity';
+
+@EntityType('someentity')
+class MyEntity extends Entity {
+  clone(): Promise<Entity> {
+    throw new Error("Method not implemented.");
+  }
+}
 
 @Injectable()
 class FakePixiService {
   public static RESIZEVAL = null;
-  private _scene = new PIXI.Container();
+  private _scene = new Map();
   public get scene() { return this._scene; }
   setUp(ref, options) { /* NOOP */ }
   resize() { return FakePixiService.RESIZEVAL; }
   toScene(any) { return new PIXI.Point(1000, -1000); }
-  createFromAsset(asset) { return Promise.resolve(new PIXI.DisplayObject()); }
+  createFromAsset(asset) { return Promise.resolve(new MyEntity()); }
 }
 
 describe('PixiComponent', () => {
@@ -83,12 +92,15 @@ describe('PixiComponent', () => {
       it('should add a new display object to the scene onDrop', (done) => {
         comp.onDrop(data)
           .then(obj => {
-            expect(pixiService.scene.getChildIndex(obj)).toBeGreaterThanOrEqual(0, 'Child has not been added to scene');
+            expect(pixiService.scene.indexOf(obj)).toBeGreaterThanOrEqual(0, 'Child has not been added to scene');
             expect(obj.position.x).toBe(pixiService.toScene(data.mouseEvent).x, 'Added object has the wong x-coordinate');
             expect(obj.position.y).toBe(pixiService.toScene(data.mouseEvent).y, 'Added object has the wong y-coordinate');
             expect(comp.dndPreview).toBeUndefined('Preview has not been removed');
             done();
-          }).catch(() => fail('Nothing resolved'));
+          }).catch(e => {
+            fail('Nothing resolved');
+            done();
+          });
       });
 
       it('should add a new display object to the scene onDragEnter as preview', (done) => {
@@ -111,7 +123,10 @@ describe('PixiComponent', () => {
             expect(comp.dndPreview.position.x).toBe(pixiService.toScene(data.mouseEvent).x, 'Added object has the wong x-coordinate');
             expect(comp.dndPreview.position.y).toBe(pixiService.toScene(data.mouseEvent).y, 'Added object has the wong y-coordinate');
             done();
-          }).catch(() => fail('Nothing resolved'));
+          }).catch(() => {
+            fail('Nothing resolved');
+            done();
+          });
       });
 
       it('should remove the preview onDragLeave', (done) => {
@@ -122,7 +137,10 @@ describe('PixiComponent', () => {
             expect(comp.dndPreview).toBeUndefined('Preview has not been removed');
             expect(pixiService.scene.children.indexOf(prev)).toBeLessThan(0, 'Preview has not been removed from scene');
             done();
-          }).catch(() => fail('Nothing resolved'));
+          }).catch(() => {
+            fail('Nothing resolved');
+            done();
+          });
       });
     });
   });

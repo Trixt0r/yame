@@ -1,7 +1,7 @@
-import { DisplayObject } from "pixi.js";
 import { Asset } from "../../../../common/asset";
 import { PixiInvalidConverterException } from "../exception/service/invalid-converter";
 import { PixiAssetNotSupportedException } from "../exception/service/asset-not-supported";
+import { Entity } from "../scene/entity";
 
 /**
  * Converts the given asset to a display object.
@@ -10,7 +10,7 @@ import { PixiAssetNotSupportedException } from "../exception/service/asset-not-s
  * @interface ConvertFn
  */
 interface ConvertFn {
-  (asset: Asset): Promise<DisplayObject>;
+  (asset: Asset): Promise<Entity>;
 }
 
 interface Converters {
@@ -46,9 +46,9 @@ export class PixiAssetConverter {
    * Creates a display object from the given asset and resolves it.
    *
    * @param {Asset} asset The asset to create the display object for.
-   * @returns {Promise<DisplayObject>} Resolves the created display object.
+   * @returns {Promise<Entity>} Resolves the created display object.
    */
-  get(asset: Asset): Promise<DisplayObject> {
+  get(asset: Asset): Promise<Entity> {
     let fn = this.converters[asset.type];
     if (!fn)
       return Promise.reject(new PixiAssetNotSupportedException(`Asset of type '${asset.type}' is not supported`));
