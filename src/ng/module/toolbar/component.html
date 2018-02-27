@@ -1,0 +1,10 @@
+<div class="content">
+  <mat-nav-list dense>
+    <mat-list-item *ngFor="let icon of ['edit', 'brush', 'format_shapes', 'settings']">
+      <mat-icon mat-list-icon>{{ icon }}</mat-icon>
+    </mat-list-item>
+  </mat-nav-list>
+</div>
+<div mat-ripple class="toggler" (click)="toggle($event)" [matRippleAnimation]="rippleAnimationConfig">
+  <mat-icon >{{ toggled ? 'arrow_drop_down' : 'arrow_drop_up' }}</mat-icon>
+</div>

@@ -3,6 +3,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { WorkspaceComponent } from "../module/workspace/component";
 import { PixiCameraDirective } from 'ng/module/pixi/directive/camera';
 import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
+import { ToolbarComponent } from '../module/toolbar/component';
 
 @Component({
   moduleId: module.id,
@@ -13,6 +14,7 @@ import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
 export class MainComponent implements AfterViewInit {
 
   @ViewChild('pixi') pixi: PixiComponent;
+  @ViewChild('toolbar') toolbar: ToolbarComponent;
   @ViewChild('workspace') workspace: WorkspaceComponent;
   @ViewChild(PixiCameraDirective) pixiCamera: PixiCameraDirective;
   @ViewChild(PixiGridDirective) pixiGrid: PixiGridDirective;
@@ -38,6 +40,7 @@ export class MainComponent implements AfterViewInit {
    */
   sizeUpdated(top: number): void {
     this.pixi.ref.nativeElement.style['height'] = `${top}px`;
+    this.toolbar.ref.nativeElement.style['height'] = `${top}px`;
     this.pixiGrid.update();
     this.pixi.onResize();
   }

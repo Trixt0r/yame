@@ -22,6 +22,7 @@ import { PixiService } from './pixi/service';
 import { WorkspaceService } from './workspace/service';
 
 import { AppComponent } from '../component/app';
+import { ToolbarModule } from './toolbar';
 
 @NgModule({
   imports: [
@@ -32,7 +33,8 @@ import { AppComponent } from '../component/app';
     PixiModule,
     MaterialModule,
     WorkspaceModule,
-    SidebarModule
+    SidebarModule,
+    ToolbarModule
   ],
   declarations: [
     AppComponent,

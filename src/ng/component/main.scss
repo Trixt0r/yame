@@ -1,3 +1,6 @@
+$toolbar-width: 64px;
+$toolbar-toggler-width: 15px;
+
 :host {
   position: absolute;
   left: 0;
@@ -6,9 +9,22 @@
   height: 100%;
   overflow: hidden;
 
+  workspace {
+    z-index: 2;
+  }
+
+  toolbar {
+    z-index: 1;
+    width: $toolbar-width;
+    transform: translateX(calc(-100% + #{$toolbar-toggler-width}));
+    &.toggled {
+      transform: translateX(0);
+    }
+  }
+
   pixi {
-    width: 100%;
-    height: 75%;
-    position: absolute;
+    z-index: 0;
+    left: $toolbar-toggler-width;
+    width: calc(100% - #{$toolbar-toggler-width});
   }
 }
