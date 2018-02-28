@@ -1,5 +1,6 @@
 import { Component, ElementRef } from "@angular/core";
 import { RippleAnimationConfig } from "@angular/material";
+import { ToolbarService } from "./service";
 
 @Component({
   moduleId: module.id,
@@ -15,7 +16,7 @@ export class ToolbarComponent {
     exitDuration: 100,
   }
 
-  constructor(public ref: ElementRef) {
+  constructor(public ref: ElementRef, private service: ToolbarService) {
 
   }
 

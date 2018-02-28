@@ -1,7 +1,8 @@
 <div class="content">
   <mat-nav-list dense>
-    <mat-list-item *ngFor="let icon of ['edit', 'brush', 'format_shapes', 'settings']">
-      <mat-icon mat-list-icon>{{ icon }}</mat-icon>
+    <mat-list-item *ngFor="let tool of service.tools" (click)="service.activate(tool)">
+      <ng-template [toolHost]="tool">
+      </ng-template>
     </mat-list-item>
   </mat-nav-list>
 </div>
