@@ -1,12 +1,17 @@
-import { Directive, Input, ViewContainerRef, ComponentFactoryResolver, ComponentRef } from "@angular/core";
+import { Directive, Input, ViewContainerRef, ComponentFactoryResolver, ComponentRef, OnChanges } from "@angular/core";
 import { Tool } from "../tool";
 import { ToolbarService } from "../service";
 import { ToolComponent } from "../component/tool";
 
+/**
+ * Directive for rendering a tool component in a template.
+ *
+ * @class ToolDirective
+ */
 @Directive({
   selector: '[toolHost]'
 })
-export class ToolDirective {
+export class ToolDirective implements OnChanges {
 
   @Input('toolHost') tool: Tool;
 

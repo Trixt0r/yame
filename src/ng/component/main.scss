@@ -16,10 +16,6 @@ $toolbar-toggler-width: 15px;
   toolbar {
     z-index: 1;
     width: $toolbar-width;
-    transform: translateX(calc(-100% + #{$toolbar-toggler-width}));
-    &.toggled {
-      transform: translateX(0);
-    }
   }
 
   pixi {

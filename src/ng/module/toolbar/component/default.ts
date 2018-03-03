@@ -1,6 +1,12 @@
 import { Component } from "@angular/core";
 import { ToolComponent } from "./tool";
 
+/**
+ * The default tool component displays the icon of the tool,
+ *
+ * @class DefaultToolComponent
+ * @extends {ToolComponent}
+ */
 @Component({
   template: `<mat-icon mat-list-icon>{{ tool.icon ? tool.icon : 'build' }}</mat-icon>`,
   styles: [`

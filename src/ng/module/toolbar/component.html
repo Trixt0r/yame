@@ -6,6 +6,9 @@
     </mat-list-item>
   </mat-nav-list>
 </div>
-<div mat-ripple class="toggler" (click)="toggle($event)" [matRippleAnimation]="rippleAnimationConfig">
-  <mat-icon >{{ toggled ? 'arrow_drop_down' : 'arrow_drop_up' }}</mat-icon>
+<div mat-ripple
+      class="toggler"
+      (click)="toggle()"
+      [matRippleAnimation]="rippleAnimationConfig">
+  <mat-icon >{{ open ? 'arrow_drop_down' : 'arrow_drop_up' }}</mat-icon>
 </div>

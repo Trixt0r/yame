@@ -48,4 +48,4 @@ describe('DirectoryGroupComponent', () => {
   afterAll(() => {
     document.body.removeChild(fixture.componentRef.location.nativeElement);
   });
-})
+});

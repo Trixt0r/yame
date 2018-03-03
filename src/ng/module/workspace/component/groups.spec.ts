@@ -49,7 +49,7 @@ class FakeWorkspaceService {
 })
 class TestModule { }
 
-describe('GroupComponent', () => {
+describe('GroupsComponent', () => {
   let comp: GroupsComponent;
   let fixture: ComponentFixture<GroupsComponent>;
   let assetService: AssetService;
