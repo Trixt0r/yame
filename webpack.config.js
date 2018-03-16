@@ -5,6 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 const postcssUrl = require('postcss-url');
+const nodeExternals = require('webpack-node-externals');
 
 const { NoEmitOnErrorsPlugin, LoaderOptionsPlugin, DefinePlugin, HashedModuleIdsPlugin } = require('webpack');
 const { GlobCopyWebpackPlugin, BaseHrefWebpackPlugin } = require('@angular/cli/plugins/webpack');
@@ -12,7 +13,7 @@ const { CommonsChunkPlugin, UglifyJsPlugin } = require('webpack').optimize;
 const { AotPlugin } = require('@ngtools/webpack');
 
 const nodeModules = path.join(process.cwd(), 'node_modules');
-const entryPoints = ["inline", "polyfills", "sw-register", "vendor", "common", "main"];
+const entryPoints = ["inline", "polyfills", "vendor", "common", "main"];
 const baseHref = "";
 const deployUrl = "";
 
@@ -31,34 +32,34 @@ function getPlugins() {
   plugins.push(new NoEmitOnErrorsPlugin());
 
   plugins.push(new GlobCopyWebpackPlugin({
-    "patterns": [
+    patterns: [
       "./assets/**",
       "./favicon.ico"
     ],
-    "globOptions": {
-      "cwd": process.cwd() + "/src/ng",
-      "dot": true,
-      "ignore": "**/.gitkeep"
+    globOptions: {
+      cwd: process.cwd() + "/src/ng",
+      dot: true,
+      ignore: "**/.gitkeep"
     }
   }));
 
   plugins.push(new ProgressPlugin());
 
   plugins.push(new HtmlWebpackPlugin({
-    "template": "./src/ng/index.html",
-    "filename": "./index.html",
-    "hash": false,
-    "inject": true,
-    "compile": true,
-    "favicon": false,
-    "minify": false,
-    "cache": true,
-    "showErrors": true,
-    "chunks": "all",
-    "excludeChunks": [],
-    "title": "Webpack App",
-    "xhtml": true,
-    "chunksSortMode": function sort(left, right) {
+    template: "./src/ng/index.html",
+    filename: "./index.html",
+    hash: false,
+    inject: true,
+    compile: true,
+    favicon: false,
+    minify: false,
+    cache: true,
+    showErrors: true,
+    chunks: "all",
+    excludeChunks: [],
+    title: "Webpack App",
+    xhtml: true,
+    chunksSortMode: function sort(left, right) {
       let leftIndex = entryPoints.indexOf(left.names[0]);
       let rightindex = entryPoints.indexOf(right.names[0]);
       if (leftIndex > rightindex) {
@@ -75,28 +76,28 @@ function getPlugins() {
 
   plugins.push(new BaseHrefWebpackPlugin({}));
 
-  plugins.push(new CommonsChunkPlugin({
-    "name": "inline",
-    "minChunks": null
-  }));
+  // plugins.push(new CommonsChunkPlugin({
+  //   name: "inline",
+  //   minChunks: null
+  // }));
 
-  plugins.push(new CommonsChunkPlugin({
-    "name": "vendor",
-    "minChunks": (module) => module.resource && module.resource.startsWith(nodeModules),
-    "chunks": [
-      "main"
-    ]
-  }));
+  // plugins.push(new CommonsChunkPlugin({
+  //   name: "vendor",
+  //   minChunks: (module) => module.resource && module.resource.startsWith(nodeModules),
+  //   chunks: [
+  //     "main"
+  //   ]
+  // }));
 
   plugins.push(new ExtractTextPlugin("style.css", { allChunks: true } ));
 
   plugins.push(new LoaderOptionsPlugin({
-    "sourceMap": false,
-    "options": {
-      "postcss": [
+    sourceMap: false,
+    options: {
+      postcss: [
         autoprefixer(),
         postcssUrl({
-          "url": (obj) => {
+          url: (obj) => {
             // Only convert root relative URLs, which CSS-Loader won't process into require().
             if (!obj.url.startsWith('/') || obj.url.startsWith('//')) {
               return obj.url;
@@ -118,53 +119,55 @@ function getPlugins() {
           }
         })
       ],
-      "sassLoader": {
-        "sourceMap": false,
-        "includePaths": []
+      sassLoader: {
+        sourceMap: false,
+        includePaths: []
       },
-      "lessLoader": {
-        "sourceMap": false
+      lessLoader: {
+        sourceMap: false
       },
-      "context": ""
+      context: ""
     }
   }));
 
   if (isProd) {
     plugins.push(new HashedModuleIdsPlugin({
-      "hashFunction": "md5",
-      "hashDigest": "base64",
-      "hashDigestLength": 4
+      hashFunction: "md5",
+      hashDigest: "base64",
+      hashDigestLength: 4
     }));
 
     plugins.push(new AotPlugin({
-      "mainPath": "main.ts",
-      "hostReplacementPaths": {
+      mainPath: "main.ts",
+      hostReplacementPaths: {
         "environments/index.ts": "environments/index.prod.ts"
       },
-      "exclude": [],
-      "tsConfigPath": "src/ng/tsconfig.app.json"
+      exclude: [],
+      tsConfigPath: "src/ng/tsconfig.app.json",
+      entryModule: "./module/app"
     }));
 
     plugins.push(new UglifyJsPlugin({
-      "mangle": {
-        "screw_ie8": true
+      mangle: {
+        screw_ie8: true
       },
-      "compress": {
-        "screw_ie8": true,
-        "warnings": false
+      compress: {
+        screw_ie8: true,
+        warnings: false
       },
-      "sourceMap": false
+      sourceMap: false
     }));
 
   } else {
     plugins.push(new AotPlugin({
-      "mainPath": "main.ts",
-      "hostReplacementPaths": {
+      mainPath: "main.ts",
+      hostReplacementPaths: {
         "environments/index.ts": "environments/index.ts"
       },
-      "exclude": [],
-      "tsConfigPath": "src/ng/tsconfig.app.json",
-      "skipCodeGeneration": true
+      exclude: [],
+      tsConfigPath: "src/ng/tsconfig.app.json",
+      skipCodeGeneration: true,
+      entryModule: path.resolve(__dirname, "src/ng/module/app")
     }));
   }
 
@@ -172,102 +175,82 @@ function getPlugins() {
 }
 
 module.exports = {
-  "devtool": "source-map",
-  "externals": {
-    "electron": "require('electron')",
-    "child_process": "require('child_process')",
-    "crypto": "require('crypto')",
-    "events": "require('events')",
-    "fs": "require('fs')",
-    "http": "require('http')",
-    "https": "require('https')",
-    "assert": "require('assert')",
-    "dns": "require('dns')",
-    "net": "require('net')",
-    "os": "require('os')",
-    "path": "require('path')",
-    "querystring": "require('querystring')",
-    "readline": "require('readline')",
-    "repl": "require('repl')",
-    "stream": "require('stream')",
-    "string_decoder": "require('string_decoder')",
-    "url": "require('url')",
-    "util": "require('util')",
-    "zlib": "require('zlib')"
-  },
-  "resolve": {
-    "extensions": [
+  target: "electron-renderer",
+  devtool: "source-map",
+  externals: [nodeExternals()],
+  resolve: {
+    extensions: [
       ".ts",
       ".js",
       ".scss",
       ".json"
     ],
-    "aliasFields": [],
-    "alias": { // WORKAROUND See. angular-cli/issues/5433
-      "environments": isProd ? path.resolve(__dirname, 'src/environments/index.prod.ts') : path.resolve(__dirname, 'src/environments/index.ts')
+    aliasFields: [],
+    alias: { // WORKAROUND See. angular-cli/issues/5433
+      environments: isProd ? path.resolve(__dirname, 'src/environments/index.prod.ts') : path.resolve(__dirname, 'src/environments/index.ts')
     },
-    "modules": [
+    modules: [
       "./node_modules"
     ]
   },
-  "resolveLoader": {
-    "modules": [
+  resolveLoader: {
+    modules: [
       "./node_modules"
     ]
   },
-  "entry": {
-    "main": [
+  entry: {
+    main: [
       "./src/ng/main.ts"
     ],
-    "polyfills": [
+    polyfills: [
       "./src/ng/polyfills.ts"
     ],
   },
-  "output": {
-    "path": path.join(process.cwd(), "dist", "ng"),
-    "filename": "[name].bundle.js",
-    "chunkFilename": "[id].chunk.js"
+  output: {
+    path: path.join(process.cwd(), "dist", "ng"),
+    filename: "[name].bundle.js",
+    chunkFilename: "[id].chunk.js"
   },
-  "module": {
-    "rules": [
+  module: {
+    rules: [
       {
-        "enforce": "pre",
-        "test": /\.(js|ts)$/,
-        "loader": "source-map-loader",
-        "exclude": [
+        enforce: "pre",
+        test: /\.(js|ts)$/,
+        loader: "source-map-loader",
+        exclude: [
           /\/node_modules\//,
           path.join(process.cwd(), 'node_modules')
         ]
       },
       {
-        "test": /\.html$/,
-        "loader": "html-loader"
+        test: /\.html$/,
+        loader: "html-loader"
       },
       {
-        "test": /\.(eot|svg)$/,
-        "loader": "file-loader?name=[name].[hash:20].[ext]"
+        test: /\.(eot|svg)$/,
+        loader: "file-loader?name=[name].[hash:20].[ext]"
       },
       {
-        "test": /\.(jpg|png|gif|otf|ttf|woff|woff2|cur|ani)$/,
-        "loader": "url-loader?name=[name].[hash:20].[ext]&limit=10000"
+        test: /\.(jpg|png|gif|otf|ttf|woff|woff2|cur|ani)$/,
+        loader: "url-loader?name=[name].[hash:20].[ext]&limit=10000"
       },
       {
-        "exclude": [
+        exclude: [
           path.join(process.cwd(), "src/ng/style.scss")
         ],
-        "test": /\.css$/,
-        "loaders": [
+        test: /\.css$/,
+        loaders: [
           "exports-loader?module.exports.toString()",
           "css-loader?{\"sourceMap\":false,\"importLoaders\":1}",
           "postcss-loader"
         ]
       },
       {
-        "exclude": [
+        exclude: [
           path.join(process.cwd(), "src/ng/style.scss")
         ],
-        "test": /\.scss$|\.sass$/,
-        "loaders": [
+        test: /\.scss$|\.sass$/,
+        loaders: [
           "exports-loader?module.exports.toString()",
           "css-loader?{\"sourceMap\":false,\"importLoaders\":1}",
           "postcss-loader",
@@ -275,22 +258,22 @@ module.exports = {
         ]
       },
       {
-        "include": [
+        include: [
           path.join(process.cwd(), "src/ng/style.scss")
         ],
-        "test": /\.css$/,
-        "loaders": ExtractTextPlugin.extract({
-          "use": [
+        test: /\.css$/,
+        loaders: ExtractTextPlugin.extract({
+          use: [
             "css-loader?{\"sourceMap\":false,\"importLoaders\":1}",
             "postcss-loader"
           ],
-          "fallback": "style-loader",
+          fallback: "style-loader",
           publicPath: '/dist/ng'
         })
       },
       {
-        "include": [ path.join(process.cwd(), "src/ng/style.scss") ],
-        "test": /\.scss$|\.sass$/,
+        include: [ path.join(process.cwd(), "src/ng/style.scss") ],
+        test: /\.scss$|\.sass$/,
         use: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [ "css-loader", "sass-loader" ],
@@ -298,13 +281,13 @@ module.exports = {
         })
       },
       {
-        "test": /\.ts$/,
-        "loader": "@ngtools/webpack"
+        test: /\.ts$/,
+        loader: "@ngtools/webpack"
       }
     ]
   },
-  "plugins": getPlugins(),
-  "node": {
+  plugins: getPlugins(),
+  node: {
     fs: "empty",
     global: true,
     crypto: "empty",

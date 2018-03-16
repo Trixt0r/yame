@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "outFile": "../../typings/electron.js",
+    "noEmitOnError": false,
+    "module": "system",
+    "moduleResolution": "node",
+    "declaration": true,
+    "target": "es6",
+    "baseUrl": "../",
+    "types": [
+      "node"
+    ]
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts",
+    "dist",
+    "app-builds",
+    "node_modules"
+  ]
+}

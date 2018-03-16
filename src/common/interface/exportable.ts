@@ -3,7 +3,7 @@
  *
  * @interface ExportOptions
  */
-interface ExportOptions {
+export interface ExportOptions {
   [key: string]: any;
 }
 

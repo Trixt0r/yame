@@ -23,11 +23,13 @@ import { WorkspaceService } from './workspace/service';
 
 import { AppComponent } from '../component/app';
 import { ToolbarModule } from './toolbar';
+import { PluginModule } from './plugin';
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    PluginModule,
     UtilsModule,
     ElectronModule,
     PixiModule,

@@ -3,6 +3,7 @@ import { IpcDirectory } from './ipc/directory';
 import { IpcDialog } from './ipc/dialog';
 import PubSub from '../common/pubsub';
 import * as Promise from 'bluebird';
+import { IpcPlugins } from './ipc/plugins';
 
 /**
  * Sets all possible ipc messages up.
@@ -15,6 +16,7 @@ export default function(electron: Electron.AllElectron): Promise<any> {
   let ipcActions: IpcAction[] = [
     new IpcDialog(),
     new IpcDirectory(),
+    new IpcPlugins(),
   ];
 
   PubSub.emit('ipc:init', ipcActions);

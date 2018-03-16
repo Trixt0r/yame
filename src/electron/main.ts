@@ -1,15 +1,26 @@
+import * as yame from './idx';
+import { extend } from '../common/require';
+// Define a way to require yame
+extend(yame);
+
 import * as path from 'path';
 import * as fs from 'fs';
 import * as electron from 'electron';
 import { BrowserWindow, app } from 'electron';
 import { File } from '../common/io/file';
 import initIpc from './ipc';
+import { Environment } from './environment';
+import { PluginManager } from './plugin/manager';
+import { Environment as commonEnv } from "common/environment";
 
-const args = process.argv.slice(1);
-const serve = args.some(val => val === '--serve');
+Environment.app = app;
 
-if (serve)
-  require('electron-reload')(__dirname, { });
+Environment.appDir = path.resolve(__dirname, '..');
+Environment.ngDir = path.resolve(Environment.appDir, 'ng');
+Environment.electronDir = path.resolve(Environment.appDir, 'electron');
+Environment.commonDir = path.resolve(Environment.appDir, 'common');
+
+let pluginManager: PluginManager;
 
 /**
  * Handler for closing the application.
@@ -22,8 +33,13 @@ function quit() {
 
 app.commandLine.appendSwitch('disable-http-cache');
 
+/**
+ * Initializes the app window and triggers the public subscribtion event 'ready'.
+ *
+ * @returns {void}
+ */
 function init() {
-  let window = new BrowserWindow({
+  const window = new BrowserWindow({
     backgroundColor: '#303030',
     width: 1280,
     height: 720,
@@ -32,25 +48,31 @@ function init() {
   });
   window.setAutoHideMenuBar(true);
   window.setMenuBarVisibility(false);
-  let appDir = path.resolve(__dirname, '..', 'ng');
 
-  window.loadURL(`file:///${path.resolve(appDir, 'index.html')}`);
+  Environment.window = window;
 
-  let file = new File(path.resolve(__dirname, '..', '..', 'config.json'));
-  file.read()
-    .then((data) => {
-      try {
-        let json = JSON.parse(data.toString());
-      } catch (e) {
-        console.error('Could not parse config file');
-      }
-    })
-    .catch(e => console.error(e));
+  window.loadURL(`file:///${path.resolve(Environment.ngDir, 'index.html')}`);
+  yame.Pubsub.emit('ready', window);
   }
 
 app.on('ready', () => {
-  initIpc(electron)
-    .finally(init);
+  const file = new File(path.resolve(__dirname, '..', '..', 'config.json'));
+  file.read()
+    .then((data) => {
+      try {
+        const json = JSON.parse(data.toString());
+        Environment.config = json;
+        pluginManager = new PluginManager();
+        return pluginManager.initialize();
+      } catch (e) {
+        Environment.config = { };
+        console.error('Could not parse config file');
+      }
+    })
+    .finally(() => {
+      initIpc(electron)
+        .finally(init);
+    });
 });
 
 app.on('window-all-closed', () => app.quit());

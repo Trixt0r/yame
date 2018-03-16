@@ -1,4 +1,5 @@
 {
   "devMode": true,
-  "debugMode": true
+  "debugMode": true,
+  "plugins": [ "./plugins/*/package.json" ]
 }
