@@ -10,7 +10,7 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, O
  * @class ResizeableComponent
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   templateUrl: 'resizable.html',
   selector: 'resizable',
   providers: null,

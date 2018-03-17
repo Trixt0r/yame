@@ -5,7 +5,7 @@ import { AssetPreviewComponent } from './interface';
 import { Asset } from '../../../../../../../common/asset';
 
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   template: `<img mat-card-image [src]="sanitize(asset.content.path)" />`,
 })
 export class ImageAssetPreviewComponent implements AssetPreviewComponent {

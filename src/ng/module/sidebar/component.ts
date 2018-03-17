@@ -3,7 +3,7 @@ import { Component, ElementRef } from '@angular/core';
 import { ResizeableComponent } from "../utils/component/resizable";
 
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'sidebar',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],

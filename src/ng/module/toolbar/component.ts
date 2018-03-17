@@ -11,7 +11,7 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
  * @class ToolbarComponent
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'toolbar',
   templateUrl: 'component.html',
   styleUrls: ['component.scss'],
@@ -50,7 +50,7 @@ export class ToolbarComponent implements OnChanges {
     exitDuration: 100,
   }
 
-  constructor(public ref: ElementRef, private service: ToolbarService) { }
+  constructor(public ref: ElementRef, public service: ToolbarService) { }
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {

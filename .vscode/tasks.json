@@ -8,19 +8,19 @@
     "tasks": [
         {
             "taskName": "yame run",
-            "args": ["gulp run"]
-        },
-        {
-            "taskName": "yame compile",
-            "args": ["gulp compile"]
+            "args": ["npm run electron"]
         },
         {
             "taskName": "yame dev",
-            "args": ["gulp dev"]
+            "args": ["npm start"]
         },
         {
-            "taskName": "yame package",
-            "args": ["gulp package --zip --token 815358b9e814d7ae5d5dd59fed1b00d839eab2de && explorer ${workspaceRoot}\\builds"]
+            "taskName": "yame package win32",
+            "args": ["electron:win32 && explorer ${workspaceRoot}\\builds"]
+        },
+        {
+            "taskName": "yame package win64",
+            "args": ["electron:win64 && explorer ${workspaceRoot}\\builds"]
         }
     ]
 }

@@ -27,7 +27,7 @@ import { Asset } from "../../../common/asset";
  * @extends {ResizeableComponent}
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'workspace',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],

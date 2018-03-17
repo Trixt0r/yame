@@ -11,7 +11,7 @@ import { SidebarComponent } from "../module/sidebar/component";
  * @class AppComponent
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'app-root',
   templateUrl: 'app.html',
   styleUrls: ['./app.scss'],

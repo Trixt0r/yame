@@ -6,7 +6,7 @@ import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
 import { ToolbarComponent } from '../module/toolbar/component';
 
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'main',
   templateUrl: 'main.html',
   styleUrls: ['./main.scss']

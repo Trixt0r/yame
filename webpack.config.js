@@ -10,7 +10,7 @@ const nodeExternals = require('webpack-node-externals');
 const { NoEmitOnErrorsPlugin, LoaderOptionsPlugin, DefinePlugin, HashedModuleIdsPlugin } = require('webpack');
 const { GlobCopyWebpackPlugin, BaseHrefWebpackPlugin } = require('@angular/cli/plugins/webpack');
 const { CommonsChunkPlugin, UglifyJsPlugin } = require('webpack').optimize;
-const { AotPlugin } = require('@ngtools/webpack');
+const { AngularCompilerPlugin } = require('@ngtools/webpack');
 
 const nodeModules = path.join(process.cwd(), 'node_modules');
 const entryPoints = ["inline", "polyfills", "vendor", "common", "main"];
@@ -76,19 +76,6 @@ function getPlugins() {
 
   plugins.push(new BaseHrefWebpackPlugin({}));
 
-  // plugins.push(new CommonsChunkPlugin({
-  //   name: "inline",
-  //   minChunks: null
-  // }));
-
-  // plugins.push(new CommonsChunkPlugin({
-  //   name: "vendor",
-  //   minChunks: (module) => module.resource && module.resource.startsWith(nodeModules),
-  //   chunks: [
-  //     "main"
-  //   ]
-  // }));
-
   plugins.push(new ExtractTextPlugin("style.css", { allChunks: true } ));
 
   plugins.push(new LoaderOptionsPlugin({
@@ -137,7 +124,7 @@ function getPlugins() {
       hashDigestLength: 4
     }));
 
-    plugins.push(new AotPlugin({
+    plugins.push(new AngularCompilerPlugin({
       mainPath: "main.ts",
       hostReplacementPaths: {
         "environments/index.ts": "environments/index.prod.ts"
@@ -147,7 +134,7 @@ function getPlugins() {
       entryModule: "./module/app"
     }));
 
-    plugins.push(new UglifyJsPlugin({
+    /*plugins.push(new UglifyJsPlugin({
       mangle: {
         screw_ie8: true
       },
@@ -156,18 +143,17 @@ function getPlugins() {
         warnings: false
       },
       sourceMap: false
-    }));
+    }));*/
 
   } else {
-    plugins.push(new AotPlugin({
+    plugins.push(new AngularCompilerPlugin({
       mainPath: "main.ts",
       hostReplacementPaths: {
         "environments/index.ts": "environments/index.ts"
       },
       exclude: [],
       tsConfigPath: "src/ng/tsconfig.app.json",
-      skipCodeGeneration: true,
-      entryModule: path.resolve(__dirname, "src/ng/module/app")
+      skipCodeGeneration: true
     }));
   }
 

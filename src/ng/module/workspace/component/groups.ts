@@ -31,7 +31,7 @@ interface OpenEvent {
  * @class GroupsComponent
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'groups',
   templateUrl: 'groups.html',
   styleUrls: ['./groups.scss'],
@@ -57,9 +57,9 @@ export class GroupsComponent implements OnInit {
   @ViewChild('parentMenuTrigger') parentMenuTrigger: MatButton;
 
   // Internal vars which have not to be available to the public
-  private groups: AssetGroup<Asset>[]; // Current files
-  private openingGroups: AssetGroup<Asset>[]; // Preview of files which will be displayed on animation end
-  private slide = 'none'; // slide state, either 'none', 'open', 'close'
+  groups: AssetGroup<Asset>[]; // Current files
+  openingGroups: AssetGroup<Asset>[]; // Preview of files which will be displayed on animation end
+  slide = 'none'; // slide state, either 'none', 'open', 'close'
   private currentlyOpen: AssetGroup<Asset>; // Current directory
   private previouslyOpen: AssetGroup<Asset>; // Previous directory
   private currentParents: AssetGroup<Asset>[]; // List of parents of the current directory
@@ -67,7 +67,7 @@ export class GroupsComponent implements OnInit {
 
   constructor(
     public ref: ElementRef,
-    private ws: WorkspaceService,
+    public ws: WorkspaceService,
     private assets: AssetService) {
   }
 

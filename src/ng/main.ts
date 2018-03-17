@@ -18,10 +18,18 @@ import { PluginManager } from './module/plugin/manager';
 if (environment.production)
   enableProdMode();
 
-function initNg() {
-  platformBrowserDynamic()
-    .bootstrapModule(require('./module/app').AppModule)
-    .then(componentRef => yame.Pubsub.emit('ready', componentRef));
+/**
+ * Initializes the angular app.
+ *
+ * @returns {Promise<any>}
+ */
+function initNg(): Promise<any> {
+  return import('./module/app')
+    .then(module => {
+      platformBrowserDynamic()
+        .bootstrapModule(module.AppModule)
+        .then(componentRef => yame.Pubsub.emit('ready', componentRef))
+    });
 }
 
 const pluginManager = new PluginManager();

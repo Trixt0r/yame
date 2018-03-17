@@ -19,7 +19,7 @@ import { MenuOption } from './assets/interface/menu-option';
  * @implements {AfterViewInit}
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'assets',
   templateUrl: 'assets.html',
   styleUrls: ['./assets.scss']
@@ -29,7 +29,7 @@ export class AssetsComponent implements OnChanges {
   /** @type {AssetGroup<Asset>} The group this component displays.*/
   @Input() group: AssetGroup<Asset>;
 
-  private assets: Asset[]; // The assets, we are displaying
+  assets: Asset[]; // The assets, we are displaying
 
   constructor(public ref: ElementRef, private as: AssetService, private assetComponents: AssetComponentService) {
   }

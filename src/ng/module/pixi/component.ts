@@ -13,7 +13,7 @@ import { Entity } from './scene/entity';
  * @class PixiComponent
  */
 @Component({
-  moduleId: module.id,
+  moduleId: module.id.toString(),
   selector: 'pixi',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],

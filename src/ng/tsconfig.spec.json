@@ -2,9 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/spec",
-    "module": "commonjs",
-    "target": "es6",
-    "baseUrl": "src/bg",
+    "module": "esnext",
+    "baseUrl": "../",
     "types": [
       "jasmine",
       "node"
@@ -19,7 +18,6 @@
   ],
   "exclude": [
     "dist",
-    "app-builds",
     "node_modules"
   ]
 }

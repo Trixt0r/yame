@@ -11,7 +11,6 @@ import { SpriteEntity } from "../../scene/sprite";
 export default function(asset: ImageAsset): Promise<SpriteEntity> {
   return new Promise((resolve, reject) => {
     let sprite = new SpriteEntity(PIXI.Texture.fromImage(asset.content.path));
-    let t = Date.now();
     sprite.once('texture:loaded', () => {
       sprite.off('error', null, this);
       resolve(sprite);

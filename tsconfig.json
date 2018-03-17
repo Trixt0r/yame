@@ -8,7 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowJs": true,
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
     "types": [
       "node",
