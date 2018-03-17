@@ -25,6 +25,7 @@
   "exclude": [
     "app-builds",
     "dist",
+    "out",
     "node_modules"
   ]
 }

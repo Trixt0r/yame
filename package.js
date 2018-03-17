@@ -12,7 +12,7 @@ const arch = argv.arch || 'all';
 const platform = argv.platform || 'darwin';
 
 const DEFAULT_OPTS = {
-    dir: './dist',
+    dir: './out',
     name: appName,
     asar: shouldUseAsar,
     buildVersion: buildVersion

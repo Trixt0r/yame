@@ -11,7 +11,6 @@ import { File } from '../common/io/file';
 import initIpc from './ipc';
 import { Environment } from './environment';
 import { PluginManager } from './plugin/manager';
-import { Environment as commonEnv } from "common/environment";
 
 Environment.app = app;
 
@@ -56,7 +55,7 @@ function init() {
   }
 
 app.on('ready', () => {
-  const file = new File(path.resolve(__dirname, '..', '..', 'config.json'));
+  const file = new File(path.resolve(__dirname, '..', 'config.json'));
   file.read()
     .then((data) => {
       try {

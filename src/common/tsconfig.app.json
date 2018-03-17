@@ -12,6 +12,7 @@
     "test.ts",
     "**/*.spec.ts",
     "dist",
+    "out",
     "app-builds",
     "node_modules"
   ]

@@ -18,6 +18,8 @@
   ],
   "exclude": [
     "dist",
+    "out",
+    "app-builds",
     "node_modules"
   ]
 }

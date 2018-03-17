@@ -13,6 +13,7 @@
     "**/*.spec.ts",
     "dist",
     "app-builds",
+    "out",
     "node_modules"
   ]
 }

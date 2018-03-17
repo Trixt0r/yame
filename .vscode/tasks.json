@@ -16,11 +16,11 @@
         },
         {
             "taskName": "yame package win32",
-            "args": ["electron:win32 && explorer ${workspaceRoot}\\builds"]
+            "args": ["npm run electron:win32 && explorer ${workspaceRoot}\\builds"]
         },
         {
             "taskName": "yame package win64",
-            "args": ["electron:win64 && explorer ${workspaceRoot}\\builds"]
+            "args": ["npm run electron:win64 && explorer ${workspaceRoot}\\builds"]
         }
     ]
 }

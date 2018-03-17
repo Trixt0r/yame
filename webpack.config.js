@@ -131,9 +131,10 @@ function getPlugins() {
       },
       exclude: [],
       tsConfigPath: "src/ng/tsconfig.app.json",
-      entryModule: "./module/app"
+      skipCodeGeneration: true
     }));
 
+    // causes errors
     /*plugins.push(new UglifyJsPlugin({
       mangle: {
         screw_ie8: true
@@ -173,7 +174,7 @@ module.exports = {
     ],
     aliasFields: [],
     alias: { // WORKAROUND See. angular-cli/issues/5433
-      environments: isProd ? path.resolve(__dirname, 'src/environments/index.prod.ts') : path.resolve(__dirname, 'src/environments/index.ts')
+      environments: path.resolve(__dirname, isProd ? 'src/environments/index.prod.ts' : 'src/environments/index.ts')
     },
     modules: [
       "./node_modules"
@@ -193,7 +194,7 @@ module.exports = {
     ],
   },
   output: {
-    path: path.join(process.cwd(), "dist", "ng"),
+    path: path.join(process.cwd(), isProd ? "out" : "dist", "ng"),
     filename: "[name].bundle.js",
     chunkFilename: "[id].chunk.js"
   },
@@ -254,7 +255,7 @@ module.exports = {
             "postcss-loader"
           ],
           fallback: "style-loader",
-          publicPath: '/dist/ng'
+          publicPath: isProd ? '/out/ng' : '/dist/ng'
         })
       },
       {
@@ -263,7 +264,7 @@ module.exports = {
         use: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [ "css-loader", "sass-loader" ],
-          publicPath: '/dist/ng'
+          publicPath: isProd ? '/out/ng' : '/dist/ng'
         })
       },
       {

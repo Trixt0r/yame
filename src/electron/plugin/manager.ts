@@ -36,7 +36,8 @@ export class PluginManager extends CommonPluginManager {
   static getFiles(force = false): Promise<string[]> {
     if (PluginManager.files && !force)
       return Promise.resolve(PluginManager.files);
-    let globs = Environment.config.plugins;
+    let globs = (Environment.config || { }).plugins;
+    if (!globs) return Promise.resolve([]);
     if (!Array.isArray(globs))
       globs = [globs];
     const proms = [];

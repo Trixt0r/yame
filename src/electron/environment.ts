@@ -32,7 +32,7 @@ const env: YameElectronEnvironment = {
   commonDir: '',
   ngDir: '',
   electronDir: '',
-  config: null,
+  config: { },
   plugins: []
 };
 

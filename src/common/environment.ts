@@ -5,7 +5,7 @@ const env: YameEnvironment = {
   commonDir: '',
   ngDir: '',
   electronDir: '',
-  config: null,
+  config: { },
   plugins: []
 };
 
