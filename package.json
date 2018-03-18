@@ -18,7 +18,7 @@
   "scripts": {
     "ng": "ng",
     "lint": "ng lint",
-    "start": "concurrently --kill-others \"webpack --watch\" \"tsc -p src/electron/tsconfig.app.json -w\" \"npm run electron\"",
+    "start": "concurrently --kill-others \"webpack --watch\" \"tsc -p src/electron/tsconfig.app.json -w\"",
     "start:dev": "webpack --watch & tsc -p src/electron/tsconfig.app.json -w",
     "start:web": "webpack-dev-server --content-base . --port 4200 --inline",
     "build:common": "tsc -p src/common/tsconfig.app.json",

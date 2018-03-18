@@ -13,11 +13,25 @@ import { CommonPluginManager } from '../../common/plugin-manager';
  */
 export class PluginManager extends CommonPluginManager {
 
+  /** @inheritdoc */
   protected environment: YameElectronEnvironment = Environment;
+
+  /**
+   * Files read from the config.
+   *
+   * @static
+   * @type {string[]}
+   */
   protected static files: string[];
 
+  /**
+   * Require electron type entry points.
+   *
+   * @inheritdoc
+   */
   protected type = 'electron';
 
+  /** @inheritdoc */
   getFiles(): Promise<string[]> {
     return PluginManager.getFiles();
   }

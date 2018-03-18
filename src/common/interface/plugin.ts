@@ -1,6 +1,52 @@
 import { YameEnvironment } from "./environment";
 import { EventEmitter } from 'eventemitter3';
 
+interface YamePluginConfig {
+  /**
+   * Whether the plugin is active or not.
+   *
+   * @type {boolean}
+   */
+  active: boolean;
+
+  /**
+   * The electron entry point.
+   *
+   * @type {string}
+   */
+  electron?: string;
+
+  /**
+   * The angular entry point.
+   *
+   * @type {string}
+   */
+  ng?: string;
+}
+
+/**
+ * Plugin configuration read from it's *.json file.
+ *
+ * @interface PluginConfig
+ */
+export interface PluginConfig {
+
+  /**
+   * The name of the plugin.
+   *
+   * @type {string}
+   */
+  name: string;
+
+  /**
+   * The yame specific configuration.
+   *
+   * @type {YamePluginConfig}
+   */
+  yame: YamePluginConfig;
+  [key: string]: any;
+}
+
 /**
  * The plugin interface defines, what a plugin has to expose to the manager,
  * so it can be managed properly by the application.
@@ -17,6 +63,8 @@ export interface Plugin extends EventEmitter {
   /**
    * The identifier of the plugin.
    * This is unique, i.e. a second plugin with the same id can not be installed.
+   * If not set by the plugin itself, it will be set by the plugin manager read from the name on the plugin's
+   * pacakge.json.
    *
    * @type {string}
    */
@@ -29,6 +77,13 @@ export interface Plugin extends EventEmitter {
    * @type {YameEnvironment}
    */
   environment: YameEnvironment;
+
+  /**
+   * The configuration of the plugin, i.e. the package.json config.
+   *
+   * @type {PluginConfig}
+   */
+  config: PluginConfig;
 
 
   /**
@@ -58,29 +113,6 @@ export interface Plugin extends EventEmitter {
    * @type {boolean}
    */
   isActive: boolean;
-
-  /**
-   * Tells whether the plugin is installed.
-   * This property will be set to `true` by the plugin manager after successfully calling @see {Plugin#install}.
-   *
-   *
-   * @type {boolean}
-   */
-  isInstalled: boolean;
-
-  /**
-   * Installs the plugin.
-   *
-   * @returns {Promise<void>} Resolves on success and rejects on error.
-   */
-  install?(): Promise<void>;
-
-  /**
-   * Uninstalls the plugin.
-   *
-   * @returns {Promise<void>} Resolves on success and rejects on error.
-   */
-  uninstall?(): Promise<void>;
 
   /**
    * Activates the plugin (again).

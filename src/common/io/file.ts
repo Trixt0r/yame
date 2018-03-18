@@ -1,5 +1,3 @@
-import * as Promise from 'bluebird';
-global.Promise = Promise;
 import * as fs from 'fs-extra';
 import * as path from 'path';
 

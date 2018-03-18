@@ -19,15 +19,15 @@ Environment.ngDir = path.resolve(Environment.appDir, 'ng');
 Environment.electronDir = path.resolve(Environment.appDir, 'electron');
 Environment.commonDir = path.resolve(Environment.appDir, 'common');
 
-let pluginManager: PluginManager;
+const pluginManager = new PluginManager();
 
 /**
  * Handler for closing the application.
  * @returns {boolean} Whether quitting the application was successful or not.
  */
 function quit() {
-  app.quit();
-  return true;
+  pluginManager.finalize()
+    .then(() => app.quit());
 }
 
 app.commandLine.appendSwitch('disable-http-cache');
@@ -57,18 +57,18 @@ function init() {
 app.on('ready', () => {
   const file = new File(path.resolve(__dirname, '..', 'config.json'));
   file.read()
-    .then((data) => {
+    .then(data => {
       try {
         const json = JSON.parse(data.toString());
         Environment.config = json;
-        pluginManager = new PluginManager();
         return pluginManager.initialize();
       } catch (e) {
         Environment.config = { };
         console.error('Could not parse config file');
       }
     })
-    .finally(() => {
+    .catch(e => console.warn(e))
+    .then(() => {
       initIpc(electron)
         .finally(init);
     });

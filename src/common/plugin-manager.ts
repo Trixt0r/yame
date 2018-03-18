@@ -1,8 +1,13 @@
 import * as _ from 'lodash';
-import { Plugin } from './interface/plugin';
+import { Plugin, PluginConfig } from './interface/plugin';
 import PubSub from './pubsub';
 import * as Promise from 'bluebird';
 import { YameEnvironment } from './interface/environment';
+import { File } from './io/file';
+
+interface PluginPaths {
+  [key: string]: string;
+}
 
 /**
  * The plugin manager handles the installation, activation and initialization of yame plugins.
@@ -44,6 +49,14 @@ export abstract class CommonPluginManager {
   protected abstract environment: YameEnvironment;
 
   /**
+   * Mapping for plugin id to the package.json of the plugin.
+   *
+   * @protected
+   * @type {PluginPaths}
+   */
+  protected pluginPaths: PluginPaths = { };
+
+  /**
    * Attempts to initialize the given plugin files.
    *
    * @protected
@@ -54,10 +67,12 @@ export abstract class CommonPluginManager {
     let promises = [];
     files.forEach(file => {
       try {
-        const config = this.require(`${file}`);
+        const config: PluginConfig = this.require(`${file}`);
         const yameConfig = config.yame;
         if (!yameConfig)
           throw new Error(`No yame config found in ${file}`);
+        if (typeof yameConfig.active !== 'boolean')
+          yameConfig.active = true;
         const entryPoint = yameConfig[this.type];
         if (typeof entryPoint !== 'string' || entryPoint === '')
           throw new Error(`No ${file} entry point configured in ${file}`);
@@ -65,16 +80,20 @@ export abstract class CommonPluginManager {
         const plugin: Plugin = this.require(filePath);
         if (!plugin || typeof plugin.initialize !== 'function')
           return console.warn('Could not initialize plugin in', filePath);
+        this.environment.plugins.push(plugin);
+        plugin.config = config;
+        plugin.isActive = plugin.config.yame.active;
+        plugin.isInitialized = false;
+        if (!plugin.id)
+          plugin.id = (config.name || _.uniqueId('yame-plugin-'));
+        this.pluginPaths[plugin.id] = file;
+        plugin.environment = this.environment;
+        if (!plugin.isActive)
+          return console.info('Plugin', config.name, 'is deactivated');
         promises.push(
           plugin.initialize()
-            .then(() => {
-              plugin.isInitialized = true;
-              this.environment.plugins.push(plugin);
-            })
-            .catch(e => {
-               plugin.isInitialized = false;
-              console.warn('Error occurred while loading plugin ', filePath, e.message);
-            })
+            .then(() => plugin.isInitialized = true)
+            .catch(e => console.warn('Error occurred while loading plugin ', filePath, e.message))
         );
       } catch (e) {
         // TODO: logs this in a persistant place
@@ -92,6 +111,67 @@ export abstract class CommonPluginManager {
   initialize(): Promise<any> {
     return this.getFiles()
             .then(files => this.initializeFromFiles(files));
+  }
+
+  /**
+   * Finalizes all plugins.
+   *
+   * @returns {Promise<any>}
+   */
+  finalize(): Promise<any> {
+    const proms = this.environment.plugins.map(plugin => {
+      return typeof plugin.finalize === 'function' ? plugin.finalize() : Promise.resolve();
+    });
+    return Promise.all(proms)
+            .catch(e => console.error('Finalizing plugins failed', e));
+  }
+
+  /**
+   * Persists the config for the given plugin.
+   *
+   * @protected
+   * @param {Plugin} plugin
+   * @returns {Promise<any>}
+   */
+  protected persistConfig(plugin: Plugin): Promise<any> {
+    const file = new File(this.pluginPaths[plugin.id]);
+    return file.write(JSON.stringify(plugin.config, null, 2));
+  }
+
+  /**
+   * Activates the plugin with the given id.
+   *
+   * @param {string} id
+   * @returns {Promise<any>} Resolves on success.
+   */
+  activate(id: string): Promise<any> {
+    const plugin = this.environment.plugins.find(plugin => plugin.id === id);
+    if (!plugin) return Promise.resolve();
+    if (plugin.isActive) return Promise.resolve();
+    const done = () => {
+      plugin.isActive = true;
+      plugin.config.yame.active = true;
+      return this.persistConfig(plugin);
+    };
+    return typeof plugin.activate === 'function' ? plugin.activate().then(done) : done();
+  }
+
+  /**
+   * Deactivates the plugin with the given id.
+   *
+   * @param {string} id
+   * @returns {Promise<any>} Resolves on success.
+   */
+  deactivate(id: string): Promise<any> {
+    const plugin = this.environment.plugins.find(plugin => plugin.id === id);
+    if (!plugin) return Promise.resolve();
+    if (!plugin.isActive) return Promise.resolve();
+    const done = () => {
+      plugin.isActive = false;
+      plugin.config.yame.active = false;
+      return this.persistConfig(plugin);
+    };
+    return typeof plugin.deactivate === 'function' ? plugin.deactivate().then(done) : done();
   }
 
   /**
