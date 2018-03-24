@@ -24,6 +24,7 @@ export class PixiComponent {
   @ViewChild('canvas') canvas: ElementRef;
 
   private preview: PIXI.DisplayObject;
+  private dragLeft = false;
 
   constructor(public ref: ElementRef, public pixiService: PixiService) {
   }
@@ -80,9 +81,14 @@ export class PixiComponent {
    * @returns {Promise<Entity>}
    */
   onDragEnter(event: DragDropData): Promise<Entity> {
+    this.dragLeft = false;
     var asset: Asset = event.dragData;
     return this.pixiService.createFromAsset(asset)
       .then(object => {
+        if (this.dragLeft) {
+          this.dragLeft = false;
+          return;
+        }
         this.preview = object;
         this.preview.alpha = 0.5;
         this.pixiService.scene.addChild(object); // Do not add it as an entity, since it is just a preview
@@ -99,6 +105,7 @@ export class PixiComponent {
    * @returns {void}
    */
   onDragLeave(event: DragDropData) {
+    this.dragLeft = true;
     if (!this.preview) return;
     this.pixiService.scene.removeChild(this.preview);
     delete this.preview;
@@ -124,6 +131,8 @@ export class PixiComponent {
    * @returns {Function} The function which says `true` or `false`.
    */
   allowDrop(): Function {
-    return (event: DragDropData) => event.dragData instanceof Asset;
+    return (event: DragDropData) => {
+      return event.dragData instanceof Asset && this.pixiService.assetConverter.has(event.dragData);
+    };
   }
 }
