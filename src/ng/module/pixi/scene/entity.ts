@@ -1,4 +1,4 @@
-import { uuid } from "../../utils/uuid";
+import * as uuid from 'uuid/v4';
 import { Type } from "@angular/core";
 import * as _ from 'lodash';
 import { Property } from "./property";
