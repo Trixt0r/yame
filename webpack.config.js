@@ -1,4 +1,6 @@
 const path = require('path');
+const glob = require('glob');
+const _ = require('lodash');
 const webpack = require('webpack');
 const ProgressPlugin = require('webpack/lib/ProgressPlugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -18,6 +20,14 @@ const baseHref = "";
 const deployUrl = "";
 
 const isProd = (process.env.NODE_ENV === 'production');
+
+const abs = path.resolve('./', 'src');
+const workers = glob.sync(abs + '/**/*.worker.ts' );
+const workerEntries = { };
+workers.forEach(filePath => {
+  const relative = path.basename(path.relative(abs, filePath), '.ts');
+  workerEntries[relative] = [filePath];
+});
 
 function getPlugins() {
   var plugins = [];
@@ -56,7 +66,7 @@ function getPlugins() {
     cache: true,
     showErrors: true,
     chunks: "all",
-    excludeChunks: [],
+    excludeChunks: Object.keys(workerEntries),
     title: "Webpack App",
     xhtml: true,
     chunksSortMode: function sort(left, right) {
@@ -161,7 +171,7 @@ function getPlugins() {
   return plugins;
 }
 
-module.exports = {
+const baseConfig = {
   target: "electron-renderer",
   devtool: "source-map",
   externals: [nodeExternals()],
@@ -184,19 +194,6 @@ module.exports = {
     modules: [
       "./node_modules"
     ]
-  },
-  entry: {
-    main: [
-      "./src/ng/main.ts"
-    ],
-    polyfills: [
-      "./src/ng/polyfills.ts"
-    ],
-  },
-  output: {
-    path: path.join(process.cwd(), isProd ? "out" : "dist", "ng"),
-    filename: "[name].bundle.js",
-    chunkFilename: "[id].chunk.js"
   },
   module: {
     rules: [
@@ -288,3 +285,39 @@ module.exports = {
     __filename: false
   }
 };
+
+module.exports = [
+  _.extend({
+    entry: {
+      main: [
+        "./src/ng/main.ts"
+      ],
+      polyfills: [
+        "./src/ng/polyfills.ts"
+      ],
+    },
+    output: {
+      path: path.join(process.cwd(), isProd ? "out" : "dist", "ng"),
+      filename: "[name].bundle.js",
+      chunkFilename: "[id].chunk.js"
+    }
+  }, baseConfig),
+ _.extend({
+    entry: workerEntries,
+    output: {
+      path: path.join(process.cwd(), isProd ? "out" : "dist", "ng", "workers"),
+      filename: "[name].js"
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          loader: "awesome-typescript-loader",
+          options: {
+            configFileName: path.join(process.cwd(), "src/ng/tsconfig.app.json")
+          }
+        }
+      ]
+    }
+  },_.omit(baseConfig, 'plugins', 'module'))
+];
