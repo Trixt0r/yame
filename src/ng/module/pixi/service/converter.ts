@@ -49,10 +49,19 @@ export class PixiAssetConverter {
    * @returns {Promise<Entity>} Resolves the created display object.
    */
   get(asset: Asset): Promise<Entity> {
-    let fn = this.converters[asset.type];
-    if (!fn)
+    if (!this.has(asset))
       return Promise.reject(new PixiAssetNotSupportedException(`Asset of type '${asset.type}' is not supported`));
-    return fn(asset);
+    return this.converters[asset.type].call(null, asset);
+  }
+
+  /**
+   * Checks for the existance of an asset converter for the given asset.
+   *
+   * @param {Asset} asset
+   * @returns {boolean} Whether a converter for the given asset exists.
+   */
+  has(asset: Asset): boolean {
+    return typeof this.converters[asset.type] === 'function';
   }
 
 }
