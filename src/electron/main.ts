@@ -44,6 +44,10 @@ function init() {
     height: 720,
     minWidth: 800,
     minHeight: 600,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+    }
   });
   window.setAutoHideMenuBar(true);
   window.setMenuBarVisibility(false);
