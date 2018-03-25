@@ -71,11 +71,19 @@ describe('ToolbarComponent', () => {
       expect(content.children.length).toBe(1, 'Tool is not displayed');
     });
 
-    it('should display new registered tools', () => {
-      service.register(new Tool('settings', 'settings'));
-      fixture.detectChanges();
-      let content = fixture.debugElement.query(By.css('mat-nav-list'));
-      expect(content.children.length).toBe(2, 'New tool is not displayed');
+    it('should display new registered tools', done => {
+      service.register(new Tool('settings', 'settings'))
+        .then(() => {
+          fixture.detectChanges();
+          let content = fixture.debugElement.query(By.css('mat-nav-list'));
+          expect(content.children.length).toBe(2, 'New tool is not displayed');
+          done();
+        })
+        .catch(() => {
+          console.log('caught');
+          fail('Should not reject');
+          done();
+        });
     });
   });
 

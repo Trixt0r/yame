@@ -38,6 +38,8 @@ export class ToolbarService {
   private activatedSource = new Subject<Tool>();
   private deactivatedSource = new Subject<Tool>();
 
+  private registering = false;
+
   registered$ = this.registeredSource.asObservable();
   activated$ = this.activatedSource.asObservable();
   deactivated$ = this.deactivatedSource.asObservable();
@@ -53,11 +55,25 @@ export class ToolbarService {
   register(tool: Tool, component: Type<ToolComponent> = DefaultToolComponent): Promise<boolean> {
     if (this.toolArray.indexOf(tool) >= 0 || this.getTool(tool.id) !== void 0)
       throw new ToolbarServiceException(`Tool '${tool.id}' is already registered`);
+    if (this.registering)
+      return new Promise((resolve, reject) => {
+        this.registered$.first().subscribe(() => {
+          this.register(tool, component).then(resolve).catch(reject);
+        });
+      });
     this.toolArray.push(tool);
     this.tooInstances[tool.id] = tool;
     this.toolComponents[tool.id] = component;
+    if (!this.currentTool) {
+      this.registering = true;
+      return this.activate(tool)
+              .then(re => {
+                this.registering = false;
+                this.registeredSource.next(tool);
+                return re;
+              });
+    }
     this.registeredSource.next(tool);
-    if (!this.currentTool) return this.activate(tool);
     return Promise.resolve(false);
   }
 

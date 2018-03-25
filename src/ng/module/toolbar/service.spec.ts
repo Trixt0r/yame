@@ -47,12 +47,19 @@ describe('ToolbarService', () => {
       }
     });
 
-    it('should emit the registered event', () => {
+    it('should emit the registered event', done => {
       let handler = { fn: function() { } };
       spyOn(handler, 'fn');
       service.registered$.subscribe(handler.fn);
-      service.register(new Tool('edit', 'edit'));
-      expect(handler.fn).toHaveBeenCalledTimes(1);
+      service.register(new Tool('edit', 'edit'))
+        .then(() => {
+          expect(handler.fn).toHaveBeenCalledTimes(1);
+          done();
+        })
+        .catch(() => {
+          fail('Should not reject');
+          done();
+        });
     });
 
     it('should activate the tool if no tools were available', done => {
@@ -98,9 +105,9 @@ describe('ToolbarService', () => {
 
     it('should activate the registered tool', done => {
       let toActivate = new Tool('settings', 'settings');
-      service.register(new Tool('edit', 'edit'));
-      service.register(toActivate);
-      service.activate('settings')
+      service.register(new Tool('edit', 'edit'))
+        .then(() => service.register(toActivate))
+        .then(() => service.activate('settings'))
         .then(re => {
           expect(re).toBe(true, 'Tool has not been activated');
           expect(toActivate.isActive).toBe(true);

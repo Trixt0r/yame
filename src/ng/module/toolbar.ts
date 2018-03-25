@@ -19,6 +19,6 @@ export class ToolbarModule {
 
   constructor(service: ToolbarService) {
     service.register(new Tool('edit', 'edit'))
-      .then(() => service.register(new Tool('camera', 'videocam')));
+    service.register(new Tool('camera', 'videocam'));
   }
 }
