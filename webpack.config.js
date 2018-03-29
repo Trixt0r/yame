@@ -252,7 +252,7 @@ const baseConfig = {
             "postcss-loader"
           ],
           fallback: "style-loader",
-          publicPath: isProd ? '/out/ng' : '/dist/ng'
+          publicPath: './'
         })
       },
       {
@@ -261,7 +261,7 @@ const baseConfig = {
         use: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [ "css-loader", "sass-loader" ],
-          publicPath: isProd ? '/out/ng' : '/dist/ng'
+          publicPath: './'
         })
       },
       {
