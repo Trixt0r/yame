@@ -18,7 +18,7 @@ export class SelectionTool extends Tool {
   container: PIXI.Container;
   map: Map;
 
-  config: SelectionToolConfig = { fill: { color: 0x000000 }, line: { } };
+  config: SelectionToolConfig = { fill: { }, line: { } };
 
   private startPos = new PIXI.Point();
   private currentPos = new PIXI.Point();
