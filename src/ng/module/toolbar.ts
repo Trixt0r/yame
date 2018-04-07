@@ -7,6 +7,7 @@ import { Tool } from "./toolbar/tool";
 import { ToolDirective } from "./toolbar/directive/tool";
 import { DefaultToolComponent } from "./toolbar/component/default";
 import { Pubsub } from "common/pubsub";
+import { SelectionTool } from "./toolbar/tools/selection";
 
 @NgModule({
   imports: [ CommonModule, MaterialModule ],
@@ -18,7 +19,7 @@ import { Pubsub } from "common/pubsub";
 export class ToolbarModule {
 
   constructor(service: ToolbarService) {
-    service.register(new Tool('edit', 'edit'))
+    service.register(new SelectionTool('edit', 'edit'));
     service.register(new Tool('camera', 'videocam'));
   }
 }

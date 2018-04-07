@@ -45,8 +45,11 @@ export class Tool extends EventEmitter {
   activate(): Promise<boolean> {
     if (this.active) return Promise.resolve(false);
     this.active = true;
-    this.emit('activated');
-    return Promise.resolve(true);
+    return this.onActivate()
+            .then(() => {
+              this.emit('activated');
+              return true;
+            });
   }
 
   /**
@@ -59,8 +62,29 @@ export class Tool extends EventEmitter {
   deactivate(): Promise<boolean> {
     if (!this.active) return Promise.resolve(false);
     this.active = false;
-    this.emit('deactivated');
-    return Promise.resolve(true);
+    return this.onDeactivate()
+            .then(() => {
+              this.emit('deactivated');
+              return true;
+            });
   }
+
+  /**
+   * Handler called during activation.
+   * Override this in your custom tool for initializing it.
+   *
+   * @protected
+   * @returns {Promise<any>}
+   */
+  protected onActivate(): Promise<any> { return Promise.resolve(); }
+
+  /**
+   * Handler called during deactivation.
+   * Override this in your custom tool for deactivating it.
+   *
+   * @protected
+   * @returns {Promise<any>}
+   */
+  protected onDeactivate() : Promise<any> { return Promise.resolve(); }
 
 }
