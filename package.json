@@ -6,7 +6,7 @@
   "dependencies": {
     "backbone": ">= 1.2.3",
     "bluebird": "^3.4.3",
-    "cheerio": "^0.19.0",
+    "cheerio": "^0.20.0",
     "is-valid-path": "^0.1.1",
     "jquery": ">= 2.1.4",
     "jstree": "^3.3.2",
