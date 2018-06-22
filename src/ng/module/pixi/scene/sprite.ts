@@ -98,4 +98,9 @@ export class SpriteEntity extends Entity {
     let sprite = new SpriteEntity(this.texture, `Copy of ${this.name}`);
     return Promise.resolve(sprite);
   }
+
+  /** @inheritdoc */
+  containsPoint(point: PIXI.Point): boolean {
+    return this.sprite.containsPoint(point);
+  }
 }

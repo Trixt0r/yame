@@ -5,6 +5,7 @@ import { Property } from "./property";
 import * as PIXI from 'pixi.js';
 import { EntityException } from "../exception/entity/entity";
 
+const tempPoint = new PIXI.Point();
 interface EntityTypes {
   [key: string]: Type<Entity>;
 }
@@ -108,6 +109,34 @@ export abstract class Entity extends PIXI.Container {
    * @returns {Promise<Entity>} Resolves the new entity instance.
    */
   abstract clone(): Promise<Entity>;
+
+  /**
+   * Tests if the given global point is inside this entity based on its calculated bounding box.
+   *
+   * @param {PIXI.Point} point The global point to test.
+   * @returns {boolean} The result of the test
+   */
+  containsPoint(point: PIXI.Point): boolean {
+    const bounds = this.getShape();
+    if (!bounds) return false;
+    if (typeof bounds.contains !== 'function') {
+      console.warn('The following shape does not implement a "contains" function:', bounds, 'entity:', this);
+      return false;
+    }
+    this.worldTransform.applyInverse(point, tempPoint);
+    return bounds.contains(tempPoint.x, tempPoint.y);
+  }
+
+  /**
+   * Returns the shape of this entity in local coordinates.
+   * By default this is equal to the local bounds of this entity.
+   * This can be overridden by any more specific entity.
+   *
+   * @returns {(PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle | any)}
+   */
+  getShape(): PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle | any {
+    return this.getLocalBounds();
+  }
 
   /**
    * Registers an entity class.

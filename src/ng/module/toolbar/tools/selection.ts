@@ -5,6 +5,7 @@ import { PixiService } from '../../pixi/service';
 import { Map } from '../../pixi/scene/map';
 import { Pubsub, AppModule } from 'ng/idx';
 import { interaction, Rectangle, Graphics } from 'pixi.js';
+import { SelectionRectangle } from './selection/rectangle';
 
 export interface SelectionToolConfig {
 
@@ -20,8 +21,7 @@ export class SelectionTool extends Tool {
 
   config: SelectionToolConfig = { fill: { }, line: { } };
 
-  private startPos = new PIXI.Point();
-  private currentPos = new PIXI.Point();
+  private rectangle: SelectionRectangle;
   private graphics = new Graphics();
   private down = false;
   private service: PixiService;
@@ -36,6 +36,7 @@ export class SelectionTool extends Tool {
       const service = this.service = ref.injector.get(PixiService);
       this.map = service.scene;
       this.container = service.app.stage;
+      this.rectangle = new SelectionRectangle(this.container);
       if (this.isActive)
         this.addToolListeners();
     });
@@ -75,7 +76,8 @@ export class SelectionTool extends Tool {
   mousedown(event: MouseEvent) {
     if (event.which !== 1) return;
     if (this.down) return;
-    this.container.toLocal((<any>this.service.renderer.plugins).interaction.mouse.global, void 0, this.startPos);
+    this.rectangle.reset();
+    this.container.toLocal((<any>this.service.renderer.plugins).interaction.mouse.global, void 0, this.rectangle.topLeft);
     this.graphics.clear();
     this.container.addChild(this.graphics);
     this.down = true;
@@ -89,25 +91,23 @@ export class SelectionTool extends Tool {
   mousemove(event: MouseEvent) {
     if (!this.down) return;
     if (event.which !== 1) return this.finish();
-    this.container.toLocal((<any>this.service.renderer.plugins).interaction.mouse.global, void 0, this.currentPos);
-    const x = this.startPos.x < this.currentPos.x ? this.startPos.x : this.currentPos.x;
-    const y = this.startPos.y < this.currentPos.y ? this.startPos.y : this.currentPos.y;
-    const width = Math.abs(this.startPos.x - this.currentPos.x);
-    const height = Math.abs(this.startPos.y - this.currentPos.y);
+    this.container.toLocal((<any>this.service.renderer.plugins).interaction.mouse.global, void 0, this.rectangle.bottomRight);
+    this.rectangle.update();
     this.graphics.clear();
     this.graphics.lineStyle(_.defaultTo(this.config.line.width, 1),
                             _.defaultTo(this.config.line.color, 0xffffff),
                             _.defaultTo(this.config.line.alpha, 1));
     this.graphics.beginFill(_.defaultTo(this.config.fill.color, 0xffffff),
                             _.defaultTo(this.config.fill.alpha, 0.25));
-    this.graphics.drawRect(x, y, width, height);
+    this.graphics.drawShape(this.rectangle.rectangle);
     this.graphics.endFill();
   }
 
   finish() {
     this.down = false;
     this.container.removeChild(this.graphics);
-    this.emit('finish', this.startPos, this.currentPos);
+    const selection = this.map.entities.filter(child => this.rectangle.contains(child));
+    this.emit('finish', selection, this.rectangle);
   }
 
   /** @inheritDoc */
