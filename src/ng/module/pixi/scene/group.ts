@@ -166,7 +166,7 @@ export class Group<T extends Entity> extends Entity {
   }
 
   /**
-   * Searches for the given entity
+   * Searches for the given entity.
    *
    * @param {(T | string)} entityOrId
    * @returns {number} The index of the given entitiy or id.

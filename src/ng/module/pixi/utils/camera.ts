@@ -24,26 +24,41 @@ export class Camera extends EventEmitter {
     this.targetPosition = new PIXI.Point();
     this.localTargetPosition = new PIXI.Point();
     this.zoomStep = 0.03;
+    this.on('update', () => {
+      if (!this._container) return;
+      this._container.emit('camera:update', this);
+    });
   }
 
   /**
    * Attaches this camera to the given container.
-   * @param  {PIXI.DisplayObject} container
+   *
+   * Triggers the `camera:attached` event on the given container.
+   * If a container is already is set, it will be detached before.
+   *
+   * @param {PIXI.DisplayObject} container
    * @chainable
    */
   attach(container: PIXI.DisplayObject) {
+    if (this._container) this.detach();
     this._zoom = Math.max(container.scale.x, container.scale.y);
     this._container = container;
+    this._container.emit('camera:attached', this);
     return this;
   }
 
   /**
-   * Detaches this camera from the current container.
+   * Detaches this camera from the current container, if this camera is attached to any.
+   *
+   * Triggers the `camera:detached` event on the current container.
    * @chainable
    */
   detach() {
+    if (!this._container) return this;
     this._zoom = 1;
+    const prev = this._container;
     this._container = null;
+    prev.emit('camera:detached', this);
     return this;
   }
 

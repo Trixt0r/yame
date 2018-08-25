@@ -1,34 +1,57 @@
 import { Entity } from "../../../pixi/idx";
+import { Point, Rectangle, Container } from "pixi.js";
 
 const globalTopLeft = new PIXI.Point();
 const globalBottomRight = new PIXI.Point();
 
+/**
+ * A rectangle like interface.
+ *
+ * @interface RectangleLike
+ * @extends {Rectangle}
+ */
+interface RectangleLike extends Rectangle { }
+
+/**
+ *
+ * The selection rectangle, i.e. when the user moves the mouse.
+ * Provides utilities for checking collisions.
+ *
+ * @export
+ * @class SelectionRectangle
+ */
 export class SelectionRectangle {
 
-  public topLeft: PIXI.Point;
-  public bottomRight: PIXI.Point;
+  /**
+   * @type {Point} The top left point.
+   */
+  public topLeft: Point;
 
-  private rect = new PIXI.Rectangle();
+  /**
+   * @type {Point} The bottom right point.
+   */
+  public bottomRight: Point;
 
-  constructor(public container: PIXI.Container,
-              topLeft?: PIXI.Point,
-              bottomRight?: PIXI.Point) {
-    this.topLeft = topLeft || new PIXI.Point();
-    this.bottomRight = bottomRight || new PIXI.Point();
+  /**
+   * @protected
+   * @type {Rectangle} Internal rectangle object.
+   */
+  protected rect: Rectangle = new Rectangle();
+
+  constructor(public container: Container,
+              topLeft?: Point,
+              bottomRight?: Point) {
+    this.topLeft = topLeft || new Point();
+    this.bottomRight = bottomRight || new Point();
   }
 
   /**
    * Updates the current internal dimensions based on the current pixi points.
    *
-   * @returns {PIXI.Rectangle}
+   * @returns {Rectangle}
    */
-  update(): PIXI.Rectangle {
-    const x = this.topLeft.x < this.bottomRight.x ? this.topLeft.x : this.bottomRight.x;
-    const y = this.topLeft.y < this.bottomRight.y ? this.topLeft.y : this.bottomRight.y;
-    const width = Math.abs(this.topLeft.x - this.bottomRight.x);
-    const height = Math.abs(this.topLeft.y - this.bottomRight.y);
-    this.rect.x = x; this.rect.y = y;
-    this.rect.width = width; this.rect.height = height;
+  update(): Rectangle {
+    SelectionRectangle.fixRectangle(this.topLeft, this.bottomRight, this.rect);
     return this.rect;
   }
 
@@ -46,9 +69,9 @@ export class SelectionRectangle {
    * The pixi rectangle for this selection rectangle.
    *
    * @readonly
-   * @type {PIXI.Rectangle}
+   * @type {Rectangle}
    */
-  get rectangle(): PIXI.Rectangle {
+  get rectangle(): Rectangle {
     return this.rect;
   }
 
@@ -76,6 +99,23 @@ export class SelectionRectangle {
       if (rect.contains(bottomRight.x, bottomRight.y)) return true;
     }
     return false;
+  }
+
+  /**
+   * Calculates the correct x, y, width and height properties based on the given two points.
+   *
+   * @param {Point} topLeft The top left point.
+   * @param {Point} bottomRight The bottom right point.
+   * @param {RectangleLike} [target={ }] Optional target to store the results in. E.q. your rectangle object.
+   */
+  static fixRectangle(topLeft: Point, bottomRight: Point, target: RectangleLike = <any>{ }): RectangleLike {
+    const x = topLeft.x < bottomRight.x ? topLeft.x : bottomRight.x;
+    const y = topLeft.y < bottomRight.y ? topLeft.y : bottomRight.y;
+    const width = Math.abs(topLeft.x - bottomRight.x);
+    const height = Math.abs(topLeft.y - bottomRight.y);
+    target.x = x; target.y = y;
+    target.width = width; target.height = height;
+    return target;
   }
 
 }
