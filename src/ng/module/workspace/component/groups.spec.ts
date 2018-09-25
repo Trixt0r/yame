@@ -196,7 +196,8 @@ describe('GroupsComponent', () => {
         totalTime: 1,
         phaseName: 'phaseName',
         element: fixture.componentRef.location.nativeElement,
-        triggerName: 'start'
+        triggerName: 'start',
+        disabled: false
       });
       expect(openingCalled).toBe(true, 'Animation has not been started');
     });
@@ -208,7 +209,8 @@ describe('GroupsComponent', () => {
         totalTime: 1,
         phaseName: 'phaseName',
         element: fixture.componentRef.location.nativeElement,
-        triggerName: 'start'
+        triggerName: 'start',
+        disabled: false
       });
       expect((<HTMLElement>fixture.componentRef.location.nativeElement).classList.contains('no-overflow')).toBe(true, 'Scroll is not locked');
     });
@@ -220,7 +222,8 @@ describe('GroupsComponent', () => {
         totalTime: 1,
         phaseName: 'phaseName',
         element: fixture.componentRef.location.nativeElement,
-        triggerName: 'start'
+        triggerName: 'start',
+        disabled: false
       });
       expect(openingCalled).toBe(false, 'Animation has been started');
     });
@@ -243,7 +246,8 @@ describe('GroupsComponent', () => {
         totalTime: 1,
         phaseName: 'phaseName',
         element: fixture.componentRef.location.nativeElement,
-        triggerName: 'start'
+        triggerName: 'start',
+        disabled: false
       });
       expect(openedCalled).toBe(true, 'Animation has not been finished');
     });
@@ -255,7 +259,8 @@ describe('GroupsComponent', () => {
         totalTime: 1,
         phaseName: 'phaseName',
         element: fixture.componentRef.location.nativeElement,
-        triggerName: 'start'
+        triggerName: 'start',
+        disabled: false
       });
       expect((<HTMLElement>fixture.componentRef.location.nativeElement).classList.contains('no-overflow')).toBe(false, 'Scroll is locked');
     });
@@ -267,7 +272,8 @@ describe('GroupsComponent', () => {
         totalTime: 1,
         phaseName: 'phaseName',
         element: fixture.componentRef.location.nativeElement,
-        triggerName: 'start'
+        triggerName: 'start',
+        disabled: false
       });
       expect(openedCalled).toBe(false, 'Animation has been finished');
     });
