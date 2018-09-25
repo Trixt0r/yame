@@ -23,8 +23,12 @@ export class SelectionContainer extends Group<Entity> {
 
   constructor() {
     super();
-    this.on('mousedown', () => this.handling = true);
+    this.on('mousedown', () => { this.handling = true; console.log('here'); } );
     this.on('mouseup', () => this.handling = false);
+    this.on('mousemove', event => {
+      if (!this.handling) return;
+      console.log(event, event.data.originalEvent.which, event.data.originalEvent.isPrimary);
+    });
   }
 
   /**
