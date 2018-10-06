@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "emitDeclarationOnly": true,
-    "outFile": "../../typings/electron.js",
+    "outDir": "../../typings",
     "noEmitOnError": false,
-    "module": "system",
+    "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
     "target": "es6",

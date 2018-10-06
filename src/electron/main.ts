@@ -4,7 +4,6 @@ import { extend } from '../common/require';
 extend(yame);
 
 import * as path from 'path';
-import * as fs from 'fs';
 import * as electron from 'electron';
 import { BrowserWindow, app } from 'electron';
 import { File } from '../common/io/file';
@@ -21,6 +20,8 @@ Environment.commonDir = path.resolve(Environment.appDir, 'common');
 
 const pluginManager = new PluginManager();
 
+app.commandLine.appendSwitch('disable-http-cache');
+
 /**
  * Handler for closing the application.
  * @returns {boolean} Whether quitting the application was successful or not.
@@ -29,8 +30,6 @@ function quit() {
   pluginManager.finalize()
     .then(() => app.quit());
 }
-
-app.commandLine.appendSwitch('disable-http-cache');
 
 /**
  * Initializes the app window and triggers the public subscribtion event 'ready'.
@@ -78,4 +77,4 @@ app.on('ready', () => {
     });
 });
 
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', quit);

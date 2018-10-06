@@ -1,5 +1,4 @@
 import { BrowserWindow, App } from "electron";
-import { Config } from "../common/interface/config";
 import { YameEnvironment } from "common/interface/environment";
 
 /**
