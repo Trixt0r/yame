@@ -18,7 +18,8 @@
   "scripts": {
     "ng": "ng",
     "lint": "ng lint",
-    "start": "npm run build:dev && concurrently --kill-others \"webpack --watch\" \"tsc -p src/electron/tsconfig.app.json -w\" \"npm run electron\"",
+    "start": "npm run build:dev && npm run watch",
+    "watch": "concurrently --kill-others \"webpack --watch\" \"tsc -p src/electron/tsconfig.app.json -w\" \"npm run electron\"",
     "build:common": "tsc -p src/common/tsconfig.app.json",
     "build:electron": "tsc -p src/electron/tsconfig.app.json --outDir out && copyfiles package.json config.json out && cd out && npm install --prod && cd ..",
     "build:electron:dev": "tsc -p src/electron/tsconfig.app.json && lnfs node_modules dist/node_modules --type junction && copyfiles package.json config.json dist",

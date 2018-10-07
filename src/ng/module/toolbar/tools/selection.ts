@@ -8,6 +8,8 @@ import { Graphics, interaction, PointLike } from 'pixi.js';
 import { SelectionRectangle } from './selection/rectangle';
 import { SelectionContainer } from './selection/container';
 import { SelectionRenderer } from './selection/renderer';
+import { SelectionTranslateHandler } from './selection/handlers/translate';
+import { SelectionRotateHandler } from './selection/handlers/rotate';
 
 /**
  *
@@ -71,6 +73,8 @@ export class SelectionTool extends Tool {
       this.renderer = new SelectionRenderer(service, this.container);
       if (this.isActive)
         this.addToolListeners();
+      new SelectionTranslateHandler(this.container);
+      new SelectionRotateHandler(this.container, this.renderer);
     });
   }
 
@@ -170,6 +174,7 @@ export class SelectionTool extends Tool {
    * @returns {void}
    */
   mouseup(event: MouseEvent): void {
+    if (!this.down) return;
     if (event.which !== 1) return;
     this.finish();
   }

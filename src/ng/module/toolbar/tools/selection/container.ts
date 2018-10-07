@@ -1,6 +1,5 @@
 import { Group, Entity } from "../../../pixi/idx";
-import { Graphics } from "pixi.js";
-import { SelectionTool } from "../selection";
+import { Rectangle, Point } from "pixi.js";
 
 /**
  * The container which should contain the selected entities.
@@ -21,14 +20,25 @@ export class SelectionContainer extends Group<Entity> {
    */
   protected handling: boolean = false;
 
-  constructor() {
-    super();
-    this.on('mousedown', () => { this.handling = true; console.log('here'); } );
-    this.on('mouseup', () => this.handling = false);
-    this.on('mousemove', event => {
-      if (!this.handling) return;
-      console.log(event, event.data.originalEvent.which, event.data.originalEvent.isPrimary);
-    });
+  protected handlerRef: any;
+
+
+  beginHandling(ref: any, ...arg: any[]) {
+    if (this.handling) throw new Error('beginHandling has already been called. endHandling has to be called before!');
+    this.handlerRef = ref;
+    this.handling = true;
+    const args = Array.prototype.slice.call(arguments, 1);
+    args.unshift('handle:start');
+    this.emit.apply(this, args);
+  }
+
+  endHandling(...arg: any[]) {
+    if (!this.handling) throw new Error('beginHandling has to be called before!');
+    this.handlerRef = null;
+    this.handling = false;
+    const args = Array.prototype.slice.call(arguments);
+    args.unshift('handle:end');
+    this.emit.apply(this, args);
   }
 
   /**
@@ -37,6 +47,14 @@ export class SelectionContainer extends Group<Entity> {
    */
   get isHandling(): boolean {
     return this.handling;
+  }
+
+  /**
+   * @readonly
+   * @type {any} The current handler.
+   */
+  get currentHandler(): any {
+    return this.handlerRef;
   }
 
   /**
@@ -60,11 +78,15 @@ export class SelectionContainer extends Group<Entity> {
       this.internalEntities.push(entity);
       added.push(entity);
       this.addChild(entity);
+      this.toLocal(entity.position, entity.parentEntity, entity.position);
       entity.emit('selected', this);
     });
     if (this.internalEntities.length > 0) {
       this.interactive = true;
-      this.hitArea = this.getLocalBounds();
+      const bounds: Rectangle = this.hitArea = this.getLocalBounds();
+      const newPos = this.parent.toLocal(new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2), this);
+      this.position.set(newPos.x, newPos.y);
+      this.pivot.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
     }
     this.emit('selected', added);
     return added;
@@ -89,12 +111,14 @@ export class SelectionContainer extends Group<Entity> {
       this.removeChild(child);
       const idx = this.internalEntities.indexOf(child);
       if (idx >= 0) this.internalEntities.splice(idx, 1);
-      if (!child.parentEntity) return
+      if (!child.parentEntity) return;
       // Restoring the internal relation
       child.parentEntity.addChild(child);
+      child.parentEntity.toLocal(child.position, this, child.position);
       child.emit('unselected', this);
     });
-    this.interactive = false;
+    if (this.internalEntities.length === 0)
+      this.interactive = false;
     this.emit('unselected', toRemove);
     return toRemove;
   }

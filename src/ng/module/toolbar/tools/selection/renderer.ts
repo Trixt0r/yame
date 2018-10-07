@@ -98,7 +98,7 @@ export class SelectionRenderer extends Graphics {
     this.currentBounds = this.container.getLocalBounds();
     this.stage.addChild(this);
     this.attached = true;
-    this.emit('attached');
+    this.emit('attached', this.stage);
     this.update();
   }
 
@@ -114,8 +114,8 @@ export class SelectionRenderer extends Graphics {
     const bnds = this.currentBounds;
     this.topLeft.set(bnds.x, bnds.y);
     this.bottomRight.set(bnds.x + bnds.width, bnds.y + bnds.height);
-    this.container.toGlobal(this.topLeft, this.topLeft);
-    this.container.toGlobal(this.bottomRight, this.bottomRight);
+    this.container.toGlobal(this.topLeft, this.topLeft, false);
+    this.container.toGlobal(this.bottomRight, this.bottomRight, false);
     SelectionRectangle.fixRectangle(this.topLeft, this.bottomRight, this.absoluteBounds);
     this.lineStyle(_.defaultTo(this.config.line.width, 1),
                             _.defaultTo(this.config.line.color, 0xffffff),
@@ -124,7 +124,7 @@ export class SelectionRenderer extends Graphics {
                             _.defaultTo(this.config.fill.alpha, 0));
     this.drawShape(this.absoluteBounds);
     this.endFill();
-    this.emit('updated');
+    this.emit('updated', this.absoluteBounds);
   }
 
   /**
@@ -135,10 +135,11 @@ export class SelectionRenderer extends Graphics {
    */
   protected detach(): void {
     if (!this.attached) return;
+    if (this.container.length !== 0) return this.update();
     this.clear();
     this.stage.removeChild(this);
     this.attached = false;
-    this.emit('detached');
+    this.emit('detached', this.stage);
   }
 
   /**
