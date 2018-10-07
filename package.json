@@ -13,7 +13,7 @@
     "typescript",
     "sass"
   ],
-  "main": "out/electron/main.js",
+  "main": "./electron/main.js",
   "private": true,
   "scripts": {
     "ng": "ng",
