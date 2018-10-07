@@ -1,5 +1,6 @@
-import { YameEnvironment } from "./environment";
+import { YameEnvironment } from "./interface/environment";
 import { EventEmitter } from 'eventemitter3';
+import * as path from 'path';
 
 interface YamePluginConfig {
   /**
@@ -44,6 +45,14 @@ export interface PluginConfig {
    * @type {YamePluginConfig}
    */
   yame: YamePluginConfig;
+
+  /**
+   * The full path of the plugin.
+   *
+   * @type {string}
+   */
+  file: string;
+
   [key: string]: any;
 }
 
@@ -56,9 +65,9 @@ export interface PluginConfig {
  *
  * @todo Define events which the plugin manager listens for.
  *
- * @interface Plugin
+ * @class YamePlugin
  */
-export interface Plugin extends EventEmitter {
+export class YamePlugin extends EventEmitter {
 
   /**
    * The identifier of the plugin.
@@ -84,7 +93,6 @@ export interface Plugin extends EventEmitter {
    * @type {PluginConfig}
    */
   config: PluginConfig;
-
 
   /**
    * An optional priority value for the plugin.
@@ -113,6 +121,13 @@ export interface Plugin extends EventEmitter {
    * @type {boolean}
    */
   isActive: boolean;
+
+  /**
+   * Internal ng and electron directories.
+   *
+   * @type {string[]}
+   */
+  private calculatedDirs: string[];
 
   /**
    * Activates the plugin (again).
@@ -149,5 +164,23 @@ export interface Plugin extends EventEmitter {
    * @memberof Plugin
    */
   finalize?(): Promise<void>;
+
+  /**
+   * Resolves the ng and electron directories of this plugin.
+   *
+   * @returns {string[]} The ng and electron entry directories. Maybe empty.
+   */
+  get directories(): string[] {
+    if (this.calculatedDirs) return this.calculatedDirs;
+    this.calculatedDirs = [];
+    if (!this.config.yame) return this.calculatedDirs;
+    const dir = path.dirname(this.config.file);
+    const config = this.config.yame;
+    if (config.electron)
+      this.calculatedDirs.push(path.dirname(path.resolve(dir, config.electron)));
+    if (config.ng)
+      this.calculatedDirs.push(path.dirname(path.resolve(dir, config.ng)));
+    return this.calculatedDirs;
+  }
 }
 

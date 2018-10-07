@@ -1,5 +1,5 @@
 import { Config } from "./config";
-import { Plugin } from "./plugin";
+import { YamePlugin } from "../plugin";
 
 /**
  * The yame environment on the electron side.
@@ -12,9 +12,9 @@ export interface YameEnvironment {
   /**
    * A list of all successfully initialized plugins.
    *
-   * @type {Plugin[]}
+   * @type {YamePlugin[]}
    */
-  plugins: Plugin[];
+  plugins: YamePlugin[];
 
   /**
    * The app directory, i.e. the root of the electron and ng modules.

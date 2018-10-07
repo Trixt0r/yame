@@ -2,7 +2,6 @@ import * as glob from 'glob';
 import * as path from 'path';
 import { Environment, YameElectronEnvironment } from '../environment';
 import * as _ from 'lodash';
-import { Plugin } from '../../common/interface/plugin';
 import { CommonPluginManager } from '../../common/plugin-manager';
 
 /**

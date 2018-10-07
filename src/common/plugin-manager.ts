@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-import { Plugin, PluginConfig } from './interface/plugin';
-import PubSub from './pubsub';
+import { YamePlugin, PluginConfig } from './plugin';
 import * as Promise from 'bluebird';
 import { YameEnvironment } from './interface/environment';
 import { File } from './io/file';
@@ -77,7 +76,7 @@ export abstract class CommonPluginManager {
         if (typeof entryPoint !== 'string' || entryPoint === '')
           throw new Error(`No ${file} entry point configured in ${file}`);
         const filePath = `${file.replace('package.json', '')}${entryPoint}`;
-        const plugin: Plugin = this.require(filePath);
+        const plugin: YamePlugin = this.require(filePath);
         if (!plugin || typeof plugin.initialize !== 'function')
           return console.warn('Could not initialize plugin in', filePath);
         this.environment.plugins.push(plugin);
@@ -88,6 +87,7 @@ export abstract class CommonPluginManager {
           plugin.id = (config.name || _.uniqueId('yame-plugin-'));
         this.pluginPaths[plugin.id] = file;
         plugin.environment = this.environment;
+        plugin.config.file = file;
         if (!plugin.isActive)
           return console.info('Plugin', config.name, 'is deactivated');
         promises.push(
@@ -130,10 +130,10 @@ export abstract class CommonPluginManager {
    * Persists the config for the given plugin.
    *
    * @protected
-   * @param {Plugin} plugin
+   * @param {YamePlugin} plugin
    * @returns {Promise<any>}
    */
-  protected persistConfig(plugin: Plugin): Promise<any> {
+  protected persistConfig(plugin: YamePlugin): Promise<any> {
     const file = new File(this.pluginPaths[plugin.id]);
     return file.write(JSON.stringify(plugin.config, null, 2));
   }

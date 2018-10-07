@@ -1,7 +1,7 @@
-import { Plugin } from "common/interface/plugin";
+import { YamePlugin } from "common/plugin";
 import { Type, ModuleWithProviders } from "@angular/core";
 
-export interface RendererPlugin extends Plugin {
+export interface RendererPlugin extends YamePlugin {
 
   /**
    * A list of angular modules this plugin provides.
