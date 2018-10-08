@@ -39,30 +39,11 @@ This will start watch tasks for the renderer and browser processes.
 
 Those are basically webpack and tsc watch tasks which run concurrently.
 
+The startup process may take a while and restart the process some times, since the watch tasks run in parallel.
+
 ### yame-dev
 
-Since the editor already supports plugins, you may checkout
-[yame-dev](https://github.com/Trixt0r/yame-dev/tree/ng2). This plugin is useful for auto reloading your app while making changes.
-
-By default the editor will look in the `plugins` folder (not checked in).
-
-You may create the folder by hand (ignored by git), clone the dev plugin into it, build it and develop with the plugin
-
-```sh
-mkdir plugins
-cd plugins
-git clone --single-branch -b ng2 https://github.com/Trixt0r/yame-dev.git
-cd yame-dev
-npm install
-
-# Unix
-ln -s ../../ node_modules/yame
-# Windows
-mklink /J node_modules\yame ..\..\
-
-npm run build
-cd ../..
-```
+This plugin will only run in development mode and reload the web contents or reset the electron process as the code gets compiled.
 
 After those steps your can run `npm start` and auto reload should just work fine.
 
@@ -70,9 +51,11 @@ After those steps your can run `npm start` and auto reload should just work fine
 
 As mentioned above, the editor already supports plugins.
 
-You can implement your own plugins by adding them to the `plugins` folder or based on your config. Have a look at the `config.json`.
+You can implement your own plugins by adding them to the `node_modules\@yame` folder or based on your config. Have a look at the `config.json`.
 
 The `yame-dev` plugin is also a plugin example.
+
+Basically you can code node js code, with an yame api :smile:.
 
 ## Purpose
 This branch contains the migration from the old, buggy Backbone based implementation to a cleaner angular implementation.
