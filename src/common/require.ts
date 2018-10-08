@@ -9,7 +9,6 @@ import * as path from 'path';
  * @return {void}
  */
 export function extend(indexModule) {
-
   var Module = require('module');
   var originalRequire = Module.prototype.require;
   const nodeModules = path.resolve(__dirname, '..', 'node_modules');

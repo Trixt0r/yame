@@ -3,6 +3,7 @@ import { YamePlugin, PluginConfig } from './plugin';
 import * as Promise from 'bluebird';
 import { YameEnvironment } from './interface/environment';
 import { File } from './io/file';
+import * as path from 'path';
 
 interface PluginPaths {
   [key: string]: string;
@@ -66,19 +67,14 @@ export abstract class CommonPluginManager {
     let promises = [];
     files.forEach(file => {
       try {
-        const config: PluginConfig = this.require(`${file}`);
+        const config: PluginConfig = this.require(path.resolve(`${file}`, 'package.json'));
+        config.yame = config.yame || <any>{ };
         const yameConfig = config.yame;
-        if (!yameConfig)
-          throw new Error(`No yame config found in ${file}`);
         if (typeof yameConfig.active !== 'boolean')
           yameConfig.active = true;
-        const entryPoint = yameConfig[this.type];
-        if (typeof entryPoint !== 'string' || entryPoint === '')
-          throw new Error(`No ${file} entry point configured in ${file}`);
-        const filePath = `${file.replace('package.json', '')}${entryPoint}`;
-        const plugin: YamePlugin = this.require(filePath);
+        const plugin: YamePlugin = this.require(file);
         if (!plugin || typeof plugin.initialize !== 'function')
-          return console.warn('Could not initialize plugin in', filePath);
+          return console.warn('Could not initialize plugin in due to no initialize function', file);
         this.environment.plugins.push(plugin);
         plugin.config = config;
         plugin.isActive = plugin.config.yame.active;
@@ -91,9 +87,9 @@ export abstract class CommonPluginManager {
         if (!plugin.isActive)
           return console.info('Plugin', config.name, 'is deactivated');
         promises.push(
-          plugin.initialize()
+          plugin.initialize(this.type)
             .then(() => plugin.isInitialized = true)
-            .catch(e => console.warn('Error occurred while loading plugin ', filePath, e.message))
+            .catch(e => console.warn('Error occurred while loading plugin ', file, e.message))
         );
       } catch (e) {
         // TODO: logs this in a persistant place
@@ -130,11 +126,12 @@ export abstract class CommonPluginManager {
    * Persists the config for the given plugin.
    *
    * @protected
+   * @todo Write to local user storage and not to the pacakge json.
    * @param {YamePlugin} plugin
    * @returns {Promise<any>}
    */
   protected persistConfig(plugin: YamePlugin): Promise<any> {
-    const file = new File(this.pluginPaths[plugin.id]);
+    const file = new File(path.resolve(this.pluginPaths[plugin.id], 'package.json'));
     return file.write(JSON.stringify(plugin.config, null, 2));
   }
 

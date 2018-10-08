@@ -152,9 +152,10 @@ export class YamePlugin extends EventEmitter {
    * Initializes the plugin.
    * This will be executed after initializing the main application by the plugin manager.
    *
+   * @param {string} type The application type, e.g. `ng` or `electron`.
    * @returns {Promise<void>} Resolves on success and rejects on error.
    */
-  initialize?(): Promise<void>;
+  initialize?(type: string): Promise<void>;
 
   /**
    * Stops the plugin.

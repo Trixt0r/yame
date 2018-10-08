@@ -1,5 +1,5 @@
 {
   "devMode": true,
   "debugMode": true,
-  "plugins": [ "./plugins/*/package.json" ]
+  "plugins": [ "./node_modules/@yame/*" ]
 }

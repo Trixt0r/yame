@@ -1,4 +1,5 @@
-export { Environment } from "./environment";
+export { Environment } from './environment';
+export { YamePlugin } from '../common/plugin';
 export { Pubsub } from '../common/pubsub';
 export { AppModule } from './module/app';
 export { ElectronModule } from './module/electron';
