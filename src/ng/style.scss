@@ -1,6 +1,8 @@
 @import './style/loading.scss';
 @import './style/utils.scss';
 @import './style/material-icons.scss';
+@import '../../node_modules/@angular/material/prebuilt-themes/pink-bluegrey.css';
+@import '../../node_modules/ng2-dnd/bundles/style.css';
 
 body {
   background: #303030;

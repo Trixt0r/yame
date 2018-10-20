@@ -5,7 +5,7 @@
     "module": "esnext",
     "baseUrl": "../",
     "paths": {
-      "*": ["./*"]
+      "*": ["./*", "./node_modules/*"]
     }
   },
   "exclude": [

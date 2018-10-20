@@ -3,6 +3,9 @@ import { extend } from 'common/require';
 // Define a way to require yame
 extend(yame);
 
+import './style.scss';
+import './polyfills';
+
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { enableProdMode } from '@angular/core';
@@ -20,7 +23,7 @@ if (environment.production)
 function initNg(): Promise<any> {
   return import('./module/app')
     .then(module => {
-      platformBrowserDynamic()
+      return platformBrowserDynamic()
         .bootstrapModule(module.AppModule)
         .then(componentRef => yame.Pubsub.emit('ready', componentRef))
     });
