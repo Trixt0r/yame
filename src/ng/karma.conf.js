@@ -1,33 +1,24 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/0.13/config/configuration-file.html
 
-const nodeExternals = require('webpack-node-externals');
-
 module.exports = function (config) {
   config.set({
     basePath: './',
-    frameworks: ['jasmine', '@angular/cli'],
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage-istanbul-reporter'),
       require('karma-electron'),
-      require('@angular/cli/plugins/karma')
+      require('@angular-devkit/build-angular/plugins/karma')
     ],
     client:{
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
       useIframe: false
     },
-    files: [
-      { pattern: './src/ng/test.ts', watched: false },
-      { pattern: './assets/**', watched: false, included: false, nocache: false, served: true }
-    ],
-    proxies: {
-      '/assets/': '/_karma_webpack_/assets/'
-    },
     preprocessors: {
-      './src/ng/test.ts': ['@angular/cli', 'electron']
+      './src/ng/test.ts': ['electron']
     },
     mime: {
       'text/x-typescript': ['ts','tsx']
