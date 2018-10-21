@@ -24,6 +24,11 @@ describe('PixiService', () => {
     service = new PixiService();
   });
 
+  afterEach(() => {
+    if (service.app)
+      return service.dispose();
+  });
+
   describe('setUp', () => {
     it('should not have a defined pixi.js app before setUp', () => {
       expect(service.app).toBeUndefined('An app is defined');

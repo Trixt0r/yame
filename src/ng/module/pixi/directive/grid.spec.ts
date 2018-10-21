@@ -18,6 +18,7 @@ describe('PixiGridDirective', () => {
   let comp: TestGroupHostComponent;
   let fixture: ComponentFixture<TestGroupHostComponent>;
   let directive: PixiGridDirective;
+  let service: PixiService;
 
 
   beforeEach(() => {
@@ -32,6 +33,13 @@ describe('PixiGridDirective', () => {
     directive = dirEl.injector.get(PixiGridDirective);
     fixture.detectChanges();
     directive.ngAfterViewInit();
+    service = fixture.debugElement.injector.get(PixiService);
+  });
+
+
+  afterEach(() => {
+    if (service.app)
+      return service.dispose()
   });
 
   it('should initialize a grid', () => {

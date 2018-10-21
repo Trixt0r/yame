@@ -118,4 +118,22 @@ export class PixiService {
   createFromAsset(asset: Asset): Promise<Entity> {
     return this.internalAssetConverter.get(asset);
   }
+
+  /**
+   * Disposes this service
+   * @returns {Promise<void>}
+   */
+  dispose(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.internalApp) throw new PixiAppNotInitializedException("Can't dispose!");
+        this.internalApp.destroy();
+        this.internalApp = null;
+        resolve();
+      } catch (e) {
+        console.warn('An unexpected error occurred while disposing the pixi service', e);
+        reject(e);
+      }
+    });
+  }
 }

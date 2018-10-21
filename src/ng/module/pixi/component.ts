@@ -1,5 +1,5 @@
 import { PixiService } from './service';
-import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, OnDestroy } from '@angular/core';
 
 import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
@@ -18,7 +18,7 @@ import { Entity } from './scene/entity';
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
 })
-export class PixiComponent {
+export class PixiComponent implements OnDestroy {
 
   @Output() resized = new EventEmitter();
   @ViewChild('canvas') canvas: ElementRef;
@@ -134,5 +134,14 @@ export class PixiComponent {
     return (event: DragDropData) => {
       return event.dragData instanceof Asset && this.pixiService.assetConverter.has(event.dragData);
     };
+  }
+
+  /**
+   * Disposes the pixi service.
+   * @inheritdoc
+   */
+  ngOnDestroy(): void {
+    this.pixiService.dispose()
+      .catch(error => alert(error.message));
   }
 }

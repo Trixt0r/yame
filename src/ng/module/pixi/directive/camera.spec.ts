@@ -4,7 +4,6 @@ import { By } from '@angular/platform-browser';
 import { PixiComponent } from '../component';
 import { PixiService } from '../service';
 import { PixiCameraDirective } from './camera';
-import { Camera } from '../utils/camera';
 import { DndModule, DragDropService, DragDropConfig } from 'ng2-dnd';
 
 @Component({
@@ -38,6 +37,11 @@ describe('PixiGridDirective', () => {
     service.renderer.plugins.interaction.eventData.data = {
       getLocalPosition: (target, from, point) => point
     };
+  });
+
+  afterEach(() => {
+    if (service.app)
+      return service.dispose()
   });
 
   describe('initialization', ()=> {

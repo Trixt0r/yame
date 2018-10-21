@@ -23,6 +23,7 @@ class FakePixiService {
   resize() { return FakePixiService.RESIZEVAL; }
   toScene(any) { return new PIXI.Point(1000, -1000); }
   createFromAsset(asset) { return Promise.resolve(new MyEntity()); }
+  dispose() { /* NOOP */}
 }
 
 describe('PixiComponent', () => {
