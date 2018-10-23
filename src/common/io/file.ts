@@ -1,3 +1,4 @@
+import * as Promise from 'bluebird';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 

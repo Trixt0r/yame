@@ -1,5 +1,4 @@
 import * as Promise from 'bluebird';
-global.Promise = Promise;
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import EventEmitter from '../event-emitter';
