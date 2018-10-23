@@ -8,65 +8,94 @@ const textStyle: TextStyleOptions = {
   fontSize: 48,
   fill: 0xffffff,
 }
-let indicator = new Text('cached', textStyle);
-indicator.anchor.set(0.5, 0.5);
+const indicator = new Text('cached', textStyle);
+indicator.pivot.set(24, 19.2);
 indicator.interactive = true;
 
 
 export class SelectionRotateHandler {
 
-  private mouseStartPos: PIXI.Point;
-  private mouseCurrentPos: PIXI.Point;
+  private mouseStartPos: Point;
+  private mouseCurrentPos: Point;
+
+  private initRot: number;
+  private clickedRot: number;
+  private clickedPos: Point;
+
+  private mouseupFn: EventListenerObject;
 
   constructor(private container: SelectionContainer, private renderer: SelectionRenderer) {
 
-    this.mouseCurrentPos = new PIXI.Point();
-    this.mouseStartPos = new PIXI.Point();
+    this.mouseCurrentPos = new Point();
+    this.mouseStartPos = new Point();
+    this.initRot = 0;
+    this.clickedRot = 0;
+    this.clickedPos = new Point();
+    this.mouseupFn = this.mouseup.bind(this);
 
-    renderer.on('attached', (stage: Container) => stage.addChild(indicator) );
-    renderer.on('detached', (stage: Container) => stage.removeChild(indicator));
-    renderer.on('updated', (bounds: Rectangle) => {
-      indicator.position.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-    });
+    renderer.on('attached', this.attached, this);
+    renderer.on('detached', this.detached, this);
+    renderer.on('updated', this.updated, this);
 
-    let initRot = 0;
-    let clickedRot = 0;
-    let clickedPos = new Point();
+    indicator.on('mousedown', this.mousedown, this);
+    indicator.on('mousemove', this.mousemove, this);
+    window.addEventListener('mouseup', this.mouseupFn);
 
-    indicator.on('mousedown', (event: interaction.InteractionEvent) => {
-      if (this.container.isHandling) return;
-      clickedPos.set(this.container.position.x, this.container.position.y);
-      this.container.beginHandling(this, event);
-      this.mouseStartPos.set(event.data.global.x, event.data.global.y);
-      this.container.parent.toLocal(this.mouseStartPos, null, this.mouseStartPos);
-      initRot = container.rotation;
-      clickedRot = Math.atan2(this.mouseStartPos.y - this.container.position.y, this.mouseStartPos.x - this.container.position.x);
-    });
+    container.on('selected', this.selected, this);
+    container.on('unselected', this.unselected, this);
+  }
 
-    indicator.on('mousemove', (event: interaction.InteractionEvent) => {
-      if (!this.container.isHandling || this.container.currentHandler !== this) return;
-      this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
-      this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
-      this.container.rotation = initRot + Math.atan2(this.mouseCurrentPos.y - clickedPos.y, this.mouseCurrentPos.x - clickedPos.x) - clickedRot;
-      this.container.emit('moved');
-    });
+  mousedown(event: interaction.InteractionEvent) {
+    if (this.container.isHandling) return;
+    this.clickedPos.set(this.container.position.x, this.container.position.y);
+    this.container.beginHandling(this, event);
+    this.mouseStartPos.set(event.data.global.x, event.data.global.y);
+    this.container.parent.toLocal(this.mouseStartPos, null, this.mouseStartPos);
+    this.initRot = this.container.rotation;
+    this.clickedRot = Math.atan2(this.mouseStartPos.y - this.container.position.y, this.mouseStartPos.x - this.container.position.x);
+  }
 
-    window.addEventListener('mouseup', () => {
-      if (!this.container.isHandling || this.container.currentHandler !== this) return;
-     this.container.endHandling();
-    })
+  mouseup() {
+    if (!this.container.isHandling || this.container.currentHandler !== this) return;
+    this.container.endHandling();
+  }
 
-    container.on('selected', () => {
-      if (container.length === 1) {
-        container.rotation = container.entities[0].rotation;
-        container.entities[0].rotation = 0;
-      }
-    });
+  mousemove(event: interaction.InteractionEvent) {
+    if (!this.container.isHandling || this.container.currentHandler !== this) return;
+    this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
+    this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
+    this.container.rotation = this.initRot + Math.atan2(this.mouseCurrentPos.y - this.clickedPos.y, this.mouseCurrentPos.x - this.clickedPos.x) - this.clickedRot;
+    indicator.rotation = this.container.rotation;
+    this.container.emit('update');
+  }
 
-    container.on('unselected', (unselected: Entity[]) => {
-      unselected.forEach(entity => entity.rotation += container.rotation);
-      container.rotation = 0;
-    });
+  attached(stage: Container) {
+    stage.addChild(indicator)
+  }
+
+  detached(stage: Container) {
+    stage.removeChild(indicator)
+  }
+
+  updated(stage: Container, bounds: Rectangle) {
+    const bnds = this.container.getLocalBounds();
+    indicator.position.set(bnds.x + bnds.width / 2, bnds.y + bnds.height / 2);
+    stage.toLocal(indicator.position, this.container, indicator.position);
+  }
+
+  selected() {
+    if (this.container.length === 1) {
+      const tmp = this.container.entities[0].rotation;
+      this.container.entities[0].rotation = 0;
+      this.container.rotation = tmp;
+      this.container.emit('update');
+    }
+    indicator.rotation = this.container.rotation;
+  }
+
+  unselected(unselected: Entity[]) {
+    unselected.forEach(entity => entity.rotation += this.container.rotation);
+    this.container.rotation = 0;
   }
 
 }

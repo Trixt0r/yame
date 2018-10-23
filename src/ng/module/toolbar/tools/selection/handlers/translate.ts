@@ -14,10 +14,7 @@ export class SelectionTranslateHandler {
     container.on('mousedown', this.start, this);
     container.on('mouseup', this.end, this);
     container.on('mousemove', this.move, this);
-    container.on('unselected', () => {
-      if (container.length === 0)
-        container.position.set(0, 0);
-    });
+    container.on('unselected', this.unselected, this);
   }
 
   start(event: interaction.InteractionEvent) {
@@ -39,6 +36,11 @@ export class SelectionTranslateHandler {
     this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
     this.container.position.x = this.startPos.x + (this.mouseCurrentPos.x - this.mouseStartPos.x);
     this.container.position.y = this.startPos.y + (this.mouseCurrentPos.y - this.mouseStartPos.y);
-    this.container.emit('moved');
+    this.container.emit('update');
+  }
+
+  unselected() {
+    if (this.container.length === 0)
+      this.container.position.set(0, 0);
   }
 }

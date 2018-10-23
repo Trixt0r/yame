@@ -33,21 +33,23 @@ export class SelectionRenderer extends Graphics {
 
   // Protected fields, for handling the rendering
   protected stage: Container;
-  protected currentBounds: Rectangle;
-  protected absoluteBounds: Rectangle;
+  protected outerBounds: Rectangle;
   protected attached: boolean;
-  protected topLeft: Point;
-  protected bottomRight: Point;
+  protected boundingPoints: Point[]; // Clockwise bounding points, topLeft, topRight, bottomRight, bottomLeft
 
   constructor(protected service: PixiService,
               protected container: SelectionContainer = null,
               nativeLines: boolean = false) {
     super(nativeLines);
     this.stage = this.service.stage;
-    this.absoluteBounds = new Rectangle();
+    this.outerBounds = new Rectangle();
     this.attached = false;
-    this.topLeft = new Point();
-    this.bottomRight = new Point();
+    this.boundingPoints = [
+      new Point(),
+      new Point(),
+      new Point(),
+      new Point(),
+    ]
     this.service.scene.on('camera:update', this.update, this); // Setup here, since the scene does not change
     this.setupContainerHandlers();
   }
@@ -81,7 +83,7 @@ export class SelectionRenderer extends Graphics {
   protected setupContainerHandlers(): void {
     if (!this.container) return;
     this.container.on('selected', this.attach, this);
-    this.container.on('moved', this.update, this);
+    this.container.on('update', this.update, this);
     this.container.on('unselected', this.detach, this);
   }
 
@@ -94,8 +96,7 @@ export class SelectionRenderer extends Graphics {
    */
   protected attach(): void {
     if (this.attached) return;
-    if (this.container.entities.length <= 0) { console.log('here'); return this.detach(); }
-    this.currentBounds = this.container.getLocalBounds();
+    if (this.container.entities.length <= 0) return this.detach();
     this.stage.addChild(this);
     this.attached = true;
     this.emit('attached', this.stage);
@@ -111,20 +112,32 @@ export class SelectionRenderer extends Graphics {
   protected update(): void {
     if (!this.attached) return;
     this.clear();
-    const bnds = this.currentBounds;
-    this.topLeft.set(bnds.x, bnds.y);
-    this.bottomRight.set(bnds.x + bnds.width, bnds.y + bnds.height);
-    this.container.toGlobal(this.topLeft, this.topLeft, false);
-    this.container.toGlobal(this.bottomRight, this.bottomRight, false);
-    SelectionRectangle.fixRectangle(this.topLeft, this.bottomRight, this.absoluteBounds);
+    const bnds = this.container.getLocalBounds();
+
+    this.boundingPoints[0].set(bnds.x, bnds.y);
+    this.boundingPoints[1].set(bnds.x + bnds.width, bnds.y);
+    this.boundingPoints[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
+    this.boundingPoints[3].set(bnds.x, bnds.y + bnds.height);
+
+    this.boundingPoints.forEach(point => this.stage.toLocal(point, this.container, point));
+    this.outerBounds.x = _.minBy(this.boundingPoints, 'x').x;
+    this.outerBounds.width = _.maxBy(this.boundingPoints, 'x').x - this.outerBounds.x;
+    this.outerBounds.y = _.minBy(this.boundingPoints, 'y').y;
+    this.outerBounds.height = _.maxBy(this.boundingPoints, 'y').y - this.outerBounds.y;
+
     this.lineStyle(_.defaultTo(this.config.line.width, 1),
                             _.defaultTo(this.config.line.color, 0xffffff),
                             _.defaultTo(this.config.line.alpha, 1));
     this.beginFill(_.defaultTo(this.config.fill.color, 0xffffff),
                             _.defaultTo(this.config.fill.alpha, 0));
-    this.drawShape(this.absoluteBounds);
+    this.drawShape(this.container.getBounds());
+    this.drawShape(this.outerBounds);
+    this.moveTo(this.boundingPoints[0].x, this.boundingPoints[0].y);
+    const tmp = this.boundingPoints.slice();
+    tmp.push(tmp.shift());
+    tmp.forEach(point => this.lineTo(point.x, point.y));
     this.endFill();
-    this.emit('updated', this.absoluteBounds);
+    this.emit('updated', this.stage, this.outerBounds);
   }
 
   /**
