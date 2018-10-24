@@ -178,4 +178,44 @@ export class Group<T extends Entity> extends Entity {
       return this.internalEntities.findIndex(entity => entity.id === entityOrId);
   }
 
+  includes(entity: T, fromIndex: number): boolean {
+    return this.internalEntities.includes(entity, fromIndex);
+  }
+
+  forEach(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg?: any): void {
+    this.internalEntities.forEach(callbackFn, thisArg);
+  }
+
+  find(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg?: any): T {
+    return this.internalEntities.find(callbackFn, thisArg);
+  }
+
+  findIndex(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg?: any): T {
+    return this.internalEntities.find(callbackFn, thisArg);
+  }
+
+  filter(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg?: any): T[] {
+    return this.internalEntities.filter(callbackFn, thisArg);
+  }
+
+  map(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg): any[] {
+    return this.internalEntities.map(callbackFn, thisArg);
+  }
+
+  every(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg): boolean {
+    return this.internalEntities.every(callbackFn, thisArg);
+  }
+
+  some(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg): boolean {
+    return this.internalEntities.some(callbackFn, thisArg);
+  }
+
+  reduce<U>(callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U {
+    return this.internalEntities.reduce(callbackFn, initialValue);
+  }
+
+  reduceRight<U>(callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U {
+    return this.internalEntities.reduceRight(callbackFn, initialValue);
+  }
+
 }
