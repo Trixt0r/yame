@@ -57,7 +57,7 @@ export class SelectionRotateHandler {
 
   mouseup() {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
-    this.container.endHandling();
+    this.container.endHandling(this);
   }
 
   mousemove(event: interaction.InteractionEvent) {

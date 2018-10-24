@@ -27,7 +27,7 @@ export class SelectionTranslateHandler {
 
   end(event: interaction.InteractionEvent) {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
-    this.container.endHandling(event);
+    this.container.endHandling(this, event);
   }
 
   move(event: interaction.InteractionEvent) {

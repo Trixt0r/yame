@@ -22,8 +22,14 @@ export class SelectionContainer extends Group<Entity> {
 
   protected handlerRef: any;
 
-
-  beginHandling(ref: any, ...arg: any[]) {
+  /**
+   * Begins handling user events with the given reference and arguments.
+   * Call this if you are handling events for a specific action which has to be blocked for others.
+   *
+   * @param ref Your reference, e.g. your instance handling the current user events.
+   * @param arg Any additional arguments.
+   */
+  beginHandling(ref: any, ...arg: any[]): void {
     if (this.handling) throw new Error('beginHandling has already been called. endHandling has to be called before!');
     this.handlerRef = ref;
     this.handling = true;
@@ -32,8 +38,18 @@ export class SelectionContainer extends Group<Entity> {
     this.emit.apply(this, args);
   }
 
-  endHandling(...arg: any[]) {
+  /**
+   * Ends handling the user events, started with the given reference.
+   * An error will be thrown if you call this method with a reference different from the one in beginHandling or if no
+   * events are handled at all right now.
+   *
+   * @param ref The reference, you called beginHandling with.
+   * @param arg Any additional arguments.
+   */
+  endHandling(ref: any, ...arg: any[]) {
     if (!this.handling) throw new Error('beginHandling has to be called before!');
+    if (ref !== this.handlerRef) throw new Error('You are not allowed to call this,' +
+                                                  ' since the handling was not started by the given reference');
     this.handlerRef = null;
     this.handling = false;
     const args = Array.prototype.slice.call(arguments);
