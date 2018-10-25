@@ -1,5 +1,5 @@
 import { AssetComponentService } from '../service/asset-component';
-import { Component, ElementRef, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 
 import * as path from 'path';
 

@@ -1,6 +1,6 @@
 <div #filesContainer class="flex wrap" *ngIf="assets && assets.length">
-  <ng-template ngFor let-asset [ngForOf]="assets">
-    <mat-card class="example-card" dnd-draggable [dragEnabled]="true" [dragData]="asset">
+  <ng-container *ngFor="let asset of assets">
+    <mat-card dnd-draggable [dragEnabled]="true" [dragData]="asset">
       <mat-card-header>
         <mat-card-title>{{ asset.content.simpleName }}</mat-card-title>
         <mat-card-subtitle>{{ asset.type }}</mat-card-subtitle>
@@ -26,7 +26,8 @@
         </mat-menu>
       </mat-card-actions>
     </mat-card>
-  </ng-template>
+  </ng-container>
+  <div class="spacer"></div>
 </div>
 
 <div #noFilesContainer
