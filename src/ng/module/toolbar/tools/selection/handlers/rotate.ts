@@ -70,11 +70,11 @@ export class SelectionRotateHandler {
   }
 
   attached(stage: Container) {
-    stage.addChild(indicator)
+    stage.addChild(indicator);
   }
 
   detached(stage: Container) {
-    stage.removeChild(indicator)
+    stage.removeChild(indicator);
   }
 
   updated(stage: Container, bounds: Rectangle) {

@@ -10,6 +10,7 @@ import { SelectionContainer } from './selection/container';
 import { SelectionRenderer } from './selection/renderer';
 import { SelectionTranslateHandler } from './selection/handlers/translate';
 import { SelectionRotateHandler } from './selection/handlers/rotate';
+import { SelectionScaleHandler } from './selection/handlers/scale';
 
 /**
  *
@@ -75,6 +76,7 @@ export class SelectionTool extends Tool {
         this.addToolListeners();
       new SelectionTranslateHandler(this.container);
       new SelectionRotateHandler(this.container, this.renderer);
+      new SelectionScaleHandler(this.container, this.renderer);
     });
   }
 
