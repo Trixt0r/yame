@@ -25,12 +25,18 @@ export class SelectionRectangle {
   /**
    * @type {Point} The top left point.
    */
-  public topLeft: Point;
+  public readonly topLeft: Point;
 
   /**
    * @type {Point} The bottom right point.
    */
-  public bottomRight: Point;
+  public readonly bottomRight: Point;
+
+  /**
+   * @protected
+   * @type {Point} Field for calculation positions between bases.
+   */
+  protected tmp: Point = new Point();
 
   /**
    * @protected
@@ -89,13 +95,17 @@ export class SelectionRectangle {
     if (!bounds) return false;
     const rect = this.rect;
     if (bounds instanceof PIXI.Rectangle || bounds instanceof PIXI.RoundedRectangle) {
-      let topLeft = this.container.toLocal(new PIXI.Point(bounds.x, bounds.y), entity);
+      this.tmp.set(bounds.x, bounds.y);
+      let topLeft = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(topLeft.x, topLeft.y)) return true;
-      let topRight = this.container.toLocal(new PIXI.Point(bounds.x + bounds.width, bounds.y), entity);
+      this.tmp.set(bounds.x + bounds.width, bounds.y);
+      let topRight = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(topRight.x, topRight.y)) return true;
-      let bottomLeft = this.container.toLocal(new PIXI.Point(bounds.x, bounds.y + bounds.height), entity);
+      this.tmp.set(bounds.x, bounds.y + bounds.height);
+      let bottomLeft = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(bottomLeft.x, bottomLeft.y)) return true;
-      let bottomRight = this.container.toLocal(new PIXI.Point(bounds.x + bounds.width, bounds.y + bounds.height), entity);
+      this.tmp.set(bounds.x + bounds.width, bounds.y + bounds.height);
+      let bottomRight = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(bottomRight.x, bottomRight.y)) return true;
     }
     return false;

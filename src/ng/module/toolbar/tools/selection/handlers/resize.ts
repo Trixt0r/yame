@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import { ResizeAnchor, HOR, VERT, LEFT, UP, RIGHT, DOWN } from "./scale/anchor";
+import { ResizeAnchor, HOR, VERT, LEFT, UP, RIGHT, DOWN } from "./resize/anchor";
 import { SelectionRenderer } from "../renderer";
 import { SelectionContainer } from "../container";
 import { Group, PixiService } from "ng/module/pixi/idx";

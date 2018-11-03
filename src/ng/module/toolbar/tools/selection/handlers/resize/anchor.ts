@@ -217,7 +217,7 @@ export class ResizeAnchor extends Graphics {
     if (fillAlpha)
       this.endFill();
     this.hitArea = this.getLocalBounds().clone();
-    (<Rectangle>this.hitArea).pad(10, 10);
+    (<Rectangle>this.hitArea).pad(5, 5);
   }
 
   /**
@@ -301,6 +301,7 @@ export class ResizeAnchor extends Graphics {
     bound.set((bound.x - this.clickedBound.x), (bound.y - this.clickedBound.y));
     this.container.position.x = this.containerPos.x + bound.x;
     this.container.position.y = this.containerPos.y + bound.y;
+    this.updateCursor();
     this.emit('update');
   }
 

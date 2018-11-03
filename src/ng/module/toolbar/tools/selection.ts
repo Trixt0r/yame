@@ -4,7 +4,7 @@ import { NgModuleRef } from '@angular/core';
 import { PixiService } from '../../pixi/service';
 import { Map } from '../../pixi/scene/map';
 import { Pubsub, AppModule } from 'ng/idx';
-import { Graphics, interaction, PointLike } from 'pixi.js';
+import { Graphics, PointLike, Point } from 'pixi.js';
 import { SelectionRectangle } from './selection/rectangle';
 import { SelectionContainer } from './selection/container';
 import { SelectionRenderer } from './selection/renderer';
@@ -74,8 +74,8 @@ export class SelectionTool extends Tool {
       this.renderer = new SelectionRenderer(service, this.container);
       if (this.isActive)
         this.addToolListeners();
-      new SelectionTranslateHandler(this.container);
-      new SelectionRotateHandler(this.container, this.renderer);
+      new SelectionTranslateHandler(this.container, service);
+      new SelectionRotateHandler(this.container, this.renderer, service);
       new SelectionResizeHandler(this.container, this.renderer, service);
     });
   }
@@ -164,9 +164,9 @@ export class SelectionTool extends Tool {
     this.map.removeChild(this.container);
     this.rectangle.reset();
     this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
-    this.stage.toLocal(this.globalMouse, void 0, this.rectangle.bottomRight);
+    this.rectangle.bottomRight.copy(this.rectangle.topLeft);
     this.rectangle.update();
-    const selection = this.map.entities.filter(child => this.rectangle.contains(child));
+    const selection = this.map.filter(child => child.containsPoint(<Point>this.globalMouse));
     if (selection.length > 0) {
       this.finish();
       this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
@@ -219,7 +219,7 @@ export class SelectionTool extends Tool {
   finish(): void {
     this.down = false;
     this.stage.removeChild(this.graphics);
-    const selection = this.map.entities.filter(child => this.rectangle.contains(child));
+    const selection = this.map.filter(child => this.rectangle.contains(child));
     if (selection.length) {
       this.map.addChild(this.container);
       this.container.select(selection);

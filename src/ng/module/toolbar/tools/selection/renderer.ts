@@ -35,8 +35,18 @@ export class SelectionRenderer extends Graphics {
   protected stage: Container;
   protected outerBounds: Rectangle;
   protected attached: boolean;
-  protected boundingPoints: Point[]; // Clockwise bounding points, topLeft, topRight, bottomRight, bottomLeft
 
+  /**
+   * @type {Point[]} Clockwise bounding points, topLeft, topRight, bottomRight, bottomLeft
+   */
+  public readonly boundingPoints: Point[];
+
+  /**
+   * Creates an instance of SelectionRenderer.
+   * @param {PixiService} service The pixi service.
+   * @param {SelectionContainer} [container=null] The selection container.
+   * @param {boolean} [nativeLines=false]
+   */
   constructor(protected service: PixiService,
               protected container: SelectionContainer = null,
               nativeLines: boolean = false) {
