@@ -7,12 +7,15 @@ export class SelectionTranslateHandler {
   private mouseCurrentPos: PIXI.Point;
   private mouseStartPos: PIXI.Point;
 
+  private mouseupFn: EventListenerObject;
+
   constructor(private container: SelectionContainer) {
     this.startPos = new PIXI.Point();
     this.mouseCurrentPos = new PIXI.Point();
     this.mouseStartPos = new PIXI.Point();
+    this.mouseupFn = this.end.bind(this);
     container.on('mousedown', this.start, this);
-    container.on('mouseup', this.end, this);
+    window.addEventListener('mouseup', this.mouseupFn);
     container.on('mousemove', this.move, this);
     container.on('unselected', this.unselected, this);
   }

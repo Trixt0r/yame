@@ -164,6 +164,15 @@ export class SelectionTool extends Tool {
     this.map.removeChild(this.container);
     this.rectangle.reset();
     this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
+    this.stage.toLocal(this.globalMouse, void 0, this.rectangle.bottomRight);
+    this.rectangle.update();
+    const selection = this.map.entities.filter(child => this.rectangle.contains(child));
+    if (selection.length > 0) {
+      this.finish();
+      this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
+      return;
+    }
+
     this.graphics.clear();
     this.stage.addChild(this.graphics);
     this.down = true;
