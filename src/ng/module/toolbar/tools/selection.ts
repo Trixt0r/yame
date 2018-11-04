@@ -43,6 +43,11 @@ export class SelectionTool extends Tool {
    */
   config: SelectionToolConfig = { fill: { }, line: { } };
 
+  /**
+   * @type {any[]} The handlers of the selection container.
+   */
+  readonly handlers: any[] = [];
+
   // The 3 main parts of this tool
   protected rectangle: SelectionRectangle;
   protected container: SelectionContainer;
@@ -65,19 +70,33 @@ export class SelectionTool extends Tool {
     super(id, icon);
     this.container = new SelectionContainer();
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
-      const service = this.service = ref.injector.get(PixiService);
-      this.globalMouse = this.service.renderer.plugins.interaction.mouse.global;
-      this.map = service.scene;
-      this.map.addChild(this.container);
-      this.stage = service.app.stage;
-      this.rectangle = new SelectionRectangle(this.stage);
-      this.renderer = new SelectionRenderer(service, this.container);
-      if (this.isActive)
-        this.addToolListeners();
-      new SelectionTranslateHandler(this.container, service);
-      new SelectionRotateHandler(this.container, this.renderer, service);
-      new SelectionResizeHandler(this.container, this.renderer, service);
+      this.service = ref.injector.get(PixiService);
+      this.setup();
     });
+  }
+
+  /**
+   * Sets this tool up.
+   * Creates the default handlers and the rendering parts of this tool.
+   *
+   * @returns {void}
+   */
+  setup(): void {
+    if (!this.service) throw new Error('No pixi service defined. Pubsub event "ready" not triggered?');
+    this.container.removeAllListeners();
+    this.globalMouse = this.service.renderer.plugins.interaction.mouse.global;
+    this.map = this.service.scene;
+    this.map.addChild(this.container);
+    this.stage = this.service.app.stage;
+    this.rectangle = new SelectionRectangle(this.stage);
+    this.renderer = new SelectionRenderer(this.service, this.container);
+    if (this.isActive) this.addToolListeners();
+    this.handlers.splice(0, this.handlers.length);
+    this.handlers.push(
+      new SelectionTranslateHandler(this.container, this.service),
+      new SelectionRotateHandler(this.container, this.renderer, this.service),
+      new SelectionResizeHandler(this.container, this.renderer, this.service)
+    );
   }
 
   /**
@@ -102,6 +121,14 @@ export class SelectionTool extends Tool {
    */
   get selectionContainer(): SelectionContainer {
     return this.container;
+  }
+
+  /**
+   * @readonly
+   * @type {Graphics} The graphics which render the rectangle following the mouse.
+   */
+  get selectionGraphics(): Graphics {
+    return this.graphics;
   }
 
   /**
@@ -141,13 +168,6 @@ export class SelectionTool extends Tool {
     canvas.removeEventListener('mousedown', this.onMousedown);
     canvas.removeEventListener('mouseup', this.onMouseup);
     canvas.removeEventListener('mousemove', this.onMousemove);
-  }
-
-  /** @inheritDoc */
-  onActivate(): Promise<any> {
-    if (this.service)
-      this.addToolListeners();
-    return Promise.resolve();
   }
 
   /**
@@ -225,6 +245,13 @@ export class SelectionTool extends Tool {
       this.container.select(selection);
     }
     this.emit('finish', selection, this.rectangle);
+  }
+
+  /** @inheritDoc */
+  onActivate(): Promise<any> {
+    if (this.service)
+      this.addToolListeners();
+    return Promise.resolve();
   }
 
   /** @inheritDoc */
