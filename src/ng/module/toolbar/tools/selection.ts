@@ -25,12 +25,11 @@ export interface SelectionToolConfig {
 }
 
 /**
- *
  * The actual selection tool, managing calculations, rendering and container switches.
  * The whole implementation is divided into 3 parts:
- *  @see {SelectionRenderer} Renders the selection.
- *  @see {SelectionContainer} Provides selection and unselection method.
- *  @see {SelectionRectangle} Handles collisions when the user selects entities with the mouse
+ * @see {SelectionRenderer} Renders the selection.
+ * @see {SelectionContainer} Provides selection and unselection method.
+ * @see {SelectionRectangle} Handles collisions when the user selects entities with the mouse
  *
  * @export
  * @class SelectionTool
