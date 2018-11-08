@@ -20,6 +20,10 @@ export class SelectionContainer extends Group<Entity> {
    */
   protected handling: boolean = false;
 
+  /**
+   * @protected
+   * @type {*} The current handler reference.
+   */
   protected handlerRef: any;
 
   /**
@@ -52,7 +56,7 @@ export class SelectionContainer extends Group<Entity> {
                                                   ' since the handling was not started by the given reference');
     this.handlerRef = null;
     this.handling = false;
-    const args = Array.prototype.slice.call(arguments);
+    const args = Array.prototype.slice.call(arguments, 1);
     args.unshift('handle:end');
     this.emit.apply(this, args);
   }
@@ -100,9 +104,13 @@ export class SelectionContainer extends Group<Entity> {
     if (this.internalEntities.length > 0) {
       this.interactive = true;
       const bounds: Rectangle = this.hitArea = this.getLocalBounds();
-      const newPos = this.parent.toLocal(new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2), this);
-      this.position.set(newPos.x, newPos.y);
-      this.pivot.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      const pivotX = bounds.x + bounds.width / 2;
+      const pivotY = bounds.y + bounds.height / 2;
+      if (this.parent) {
+        const newPos = this.parent.toLocal(new Point(pivotX, pivotY), this);
+        this.position.set(newPos.x, newPos.y);
+      }
+      this.pivot.set(pivotX, pivotY);
     }
     this.emit('selected', added);
     return added;
@@ -119,7 +127,8 @@ export class SelectionContainer extends Group<Entity> {
    * @return {Entity[]}
    */
   unselect(entities: Entity[] = this.entities): Entity[] {
-    this.handling = false;
+    if (this.handling)
+      this.endHandling(this.currentHandler);
     const toRemove = entities.filter(child => this.indexOf(child) >= 0);
     entities.forEach(child => {
       if (toRemove.indexOf(child) < 0) return console.warn('[SelectionContainer] You are trying to remove a child ' +
@@ -127,10 +136,11 @@ export class SelectionContainer extends Group<Entity> {
       this.removeChild(child);
       const idx = this.internalEntities.indexOf(child);
       if (idx >= 0) this.internalEntities.splice(idx, 1);
-      if (!child.parentEntity) return;
-      // Restoring the internal relation
-      child.parentEntity.addChild(child);
-      child.parentEntity.toLocal(child.position, this, child.position);
+      if (child.parentEntity) {
+        // Restoring the internal relation
+        child.parentEntity.addChild(child);
+        child.parentEntity.toLocal(child.position, this, child.position);
+      }
       child.emit('unselected', this);
     });
     if (this.internalEntities.length === 0)
