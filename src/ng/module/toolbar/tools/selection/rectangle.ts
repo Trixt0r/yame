@@ -47,8 +47,14 @@ export class SelectionRectangle {
   constructor(public container: Container,
               topLeft?: Point,
               bottomRight?: Point) {
-    this.topLeft = topLeft || new Point();
-    this.bottomRight = bottomRight || new Point();
+    this.topLeft = new Point();
+    this.bottomRight = new Point();
+    if (topLeft) {
+      this.topLeft.copy(topLeft);
+    }
+    if (bottomRight) {
+      this.bottomRight.copy(bottomRight);
+    }
   }
 
   /**
