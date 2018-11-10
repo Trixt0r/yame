@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
-import { Graphics, Container, Rectangle, Polygon, Point, DisplayObject, } from "pixi.js";
+import { Graphics, Container, Rectangle, Point, PointLike, } from "pixi.js";
 import { SelectionContainer } from "./container";
 import { PixiService, Entity } from "../../../pixi/idx";
-import { SelectionRectangle } from "./rectangle";
 
 /**
  * The config interface for the rendering.
@@ -39,7 +38,7 @@ export class SelectionRenderer extends Graphics {
   /**
    * @type {Point[]} Clockwise bounding points, topLeft, topRight, bottomRight, bottomLeft
    */
-  public readonly boundingPoints: Point[];
+  readonly boundingPoints: Point[];
 
   /**
    * Creates an instance of SelectionRenderer.
@@ -75,8 +74,8 @@ export class SelectionRenderer extends Graphics {
     if (this.container === container) return;
     const old = this.container;
     if (old) {
-      old.off(null, null, this);
-      this.detach();
+      old.off('selected', null, this).off('update', null, this).off('unselected', null, this);
+      this.detach(true);
     }
     this.container = container;
     this.setupContainerHandlers();
@@ -145,13 +144,13 @@ export class SelectionRenderer extends Graphics {
 
     if (this.container.length > 1) {
       this.lineStyle(lineWidth, lineColor, lineAlpha * 0.25);
-      this.container.forEach(entity => SelectionRenderer.drawBounds(entity, this));
+      this.container.forEach(entity => SelectionRenderer.drawBounds(this, entity));
       this.drawShape(this.container.getBounds());
     }
     this.lineStyle(lineWidth, lineColor, lineAlpha * 0.5);
     this.drawShape(this.outerBounds);
     this.lineStyle(lineWidth, lineColor, lineAlpha);
-    SelectionRenderer.drawBounds(this.container, this, this.boundingPoints);
+    SelectionRenderer.drawBounds(this, this.container, this.boundingPoints);
 
     if (fillAlpha) this.endFill();
     this.emit('updated', this.stage, this.outerBounds);
@@ -161,11 +160,13 @@ export class SelectionRenderer extends Graphics {
    * Detaches this renderer from the stage, so it will not be rendered, while nothing is selected.
    *
    * @protected
+   * @param {boolean} [force=false]
    * @returns {void}
    */
-  protected detach(): void {
+  protected detach(force = false): void {
+    if (typeof force !== 'boolean') force = false;
     if (!this.attached) return;
-    if (this.container.length !== 0) return this.update();
+    if (this.container.length !== 0 && !force) return this.update();
     this.clear();
     this.stage.removeChild(this);
     this.attached = false;
@@ -181,32 +182,32 @@ export class SelectionRenderer extends Graphics {
   }
 
   // Point pool
-  private static points = [  new Point(),
-                                new Point(),
-                                new Point(),
-                                new Point() ];
+  private static points = [ new Point(),
+                            new Point(),
+                            new Point(),
+                            new Point() ];
 
   /**
    * Draws rotated bounds of the given entity mapped to the given target.
    *
-   * @param entity The entity to draw the bounds for.
-   * @param target The target to draw the lines on.
-   * @param points Optional parameter for pooled points. Can be used to prevent unnecessary calculations, if already
+   * @param {Entity} entity The entity to draw the bounds for.
+   * @param {Graphics} target The target to draw the lines on.
+   * @param {PointLike[]} points Optional parameter for pooled points. Can be used to prevent unnecessary calculations, if already
    *               done. Points have to be mapped to the parent coordinates of the target.
    *               If not passed, an internal pool will be used.
    */
-  static drawBounds(entity: Entity, target: Graphics, points = SelectionRenderer.points) {
-      if (points === SelectionRenderer.points) {
-        const bnds = entity.getLocalBounds();
-        points[0].set(bnds.x, bnds.y);
-        points[1].set(bnds.x + bnds.width, bnds.y);
-        points[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
-        points[3].set(bnds.x, bnds.y + bnds.height);
-        points.forEach(point => target.parent.toLocal(point, entity, point));
-      }
-      target.moveTo(points[0].x, points[0].y);
-      points.push(points.shift());
-      points.forEach(point => target.lineTo(point.x, point.y));
+  static drawBounds(target: Graphics, entity?: Entity, points: PointLike[] = SelectionRenderer.points) {
+    if (points === SelectionRenderer.points && entity instanceof Entity) {
+      const bnds = entity.getLocalBounds();
+      points[0].set(bnds.x, bnds.y);
+      points[1].set(bnds.x + bnds.width, bnds.y);
+      points[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
+      points[3].set(bnds.x, bnds.y + bnds.height);
+      points.forEach(point => target.parent.toLocal(point, entity, point));
+    }
+    target.moveTo(points[0].x, points[0].y);
+    points.push(points.shift());
+    points.forEach(point => target.lineTo(point.x, point.y));
   }
 
 }
