@@ -4,7 +4,7 @@ import { Entity, PixiService } from "../../../../pixi/idx";
 import { SelectionRenderer } from '../renderer';
 
 /**
- * The rotation handler is responsible changing the rotation of the current selection.
+ * The rotation handler is responsible for changing the rotation of the current selection.
  *
  * @export
  * @class SelectionRotateHandler
@@ -21,7 +21,7 @@ export class SelectionRotateHandler {
   private mouseupFn: EventListenerObject;
   private mouseLeft = false;
 
-  private areas: DisplayObject[] = [ ];
+  readonly areas: DisplayObject[] = [ ];
 
   /**
    * Creates an instance of SelectionRotateHandler.
@@ -150,25 +150,19 @@ export class SelectionRotateHandler {
     const verDiff = { x: bottomLeft.x - topLeft.x, y: bottomLeft.y - topLeft.y };
     const width = Math.sqrt((horDiff.x * horDiff.x) + (horDiff.y * horDiff.y)) + (offset + threshold) * 2;
     const height = Math.sqrt((verDiff.x * verDiff.x) + (verDiff.y * verDiff.y));
-    this.areas.forEach((area, i) => {
-      switch(i) {
-        case 0: // Top
-          area.hitArea = new Rectangle(-offset - threshold, -offset - threshold, width, threshold);
-          area.position.set(bnds.x, bnds.y);
-          break;
-        case 1: // Right
-          area.hitArea = new Rectangle(offset, 0, threshold, height);
-          area.position.set(bnds.x + bnds.width, bnds.y);
-          break;
-        case 2: // Bottom
-          area.hitArea = new Rectangle(-offset - threshold, offset, width, threshold);
-          area.position.set(bnds.x, bnds.y + bnds.height);
-          break;
-        case 3: // Left
-          area.hitArea = new Rectangle(-offset - threshold, 0, threshold, height);
-          area.position.set(bnds.x, bnds.y);
-          break;
-      }
+    // Top
+    this.areas[0].hitArea = new Rectangle(-offset - threshold, -offset - threshold, width, threshold);
+    this.areas[0].position.set(bnds.x, bnds.y);
+    // Right
+    this.areas[1].hitArea = new Rectangle(offset, 0, threshold, height);
+    this.areas[1].position.set(bnds.x + bnds.width, bnds.y);
+    // Bottom
+    this.areas[2].hitArea = new Rectangle(-offset - threshold, offset, width, threshold);
+    this.areas[2].position.set(bnds.x, bnds.y + bnds.height);
+    // Left
+    this.areas[3].hitArea = new Rectangle(-offset - threshold, 0, threshold, height);
+    this.areas[3].position.set(bnds.x, bnds.y);
+    this.areas.forEach(area => {
       area.rotation = this.container.rotation;
       stage.toLocal(area.position, this.container, area.position);
     });
@@ -202,10 +196,9 @@ export class SelectionRotateHandler {
    * Makes sure that the clickable areas are aligned properly.
    *
    * @param {Container} stage
-   * @param {Rectangle} bounds
    * @returns {void}
    */
-  updated(stage: Container, bounds: Rectangle): void {
+  updated(stage: Container): void {
     this.updateAreaPostions(stage);
   }
 
