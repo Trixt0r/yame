@@ -53,10 +53,7 @@ const cursorOrder = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
  */
 export class ResizeAnchor extends Graphics {
 
-  public readonly xDirection: number;
-  public readonly yDirection: number;
-  public readonly offset: Point;
-  private clickedPos = new Point();
+  private clickedPos: Point = null;
   private containerPos = new Point();
   private clickedScale = new Point();
   private clickedSize = new Point();
@@ -69,6 +66,11 @@ export class ResizeAnchor extends Graphics {
   private tmpLocalBounds: Rectangle;
   private mouseupFn: EventListenerObject;
   private mouseLeft = false;
+
+  readonly xDirection: number;
+  readonly yDirection: number;
+
+  readonly offset: Point;
 
   /**
    * @type {DisplayObject} The target to resize.
@@ -146,11 +148,31 @@ export class ResizeAnchor extends Graphics {
    * @param {number} type The type to test.
    * @returns {boolean}
    */
-  matches(type: number, all = false): boolean {
-    if (all)
-      return (this.type & type) === this.type;
-    else
-      return (this.type & type) !== 0;
+  matches(type: number): boolean {
+    return (this.type & type) !== 0;
+  }
+
+  /**
+   * Renders this anchor with the current configuration.
+   *
+   * @returns {void}
+   */
+  render(): void {
+    const lineWidth = _.defaultTo(this.config.line.width, 1);
+    const lineColor = _.defaultTo(this.config.line.color, 0xffffff);
+    const lineAlpha = _.defaultTo(this.config.line.alpha, 1);
+    const fillColor = _.defaultTo(this.config.fill.color, 0x000000);
+    const fillAlpha =_.defaultTo(this.config.fill.alpha, 1);
+
+    this.clear();
+    if (fillAlpha) this.beginFill(fillColor, fillAlpha);
+
+    this.lineStyle(lineWidth, lineColor, lineAlpha);
+    this.drawRect(-this.config.size / 2, -this.config.size / 2, this.config.size, this.config.size);
+
+    if (fillAlpha) this.endFill();
+    this.hitArea = this.getLocalBounds().clone();
+    (<Rectangle>this.hitArea).pad(5, 5);
   }
 
   /**
@@ -182,31 +204,8 @@ export class ResizeAnchor extends Graphics {
    */
   resetCursor(event?: interaction.InteractionEvent): void {
     if (event !== void 0) this.mouseLeft = true;
-    if (this.clickedPos || !this.mouseLeft) return;
+    if (this.clickedPos || (!this.clickedPos && !this.mouseLeft)) return;
     this.service.app.view.style.cursor = '';
-  }
-
-  /**
-   * Renders this anchor with the current configuration.
-   *
-   * @returns {void}
-   */
-  render(): void {
-    const lineWidth = _.defaultTo(this.config.line.width, 1);
-    const lineColor = _.defaultTo(this.config.line.color, 0xffffff);
-    const lineAlpha = _.defaultTo(this.config.line.alpha, 1);
-    const fillColor = _.defaultTo(this.config.fill.color, 0x000000);
-    const fillAlpha =_.defaultTo(this.config.fill.alpha, 1);
-
-    this.clear();
-    if (fillAlpha) this.beginFill(fillColor, fillAlpha);
-
-    this.lineStyle(lineWidth, lineColor, lineAlpha);
-    this.drawRect(-this.config.size / 2, -this.config.size / 2, this.config.size, this.config.size);
-
-    if (fillAlpha) this.endFill();
-    this.hitArea = this.getLocalBounds().clone();
-    (<Rectangle>this.hitArea).pad(5, 5);
   }
 
   /**
@@ -246,9 +245,7 @@ export class ResizeAnchor extends Graphics {
     this.clickedBound.set(bnds.x + bnds.width * this.tmpXSignBounds,
                           bnds.y + bnds.height * this.tmpYSignBounds);
     this.clickedSize.set(bnds.width, bnds.height);
-
     this.container.parent.toLocal(this.clickedBound, this.target, this.clickedBound);
-
     this.emit('handle:start');
   }
 
@@ -317,6 +314,7 @@ export class ResizeAnchor extends Graphics {
    * @returns {void}
    */
   update(stage: Container, bnds: Rectangle): void {
+    this.validate();
     this.position.set(bnds.x + bnds.width * this.offset.x, bnds.y + bnds.height * this.offset.y);
     this.rotation = this.container.rotation;
     stage.toLocal(this.position, this.container, this.position);

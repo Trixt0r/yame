@@ -67,7 +67,6 @@ describe('SelectionRectangle', () => {
   });
 
   describe('contains', () => {
-
     let rect: SelectionRectangle;
     let entity: MyEntity;
 

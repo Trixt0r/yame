@@ -2,7 +2,7 @@ import { PixiService } from "ng/idx";
 import { SelectionContainer } from "../container";
 import { SelectionRenderer } from "../renderer";
 import { SelectionResizeHandler } from "./resize";
-import { ResizeAnchor, HOR, VERT, LEFT, UP, RIGHT, DOWN } from "./resize/anchor";
+import { HOR, VERT, LEFT, UP, RIGHT, DOWN } from "./resize/anchor";
 import { SpriteEntity, Group } from "ng/module/pixi/idx";
 
 describe('SelectionResizeHandler', () => {
@@ -32,21 +32,21 @@ describe('SelectionResizeHandler', () => {
 
     it('should have 8 anchors on each corner and each side', () => {
       expect(resize.anchors.length).toBe(8, 'Wrong amount of anchors');
-      let found = resize.anchors.find(anchor => anchor.matches(HOR | VERT | LEFT | UP, true));
+      let found = resize.anchors.find(anchor => anchor.type === (HOR | VERT | LEFT | UP));
       expect(found).toBeDefined('Top left anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(VERT | UP, true));
+      found = resize.anchors.find(anchor => anchor.type === (VERT | UP));
       expect(found).toBeDefined('Top anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(HOR | VERT | RIGHT | UP, true));
+      found = resize.anchors.find(anchor => anchor.type === (HOR | VERT | RIGHT | UP));
       expect(found).toBeDefined('Top right anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(HOR | RIGHT, true));
+      found = resize.anchors.find(anchor => anchor.type === (HOR | RIGHT));
       expect(found).toBeDefined('Right anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(HOR | VERT | RIGHT | DOWN, true));
+      found = resize.anchors.find(anchor => anchor.type === (HOR | VERT | RIGHT | DOWN));
       expect(found).toBeDefined('Bottom right anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(VERT | DOWN, true));
+      found = resize.anchors.find(anchor => anchor.type === (VERT | DOWN));
       expect(found).toBeDefined('Bottom anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(HOR | VERT | LEFT | DOWN, true))
+      found = resize.anchors.find(anchor => anchor.type === (HOR | VERT | LEFT | DOWN))
       expect(found).toBeDefined('Bottom left anchor not found');
-      found = resize.anchors.find(anchor => anchor.matches(HOR | LEFT, true))
+      found = resize.anchors.find(anchor => anchor.type === (HOR | LEFT))
       expect(found).toBeDefined('Left anchor not found');
     });
   });

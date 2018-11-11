@@ -136,7 +136,6 @@ describe('SelectionRenderer', () => {
   });
 
   describe('update', () => {
-
     let shapes, beginFill, endFill,
         lineStyle, lineWidth, lineColor, lineAlpha,
         fillColor, fillAlpha;
@@ -219,8 +218,8 @@ describe('SelectionRenderer', () => {
       renderer.selectionContainer.emit('update');
       expect(beginFill).toBe(true, 'beginFill not called');
       expect(endFill).toBe(true, 'endFill not called');
-      expect(fillAlpha).toBe(0.5, 'Wrong lineWidth');
-      expect(fillColor).toBe(0xffffff, 'Wrong lineColor');
+      expect(fillAlpha).toBe(0.5, 'Wrong fillAlpha');
+      expect(fillColor).toBe(0xffffff, 'Wrong fillColor');
     });
 
     it('should apply configured line style and fill if configured', () => {
@@ -237,8 +236,8 @@ describe('SelectionRenderer', () => {
       expect(lineColor).toBe(renderer.config.line.color, 'Wrong lineColor');
       expect(beginFill).toBe(true, 'beginFill not called');
       expect(endFill).toBe(true, 'endFill not called');
-      expect(fillAlpha).toBe(renderer.config.fill.alpha, 'Wrong lineWidth');
-      expect(fillColor).toBe(renderer.config.fill.color, 'Wrong lineColor');
+      expect(fillAlpha).toBe(renderer.config.fill.alpha, 'Wrong fillAlpha');
+      expect(fillColor).toBe(renderer.config.fill.color, 'Wrong fillColor');
     });
 
     it('should do nothing if not attached', () => {
