@@ -18,7 +18,7 @@ export class SelectionResizeHandler {
    *
    * @type {ResizeAnchor[]}
    */
-  public readonly points: ResizeAnchor[] = [ ];
+  public readonly anchors: ResizeAnchor[] = [ ];
 
   /**
    * Creates an instance of SelectionResizeHandler.
@@ -28,7 +28,7 @@ export class SelectionResizeHandler {
    * @memberof SelectionResizeHandler
    */
   constructor(private container: SelectionContainer, renderer: SelectionRenderer, service: PixiService) {
-    this.points.push(
+    this.anchors.push(
       new ResizeAnchor(HOR | VERT | LEFT | UP, service), // top left
       new ResizeAnchor(VERT | UP, service), // top mid
       new ResizeAnchor(HOR | VERT | RIGHT | UP, service), // top right
@@ -45,6 +45,16 @@ export class SelectionResizeHandler {
   }
 
   /**
+   * Determines whether the resizing can be active or not.
+   *
+   * @readonly
+   * @type {boolean}
+   */
+  get canBeActive(): boolean {
+    return this.container.length === 1 && !(this.container.entities[0] instanceof Group);
+  }
+
+  /**
    * Attaches handler.
    * Executed when the selection renderer got attached to the stage.
    *
@@ -53,16 +63,15 @@ export class SelectionResizeHandler {
    * @memberof SelectionResizeHandler
    */
   attached(stage: Container): void {
-    if (this.container.length !== 1) return;
-    if (this.container.entities[0] instanceof Group) return;
-    this.points.forEach(point => {
-      point.render();
-      point.setContainer(this.container);
-      point.setTarget(this.container.entities[0]);
-      point.on('update', () => this.container.emit('update'));
-      point.on('handle:start', () => this.container.beginHandling(point));
-      point.on('handle:end', () => this.container.endHandling(point));
-      stage.addChild(point);
+    if (!this.canBeActive) return;
+    this.anchors.forEach(anchor => {
+      anchor.render();
+      anchor.container = this.container;
+      anchor.target = this.container.entities[0];
+      anchor.on('update', () => this.container.emit('update'))
+            .on('handle:start', () => this.container.beginHandling(anchor))
+            .on('handle:end', () => this.container.endHandling(anchor));
+      stage.addChild(anchor);
     });
   }
 
@@ -74,11 +83,11 @@ export class SelectionResizeHandler {
    * @returns {void}
    */
   detached(stage: Container): void {
-    this.points.forEach(point => {
-      point.off('update');
-      point.off('handle:start');
-      point.off('handle:end');
-      stage.removeChild(point);
+    this.anchors.forEach(anchor => {
+      anchor.container = null;
+      anchor.target = null;
+      anchor.off('update').off('handle:start').off('handle:end');
+      stage.removeChild(anchor);
     });
   }
 
@@ -90,8 +99,9 @@ export class SelectionResizeHandler {
    * @returns {void}
    */
   updated(stage: Container): void {
+    if (!this.canBeActive) return;
     const bnds = this.container.getLocalBounds();
-    this.points.forEach(point => point.update(stage, bnds));
+    this.anchors.forEach(anchor => anchor.update(stage, bnds));
   }
 
 }

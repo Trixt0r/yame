@@ -67,17 +67,25 @@ export class ResizeAnchor extends Graphics {
   private tmpXSignBounds: number;
   private tmpYSignBounds: number;
   private tmpLocalBounds: Rectangle;
-  private target: DisplayObject;
   private mouseupFn: EventListenerObject;
-  private container: SelectionContainer;
   private mouseLeft = false;
+
+  /**
+   * @type {DisplayObject} The target to resize.
+   */
+  target: DisplayObject = null;
+
+  /**
+   * @type {DisplayObject} The container which the target is part of.
+   */
+  container: SelectionContainer = null;
 
   /**
    * The rendering configuration for this anchor.
    *
    * @type {ResizeAnchorRenderingConfig}
    */
-  public config: ResizeAnchorRenderingConfig = {
+  config: ResizeAnchorRenderingConfig = {
     fill: { },
     line: { },
     size: 10
@@ -138,8 +146,11 @@ export class ResizeAnchor extends Graphics {
    * @param {number} type The type to test.
    * @returns {boolean}
    */
-  matches(type: number): boolean {
-    return (this.type & type) !== 0;
+  matches(type: number, all = false): boolean {
+    if (all)
+      return (this.type & type) === this.type;
+    else
+      return (this.type & type) !== 0;
   }
 
   /**
@@ -176,26 +187,6 @@ export class ResizeAnchor extends Graphics {
   }
 
   /**
-   * Sets the container which the target is part of.
-   *
-   * @param {SelectionContainer} container The container to set.
-   * @returns {void}
-   */
-  setContainer(container: SelectionContainer) {
-    this.container = container;
-  }
-
-  /**
-   * Sets the target to resize.
-   *
-   * @param {DisplayObject} target
-   * @returns {void}
-   */
-  setTarget(target: DisplayObject): void {
-    this.target = target;
-  }
-
-  /**
    * Renders this anchor with the current configuration.
    *
    * @returns {void}
@@ -208,14 +199,12 @@ export class ResizeAnchor extends Graphics {
     const fillAlpha =_.defaultTo(this.config.fill.alpha, 1);
 
     this.clear();
-    if (fillAlpha)
-      this.beginFill(fillColor, fillAlpha);
+    if (fillAlpha) this.beginFill(fillColor, fillAlpha);
 
     this.lineStyle(lineWidth, lineColor, lineAlpha);
     this.drawRect(-this.config.size / 2, -this.config.size / 2, this.config.size, this.config.size);
 
-    if (fillAlpha)
-      this.endFill();
+    if (fillAlpha) this.endFill();
     this.hitArea = this.getLocalBounds().clone();
     (<Rectangle>this.hitArea).pad(5, 5);
   }
