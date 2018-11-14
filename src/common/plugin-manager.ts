@@ -11,19 +11,10 @@ interface PluginPaths {
 
 /**
  * The plugin manager handles the installation, activation and initialization of yame plugins.
- * In order to get initialized, the plugin has to serve a package.json file with a `yame` attribute.
- * Inside this attributes the entry point for each part of the app should be defined.
- * For example:
- * ```json
- * {
- * ...
- * "yame": {
- *   "electron": "path-to/electron/entry-point",
- *   "ng": "path-to/angular/entry-point"
- * }
- * ...
- * }
- * ```
+ *
+ * In order to get initialized, the plugin has to be a node module.
+ * This means that the entry point of the plugin is defined in the `package.json` unter `main`.
+ *
  *
  * @class PluginManager
  */

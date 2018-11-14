@@ -1,7 +1,19 @@
 import * as yame from './idx';
+import * as bluebird from 'bluebird';
+import * as eventemitter3 from 'eventemitter3';
+import * as fsExtra from 'fs-extra';
+import * as lodash from 'lodash';
+import * as uuid from 'uuid';
 import { extend } from '../common/require';
-// Define a way to require yame
-extend(yame);
+const mapping = {
+  yame: yame,
+  bluebird: bluebird,
+  eventemitter3: eventemitter3,
+  'fs-extra': fsExtra,
+  lodash: lodash,
+  uuid: uuid,
+};
+extend(mapping);
 
 import * as path from 'path';
 import * as electron from 'electron';
