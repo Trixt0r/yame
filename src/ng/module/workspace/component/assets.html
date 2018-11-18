@@ -1,6 +1,6 @@
 <div #filesContainer class="flex wrap" *ngIf="assets && assets.length">
   <ng-container *ngFor="let asset of assets">
-    <mat-card dnd-draggable [dragEnabled]="true" [dragData]="asset">
+    <mat-card dnd-draggable [dragEnabled]="true" [dragData]="asset" (dragstart)="dragStart($event)">
       <mat-card-header>
         <mat-card-title>{{ asset.content.simpleName }}</mat-card-title>
         <mat-card-subtitle>{{ asset.type }}</mat-card-subtitle>

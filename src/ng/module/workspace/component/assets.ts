@@ -8,6 +8,8 @@ import { AssetGroup } from '../../../../common/asset/group';
 import { Asset } from '../../../../common/asset';
 import { MenuOption } from './assets/interface/menu-option';
 
+const dragImage = new Image(0, 0);
+
 /**
  * Assets component responsible for controling the assets view.
  *
@@ -49,5 +51,16 @@ export class AssetsComponent implements OnChanges {
    */
   getMenuOptions(asset: Asset): MenuOption[] {
     return this.assetComponents.getMenuOptions(asset);
+  }
+
+  /**
+   * Drag start handler.
+   * Overrides the default drag image.
+   *
+   * @param {DragEvent} event
+   * @returns {void}
+   */
+  dragStart(event: DragEvent): void {
+    event.dataTransfer.setDragImage(dragImage, 0, 0);
   }
 }
