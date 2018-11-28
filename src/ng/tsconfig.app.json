@@ -5,7 +5,15 @@
     "module": "esnext",
     "baseUrl": "../",
     "paths": {
-      "*": ["./*", "./node_modules/*"]
+      "@common/*": ["./common/*"],
+      "@electron/*": ["./ng/module/electron/*"],
+      "@pixi/*": ["./ng/module/pixi/*"],
+      "@plugin/*": ["./ng/module/plugin/*"],
+      "@sidebar/*": ["./ng/module/sidebar/*"],
+      "@toolbar/*": ["./ng/module/toolbar/*"],
+      "@utils/*": ["./ng/module/utils/*"],
+      "@workspace/*": ["/ng./module/workspace/*"],
+      "*": ["./*", "./node_modules/*"],
     }
   },
   "exclude": [
