@@ -62,7 +62,7 @@ describe('Camera', () => {
       cam.attach(container);
       updateHandler = {fn: () => { }};
       updateSpy = spyOn(updateHandler, 'fn');
-      cam.on('update', updateHandler.fn);
+      cam.on('updated', updateHandler.fn);
     });
 
     it('should have the same zoom as the container the camera is attached to', () => {

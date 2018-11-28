@@ -24,9 +24,9 @@ export class Camera extends EventEmitter {
     this.targetPosition = new PIXI.Point();
     this.localTargetPosition = new PIXI.Point();
     this.zoomStep = 0.03;
-    this.on('update', () => {
+    this.on('updated', () => {
       if (!this._container) return;
-      this._container.emit('camera:update', this);
+      this._container.emit('camera:updated', this);
     });
   }
 
@@ -93,7 +93,7 @@ export class Camera extends EventEmitter {
       this._container.scale.set(this._zoom);
       this._container.position.x = -(this.localTargetPosition.x * this._zoom) + this.targetPosition.x;
       this._container.position.y = -(this.localTargetPosition.y * this._zoom) + this.targetPosition.y;
-      this.emit('update');
+      this.emit('updated');
     }
   }
 
@@ -157,7 +157,7 @@ export class Camera extends EventEmitter {
   set position(pos: PIXI.Point) {
     if (this.position.x != pos.x || this.position.y != pos.y) {
       this._container.position.set(pos.x, pos.y);
-      this.emit('update');
+      this.emit('updated');
     }
   }
 }
