@@ -80,8 +80,8 @@ describe('SelectionResizeHandler', () => {
         expect(anchor.container).toBe(container, `Container not set ${i}`);
         expect(anchor.target).toBe(container.entities[0], `First entity not set as target ${i}`);
         let emitted = false;
-        container.once('update', () => emitted = true);
-        anchor.emit('update');
+        container.once('updated', () => emitted = true);
+        anchor.emit('updated');
         expect(emitted).toBe(true, `"update" not emitted ${i}`);
         anchor.emit('handle:start');
         expect(container.currentHandler).toBe(anchor, `Handling not started on "handle:start" ${i}`);
@@ -115,7 +115,7 @@ describe('SelectionResizeHandler', () => {
       resize.anchors.forEach((anchor, i) => {
         expect(anchor.container).toBeNull(`Container not reset ${i}`);
         expect(anchor.target).toBeNull(`Target not reset ${i}`);
-        expect(anchor.listeners('update').length).toBe(0, `'update' listeners not removed ${i}`);
+        expect(anchor.listeners('updated').length).toBe(0, `'updated' listeners not removed ${i}`);
         expect(anchor.listeners('handle:start').length).toBe(0, `'handle:start' listeners not removed ${i}`);
         expect(anchor.listeners('handle:end').length).toBe(0, `'handle:end' listeners not removed ${i}`);
         expect(service.stage.children.indexOf(anchor)).toBeLessThan(0, `Anchor still added to stage ${i}`);

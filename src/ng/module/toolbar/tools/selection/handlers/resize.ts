@@ -68,7 +68,7 @@ export class SelectionResizeHandler {
       anchor.render();
       anchor.container = this.container;
       anchor.target = this.container.entities[0];
-      anchor.on('update', () => this.container.emit('update'))
+      anchor.on('updated', () => this.container.emit('updated'))
             .on('handle:start', () => this.container.beginHandling(anchor))
             .on('handle:end', () => this.container.endHandling(anchor));
       stage.addChild(anchor);
@@ -86,7 +86,7 @@ export class SelectionResizeHandler {
     this.anchors.forEach(anchor => {
       anchor.container = null;
       anchor.target = null;
-      anchor.off('update').off('handle:start').off('handle:end');
+      anchor.off('updated').off('handle:start').off('handle:end');
       stage.removeChild(anchor);
     });
   }

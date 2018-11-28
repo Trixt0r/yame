@@ -20,14 +20,14 @@ describe('SelectionRenderer', () => {
 
   describe('initial', () => {
     it('should listen to camera updates in the scene', () => {
-      const functions = service.scene.listeners('camera:update');
+      const functions = service.scene.listeners('camera:updated');
       const found = functions.find(fn => fn.name === 'update');
       expect(found).toBeDefined('No handler found with name "update"');
     });
 
     it('should listen to "selected" "update" and "unselected" events on the container', () => {
       const selected = renderer.selectionContainer.listeners('selected');
-      const update = renderer.selectionContainer.listeners('update');
+      const update = renderer.selectionContainer.listeners('updated');
       const unselected = renderer.selectionContainer.listeners('unselected');
       expect(selected.find(fn => fn.name === 'attach')).toBeDefined('No handler found with name "attach"');
       expect(update.find(fn => fn.name === 'update')).toBeDefined('No handler found with name "update"');
@@ -40,13 +40,13 @@ describe('SelectionRenderer', () => {
       const old = renderer.selectionContainer;
       renderer.selectionContainer = new SelectionContainer();
       let selected = old.listeners('selected');
-      let update = old.listeners('update');
+      let update = old.listeners('updated');
       let unselected = old.listeners('unselected');
       expect(selected.find(fn => fn.name === 'attach')).toBeUndefined('Handler found with name "attach" in old ref');
       expect(update.find(fn => fn.name === 'update')).toBeUndefined('Handler found with name "update" in old ref');
       expect(unselected.find(fn => fn.name === 'detach')).toBeUndefined('Handler found with name "detach" in old ref');
       selected = renderer.selectionContainer.listeners('selected');
-      update = renderer.selectionContainer.listeners('update');
+      update = renderer.selectionContainer.listeners('updated');
       unselected = renderer.selectionContainer.listeners('unselected');
       expect(selected.find(fn => fn.name === 'attach')).toBeDefined('No handler found with name "attach"');
       expect(update.find(fn => fn.name === 'update')).toBeDefined('No handler found with name "update"');
@@ -176,7 +176,7 @@ describe('SelectionRenderer', () => {
       SelectionRenderer.drawBounds = function() { bounds++; }
       let emitted = false;
       renderer.on('updated', () => emitted = true);
-      renderer.selectionContainer.emit('update');
+      renderer.selectionContainer.emit('updated');
       expect(shapes).toBe(1, 'drawShape not called once');
       expect(bounds).toBe(1, 'drawBounds not drawn');
       expect(lineStyle).toBe(true, 'lineStyle not called');
@@ -194,7 +194,7 @@ describe('SelectionRenderer', () => {
       SelectionRenderer.drawBounds = function() { bounds++; }
       let emitted = false;
       renderer.on('updated', () => emitted = true);
-      renderer.selectionContainer.emit('update');
+      renderer.selectionContainer.emit('updated');
       expect(shapes).toBe(2, 'drawShape not called twice');
       expect(bounds).toBe(1 + renderer.selectionContainer.length, 'drawBounds not drawn twice');
       expect(lineStyle).toBe(true, 'lineStyle not called');
@@ -206,7 +206,7 @@ describe('SelectionRenderer', () => {
 
     it('should apply default line style, by default', () => {
       renderer.selectionContainer.select([new SpriteEntity()]);
-      renderer.selectionContainer.emit('update');
+      renderer.selectionContainer.emit('updated');
       expect(lineWidth).toBe(1, 'Wrong lineWidth');
       expect(lineColor).toBe(0xffffff, 'Wrong lineColor');
       expect(lineAlpha).toBe(1, 'Wrong lineAlpha');
@@ -215,7 +215,7 @@ describe('SelectionRenderer', () => {
     it('should apply default fill color if alpha is bigger than 0', () => {
       renderer.selectionContainer.select([new SpriteEntity()]);
       renderer.config.fill.alpha = 0.5;
-      renderer.selectionContainer.emit('update');
+      renderer.selectionContainer.emit('updated');
       expect(beginFill).toBe(true, 'beginFill not called');
       expect(endFill).toBe(true, 'endFill not called');
       expect(fillAlpha).toBe(0.5, 'Wrong fillAlpha');
@@ -229,7 +229,7 @@ describe('SelectionRenderer', () => {
       renderer.config.line.width = 2;
       renderer.config.fill.alpha = 1;
       renderer.config.fill.color = 0xff00ff;
-      renderer.selectionContainer.emit('update');
+      renderer.selectionContainer.emit('updated');
       expect(lineStyle).toBe(true, 'lineStyle not called');
       expect(lineWidth).toBe(renderer.config.line.width, 'Wrong lineWidth');
       expect(lineAlpha).toBe(renderer.config.line.alpha, 'Wrong lineAlpha');
@@ -243,7 +243,7 @@ describe('SelectionRenderer', () => {
     it('should do nothing if not attached', () => {
       let emitted = false;
       renderer.on('updated', () => emitted = true);
-      renderer.selectionContainer.emit('update');
+      renderer.selectionContainer.emit('updated');
       expect(emitted).toBe(false, 'Still emitted');
     });
   });

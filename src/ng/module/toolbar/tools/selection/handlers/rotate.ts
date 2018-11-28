@@ -127,7 +127,7 @@ export class SelectionRotateHandler {
     this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
     this.container.rotation = this.initRot + Math.atan2(this.mouseCurrentPos.y - this.clickedPos.y,
                                                         this.mouseCurrentPos.x - this.clickedPos.x) - this.clickedRot;
-    this.container.emit('update');
+    this.container.emit('updated');
   }
 
   /**
@@ -213,7 +213,7 @@ export class SelectionRotateHandler {
       const tmp = this.container.entities[0].rotation;
       this.container.entities[0].rotation = 0;
       this.container.rotation = tmp;
-      this.container.emit('update');
+      this.container.emit('updated');
     }
   }
 

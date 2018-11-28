@@ -103,7 +103,7 @@ describe('SelectionTranslateHandler', () => {
         data: { global: new Point(0, 0) },
       });
       let emitted = false;
-      container.on('update', () => emitted = true);
+      container.on('updated', () => emitted = true);
       translate.mousemove(<any>{
         stopped: false,
         currentTarget: container,

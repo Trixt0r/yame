@@ -59,7 +59,7 @@ export class SelectionRenderer extends Graphics {
       new Point(),
       new Point(),
     ]
-    this.service.scene.on('camera:update', this.update, this); // Setup here, since the scene does not change
+    this.service.scene.on('camera:updated', this.update, this); // Setup here, since the scene does not change
     this.setupContainerHandlers();
   }
 
@@ -74,7 +74,7 @@ export class SelectionRenderer extends Graphics {
     if (this.container === container) return;
     const old = this.container;
     if (old) {
-      old.off('selected', null, this).off('update', null, this).off('unselected', null, this);
+      old.off('selected', null, this).off('updated', null, this).off('unselected', null, this);
       this.detach(true);
     }
     this.container = container;
@@ -92,7 +92,7 @@ export class SelectionRenderer extends Graphics {
   protected setupContainerHandlers(): void {
     if (!this.container) return;
     this.container.on('selected', this.attach, this);
-    this.container.on('update', this.update, this);
+    this.container.on('updated', this.update, this);
     this.container.on('unselected', this.detach, this);
   }
 

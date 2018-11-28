@@ -371,7 +371,7 @@ describe('ResizeAnchor', () => {
       });
       let emitted = false;
       let called = false;
-      newAnchor.on('update', () => emitted = true);
+      newAnchor.on('updated', () => emitted = true);
       newAnchor.validate = function() { called = true; return true; };
       newAnchor.mousemove(<any>{
         stopped: false,
@@ -398,7 +398,7 @@ describe('ResizeAnchor', () => {
       });
       let emitted = false;
       let called = false;
-      newAnchor.on('update', () => emitted = true);
+      newAnchor.on('updated', () => emitted = true);
       newAnchor.validate = function() { called = true; return true; };
       newAnchor.mousemove(<any>{
         stopped: false,
@@ -424,7 +424,7 @@ describe('ResizeAnchor', () => {
       });
       let emitted = false;
       let called = false;
-      newAnchor.on('update', () => emitted = true);
+      newAnchor.on('updated', () => emitted = true);
       newAnchor.validate = function() { called = true; return true; };
       newAnchor.mousemove(<any>{
         stopped: false,
@@ -443,7 +443,7 @@ describe('ResizeAnchor', () => {
       newAnchor.target = target;
       newAnchor.container = container;
       let emitted = false;
-      newAnchor.on('update', () => emitted = true);
+      newAnchor.on('updated', () => emitted = true);
       newAnchor.mousemove(<any>{ });
       expect(emitted).toBe(false, 'Still emitted');
     });

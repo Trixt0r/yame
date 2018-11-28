@@ -162,7 +162,7 @@ describe('SelectionRotateHandler', () => {
         data: { global: new Point(0, 0) },
       });
       let emitted = false;
-      container.on('update', () => emitted = true);
+      container.on('updated', () => emitted = true);
       rotate.mousemove(<any>{
         stopped: false,
         currentTarget: container,
@@ -222,7 +222,7 @@ describe('SelectionRotateHandler', () => {
       container.select([entity]);
       entity.rotation = Math.PI;
       let emitted = false;
-      container.on('update', () => emitted = true);
+      container.on('updated', () => emitted = true);
       rotate.selected();
       expect(container.rotation).toBe(Math.PI, 'Rotation not applied');
       expect(entity.rotation).toBe(0, 'Entity rotation not reset');

@@ -7,18 +7,53 @@ import { SelectionRenderer } from "./selection/renderer";
 import { SelectionContainer } from "./selection/container";
 import { DisplayObject, Graphics } from "pixi.js";
 import { Rectangle } from "electron";
+import { Action, ActionReducer, Store, ActionsSubject, ReducerManager } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operator/map';
+import { Observer } from 'rxjs/Observer';
+import { Subject } from "rxjs";
+
+export class MockStore<T> extends Store<T> {
+
+    private _fakeData: Object = {};
+    private fakeDataSubject: BehaviorSubject<Object> = new BehaviorSubject(this._fakeData);
+
+    select = <T, R>(mapFn: any, ...paths: string[]): Observable<R> => {
+        return map.call(this.fakeDataSubject, mapFn);
+    };
+
+    constructor() {
+        super(new Subject().asObservable(), new ActionsSubject(), <any>{});
+    }
+
+    nextMock(mock: Object, ...keys: string[]) {
+        let curMockLevel = this._fakeData = {};
+        keys.forEach((key, idx) => {
+            curMockLevel = curMockLevel[key] = idx === keys.length - 1 ? mock : {};
+        });
+        this.fakeDataSubject.next(this._fakeData);
+    }
+
+    get fakeData() {
+        return this._fakeData;
+    }
+
+}
 
 
 describe('SelectionTool', () => {
 
   let tool: SelectionTool;
   let pixiService: PixiService;
-  const ngRef = { injector: { get: function(){ return pixiService; } } };
+  let store: Store<any>;
+  const ngRef = { injector: { get: function(type) { return type === Store ? store : pixiService; } } };
 
   beforeEach(() => {
     pixiService = new PixiService();
     pixiService.setUp(<any>{ nativeElement: document.createElement('canvas') }, { });
     tool = new SelectionTool('select');
+    store = new MockStore<any>();
   });
 
   describe('initial', () => {

@@ -288,7 +288,7 @@ export class ResizeAnchor extends Graphics {
     this.container.position.x = this.containerPos.x + bound.x;
     this.container.position.y = this.containerPos.y + bound.y;
     this.updateCursor();
-    this.emit('update');
+    this.emit('updated');
   }
 
   /**

@@ -68,6 +68,7 @@
     "@angular/platform-browser": "^7.0.0",
     "@angular/platform-browser-dynamic": "^7.0.0",
     "@angular/router": "^7.0.0",
+    "@ngrx/store": "^6.1.2",
     "@ngtools/webpack": "^7.0.2",
     "@types/core-js": "0.9.36",
     "@types/fs-extra": "^4.0.2",

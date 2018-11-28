@@ -74,7 +74,7 @@ export class SelectionTranslateHandler {
     this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
     this.container.position.x = this.startPos.x + (this.mouseCurrentPos.x - this.mouseStartPos.x);
     this.container.position.y = this.startPos.y + (this.mouseCurrentPos.y - this.mouseStartPos.y);
-    this.container.emit('update');
+    this.container.emit('updated');
   }
 
   /**

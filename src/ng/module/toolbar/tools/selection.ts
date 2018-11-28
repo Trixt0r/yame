@@ -11,6 +11,8 @@ import { SelectionRenderer } from './selection/renderer';
 import { SelectionTranslateHandler } from './selection/handlers/translate';
 import { SelectionRotateHandler } from './selection/handlers/rotate';
 import { SelectionResizeHandler } from './selection/handlers/resize';
+import { Store } from '@ngrx/store';
+import { SelectionToolTranslateAction, SelectionToolRotateAction, SelectionToolResizeAction, SelectionToolSelectAction, SelectionToolUnselectAction } from './selection/rx/actions';
 
 /**
  *
@@ -60,6 +62,8 @@ export class SelectionTool extends Tool {
   protected service: PixiService;
   protected globalMouse: PointLike;
 
+  protected store: Store<{selection: any}>;
+
   // Context bound mouse event handler.
   protected onMousedown: EventListenerObject;
   protected onMouseup: EventListenerObject;
@@ -70,6 +74,7 @@ export class SelectionTool extends Tool {
     this.container = new SelectionContainer();
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
       this.service = ref.injector.get(PixiService);
+      this.store = <Store<{selection: any}>>ref.injector.get(Store);
       this.setup();
     });
   }
@@ -96,6 +101,25 @@ export class SelectionTool extends Tool {
       new SelectionRotateHandler(this.container, this.renderer, this.service),
       new SelectionResizeHandler(this.container, this.renderer, this.service)
     );
+    this.container.on('selected', () =>
+      this.store.dispatch(new SelectionToolSelectAction(this.container.map(entity => entity.id)))
+    );
+    this.container.on('unselected', () => this.store.dispatch(new SelectionToolUnselectAction()));
+    this.container.on('updated', () => {
+      if (!this.store) return console.warn('[SelectionTool] No store initialized!');
+      if (this.container.currentHandler instanceof SelectionTranslateHandler)
+        this.store.dispatch(new SelectionToolTranslateAction({
+          x: this.container.position.x,
+          y: this.container.position.y
+        }));
+      else if (this.container.currentHandler instanceof SelectionRotateHandler)
+        this.store.dispatch(new SelectionToolRotateAction(this.container.rotation));
+      else if (this.handlers[this.handlers.length - 1].anchors.indexOf(this.container.currentHandler) >= 0)
+        this.store.dispatch(new SelectionToolResizeAction({
+          x: this.container.entities[0].scale.x,
+          y: this.container.entities[0].scale.y
+        }));
+    });
   }
 
   /**

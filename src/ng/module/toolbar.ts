@@ -6,11 +6,16 @@ import { ToolbarService } from "./toolbar/service";
 import { Tool } from "./toolbar/tool";
 import { ToolDirective } from "./toolbar/directive/tool";
 import { DefaultToolComponent } from "./toolbar/component/default";
-import { Pubsub } from "common/pubsub";
 import { SelectionTool } from "./toolbar/tools/selection";
+import { StoreModule } from "@ngrx/store";
+import { selectionReducer } from "./toolbar/tools/selection/rx/reducer";
 
 @NgModule({
-  imports: [ CommonModule, MaterialModule ],
+  imports: [
+    CommonModule,
+    MaterialModule,
+    StoreModule.forRoot({ selection: selectionReducer })
+  ],
   entryComponents: [ DefaultToolComponent ],
   declarations: [ ToolbarComponent, DefaultToolComponent, ToolDirective ],
   exports: [ ToolbarComponent ],
