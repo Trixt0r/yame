@@ -1,7 +1,7 @@
 import { SelectionTool } from "./selection";
 import { Tool } from "../tool";
 import { Pubsub } from "electron/idx";
-import { PixiService } from "ng/module/pixi/idx";
+import { PixiService, SpriteEntity } from "ng/module/pixi/idx";
 import { SelectionRectangle } from "./selection/rectangle";
 import { SelectionRenderer } from "./selection/renderer";
 import { SelectionContainer } from "./selection/container";
@@ -198,17 +198,31 @@ describe('SelectionTool', () => {
       expect(unselected).toBe(false, 'Still executedd');
     });
 
-    it('should skip if second mousedown got executed', () => {
+    it('should not unselect if nothing selected', () => {
       const event = new MouseEvent('mousedown');
       tool.mousedown(event);
-      expect(unselected).toBe(true, 'First time not executedd');
+      expect(unselected).toBe(false, 'Still executed');
+    });
+
+    it('should not unselect if something selected', () => {
+      const event = new MouseEvent('mousedown');
+      tool.mousedown(event);
+      expect(unselected).toBe(false, 'Still executed');
+    });
+
+    it('should skip if second mousedown got executed', () => {
+      const event = new MouseEvent('mousedown');
+      tool.selectionContainer.select([new SpriteEntity()]);
+      tool.mousedown(event);
+      expect(unselected).toBe(true, 'First time not executed');
       unselected = false;
       tool.mousedown(event);
-      expect(unselected).toBe(false, 'Still executedd');
+      expect(unselected).toBe(false, 'Still executed');
     });
 
     it('should unselect, remove the container and update the selection retangle if previous checks are ok', () => {
       const event = new MouseEvent('mousedown');
+      tool.selectionContainer.select([new SpriteEntity()]);
       tool.mousedown(event);
       expect(unselected).toBe(true, 'Not unselected');
       expect(removed).toEqual(tool.selectionContainer, 'Not removed');

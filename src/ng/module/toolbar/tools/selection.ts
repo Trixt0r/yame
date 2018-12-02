@@ -75,7 +75,6 @@ export class SelectionTool extends Tool {
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
       this.service = ref.injector.get(PixiService);
       this.store = ref.injector.get(Store);
-      this.store.subscribe(data => console.log(data));
       this.setup();
     });
   }
@@ -103,7 +102,12 @@ export class SelectionTool extends Tool {
       new SelectionResizeHandler(this.container, this.renderer, this.service)
     );
     this.container.on('selected', () =>
-      this.store.dispatch(new Select(this.container.map(entity => entity.id)))
+      this.store.dispatch(new Select(
+        this.container.map(entity => entity.id),
+        { x: this.container.position.x, y: this.container.position.y },
+        this.container.rotation,
+        this.container.length > 1 ? void 0 : { x: this.container.entities[0].scale.x, y: this.container.entities[0].scale.y },
+      ))
     );
     this.container.on('unselected', () => this.store.dispatch(new Unselect()));
     this.container.on('updated', () => {
@@ -204,7 +208,7 @@ export class SelectionTool extends Tool {
     if (this.container.isHandling) return; // Delegate the work to the current container
     if (event.which !== 1) return;
     if (this.down) return;
-    this.container.unselect();
+    if (this.container.length) this.container.unselect();
     this.map.removeChild(this.container);
     this.rectangle.reset();
     this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
