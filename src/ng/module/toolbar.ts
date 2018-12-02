@@ -7,14 +7,16 @@ import { Tool } from "./toolbar/tool";
 import { ToolDirective } from "./toolbar/directive/tool";
 import { DefaultToolComponent } from "./toolbar/component/default";
 import { SelectionTool } from "./toolbar/tools/selection";
-import { StoreModule } from "@ngrx/store";
-import { selectionReducer } from "./toolbar/tools/selection/rx/reducer";
+import { NgxsModule } from '@ngxs/store';
+import { SelectionState } from "./toolbar/tools/selection/ngxs/state";
 
 @NgModule({
   imports: [
     CommonModule,
     MaterialModule,
-    StoreModule.forRoot({ selection: selectionReducer })
+    NgxsModule.forRoot([
+      SelectionState
+    ])
   ],
   entryComponents: [ DefaultToolComponent ],
   declarations: [ ToolbarComponent, DefaultToolComponent, ToolDirective ],

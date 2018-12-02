@@ -5,6 +5,7 @@ import { Asset } from '../../../common/asset';
 import { PixiAssetConverter } from './service/converter';
 import { Map } from './scene/map';
 import { Entity } from './scene/entity';
+import { Subject } from 'rxjs/Rx';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
@@ -22,6 +23,14 @@ export class PixiService {
   private viewRef: ElementRef;
   private newSize = new PIXI.Point();
   private internalAssetConverter = new PixiAssetConverter();
+
+  private resizeSource = new Subject<PIXI.Point>();
+  private readySource = new Subject<void>();
+  private disposeSource = new Subject<void>();
+
+  resize$ = this.resizeSource.asObservable();
+  ready$ = this.readySource.asObservable();
+  dipose$ = this.disposeSource.asObservable();
 
   /** @type {PIXI.Application} app The pixi js application instance. */
   get app(): PIXI.Application {
@@ -79,6 +88,7 @@ export class PixiService {
                                             options);
     this.internalScene = new Map();
     this.internalApp.stage.addChild(this.internalScene);
+    this.readySource.next();
     this.resize();
   }
 
@@ -92,6 +102,7 @@ export class PixiService {
     this.newSize.set(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
     if (this.renderer.width != this.newSize.x || this.renderer.height != this.newSize.y) {
       this.renderer.resize(this.newSize.x, this.newSize.y);
+      this.resizeSource.next(this.newSize);
       return this.newSize;
     }
     return false;
@@ -129,6 +140,7 @@ export class PixiService {
         if (!this.internalApp) throw new PixiAppNotInitializedException("Can't dispose!");
         this.internalApp.destroy();
         this.internalApp = null;
+        this.disposeSource.next();
         resolve();
       } catch (e) {
         console.warn('An unexpected error occurred while disposing the pixi service', e);

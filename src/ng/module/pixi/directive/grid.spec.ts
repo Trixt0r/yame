@@ -56,7 +56,7 @@ describe('PixiGridDirective', () => {
     let cam = new Camera();
     directive.listenToCamera(cam);
     let spy = spyOn(directive.grid, 'update');
-    cam.emit('update');
+    cam.emit('updated');
     expect(spy.calls.any()).toBe(true, 'update() has not been called on the camera update event');
   });
 
@@ -65,7 +65,7 @@ describe('PixiGridDirective', () => {
     directive.listenToCamera(oldCam);
     directive.listenToCamera(new Camera());
     let spy = spyOn(directive.grid, 'update');
-    oldCam.emit('update');
+    oldCam.emit('updated');
     expect(spy.calls.any()).toBe(false, 'update() should not have been called on the old camera update event');
   });
 

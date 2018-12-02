@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Entity, EntityData, EntityType } from "./entity";
 import { GroupException } from '../exception/entity/group';
 
-interface GroupData extends EntityData {
+export interface GroupData extends EntityData {
   entities: EntityData[];
 }
 
@@ -50,7 +50,7 @@ export class Group<T extends Entity> extends Entity {
     let prevEntities = this.entities;
     return this.clear()
             .then(() => this.addEntities(entities, from))
-            .then(entities => super.parse(data, from))
+            .then(() => super.parse(data, from))
             .catch(e => this.addEntities(prevEntities)
                         .then(() => Promise.reject(e)) ) as Promise<Group<T>>;
   }
@@ -198,15 +198,15 @@ export class Group<T extends Entity> extends Entity {
     return this.internalEntities.filter(callbackFn, thisArg);
   }
 
-  map(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg): any[] {
+  map(callbackFn: (entity: T, index: number, array: T[]) => any,  thisArg?: any): any[] {
     return this.internalEntities.map(callbackFn, thisArg);
   }
 
-  every(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg): boolean {
+  every(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg?: any): boolean {
     return this.internalEntities.every(callbackFn, thisArg);
   }
 
-  some(callbackFn: (entity: T, index: number, array: T[]) => any, thisArg): boolean {
+  some(callbackFn: (entity: T, index: number, array: T[]) => any,  thisArg?: any): boolean {
     return this.internalEntities.some(callbackFn, thisArg);
   }
 

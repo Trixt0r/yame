@@ -76,7 +76,9 @@ describe('Scene', () => {
         let entityData = {
           id: 'myId',
           name: 'myEntity',
-          type: 'myentity'
+          type: 'myentity',
+          visibility: true,
+          locked: false,
         };
         let length = group.length;
         group.addEntity(entityData)
@@ -86,6 +88,8 @@ describe('Scene', () => {
             expect(group.indexOf('myId')).toBe(0, 'Entity has wrong index');
             expect(re.id).toEqual('myId', 'Id has not been parsed');
             expect(re.name).toEqual('myEntity', 'Name has not been parsed');
+            expect(re.visibility).toEqual(true, 'Visibility has not been parsed');
+            expect(re.locked).toEqual(false, 'Locked has not been parsed');
             done();
           })
           .catch(() => {
@@ -149,9 +153,9 @@ describe('Scene', () => {
       it('should add the given array of entity data to the group', done => {
         let origin = { type: 'myentity' };
         let entities = [
-          _.extend({ id: _.uniqueId(), name: 'bla' }, origin),
-          _.extend({ id: _.uniqueId(), name: 'ble' }, origin),
-          _.extend({ id: _.uniqueId(), name: 'blo' }, origin),
+          _.extend({ id: _.uniqueId(), name: 'bla', visibility: true, locked: false }, origin),
+          _.extend({ id: _.uniqueId(), name: 'ble', visibility: true, locked: false }, origin),
+          _.extend({ id: _.uniqueId(), name: 'blo', visibility: true, locked: false }, origin),
         ];
         let length = group.length;
         group.addEntities(entities)
@@ -175,9 +179,9 @@ describe('Scene', () => {
       it('should add the given array of mixed entity data and entity instances to the group', done => {
         let origin = { type: 'myentity' };
         let entities = [
-          _.extend({ id: _.uniqueId(), name: 'bla' }, origin),
+          _.extend({ id: _.uniqueId(), name: 'bla', visibility: true, locked: false }, origin),
           new MyEntity(),
-          _.extend({ id: _.uniqueId(), name: 'blo' }, origin),
+          _.extend({ id: _.uniqueId(), name: 'blo', visibility: true, locked: false }, origin),
         ];
         let length = group.length;
         group.addEntities(entities)
@@ -433,6 +437,8 @@ describe('Scene', () => {
           id: 'myGroup',
           name: 'test',
           type: 'group',
+          visibility: true,
+          locked: false,
         };
         group.parse(data, '')
               .then(() => {
@@ -451,11 +457,15 @@ describe('Scene', () => {
           entities: [{
             id: 'anId',
             name: 'myEntity',
-            type: 'myentity'
+            type: 'myentity',
+            visibility: true,
+            locked: false,
           }],
           id: 'myGroup',
           name: 'test',
           type: 'group',
+          visibility: true,
+          locked: false,
         };
         group.parse(data, '')
           .then(re => {
@@ -479,11 +489,15 @@ describe('Scene', () => {
           entities: [{
             id: 'anId',
             name: 'myEntity',
-            type: 'myentity'
+            type: 'myentity',
+            visibility: true,
+            locked: false,
           }],
           id: 'myGroup',
           name: 'test',
           type: 'group',
+          visibility: true,
+          locked: false,
         };
         let prevEntity = new MyEntity('myOtherEntity');
         group.addEntity(prevEntity)
@@ -506,11 +520,15 @@ describe('Scene', () => {
           entities: [{
             id: <any>false,
             name: 'myEntity',
-            type: 'myentity'
+            type: 'myentity',
+            visibility: true,
+            locked: false,
           }],
           id: 'myGroup',
           name: 'test',
           type: 'group',
+          visibility: true,
+          locked: false,
         };
         group.addEntities([new MyEntity(), new MyEntity()])
           .then(entities => {

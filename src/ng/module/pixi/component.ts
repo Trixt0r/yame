@@ -5,6 +5,7 @@ import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from '../../../common/asset';
 import { Entity } from './scene/entity';
+import { Layer } from './scene/idx';
 
 /**
  * A pixi component provides a canvas element and initializes the injected pixi service.

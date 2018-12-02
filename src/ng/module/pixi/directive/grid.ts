@@ -53,9 +53,9 @@ export class PixiGridDirective implements AfterViewInit {
    */
   listenToCamera(camera: Camera) {
     if (this.currentCam)
-      this.currentCam.off('update', this.update, this);
+      this.currentCam.off('updated', this.update, this);
     if (!camera) return;
     this.currentCam = camera;
-    camera.on('update', this.update, this);
+    camera.on('updated', this.update, this);
   }
 }

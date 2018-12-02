@@ -82,13 +82,18 @@ describe('Scene', () => {
         const data = {
           id: 'test',
           name: 'noname',
-          type: 'mytestentity'
+          type: 'mytestentity',
+          visibility: true,
+          locked: false,
         };
         entity.parse(data, '')
           .then(res => {
             expect(res).toBe(entity, 'Entity has not been resolved');
             expect(entity.id).toBe('test', 'The parsed id has not been applied');
             expect(entity.name).toBe('noname', 'The parsed name has not been applied');
+            expect(entity.visibility).toBe(true, 'The parsed visibility has not been applied');
+            expect(entity.visible).toBe(true, 'The visibility has not been applied to the visible flag');
+            expect(entity.locked).toBe(false, 'The locked has not been applied');
             done();
           })
           .catch(() => fail('Should not fail while parsing'));
@@ -98,7 +103,9 @@ describe('Scene', () => {
         const data = {
           id: 'test',
           name: 'noname',
-          type: 'mytestentity'
+          type: 'mytestentity',
+          visibility: true,
+          locked: false,
         };
         let spy = { fn: function(parsed) { expect(data).toBe(parsed, 'The incorrect value has been emitted'); } };
         spyOn(spy, 'fn');
@@ -113,7 +120,9 @@ describe('Scene', () => {
         const data = {
           id: '',
           name: 'noname',
-          type: 'mytestentity'
+          type: 'mytestentity',
+          visibility: true,
+          locked: false,
         };
         entity.parse(data, '')
           .then(() => fail('Should fail while parsing'))

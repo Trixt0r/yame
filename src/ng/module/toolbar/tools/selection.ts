@@ -11,8 +11,8 @@ import { SelectionRenderer } from './selection/renderer';
 import { SelectionTranslateHandler } from './selection/handlers/translate';
 import { SelectionRotateHandler } from './selection/handlers/rotate';
 import { SelectionResizeHandler } from './selection/handlers/resize';
-import { Store } from '@ngrx/store';
-import { SelectionToolTranslateAction, SelectionToolRotateAction, SelectionToolResizeAction, SelectionToolSelectAction, SelectionToolUnselectAction } from './selection/rx/actions';
+import { Store } from '@ngxs/store';
+import { Translate, Rotate, Resize, Select, Unselect } from './selection/ngxs/actions';
 
 /**
  *
@@ -62,7 +62,7 @@ export class SelectionTool extends Tool {
   protected service: PixiService;
   protected globalMouse: PointLike;
 
-  protected store: Store<{selection: any}>;
+  protected store: Store;
 
   // Context bound mouse event handler.
   protected onMousedown: EventListenerObject;
@@ -74,7 +74,8 @@ export class SelectionTool extends Tool {
     this.container = new SelectionContainer();
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
       this.service = ref.injector.get(PixiService);
-      this.store = <Store<{selection: any}>>ref.injector.get(Store);
+      this.store = ref.injector.get(Store);
+      this.store.subscribe(data => console.log(data));
       this.setup();
     });
   }
@@ -102,20 +103,20 @@ export class SelectionTool extends Tool {
       new SelectionResizeHandler(this.container, this.renderer, this.service)
     );
     this.container.on('selected', () =>
-      this.store.dispatch(new SelectionToolSelectAction(this.container.map(entity => entity.id)))
+      this.store.dispatch(new Select(this.container.map(entity => entity.id)))
     );
-    this.container.on('unselected', () => this.store.dispatch(new SelectionToolUnselectAction()));
+    this.container.on('unselected', () => this.store.dispatch(new Unselect()));
     this.container.on('updated', () => {
       if (!this.store) return console.warn('[SelectionTool] No store initialized!');
       if (this.container.currentHandler instanceof SelectionTranslateHandler)
-        this.store.dispatch(new SelectionToolTranslateAction({
+        this.store.dispatch(new Translate({
           x: this.container.position.x,
           y: this.container.position.y
         }));
       else if (this.container.currentHandler instanceof SelectionRotateHandler)
-        this.store.dispatch(new SelectionToolRotateAction(this.container.rotation));
+        this.store.dispatch(new Rotate(this.container.rotation));
       else if (this.handlers[this.handlers.length - 1].anchors.indexOf(this.container.currentHandler) >= 0)
-        this.store.dispatch(new SelectionToolResizeAction({
+        this.store.dispatch(new Resize({
           x: this.container.entities[0].scale.x,
           y: this.container.entities[0].scale.y
         }));
@@ -209,7 +210,7 @@ export class SelectionTool extends Tool {
     this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
     this.rectangle.bottomRight.copy(this.rectangle.topLeft);
     this.rectangle.update();
-    const selection = this.map.filter(child => child.containsPoint(<Point>this.globalMouse));
+    const selection = this.map.filter(child => child.visible && !child.locked && child.containsPoint(<Point>this.globalMouse));
     if (selection.length > 0) {
       this.finish();
       this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
@@ -262,7 +263,7 @@ export class SelectionTool extends Tool {
   finish(): void {
     this.down = false;
     this.stage.removeChild(this.graphics);
-    const selection = this.map.filter(child => this.rectangle.contains(child));
+    const selection = this.map.filter(child => child.visible && !child.locked && this.rectangle.contains(child));
     if (selection.length) {
       this.map.addChild(this.container);
       this.container.select(selection);
