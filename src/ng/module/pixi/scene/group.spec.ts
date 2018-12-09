@@ -129,9 +129,82 @@ describe('Scene', () => {
             done();
           });
       });
+
+      it('should add the entity to the flat list', done => {
+        let entity = new MyEntity();
+        group.addEntity(entity)
+          .then(re => {
+            expect(group.flatEntities.indexOf(entity)).toBe(0, 'Entity has not been added to the flat entity list');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
+
+      it('should add the entity to the flat list', done => {
+        let entity = new MyEntity();
+        group.addEntity(entity)
+          .then(() => {
+            expect(group.flatIndexOf(entity)).toBe(0, 'Entity has not been added to the flat entity list');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
+
+      it('should add indirect entities to the flat list initially', done => {
+        let newGroup = new Group();
+        let entity = new MyEntity();
+        newGroup.addEntity(entity)
+          .then(() => group.addEntity(newGroup))
+          .then(() => {
+            expect(group.flatIndexOf(entity)).toBe(1, 'Entity has not been added to the flat entity list');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
+
+      it('should add indirect entities to the flat list, if they added afterwards', done => {
+        let newGroup = new Group();
+        let entity = new MyEntity();
+        group.addEntity(newGroup)
+          .then(() => {
+            return newGroup.addEntity(entity);
+          })
+          .then(() => {
+            expect(group.flatIndexOf(entity)).toBe(1, 'Entity has not been added to the flat entity list');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
     });
 
     describe('addEntities', () => {
+      it('should call addEntity for each entity', done => {
+        let entities = [new MyEntity(), new MyEntity(), new MyEntity()];
+        let count = 0;
+        (<any>group).addEntity = () => count++;
+        group.addEntities(entities)
+          .then(() => {
+            expect(count).toBe(entities.length, 'addEntity has not been called correctly');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
+
       it('should add the given array of entites to the group', done => {
         let entities = [new MyEntity(), new MyEntity(), new MyEntity()];
         let length = group.length;
@@ -266,7 +339,6 @@ describe('Scene', () => {
         group.on('removed:entity', handler.fn);
         group.addEntity(entity)
           .then(() => {
-            let length = group.length;
             return group.removeEntity(entity)
               .then(() => {
                 expect(handler.fn).toHaveBeenCalledTimes(1);
@@ -278,6 +350,61 @@ describe('Scene', () => {
             done();
           });
         });
+
+      it('should remove the entity from the flat entity list', done => {
+        let entity = new MyEntity();
+        group.addEntity(entity)
+          .then(() => {
+            let length = group.flatEntities.length;
+            return group.removeEntity(entity)
+              .then(() => {
+                expect(group.flatEntities.length).toBe(length - 1, 'Entity has not been removed from the flat entity list');
+                done();
+              });
+          })
+          .catch(e => {
+            fail('Should not have been rejected');
+            done();
+          });
+        });
+
+      it('should remove indirect entities from the flat list if they get removed from a sub group', done => {
+        let newGroup = new Group();
+        let entity = new MyEntity();
+        let length = 0;
+        newGroup.addEntity(entity)
+          .then(() => group.addEntity(newGroup))
+          .then(() => length = group.flatEntities.length)
+          .then(() => newGroup.removeEntity(entity))
+          .then(() => {
+            expect(group.flatEntities.length).toBe(length - 1, 'Entity has not been removed from the flat entity list');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
+
+      it('should remove all entities from the flat list if they get removed with a sub group', done => {
+        let newGroup = new Group();
+        let entity = new MyEntity();
+        newGroup.addEntity(entity)
+          .then(() => group.addEntity(newGroup))
+          .then(() => group.removeEntity(newGroup))
+          .then(() => {
+            expect(group.flatEntities.length).toBe(0, 'Entities have not been removed from the flat entity list');
+            return newGroup.addEntity(new MyEntity());
+          })
+          .then(() => {
+            expect(group.flatEntities.length).toBe(0, 'Entities have still been added to the flat entity list');
+            done();
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
 
       it('should reject if the entity is not part of the group', done => {
         let entity = new MyEntity();
@@ -295,6 +422,23 @@ describe('Scene', () => {
     });
 
     describe('removeEntities', () => {
+      it('should call removeEntity internally', done => {
+        let count = 0;
+        (<any>group).removeEntity = () => count++;
+        group.addEntities([new MyEntity(), new MyEntity(), new MyEntity(), new MyEntity(), new MyEntity()])
+          .then(() => {
+            return group.removeEntities(group.entities.slice(0, 2))
+              .then(removed => {
+                expect(count).toBe(removed.length, 'removeEntity has not been called properly.');
+                done();
+              });
+          })
+          .catch(() => {
+            fail('Should not have been rejected');
+            done();
+          });
+      });
+
       it('should remove a part of entites from the group', done => {
         group.addEntities([new MyEntity(), new MyEntity(), new MyEntity(), new MyEntity(), new MyEntity()])
           .then(() => {

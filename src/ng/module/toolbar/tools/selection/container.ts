@@ -96,6 +96,7 @@ export class SelectionContainer extends Group<Entity> {
       const found = this.indexOf(entity);
       if (found >= 0) return console.warn(`[SelectionContainer] Entity with id ${entity.id} is already selected!`);
       this.internalEntities.push(entity);
+      this.addFlatEntity(entity);
       added.push(entity);
       this.addChild(entity);
       this.toLocal(entity.position, entity.parentEntity, entity.position);
@@ -136,6 +137,7 @@ export class SelectionContainer extends Group<Entity> {
       this.removeChild(child);
       const idx = this.internalEntities.indexOf(child);
       if (idx >= 0) this.internalEntities.splice(idx, 1);
+      this.removeFlatEntity(child);
       if (child.parentEntity) {
         // Restoring the internal relation
         child.parentEntity.addChild(child);
