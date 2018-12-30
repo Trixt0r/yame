@@ -1,16 +1,8 @@
-import { Entity } from "../../../pixi/idx";
-import { Point, Rectangle, Container } from "pixi.js";
+import { Entity } from '../../../pixi/idx';
+import { Point, Rectangle, Container } from 'pixi.js';
 
 const globalTopLeft = new PIXI.Point();
 const globalBottomRight = new PIXI.Point();
-
-/**
- * A rectangle like interface.
- *
- * @interface RectangleLike
- * @extends {Rectangle}
- */
-interface RectangleLike extends Rectangle { }
 
 /**
  *
@@ -21,7 +13,6 @@ interface RectangleLike extends Rectangle { }
  * @class SelectionRectangle
  */
 export class SelectionRectangle {
-
   /**
    * @type {Point} The top left point.
    */
@@ -44,9 +35,26 @@ export class SelectionRectangle {
    */
   protected rect: Rectangle = new Rectangle();
 
-  constructor(public container: Container,
-              topLeft?: Point,
-              bottomRight?: Point) {
+  /**
+   * Calculates the correct x, y, width and height properties based on the given two points.
+   *
+   * @param {Point} topLeft The top left point.
+   * @param {Point} bottomRight The bottom right point.
+   * @param {Rectangle} [target={ }] Optional target to store the results in. E.q. your rectangle object.
+   */
+  static fixRectangle(topLeft: Point, bottomRight: Point, target: Rectangle = <any>{}): Rectangle {
+    const x = topLeft.x < bottomRight.x ? topLeft.x : bottomRight.x;
+    const y = topLeft.y < bottomRight.y ? topLeft.y : bottomRight.y;
+    const width = Math.abs(topLeft.x - bottomRight.x);
+    const height = Math.abs(topLeft.y - bottomRight.y);
+    target.x = x;
+    target.y = y;
+    target.width = width;
+    target.height = height;
+    return target;
+  }
+
+  constructor(public container: Container, topLeft?: Point, bottomRight?: Point) {
     this.topLeft = new Point();
     this.bottomRight = new Point();
     if (topLeft) {
@@ -102,36 +110,18 @@ export class SelectionRectangle {
     const rect = this.rect;
     if (bounds instanceof PIXI.Rectangle || bounds instanceof PIXI.RoundedRectangle) {
       this.tmp.set(bounds.x, bounds.y);
-      let topLeft = this.container.toLocal(this.tmp, entity, this.tmp);
+      const topLeft = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(topLeft.x, topLeft.y)) return true;
       this.tmp.set(bounds.x + bounds.width, bounds.y);
-      let topRight = this.container.toLocal(this.tmp, entity, this.tmp);
+      const topRight = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(topRight.x, topRight.y)) return true;
       this.tmp.set(bounds.x, bounds.y + bounds.height);
-      let bottomLeft = this.container.toLocal(this.tmp, entity, this.tmp);
+      const bottomLeft = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(bottomLeft.x, bottomLeft.y)) return true;
       this.tmp.set(bounds.x + bounds.width, bounds.y + bounds.height);
-      let bottomRight = this.container.toLocal(this.tmp, entity, this.tmp);
+      const bottomRight = this.container.toLocal(this.tmp, entity, this.tmp);
       if (rect.contains(bottomRight.x, bottomRight.y)) return true;
     }
     return false;
   }
-
-  /**
-   * Calculates the correct x, y, width and height properties based on the given two points.
-   *
-   * @param {Point} topLeft The top left point.
-   * @param {Point} bottomRight The bottom right point.
-   * @param {RectangleLike} [target={ }] Optional target to store the results in. E.q. your rectangle object.
-   */
-  static fixRectangle(topLeft: Point, bottomRight: Point, target: RectangleLike = <any>{ }): RectangleLike {
-    const x = topLeft.x < bottomRight.x ? topLeft.x : bottomRight.x;
-    const y = topLeft.y < bottomRight.y ? topLeft.y : bottomRight.y;
-    const width = Math.abs(topLeft.x - bottomRight.x);
-    const height = Math.abs(topLeft.y - bottomRight.y);
-    target.x = x; target.y = y;
-    target.width = width; target.height = height;
-    return target;
-  }
-
 }
