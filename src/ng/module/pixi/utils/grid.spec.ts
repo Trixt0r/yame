@@ -6,7 +6,6 @@ interface EventHandler {
 }
 
 describe('Grid', () => {
-
   let grid: Grid;
   let updateSpy: jasmine.Spy;
   let cacheGrowingSpy: jasmine.Spy;
@@ -19,7 +18,7 @@ describe('Grid', () => {
 
   beforeEach(() => {
     grid = new Grid(new PIXI.Container());
-    let tex = Grid.getGridTexture();
+    const tex = Grid.getGridTexture();
     // Mock dimensions since we do not load the actual asset
     tex.frame.width = tex.baseTexture.width = 1600;
     tex.frame.height = tex.baseTexture.height = 1600;
@@ -27,10 +26,10 @@ describe('Grid', () => {
     tex.baseTexture.isLoading = false;
     tex.baseTexture.emit('update', tex.baseTexture);
 
-    updateHandler = {fn: () => { }};
-    cacheGrowingHandler = {fn: () => { }};
-    cacheGrownHandler = {fn: () => { }};
-    grownAndUpdateHandler = {fn: () => { }};
+    updateHandler = { fn: () => {} };
+    cacheGrowingHandler = { fn: () => {} };
+    cacheGrownHandler = { fn: () => {} };
+    grownAndUpdateHandler = { fn: () => {} };
 
     updateSpy = spyOn(updateHandler, 'fn');
     cacheGrowingSpy = spyOn(cacheGrowingHandler, 'fn');
@@ -51,20 +50,20 @@ describe('Grid', () => {
 
   describe('constructor', () => {
     it('should initialize the cache', () => {
-      let tex = Grid.getGridTexture();
+      const tex = Grid.getGridTexture();
       tex.baseTexture.isLoading = true;
-      let grid = new Grid(new PIXI.Container());
+      const newGrid = new Grid(new PIXI.Container());
       tex.baseTexture.isLoading = false;
-      grid.on('cache:grown', cacheGrownHandler.fn);
+      newGrid.on('cache:grown', cacheGrownHandler.fn);
       tex.baseTexture.emit('update', tex.baseTexture);
       expect(cacheGrownSpy.calls.any()).toBe(true, 'Cache has not been initialized');
     });
 
     it('should not initialize the cache if the texture is not loaded yet', () => {
-      let tex = Grid.getGridTexture();
+      const tex = Grid.getGridTexture();
       tex.baseTexture.isLoading = true;
-      let grid = new Grid(new PIXI.Container());
-      grid.on('cache:grown', cacheGrownHandler.fn);
+      const newGrid = new Grid(new PIXI.Container());
+      newGrid.on('cache:grown', cacheGrownHandler.fn);
       expect(cacheGrowingSpy.calls.any()).toBe(false, 'Cache has been initialized while texture is loading');
     });
 
@@ -135,7 +134,6 @@ describe('Grid', () => {
   });
 
   describe('setters', () => {
-
     let changeContainerHandler: EventHandler;
     let changeWidthHandler: EventHandler;
     let changeHeightHandler: EventHandler;
@@ -144,9 +142,9 @@ describe('Grid', () => {
     let changeHeightSpy: jasmine.Spy;
 
     beforeEach(() => {
-      changeContainerHandler = {fn: () => { }};
-      changeWidthHandler = {fn: () => { }};
-      changeHeightHandler = {fn: () => { }};
+      changeContainerHandler = { fn: () => {} };
+      changeWidthHandler = { fn: () => {} };
+      changeHeightHandler = { fn: () => {} };
 
       changeContainerSpy = spyOn(changeContainerHandler, 'fn');
       changeWidthSpy = spyOn(changeWidthHandler, 'fn');
@@ -158,8 +156,8 @@ describe('Grid', () => {
     });
 
     it('should remove the rendered container from the container the grid is attached to it changes', () => {
-      let prevContainer = grid.container;
-      let newContainer = new PIXI.Container();
+      const prevContainer = grid.container;
+      const newContainer = new PIXI.Container();
       grid.container = newContainer;
       expect(prevContainer.children.indexOf(grid.renderedContainer)).toBeLessThan(0, 'The grid has not been removed');
       expect(newContainer.children.indexOf(grid.renderedContainer)).toBeGreaterThan(-1, 'The grid has not been added');
@@ -204,6 +202,5 @@ describe('Grid', () => {
       grid.height = 4;
       expect(grid.height).toBe(8, 'The height fell below 8');
     });
-
   });
 });

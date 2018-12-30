@@ -1,0 +1,49 @@
+h5 {
+  margin: 10px 0;
+}
+
+mat-tree ul,
+mat-tree li {
+  overflow: hidden;
+  transition: all ease-in 200ms;
+  // max-height: 1000px;
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style-type: none;
+  width: 100%;
+}
+.invisible {
+  display: none;
+}
+.mat-tree-ul {
+  padding-left: 0;
+  mat-tree-node {
+    padding-left: 40px;
+  }
+}
+.mat-list-text {
+  display: inline-block;
+}
+
+mat-tree-node {
+  cursor: pointer;
+  .node-name { float: left; }
+  .inline-actions {
+    float: right;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all ease-in-out 100ms;
+    .mat-icon-button {
+      line-height: inherit;
+      mat-icon {
+        font-size: 18px;
+      }
+    }
+  }
+  &:hover, &.changed {
+    .inline-actions {
+      opacity: inherit;
+      transform: none;
+    }
+  }
+}

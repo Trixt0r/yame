@@ -1,15 +1,13 @@
-import { ViewChild } from '@angular/core';
 import { Component, ElementRef } from '@angular/core';
-import { ResizeableComponent } from "../utils/component/resizable";
+import { ResizeableComponent } from '../utils/component/resizable';
 
 @Component({
   moduleId: module.id.toString(),
-  selector: 'sidebar',
+  selector: 'yame-sidebar',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
 })
 export class SidebarComponent extends ResizeableComponent {
-
   constructor(public ref: ElementRef) {
     super(ref);
     this.maxVal = window.innerWidth - 400;
@@ -19,9 +17,5 @@ export class SidebarComponent extends ResizeableComponent {
   onResize() {
     this.maxVal = window.innerWidth - 400;
     super.onResize();
-  }
-
-  loadComponents() {
-
   }
 }

@@ -1,19 +1,16 @@
 import { DialogProvider } from '../electron/provider/dialog';
 import { ElectronService } from '../electron/service';
 import { AssetGroup } from '../../../common/asset/group';
-import { DirectoryAsset } from '../../../common/asset/directory';
 import { AssetService } from './service/asset';
 import { GroupsComponent } from './component/groups';
-import { ResizeableComponent } from "../utils/component/resizable";
+import { ResizeableComponent } from '../utils/component/resizable';
 import { AssetsComponent } from './component/assets';
-import { WindowRef } from '../../service/window';
 import { WorkspaceService } from './service';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import * as _ from 'lodash';
-import * as path from 'path';
-import { DirectoryContent } from "../../../common/content/directory";
-import { FileContent } from "../../../common/content/file";
-import { Asset } from "../../../common/asset";
+import { DirectoryContent } from '../../../common/content/directory';
+import { FileContent } from '../../../common/content/file';
+import { Asset } from '../../../common/asset';
 
 /**
  * The workspace component represents the workspace.
@@ -28,12 +25,11 @@ import { Asset } from "../../../common/asset";
  */
 @Component({
   moduleId: module.id.toString(),
-  selector: 'workspace',
+  selector: 'yame-workspace',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
 })
 export class WorkspaceComponent extends ResizeableComponent {
-
   /**
    * @type {((DirectoryContent | FileContent)[])} All currently loaded content.
    */
@@ -69,10 +65,12 @@ export class WorkspaceComponent extends ResizeableComponent {
    */
   @ViewChild('row') row: ElementRef;
 
-  constructor(public ref: ElementRef,
-              private service: WorkspaceService,
-              private assets: AssetService,
-              private electron: ElectronService) {
+  constructor(
+    public ref: ElementRef,
+    private service: WorkspaceService,
+    private assets: AssetService,
+    private electron: ElectronService
+  ) {
     super(ref);
     this.maxVal = window.innerHeight - 100;
   }
@@ -81,7 +79,7 @@ export class WorkspaceComponent extends ResizeableComponent {
   onResize() {
     this.maxVal = window.innerHeight - 100;
     if (this.row) {
-      let fullWidth = this.row.nativeElement.offsetWidth;
+      const fullWidth = this.row.nativeElement.offsetWidth;
       this.resizer.maxVal = Math.max(200, fullWidth - (this.minWidth + 15));
     }
     super.onResize();
@@ -97,23 +95,27 @@ export class WorkspaceComponent extends ResizeableComponent {
    * @returns {Promise<boolean>} Resolves `true` if a folder has been opened. `false otherwise`.
    */
   openFolder() {
-    let provider = this.electron.getProvider(DialogProvider);
-    return provider.open({ properties: ['openDirectory'] })
+    const provider = this.electron.getProvider(DialogProvider);
+    return provider
+      .open({ properties: ['openDirectory'] })
       .then(files => {
         return this.service.init(files[0]).then(json => {
-          this.content = <any>[{
-            name: 'Assets',
-            path: json.path,
-            isExpanded: true,
-            children: this.service.directories
-          }];
-          return this.assets.fromFs(json)
-                  .then(group => this.onGroupSelect(<AssetGroup<Asset>>group))
-                  .then(() => setTimeout(() => this.onResize()))
-                  .then(() => true);
+          this.content = <any>[
+            {
+              name: 'Assets',
+              path: json.path,
+              isExpanded: true,
+              children: this.service.directories,
+            },
+          ];
+          return this.assets
+            .fromFs(json)
+            .then(group => this.onGroupSelect(<AssetGroup<Asset>>group))
+            .then(() => setTimeout(() => this.onResize()))
+            .then(() => true);
         });
       })
-      .catch(e =>false);
+      .catch(e => false);
   }
 
   /**
@@ -123,13 +125,13 @@ export class WorkspaceComponent extends ResizeableComponent {
    */
   updateColumns(size: number) {
     if (!this.row) return false;
-    let fullWidth = this.row.nativeElement.offsetWidth;
+    const fullWidth = this.row.nativeElement.offsetWidth;
     this.groupsComponent.ref.nativeElement.style.width = `${size}px`;
     this.groupsComponent.ref.nativeElement.style['max-width'] = `${size}px`;
     this.assetsComponent.ref.nativeElement.style.left = `${size + 5}px`;
     this.assetsComponent.ref.nativeElement.style['max-width'] = `${fullWidth - size - 5}px`;
     this.assetsComponent.ref.nativeElement.style.width = `${fullWidth - size - 5}px`;
-    return true
+    return true;
   }
 
   /**

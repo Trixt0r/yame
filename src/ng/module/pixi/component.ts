@@ -1,11 +1,13 @@
 import { PixiService } from './service';
-import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, OnDestroy } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, OnDestroy, OnInit } from '@angular/core';
 
 import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from '../../../common/asset';
 import { Entity } from './scene/entity';
-import { Layer } from './scene/idx';
+import { Store } from '@ngxs/store';
+import { CreateEntity } from './ngxs/actions';
+import { PointLike } from 'pixi.js';
 
 /**
  * A pixi component provides a canvas element and initializes the injected pixi service.
@@ -15,20 +17,18 @@ import { Layer } from './scene/idx';
  */
 @Component({
   moduleId: module.id.toString(),
-  selector: 'pixi',
+  selector: 'yame-pixi',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
 })
-export class PixiComponent implements OnDestroy {
-
+export class PixiComponent implements OnDestroy, OnInit {
   @Output() resized = new EventEmitter();
   @ViewChild('canvas') canvas: ElementRef;
 
   private preview: PIXI.DisplayObject;
   private dragLeft = false;
 
-  constructor(public ref: ElementRef, public pixiService: PixiService) {
-  }
+  constructor(public ref: ElementRef, public pixiService: PixiService, public store: Store) {}
 
   /** @type {PIXI.DisplayObject} The current drag and drop preview. */
   get dndPreview(): PIXI.DisplayObject {
@@ -50,8 +50,7 @@ export class PixiComponent implements OnDestroy {
   @HostListener('window:resize')
   onResize() {
     let newSize;
-    if (newSize = this.pixiService.resize())
-      this.resized.emit( { width: newSize.x, height: newSize.y } );
+    if ((newSize = this.pixiService.resize())) this.resized.emit({ width: newSize.x, height: newSize.y });
   }
 
   /**
@@ -62,16 +61,16 @@ export class PixiComponent implements OnDestroy {
    * @returns {Entity}
    */
   onDrop(event: DragDropData): Promise<Entity> {
-    var asset: Asset = event.dragData;
+    const asset: Asset = event.dragData;
     return this.pixiService.createFromAsset(asset)
-      .then(entity => {
-        return this.pixiService.scene.addEntity(entity)
+            .then(entity => {
+              this.pixiService.toScene(event.mouseEvent, entity.position);
+              return this.store.dispatch(new CreateEntity(entity)).toPromise()
                 .then(() => {
-                  entity.position.copy(this.pixiService.toScene(event.mouseEvent));
                   this.onDragLeave(event);
                   return entity;
                 });
-      });
+            });
   }
 
   /**
@@ -83,19 +82,18 @@ export class PixiComponent implements OnDestroy {
    */
   onDragEnter(event: DragDropData): Promise<Entity> {
     this.dragLeft = false;
-    var asset: Asset = event.dragData;
-    return this.pixiService.createFromAsset(asset)
-      .then(object => {
-        if (this.dragLeft) {
-          this.dragLeft = false;
-          return;
-        }
-        this.preview = object;
-        this.preview.alpha = 0.5;
-        this.pixiService.scene.addChild(object); // Do not add it as an entity, since it is just a preview
-        object.position.copy(this.pixiService.toScene(event.mouseEvent));
-        return object;
-      });
+    const asset: Asset = event.dragData;
+    return this.pixiService.createFromAsset(asset).then(object => {
+      if (this.dragLeft) {
+        this.dragLeft = false;
+        return;
+      }
+      this.preview = object;
+      this.preview.alpha = 0.5;
+      this.pixiService.scene.addChild(object); // Do not add it as an entity, since it is just a preview
+      object.position.copy(this.pixiService.toScene(event.mouseEvent));
+      return object;
+    });
   }
 
   /**
@@ -120,7 +118,7 @@ export class PixiComponent implements OnDestroy {
    * @returns {void}
    */
   onDragOver(event: DragDropData) {
-    var asset: Asset = event.dragData;
+    const asset: Asset = event.dragData;
     if (!this.preview) return;
     this.preview.position.copy(this.pixiService.toScene(event.mouseEvent));
   }
@@ -142,7 +140,6 @@ export class PixiComponent implements OnDestroy {
    * @inheritdoc
    */
   ngOnDestroy(): void {
-    this.pixiService.dispose()
-      .catch(error => alert(error.message));
+    this.pixiService.dispose().catch(error => alert(error.message));
   }
 }

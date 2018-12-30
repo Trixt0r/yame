@@ -5,7 +5,9 @@ import { Asset } from '../../../common/asset';
 import { PixiAssetConverter } from './service/converter';
 import { Map } from './scene/map';
 import { Entity } from './scene/entity';
-import { Subject } from 'rxjs/Rx';
+import { Subject, Observable } from 'rxjs/Rx';
+import { Store, Actions, ofActionSuccessful, ofActionDispatched } from '@ngxs/store';
+import { DeleteEntity, UpdateEntity, CreateEntity } from './ngxs/actions';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
@@ -17,7 +19,6 @@ import { Subject } from 'rxjs/Rx';
  */
 @Injectable()
 export class PixiService {
-
   private internalApp: PIXI.Application;
   private internalScene: Map;
   private viewRef: ElementRef;
@@ -31,6 +32,8 @@ export class PixiService {
   resize$ = this.resizeSource.asObservable();
   ready$ = this.readySource.asObservable();
   dipose$ = this.disposeSource.asObservable();
+
+  constructor(protected store?: Store, protected actions?: Actions) {}
 
   /** @type {PIXI.Application} app The pixi js application instance. */
   get app(): PIXI.Application {
@@ -83,13 +86,30 @@ export class PixiService {
   setUp(viewRef: ElementRef, options: PIXI.ApplicationOptions) {
     if (this.internalApp) return;
     this.viewRef = viewRef;
-    this.internalApp = new PIXI.Application(viewRef.nativeElement.offsetWidth,
-                                            viewRef.nativeElement.offsetHeight,
-                                            options);
+    this.internalApp = new PIXI.Application(
+      viewRef.nativeElement.offsetWidth,
+      viewRef.nativeElement.offsetHeight,
+      options
+    );
     this.internalScene = new Map();
     this.internalApp.stage.addChild(this.internalScene);
     this.readySource.next();
     this.resize();
+    if (this.store) {
+      this.actions.pipe(ofActionSuccessful(CreateEntity)).subscribe((create: CreateEntity) => {
+        return this.scene.addEntity(create.entity);
+      });
+
+      this.actions.pipe(ofActionSuccessful(UpdateEntity)).subscribe((update: UpdateEntity) => {
+        const found = this.scene.find(entity => update.data.id === entity.id);
+        if (found) return found.parse(update.data, '.');
+      });
+
+      this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((remove: DeleteEntity) => {
+        const found = this.scene.find(entity => remove.id === entity.id);
+        if (found) return this.scene.removeEntity(found);
+      });
+    }
   }
 
   /**
@@ -98,9 +118,9 @@ export class PixiService {
    * @returns {(boolean | PIXI.Point)}
    */
   resize(): boolean | PIXI.Point {
-    if (!this.viewRef) throw new PixiAppNotInitializedException("Can't resize");
+    if (!this.viewRef) throw new PixiAppNotInitializedException('Can\'t resize');
     this.newSize.set(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
-    if (this.renderer.width != this.newSize.x || this.renderer.height != this.newSize.y) {
+    if (this.renderer.width !== this.newSize.x || this.renderer.height !== this.newSize.y) {
       this.renderer.resize(this.newSize.x, this.newSize.y);
       this.resizeSource.next(this.newSize);
       return this.newSize;
@@ -112,11 +132,13 @@ export class PixiService {
    * Converts the mouse coordinates from the given mouse event to local scene coordinates.
    *
    * @param {MouseEvent} event The mouse event from which to convert the coordinates.
-   * @param {PIXI.PointLike} [point] Optional parameter to store the result
+   * @param {PIXI.PointLike} [target] Optional parameter to store the result in.
    * @returns {PIXI.PointLike}
    */
-  toScene(event: MouseEvent, point?: PIXI.PointLike): PIXI.PointLike {
-    return this.scene.toLocal(<PIXI.PointLike>{ x: event.clientX, y: event.clientY }, void 0, point);
+  toScene(event: MouseEvent | PIXI.PointLike, target?: PIXI.PointLike): PIXI.PointLike {
+    if (event instanceof MouseEvent)
+      return this.scene.toLocal(<PIXI.PointLike>{ x: event.clientX, y: event.clientY }, void 0, target);
+    else return this.scene.toLocal(event, void 0, target);
   }
 
   /**
@@ -137,7 +159,7 @@ export class PixiService {
   dispose(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        if (!this.internalApp) throw new PixiAppNotInitializedException("Can't dispose!");
+        if (!this.internalApp) throw new PixiAppNotInitializedException('Can\'t dispose!');
         this.internalApp.destroy();
         this.internalApp = null;
         this.disposeSource.next();

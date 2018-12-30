@@ -8,21 +8,19 @@ import { Camera } from '../utils/camera';
  * This directive will create a grid and render it below the current scene.
  */
 @Directive({
-  selector: 'pixi[pixiGrid]'
+  selector: 'yame-pixi[pixiGrid]',
 })
 export class PixiGridDirective implements AfterViewInit {
-
   private internalGrid: Grid;
   private currentCam: Camera;
 
-  constructor(private host: PixiComponent) {
-  }
+  constructor(private host: PixiComponent) {}
 
   /** @inheritdoc */
   ngAfterViewInit() {
-    let parent = (<HTMLElement>this.host.ref.nativeElement);
-    let width = parent.offsetWidth;
-    let height = parent.offsetHeight;
+    const parent = <HTMLElement>this.host.ref.nativeElement;
+    const width = parent.offsetWidth;
+    const height = parent.offsetHeight;
     this.internalGrid = new Grid(this.host.pixiService.scene);
     this.internalGrid.update(width, height);
   }
@@ -42,7 +40,7 @@ export class PixiGridDirective implements AfterViewInit {
   @HostListener('resized')
   update() {
     if (!this.internalGrid) return;
-    let parent = (<HTMLElement>this.host.ref.nativeElement);
+    const parent = <HTMLElement>this.host.ref.nativeElement;
     this.internalGrid.update(parent.offsetWidth, parent.offsetHeight);
   }
 
@@ -52,8 +50,7 @@ export class PixiGridDirective implements AfterViewInit {
    * @returns {void}
    */
   listenToCamera(camera: Camera) {
-    if (this.currentCam)
-      this.currentCam.off('updated', this.update, this);
+    if (this.currentCam) this.currentCam.off('updated', this.update, this);
     if (!camera) return;
     this.currentCam = camera;
     camera.on('updated', this.update, this);

@@ -1,7 +1,7 @@
-import { Asset } from "../../../../common/asset";
-import { PixiInvalidConverterException } from "../exception/service/invalid-converter";
-import { PixiAssetNotSupportedException } from "../exception/service/asset-not-supported";
-import { Entity } from "../scene/entity";
+import { Asset } from '../../../../common/asset';
+import { PixiInvalidConverterException } from '../exception/service/invalid-converter';
+import { PixiAssetNotSupportedException } from '../exception/service/asset-not-supported';
+import { Entity } from '../scene/entity';
 
 /**
  * Converts the given asset to a display object.
@@ -9,9 +9,7 @@ import { Entity } from "../scene/entity";
  *
  * @interface ConvertFn
  */
-interface ConvertFn {
-  (asset: Asset): Promise<Entity>;
-}
+type ConvertFn = (asset: Asset) => Promise<Entity>;
 
 interface Converters {
   [key: string]: ConvertFn;
@@ -24,8 +22,7 @@ interface Converters {
  * @class Converter
  */
 export class PixiAssetConverter {
-
-  private converters: Converters = { };
+  private converters: Converters = {};
 
   /**
    * Registers an asset to display object converter.
@@ -36,8 +33,9 @@ export class PixiAssetConverter {
    */
   register(type: string, converter: ConvertFn) {
     if (converter.length !== 1) {
-      throw new PixiInvalidConverterException('Expected converter function to accept 1 argument, ' +
-                                              `but found ${converter.length}.`);
+      throw new PixiInvalidConverterException(
+        'Expected converter function to accept 1 argument, ' + `but found ${converter.length}.`
+      );
     }
     this.converters[type] = converter;
   }
@@ -63,5 +61,4 @@ export class PixiAssetConverter {
   has(asset: Asset): boolean {
     return typeof this.converters[asset.type] === 'function';
   }
-
 }

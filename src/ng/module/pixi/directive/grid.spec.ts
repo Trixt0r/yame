@@ -6,40 +6,40 @@ import { PixiService } from '../service';
 import { PixiGridDirective } from './grid';
 import { Camera } from '../utils/camera';
 import { DndModule, DragDropService, DragDropConfig } from 'ng2-dnd';
+import { NgxsModule } from '@ngxs/store';
+import { SceneState } from '../ngxs/state';
 
 @Component({
-  template: `<pixi pixiGrid></pixi>`
+  template: `<yame-pixi pixiGrid></yame-pixi>`,
 })
-class TestGroupHostComponent {
-}
+class TestGroupHostComponent {}
 
 describe('PixiGridDirective', () => {
-
   let comp: TestGroupHostComponent;
   let fixture: ComponentFixture<TestGroupHostComponent>;
   let directive: PixiGridDirective;
   let service: PixiService;
 
-
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ DndModule ],
-      declarations: [ TestGroupHostComponent, PixiComponent, PixiGridDirective ],
-      providers: [ PixiService, DragDropService, DragDropConfig ]
+      imports: [
+        DndModule,
+        NgxsModule.forRoot([SceneState]),
+      ],
+      declarations: [TestGroupHostComponent, PixiComponent, PixiGridDirective],
+      providers: [PixiService, DragDropService, DragDropConfig],
     }).compileComponents();
     fixture = TestBed.createComponent(TestGroupHostComponent);
     comp = fixture.componentInstance;
-    let dirEl = fixture.debugElement.query(By.directive(PixiGridDirective));
+    const dirEl = fixture.debugElement.query(By.directive(PixiGridDirective));
     directive = dirEl.injector.get(PixiGridDirective);
     fixture.detectChanges();
     directive.ngAfterViewInit();
     service = fixture.debugElement.injector.get(PixiService);
   });
 
-
   afterEach(() => {
-    if (service.app)
-      return service.dispose()
+    if (service.app) return service.dispose();
   });
 
   it('should initialize a grid', () => {
@@ -47,26 +47,25 @@ describe('PixiGridDirective', () => {
   });
 
   it('should update the grid', () => {
-    let spy = spyOn(directive.grid, 'update');
+    const spy = spyOn(directive.grid, 'update');
     directive.update();
     expect(spy.calls.any()).toBe(true, 'update() has not been called on the grid');
   });
 
   it('should listen to camera updates', () => {
-    let cam = new Camera();
+    const cam = new Camera();
     directive.listenToCamera(cam);
-    let spy = spyOn(directive.grid, 'update');
+    const spy = spyOn(directive.grid, 'update');
     cam.emit('updated');
     expect(spy.calls.any()).toBe(true, 'update() has not been called on the camera update event');
   });
 
   it('should not listen to old camera updates', () => {
-    let oldCam = new Camera();
+    const oldCam = new Camera();
     directive.listenToCamera(oldCam);
     directive.listenToCamera(new Camera());
-    let spy = spyOn(directive.grid, 'update');
+    const spy = spyOn(directive.grid, 'update');
     oldCam.emit('updated');
     expect(spy.calls.any()).toBe(false, 'update() should not have been called on the old camera update event');
   });
-
 });

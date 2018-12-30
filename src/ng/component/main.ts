@@ -1,26 +1,24 @@
 import { PixiComponent } from '../module/pixi/component';
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { WorkspaceComponent } from "../module/workspace/component";
+import { WorkspaceComponent } from '../module/workspace/component';
 import { PixiCameraDirective } from 'ng/module/pixi/directive/camera';
 import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
 import { ToolbarComponent } from '../module/toolbar/component';
 
 @Component({
   moduleId: module.id.toString(),
-  selector: 'main',
+  selector: 'yame-main',
   templateUrl: 'main.html',
-  styleUrls: ['./main.scss']
+  styleUrls: ['./main.scss'],
 })
 export class MainComponent implements AfterViewInit {
-
   @ViewChild('pixi') pixi: PixiComponent;
   @ViewChild('toolbar') toolbar: ToolbarComponent;
   @ViewChild('workspace') workspace: WorkspaceComponent;
   @ViewChild(PixiCameraDirective) pixiCamera: PixiCameraDirective;
   @ViewChild(PixiGridDirective) pixiGrid: PixiGridDirective;
 
-  constructor(public ref: ElementRef) {
-  }
+  constructor(public ref: ElementRef) {}
 
   /**
    * Sidebar update handler.
@@ -49,5 +47,4 @@ export class MainComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.pixiGrid.listenToCamera(this.pixiCamera.camera);
   }
-
 }

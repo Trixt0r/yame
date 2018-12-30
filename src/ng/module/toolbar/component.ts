@@ -1,6 +1,16 @@
-import { Component, ElementRef, Input, OnChanges, SimpleChanges, HostBinding, HostListener, Output, EventEmitter } from "@angular/core";
-import { RippleAnimationConfig } from "@angular/material";
-import { ToolbarService } from "./service";
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  HostBinding,
+  HostListener,
+  Output,
+  EventEmitter,
+} from '@angular/core';
+import { RippleAnimationConfig } from '@angular/material';
+import { ToolbarService } from './service';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 
 /**
@@ -12,7 +22,7 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
  */
 @Component({
   moduleId: module.id.toString(),
-  selector: 'toolbar',
+  selector: 'yame-toolbar',
   templateUrl: 'component.html',
   styleUrls: ['component.scss'],
   animations: [
@@ -20,11 +30,10 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
       state('open', style({ transform: 'translateX(0)' })),
       state('closed', style({ transform: 'translateX(calc(-100% + 15px))' })),
       transition('open => closed, closed => open', animate('100ms ease-in')),
-    ])
-  ]
+    ]),
+  ],
 })
 export class ToolbarComponent implements OnChanges {
-
   /** @type {'open' | 'closed'} The internal state for animating the component. */
   @HostBinding('@state') protected state = 'closed';
 
@@ -43,19 +52,17 @@ export class ToolbarComponent implements OnChanges {
   /** @type {EventEmitter} Event which gets emitted when the toolbar has been closed. */
   @Output('closed') closed = new EventEmitter();
 
-
   /** @type {RippleAnimationConfig} The ripple animation config for the toggle button. */
   rippleAnimationConfig: RippleAnimationConfig = {
     enterDuration: 100,
     exitDuration: 100,
-  }
+  };
 
-  constructor(public ref: ElementRef, public service: ToolbarService) { }
+  constructor(public ref: ElementRef, public service: ToolbarService) {}
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.open)
-      this.updateState();
+    if (changes.open) this.updateState();
   }
 
   /**
@@ -83,10 +90,8 @@ export class ToolbarComponent implements OnChanges {
    */
   @HostListener('@state.start', ['$event'])
   stateAnimStart(event: AnimationEvent): void {
-    if (event.toState === 'open')
-      this.opening.emit();
-    else if (event.toState === 'closed')
-      this.closing.emit();
+    if (event.toState === 'open') this.opening.emit();
+    else if (event.toState === 'closed') this.closing.emit();
   }
 
   /**
@@ -96,9 +101,7 @@ export class ToolbarComponent implements OnChanges {
    */
   @HostListener('@state.done', ['$event'])
   stateAnimDone(event: AnimationEvent): void {
-    if (event.toState === 'open')
-      this.opened.emit();
-    else if (event.toState === 'closed')
-      this.closed.emit();
+    if (event.toState === 'open') this.opened.emit();
+    else if (event.toState === 'closed') this.closed.emit();
   }
 }

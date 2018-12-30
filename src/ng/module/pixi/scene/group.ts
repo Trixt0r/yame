@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Entity, EntityData, EntityType } from "./entity";
+import { Entity, EntityData, EntityType } from './entity';
 import { GroupException } from '../exception/entity/group';
 
 export interface GroupData extends EntityData {
@@ -17,7 +17,6 @@ export interface GroupData extends EntityData {
  */
 @EntityType()
 export class Group<T extends Entity> extends Entity {
-
   exportData: GroupData; // Override the type of the export data.
 
   /** @type {T[]} Flat list of all entities in this group, i.e. direct and indirect child entities. */
@@ -27,7 +26,7 @@ export class Group<T extends Entity> extends Entity {
   protected internalEntities: T[] = [];
 
   /** @type {T[]} A shallow copy of the current __direct__ entities. */
-  get entities() : T[] {
+  get entities(): T[] {
     return this.internalEntities.slice();
   }
 
@@ -38,12 +37,11 @@ export class Group<T extends Entity> extends Entity {
 
   /** @inheritdoc */
   export(target: string): Promise<GroupData> {
-    let entities = this.internalEntities.map(entity => entity.export(target));
-    return Promise.all(entities)
-          .then(result => {
-            this.exportData.entities = result;
-            return super.export(target) as Promise<GroupData>;
-          });
+    const entities = this.internalEntities.map(entity => entity.export(target));
+    return Promise.all(entities).then(result => {
+      this.exportData.entities = result;
+      return super.export(target) as Promise<GroupData>;
+    });
   }
 
   /** @inheritdoc */
@@ -52,21 +50,19 @@ export class Group<T extends Entity> extends Entity {
     if (!Array.isArray(entities)) return Promise.reject(new GroupException('No valid entities provided'));
     const prevEntities = this.entities;
     return this.clear()
-            .then(() => this.addEntities(entities, from))
-            .then(() => super.parse(data, from))
-            .catch(e => this.addEntities(prevEntities)
-                        .then(() => Promise.reject(e)) ) as Promise<Group<T>>;
+      .then(() => this.addEntities(entities, from))
+      .then(() => super.parse(data, from))
+      .catch(e => this.addEntities(prevEntities).then(() => Promise.reject(e))) as Promise<Group<T>>;
   }
 
   /** @inheritdoc */
   clone(): Promise<Group<T>> {
     const newGroup = new Group('Copy of ' + this.name);
     const clones = this.internalEntities.map(entity => entity.clone());
-    return Promise.all(clones)
-      .then(entities => {
-        entities.forEach(entity => newGroup.addChild(entity));
-        return newGroup;
-      }) as Promise<Group<T>>;
+    return Promise.all(clones).then(entities => {
+      entities.forEach(entity => newGroup.addChild(entity));
+      return newGroup;
+    }) as Promise<Group<T>>;
   }
 
   /**
@@ -83,13 +79,17 @@ export class Group<T extends Entity> extends Entity {
     const found = this.flatIndexOf(entity);
     if (found >= 0) return console.warn(`[Group] Entity ${entity.id} is already in flat list!`);
     this.flatEntities.push(entity);
-    if (entity instanceof Group)
-      entity.flatEntities.forEach(e => this.addFlatEntity(e));
+    this.emit('added:flat:entity', entity);
+    if (entity instanceof Group) entity.flatEntities.forEach(e => this.addFlatEntity(e));
     entity.on('added:entity', e => this.addFlatEntity(e), this);
-    entity.on('removed:entity', e => {
-      const idx = this.flatIndexOf(e);
-      if (idx >= 0) this.removeFlatEntity(e);
-    }, this);
+    entity.on(
+      'removed:entity',
+      e => {
+        const idx = this.flatIndexOf(e);
+        if (idx >= 0) this.removeFlatEntity(e);
+      },
+      this
+    );
   }
 
   /**
@@ -104,9 +104,9 @@ export class Group<T extends Entity> extends Entity {
   protected removeFlatEntity(entity: T): void {
     const idx = this.flatIndexOf(entity);
     if (idx < 0) return console.warn(`[Group] Entity ${entity.id} is not in flat list!`);
-    if (entity instanceof Group)
-      entity.flatEntities.forEach(e => this.removeFlatEntity(e));
+    if (entity instanceof Group) entity.flatEntities.forEach(e => this.removeFlatEntity(e));
     this.flatEntities.splice(idx, 1);
+    this.emit('removed:flat:entity', entity);
     entity.removeListener(<any>'added:entity', null, this);
     entity.removeListener(<any>'removed:entity', null, this);
   }
@@ -124,8 +124,7 @@ export class Group<T extends Entity> extends Entity {
     if (entityOrData instanceof Entity) {
       promise = Promise.resolve(entityOrData);
     } else {
-      if (typeof from !== 'string')
-        throw new GroupException(`The 'from' value has to be a string`);
+      if (typeof from !== 'string') throw new GroupException(`The 'from' value has to be a string`);
       const clazz = Entity.getEntityType(entityOrData.type);
       const instance = new clazz();
       promise = instance.parse(entityOrData, from) as Promise<T>;
@@ -152,11 +151,10 @@ export class Group<T extends Entity> extends Entity {
    */
   addEntities(entitiesOrData: (T | EntityData)[], from = ''): Promise<T[]> {
     const promises = entitiesOrData.map(val => this.addEntity(val, from));
-    return Promise.all(promises)
-            .then(entities => {
-              this.emit('added:entities', entities);
-              return entities;
-            });
+    return Promise.all(promises).then(entities => {
+      this.emit('added:entities', entities);
+      return entities;
+    });
   }
 
   /**
@@ -189,13 +187,12 @@ export class Group<T extends Entity> extends Entity {
    * @param {((T | string)[])} entitiesOrIds The entities or entity ids to remove.
    * @returns {Promise<T[]>} Resolves the removed entities.
    */
-  removeEntities(entitiesOrIds: (T | string)[] ): Promise<T[]> {
-    let promises = entitiesOrIds.map(val => this.removeEntity(val));
-    return Promise.all(promises)
-            .then(entities => {
-              this.emit('removed:entities', entities);
-              return entities;
-            }) as Promise<T[]>;
+  removeEntities(entitiesOrIds: (T | string)[]): Promise<T[]> {
+    const promises = entitiesOrIds.map(val => this.removeEntity(val));
+    return Promise.all(promises).then(entities => {
+      this.emit('removed:entities', entities);
+      return entities;
+    }) as Promise<T[]>;
   }
 
   /**
@@ -205,11 +202,10 @@ export class Group<T extends Entity> extends Entity {
    * @returns {Promise<T[]>} All removed entities.
    */
   clear(): Promise<T[]> {
-    return this.removeEntities(this.internalEntities.slice())
-            .then(entities => {
-              this.emit('cleared', entities);
-              return entities;
-            });
+    return this.removeEntities(this.internalEntities.slice()).then(entities => {
+      this.emit('cleared', entities);
+      return entities;
+    });
   }
 
   /**
@@ -219,10 +215,8 @@ export class Group<T extends Entity> extends Entity {
    * @returns {number} The index of the given entitiy or id.
    */
   indexOf(entityOrId: T | string): number {
-    if (entityOrId instanceof Entity)
-      return this.internalEntities.indexOf(entityOrId);
-    else
-      return this.internalEntities.findIndex(entity => entity.id === entityOrId);
+    if (entityOrId instanceof Entity) return this.internalEntities.indexOf(entityOrId);
+    else return this.internalEntities.findIndex(entity => entity.id === entityOrId);
   }
 
   /**
@@ -232,10 +226,8 @@ export class Group<T extends Entity> extends Entity {
    * @returns {number} The flat index of the given entitiy or id.
    */
   flatIndexOf(entityOrId: T | string): number {
-    if (entityOrId instanceof Entity)
-      return this.flatEntities.indexOf(entityOrId);
-    else
-      return this.flatEntities.findIndex(entity => entity.id === entityOrId);
+    if (entityOrId instanceof Entity) return this.flatEntities.indexOf(entityOrId);
+    else return this.flatEntities.findIndex(entity => entity.id === entityOrId);
   }
 
   /**
@@ -375,8 +367,11 @@ export class Group<T extends Entity> extends Entity {
    * @param {boolean} [deep=false] Whether to search all sub groups, if any are present.
    * @returns {U}
    */
-  reduce<U>(callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
-            initialValue: U, deep: boolean = false): U {
+  reduce<U>(
+    callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
+    initialValue: U,
+    deep: boolean = false
+  ): U {
     return (deep ? this.flatEntities : this.internalEntities).reduce(callbackFn, initialValue);
   }
 
@@ -392,9 +387,11 @@ export class Group<T extends Entity> extends Entity {
    * @param {boolean} [deep=false] Whether to search all sub groups, if any are present.
    * @returns {U}
    */
-  reduceRight<U>(callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
-                 initialValue: U, deep: boolean = false): U {
+  reduceRight<U>(
+    callbackFn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
+    initialValue: U,
+    deep: boolean = false
+  ): U {
     return (deep ? this.flatEntities : this.internalEntities).reduceRight(callbackFn, initialValue);
   }
-
 }

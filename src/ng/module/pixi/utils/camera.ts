@@ -6,7 +6,6 @@ import * as PIXI from 'pixi.js';
  * A camera is responsible for updating the users view correctly.
  */
 export class Camera extends EventEmitter {
-
   private _zoom: number;
   private _container: PIXI.DisplayObject;
   private _minZoom: number;
@@ -85,8 +84,8 @@ export class Camera extends EventEmitter {
   set zoom(target: number) {
     if (!this.isAttached()) return;
     target = Math.max(Math.min(this._maxZoom, target), this._minZoom);
-    var diff = target - this._zoom;
-    var diffAbs = Math.abs(diff);
+    const diff = target - this._zoom;
+    const diffAbs = Math.abs(diff);
     if (diffAbs > 0) {
       this._container.toLocal(this.targetPosition, null, this.localTargetPosition);
       this._zoom += Math.sign(diff) * Math.min(this.zoomStep, diffAbs);
@@ -111,7 +110,7 @@ export class Camera extends EventEmitter {
     this._maxZoom = value;
     // Make sure the current zoom won't exceed the new maximum value
     if (this._zoom > this._maxZoom) {
-      var prevStep = this.zoomStep;
+      const prevStep = this.zoomStep;
       this.zoomStep = this._zoom - this._maxZoom;
       this.zoom = this._maxZoom;
       this.zoomStep = prevStep;
@@ -132,7 +131,7 @@ export class Camera extends EventEmitter {
     this._minZoom = value;
     // Make sure the current zoom won't exceed the new minimum value
     if (this._zoom < this._minZoom) {
-      var prevStep = this.zoomStep;
+      const prevStep = this.zoomStep;
       this.zoomStep = this._minZoom - this._zoom;
       this.zoom = this._minZoom;
       this.zoomStep = prevStep;
@@ -155,7 +154,7 @@ export class Camera extends EventEmitter {
    * @returns {void}
    */
   set position(pos: PIXI.Point) {
-    if (this.position.x != pos.x || this.position.y != pos.y) {
+    if (this.position.x !== pos.x || this.position.y !== pos.y) {
       this._container.position.set(pos.x, pos.y);
       this.emit('updated');
     }

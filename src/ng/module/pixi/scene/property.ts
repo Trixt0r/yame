@@ -1,4 +1,4 @@
-import { Entity } from "./entity";
+import { Entity } from './entity';
 
 /**
  * Creates a dectorator function for entity properties.
@@ -13,23 +13,20 @@ export function Property(exportData: boolean): (target: Entity, key: string) => 
   return (target: Entity, key: string) => {
     const definition = {
       set: function(value) {
-        if (!this.internalValues)
-          this.internalValues = { };
-        let internalValue = this.internalValues[key];
+        if (!this.internalValues) this.internalValues = {};
+        const internalValue = this.internalValues[key];
         if (internalValue !== value) {
-          let prevVal = internalValue;
+          const prevVal = internalValue;
           this.internalValues[key] = value;
-          if (exportData)
-            this.internalExportData[key] = value;
+          if (exportData) this.internalExportData[key] = value;
           this.emit(`change:${key}`, value, prevVal);
         }
       },
       get: function() {
-        if (!this.internalValues)
-          this.internalValues = { };
+        if (!this.internalValues) this.internalValues = {};
         return this.internalValues[key];
-      }
+      },
     };
     Object.defineProperty(target, key, definition);
-  }
+  };
 }

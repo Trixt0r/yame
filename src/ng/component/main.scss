@@ -9,16 +9,16 @@ $toolbar-toggler-width: 15px;
   height: 100%;
   overflow: hidden;
 
-  workspace {
+  yame-workspace {
     z-index: 2;
   }
 
-  toolbar {
+  yame-toolbar {
     z-index: 1;
     width: $toolbar-width;
   }
 
-  pixi {
+  yame-pixi {
     z-index: 0;
     left: $toolbar-toggler-width;
     width: calc(100% - #{$toolbar-toggler-width});

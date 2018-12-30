@@ -14,7 +14,7 @@ import { SelectionState } from "./toolbar/tools/selection/ngxs/state";
   imports: [
     CommonModule,
     MaterialModule,
-    NgxsModule.forRoot([
+    NgxsModule.forFeature([
       SelectionState
     ])
   ],

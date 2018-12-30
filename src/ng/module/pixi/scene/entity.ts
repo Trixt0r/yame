@@ -1,9 +1,9 @@
 import * as uuid from 'uuid/v4';
-import { Type } from "@angular/core";
+import { Type } from '@angular/core';
 import * as _ from 'lodash';
-import { Property } from "./property";
+import { Property } from './property';
 import * as PIXI from 'pixi.js';
-import { EntityException } from "../exception/entity/entity";
+import { EntityException } from '../exception/entity/entity';
 
 const tempPoint = new PIXI.Point();
 interface EntityTypes {
@@ -15,7 +15,6 @@ interface EntityTypes {
  * @interface EntityData
  */
 export interface EntityData {
-
   /** @type {string} The id of the entity. */
   id: string;
 
@@ -35,7 +34,7 @@ export interface EntityData {
 }
 
 /** @type {EntityTypes} A map of entity types, which are registred. */
-const TYPES: EntityTypes = { };
+const TYPES: EntityTypes = {};
 
 /**
  * An entity represents any object which can be rendered in a scene.
@@ -47,7 +46,6 @@ const TYPES: EntityTypes = { };
  * @extends {PIXI.Container}
  */
 export abstract class Entity extends PIXI.Container {
-
   /** @type {Entity} The parent entity, which may be different from the parent. This will not be exported or parsed. */
   @Property(false) parentEntity: Entity;
 
@@ -66,6 +64,38 @@ export abstract class Entity extends PIXI.Container {
   /** @type {EntityData} The data to export. Should be updated as soon, as changes happen to this entity. */
   protected internalExportData: EntityData;
 
+  /**
+   * Registers an entity class.
+   * You should use the method to register your entity class, so resolving entity types will works as expected.
+   *
+   * @param {Type<Entity>} clazz The class to regiter.
+   * @param {string} [type=clazz.name.toLowerCase()] You may want to set this, to prevent naming collisions.
+   */
+  static registerEntityType<T extends Entity>(clazz: Type<T>, type: string = clazz.name.toLowerCase()): void {
+    TYPES[type] = clazz;
+  }
+
+  /**
+   * Resolves an entity class for the given entity type.
+   *
+   * @param {string} type The entity type.
+   * @returns {Type<Entity>} The entity class. Maybe `undefined` if not registered yet.
+   */
+  static getEntityType(type: string): Type<Entity> {
+    return TYPES[type];
+  }
+
+  /**
+   * Searches for the registered entity type of the given entity.
+   *
+   * @param {T} entity The entity to find the type for.
+   * @returns {string} The type or `undefined` if not found.
+   */
+  static getEntityTypeOf<T extends Entity>(entity: T): string {
+    const proto = Object.getPrototypeOf(entity);
+    return _.findKey(TYPES, type => type === proto.constructor);
+  }
+
   constructor(name?: string) {
     super();
     this.internalExportData = {
@@ -80,7 +110,7 @@ export abstract class Entity extends PIXI.Container {
     this.name = name;
     this.visibility = true;
     this.locked = false;
-    this.on('change:visibility', val => this.visible = val);
+    this.on('change:visibility', val => (this.visible = val));
   }
 
   /** @type {EntityData} The export data of this entity. */
@@ -157,39 +187,6 @@ export abstract class Entity extends PIXI.Container {
   getShape(): PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle | any {
     return this.getLocalBounds();
   }
-
-  /**
-   * Registers an entity class.
-   * You should use the method to register your entity class, so resolving entity types will works as expected.
-   *
-   * @param {Type<Entity>} clazz The class to regiter.
-   * @param {string} [type=clazz.name.toLowerCase()] You may want to set this, to prevent naming collisions.
-   */
-  static registerEntityType<T extends Entity>(clazz: Type<T>, type: string = clazz.name.toLowerCase()): void {
-    TYPES[type] = clazz;
-  }
-
-  /**
-   * Resolves an entity class for the given entity type.
-   *
-   * @param {string} type The entity type.
-   * @returns {Type<Entity>} The entity class. Maybe `undefined` if not registered yet.
-   */
-  static getEntityType(type: string): Type<Entity> {
-    return TYPES[type];
-  }
-
-  /**
-   * Searches for the registered entity type of the given entity.
-   *
-   * @param {T} entity The entity to find the type for.
-   * @returns {string} The type or `undefined` if not found.
-   */
-  static getEntityTypeOf<T extends Entity>(entity: T): string {
-    let proto = Object.getPrototypeOf(entity);
-    return _.findKey(TYPES, type => type === proto.constructor);
-  }
-
 }
 
 /**
@@ -201,5 +198,5 @@ export abstract class Entity extends PIXI.Container {
 export function EntityType<T extends Type<Entity>>(name?: string) {
   return (constructor: T) => {
     Entity.registerEntityType(constructor, name);
-  }
+  };
 }

@@ -2,7 +2,7 @@ import { PixiComponent } from '../component';
 import { Camera } from '../utils/camera';
 import { AfterViewInit, Directive, ElementRef, HostListener, Input } from '@angular/core';
 
-let tmpPos = new PIXI.Point();
+const tmpPos = new PIXI.Point();
 
 /**
  * Directive which can be attached to a pixi component.
@@ -10,10 +10,9 @@ let tmpPos = new PIXI.Point();
  * handle mouse input and update the camera according to the input.
  */
 @Directive({
-  selector: 'pixi[pixiCamera]'
+  selector: 'yame-pixi[pixiCamera]',
 })
 export class PixiCameraDirective implements AfterViewInit {
-
   interactive = true;
 
   private cam: Camera;
@@ -27,22 +26,20 @@ export class PixiCameraDirective implements AfterViewInit {
   @HostListener('mousewheel', ['$event'])
   onMouseWheel(event: MouseWheelEvent) {
     if (!this.interactive) return;
-    let service = this.host.pixiService;
-    let data = service.renderer.plugins.interaction.eventData.data;
+    const service = this.host.pixiService;
+    const data = service.renderer.plugins.interaction.eventData.data;
     this.cam.targetPosition = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
-    if (event.wheelDelta > 0)
-      this.cam.zoom = this.cam.maxZoom;
-    else if (event.wheelDelta < 0)
-      this.cam.zoom = this.cam.minZoom;
+    if (event.deltaY < 0) this.cam.zoom = this.cam.maxZoom;
+    else if (event.deltaY > 0) this.cam.zoom = this.cam.minZoom;
   }
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent) {
     if (!this.interactive) return;
     if (event.which !== 3) return; // Only listen for right click
-    let service = this.host.pixiService;
-    let data = service.renderer.plugins.interaction.eventData.data;
-    this.prevPos = data.getLocalPosition(service.stage, null, {x: event.clientX, y: event.clientY});
+    const service = this.host.pixiService;
+    const data = service.renderer.plugins.interaction.eventData.data;
+    this.prevPos = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
     this.camPos = new PIXI.Point(this.cam.position.x, this.cam.position.y);
   }
 
@@ -57,9 +54,9 @@ export class PixiCameraDirective implements AfterViewInit {
   onMouseMove(event: MouseEvent) {
     if (!this.interactive) return;
     if (event.which !== 3 || !this.prevPos) return; // Only listen for right click
-    let service = this.host.pixiService;
-    let data = service.renderer.plugins.interaction.eventData.data;
-    let pos = data.getLocalPosition(service.stage, null, {x: event.clientX, y: event.clientY});
+    const service = this.host.pixiService;
+    const data = service.renderer.plugins.interaction.eventData.data;
+    const pos = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
     tmpPos.set(this.camPos.x + (pos.x - this.prevPos.x), this.camPos.y + (pos.y - this.prevPos.y));
     this.cam.position = tmpPos;
   }

@@ -1,8 +1,7 @@
 import { MainComponent } from './main';
 import { PixiService } from '../module/pixi/service';
-import { PixiComponent } from '../module/pixi/component';
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { SidebarComponent } from "../module/sidebar/component";
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { SidebarComponent } from '../module/sidebar/component';
 
 /**
  * Entry point for the main application.
@@ -12,23 +11,23 @@ import { SidebarComponent } from "../module/sidebar/component";
  */
 @Component({
   moduleId: module.id.toString(),
-  selector: 'app-root',
+  selector: 'yame-root',
   templateUrl: 'app.html',
   styleUrls: ['./app.scss'],
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
   name = 'YAME';
   private initialized = false;
 
   @ViewChild('main') main: MainComponent;
   @ViewChild('sidebar') sidebar: SidebarComponent;
 
-  constructor(public ref: ElementRef, private pixiService: PixiService) { }
+  constructor(public ref: ElementRef, private pixiService: PixiService) {}
 
   /** @inheritdoc */
   ngAfterViewInit() {
-    this.sidebar.updateValue(this.sidebar.clampValue(window.innerWidth * .75));
-    this.main.workspace.updateValue(this.main.workspace.clampValue(window.innerHeight * .75));
+    this.sidebar.updateValue(this.sidebar.clampValue(window.innerWidth * 0.75));
+    this.main.workspace.updateValue(this.main.workspace.clampValue(window.innerHeight * 0.75));
     this.initialized = true;
   }
 

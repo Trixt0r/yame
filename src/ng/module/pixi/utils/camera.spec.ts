@@ -5,7 +5,6 @@ interface EventHandler {
 }
 
 describe('Camera', () => {
-
   let cam: Camera;
   let container: PIXI.DisplayObject;
 
@@ -54,13 +53,12 @@ describe('Camera', () => {
   });
 
   describe('zoom', () => {
-
     let updateSpy: jasmine.Spy;
     let updateHandler: EventHandler;
 
     beforeEach(() => {
       cam.attach(container);
-      updateHandler = {fn: () => { }};
+      updateHandler = { fn: () => {} };
       updateSpy = spyOn(updateHandler, 'fn');
       cam.on('updated', updateHandler.fn);
     });
@@ -75,13 +73,13 @@ describe('Camera', () => {
     });
 
     it('should zoom towards the given value', () => {
-      let prev = cam.zoom;
+      const prev = cam.zoom;
       cam.zoom = 2;
       expect(cam.zoom).toBeGreaterThan(prev, 'Zoomed immediately to the given value');
     });
 
     it('should apply the zoom on the display object the camera is attached to', () => {
-      let prev = container.scale.x;
+      const prev = container.scale.x;
       cam.zoom = 2;
       expect(container.scale.x).not.toBe(prev, 'New zoom has not been applied to display object');
     });
@@ -94,48 +92,46 @@ describe('Camera', () => {
     });
 
     it('should move away from the set target position if zooming in', () => {
-      let prevX = cam.position.x;
-      let prevY = cam.position.y;
+      const prevX = cam.position.x;
+      const prevY = cam.position.y;
       cam.targetPosition.set(50, 50);
-      let oldDist = Math.sqrt((prevX - cam.targetPosition.x) ** 2 + (prevY - cam.targetPosition.y) ** 2);
+      const oldDist = Math.sqrt((prevX - cam.targetPosition.x) ** 2 + (prevY - cam.targetPosition.y) ** 2);
       cam.zoom = 2;
-      let newX = cam.position.x;
-      let newY = cam.position.y;
-      let newDist = Math.sqrt((newX - cam.targetPosition.x) ** 2 + (newY - cam.targetPosition.y) ** 2);
+      const newX = cam.position.x;
+      const newY = cam.position.y;
+      const newDist = Math.sqrt((newX - cam.targetPosition.x) ** 2 + (newY - cam.targetPosition.y) ** 2);
       expect(newDist).toBeGreaterThan(oldDist, 'The new distance is not greater than the old');
     });
 
     it('should move towards the set target position if zooming out', () => {
-      let prevX = cam.position.x;
-      let prevY = cam.position.y;
+      const prevX = cam.position.x;
+      const prevY = cam.position.y;
       cam.targetPosition.set(50, 50);
-      let oldDist = Math.sqrt((prevX - cam.targetPosition.x) ** 2 + (prevY - cam.targetPosition.y) ** 2);
+      const oldDist = Math.sqrt((prevX - cam.targetPosition.x) ** 2 + (prevY - cam.targetPosition.y) ** 2);
       cam.zoom = 0.5;
-      let newX = cam.position.x;
-      let newY = cam.position.y;
-      let newDist = Math.sqrt((newX - cam.targetPosition.x) ** 2 + (newY - cam.targetPosition.y) ** 2);
+      const newX = cam.position.x;
+      const newY = cam.position.y;
+      const newDist = Math.sqrt((newX - cam.targetPosition.x) ** 2 + (newY - cam.targetPosition.y) ** 2);
       expect(newDist).toBeLessThan(oldDist, 'The new distance is not less than the old');
     });
 
     it('should have the wished zoom after zooming various iterations', () => {
-      let targetZoom = 1.5;
-      let steps = Math.ceil(Math.abs(targetZoom - cam.zoom) / cam.zoomStep);
-      for (let i = 0; i < steps; i++)
-        cam.zoom = targetZoom;
+      const targetZoom = 1.5;
+      const steps = Math.ceil(Math.abs(targetZoom - cam.zoom) / cam.zoomStep);
+      for (let i = 0; i < steps; i++) cam.zoom = targetZoom;
       expect(cam.zoom).toBe(targetZoom, `Did not reach target zoom after ${steps} iterations`);
     });
 
     it('should not update after the wished zoom has been reached', () => {
-      let targetZoom = 1.5;
-      let steps = Math.ceil(Math.abs(targetZoom - cam.zoom) / cam.zoomStep);
-      for (let i = 0; i < steps; i++)
-        cam.zoom = targetZoom;
+      const targetZoom = 1.5;
+      const steps = Math.ceil(Math.abs(targetZoom - cam.zoom) / cam.zoomStep);
+      for (let i = 0; i < steps; i++) cam.zoom = targetZoom;
       cam.zoom = targetZoom;
       expect(updateSpy.calls.all().length).toBe(steps, `The update event has been emitted too often`);
     });
 
     it('should zoom by zoomStep', () => {
-      let prev = cam.zoom;
+      const prev = cam.zoom;
       cam.zoom = 2;
       expect(cam.zoom).toBe(prev + cam.zoomStep, 'The zoom has not been increased by zoomStep');
     });
@@ -179,5 +175,4 @@ describe('Camera', () => {
       expect(updateSpy.calls.all().length).toBe(1, 'The update event has not been emitted');
     });
   });
-
 });

@@ -11,8 +11,10 @@ import { SelectionRenderer } from './selection/renderer';
 import { SelectionTranslateHandler } from './selection/handlers/translate';
 import { SelectionRotateHandler } from './selection/handlers/rotate';
 import { SelectionResizeHandler } from './selection/handlers/resize';
-import { Store } from '@ngxs/store';
+import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { Translate, Rotate, Resize, Select, Unselect } from './selection/ngxs/actions';
+import { Entity } from 'ng/module/pixi/scene/entity';
+import { DeleteEntity } from 'ng/module/pixi/ngxs/actions';
 
 /**
  *
@@ -22,8 +24,8 @@ import { Translate, Rotate, Resize, Select, Unselect } from './selection/ngxs/ac
  * @interface SelectionToolConfig
  */
 export interface SelectionToolConfig {
-  fill?: { alpha?: number; color?: number; };
-  line?: { width?: number, color?: number; alpha?: number; }
+  fill?: { alpha?: number; color?: number };
+  line?: { width?: number; color?: number; alpha?: number };
 }
 
 /**
@@ -38,11 +40,10 @@ export interface SelectionToolConfig {
  * @extends {Tool}
  */
 export class SelectionTool extends Tool {
-
   /**
    * @type {SelectionToolConfig} The configuration for this tool.
    */
-  config: SelectionToolConfig = { fill: { }, line: { } };
+  config: SelectionToolConfig = { fill: {}, line: {} };
 
   /**
    * @type {any[]} The handlers of the selection container.
@@ -63,6 +64,7 @@ export class SelectionTool extends Tool {
   protected globalMouse: PointLike;
 
   protected store: Store;
+  protected actions: Actions;
 
   // Context bound mouse event handler.
   protected onMousedown: EventListenerObject;
@@ -75,6 +77,17 @@ export class SelectionTool extends Tool {
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
       this.service = ref.injector.get(PixiService);
       this.store = ref.injector.get(Store);
+      this.actions = ref.injector.get(Actions);
+      this.actions.pipe(ofActionSuccessful(DeleteEntity))
+          .subscribe((action: DeleteEntity) => {
+            const idx = this.selectionContainer.indexOf(action.id);
+            if (idx < 0) return;
+            const prev = this.selectionContainer.entities;
+            prev.splice(idx, 1);
+            this.selectionContainer.unselect();
+            if (!prev.length) return;
+            this.selectionContainer.select(prev);
+          });
       this.setup();
     });
   }
@@ -102,28 +115,36 @@ export class SelectionTool extends Tool {
       new SelectionResizeHandler(this.container, this.renderer, this.service)
     );
     this.container.on('selected', () =>
-      this.store.dispatch(new Select(
-        this.container.map(entity => entity.id),
-        { x: this.container.position.x, y: this.container.position.y },
-        this.container.rotation,
-        this.container.length > 1 ? void 0 : { x: this.container.entities[0].scale.x, y: this.container.entities[0].scale.y },
-      ))
+      this.store.dispatch(
+        new Select(
+          this.container.map(entity => entity.id),
+          { x: this.container.position.x, y: this.container.position.y },
+          this.container.rotation,
+          this.container.length > 1
+            ? void 0
+            : { x: this.container.entities[0].scale.x, y: this.container.entities[0].scale.y }
+        )
+      )
     );
     this.container.on('unselected', () => this.store.dispatch(new Unselect()));
     this.container.on('updated', () => {
       if (!this.store) return console.warn('[SelectionTool] No store initialized!');
       if (this.container.currentHandler instanceof SelectionTranslateHandler)
-        this.store.dispatch(new Translate({
-          x: this.container.position.x,
-          y: this.container.position.y
-        }));
+        this.store.dispatch(
+          new Translate({
+            x: this.container.position.x,
+            y: this.container.position.y,
+          })
+        );
       else if (this.container.currentHandler instanceof SelectionRotateHandler)
         this.store.dispatch(new Rotate(this.container.rotation));
       else if (this.handlers[this.handlers.length - 1].anchors.indexOf(this.container.currentHandler) >= 0)
-        this.store.dispatch(new Resize({
-          x: this.container.entities[0].scale.x,
-          y: this.container.entities[0].scale.y
-        }));
+        this.store.dispatch(
+          new Resize({
+            x: this.container.entities[0].scale.x,
+            y: this.container.entities[0].scale.y,
+          })
+        );
     });
   }
 
@@ -165,12 +186,13 @@ export class SelectionTool extends Tool {
    * @returns {void}
    */
   protected initFunctions(): void {
-    if (!this.onMousedown)
-      this.onMousedown = this.mousedown.bind(this);
-    if (!this.onMouseup)
-      this.onMouseup = this.mouseup.bind(this);
-    if (!this.onMousemove)
-      this.onMousemove = this.mousemove.bind(this);
+    if (!this.onMousedown) this.onMousedown = this.mousedown.bind(this);
+    if (!this.onMouseup) this.onMouseup = this.mouseup.bind(this);
+    if (!this.onMousemove) this.onMousemove = this.mousemove.bind(this);
+  }
+
+  protected isSelectable(entity: Entity): boolean {
+    return entity.visibility && !entity.locked;
   }
 
   /**
@@ -214,7 +236,9 @@ export class SelectionTool extends Tool {
     this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
     this.rectangle.bottomRight.copy(this.rectangle.topLeft);
     this.rectangle.update();
-    const selection = this.map.filter(child => child.visible && !child.locked && child.containsPoint(<Point>this.globalMouse));
+    const selection = this.map.filter(
+      child => this.isSelectable(child) && child.containsPoint(<Point>this.globalMouse)
+    );
     if (selection.length > 0) {
       this.finish();
       this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
@@ -250,11 +274,12 @@ export class SelectionTool extends Tool {
     this.stage.toLocal(this.globalMouse, void 0, this.rectangle.bottomRight);
     this.rectangle.update();
     this.graphics.clear();
-    this.graphics.lineStyle(_.defaultTo(this.config.line.width, 1),
-                            _.defaultTo(this.config.line.color, 0xffffff),
-                            _.defaultTo(this.config.line.alpha, 1));
-    this.graphics.beginFill(_.defaultTo(this.config.fill.color, 0xffffff),
-                            _.defaultTo(this.config.fill.alpha, 0.25));
+    this.graphics.lineStyle(
+      _.defaultTo(this.config.line.width, 1),
+      _.defaultTo(this.config.line.color, 0x0055ff),
+      _.defaultTo(this.config.line.alpha, 1)
+    );
+    this.graphics.beginFill(_.defaultTo(this.config.fill.color, 0x0055ff), _.defaultTo(this.config.fill.alpha, 0.25));
     this.graphics.drawShape(this.rectangle.rectangle);
     this.graphics.endFill();
   }
@@ -267,7 +292,11 @@ export class SelectionTool extends Tool {
   finish(): void {
     this.down = false;
     this.stage.removeChild(this.graphics);
-    const selection = this.map.filter(child => child.visible && !child.locked && this.rectangle.contains(child));
+    const selection = this.map.filter(
+      child => this.isSelectable(child) && this.rectangle.contains(child),
+      this,
+      true
+    );
     if (selection.length) {
       this.map.addChild(this.container);
       this.container.select(selection);
@@ -277,8 +306,7 @@ export class SelectionTool extends Tool {
 
   /** @inheritDoc */
   onActivate(): Promise<any> {
-    if (this.service)
-      this.addToolListeners();
+    if (this.service) this.addToolListeners();
     return Promise.resolve();
   }
 
@@ -287,5 +315,4 @@ export class SelectionTool extends Tool {
     this.removeToolListeners();
     return Promise.resolve();
   }
-
 }

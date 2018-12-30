@@ -7,6 +7,18 @@ import * as PIXI from 'pixi.js';
  * @class Grid
  */
 export class Grid extends EventEmitter {
+  /**
+   * NOTE: The grid texture consits of 16x16 rectangles
+   * @static
+   * @type {PIXI.Texture} spriteTexture Internal texture for the rectangles.
+   */
+  private static spriteTexture: PIXI.Texture;
+
+  /**
+   * @static
+   * @type {PIXI.Point} rectangleCount Amount of rectangles on each axis
+   */
+  private static rectangleCount: PIXI.Point = new PIXI.Point();
 
   /** @type {number} pWidth Grid width. */
   private pWidth: number;
@@ -27,19 +39,6 @@ export class Grid extends EventEmitter {
   private cache: PIXI.Sprite[];
 
   /**
-   * NOTE: The grid texture consits of 16x16 rectangles
-   * @static
-   * @type {PIXI.Texture} spriteTexture Internal texture for the rectangles.
-   */
-  private static spriteTexture: PIXI.Texture;
-
-  /**
-   * @static
-   * @type {PIXI.Point} rectangleCount Amount of rectangles on each axis
-   */
-  private static rectangleCount: PIXI.Point = new PIXI.Point();
-
-  /**
    * @static
    * @returns {PIXI.Texture} The grid texture.
    */
@@ -47,15 +46,11 @@ export class Grid extends EventEmitter {
     if (Grid.spriteTexture) return Grid.spriteTexture;
     Grid.spriteTexture = PIXI.Texture.fromImage('assets/grid.png', true, PIXI.SCALE_MODES.NEAREST);
     // Listen for the texture update and assign the rectangle size
-    Grid.spriteTexture.baseTexture.on('update',
-                                      tex => Grid.rectangleCount.set(tex.width / 16, tex.height / 16) );
+    Grid.spriteTexture.baseTexture.on('update', tex => Grid.rectangleCount.set(tex.width / 16, tex.height / 16));
     return Grid.spriteTexture;
   }
 
-  constructor(container: PIXI.Container,
-              width: number = 32,
-              height: number = 32,
-              cacheSize: number = 64) {
+  constructor(container: PIXI.Container, width: number = 32, height: number = 32, cacheSize: number = 64) {
     super();
     // Make sure the grid texture gets loaded
     Grid.getGridTexture();
@@ -79,8 +74,7 @@ export class Grid extends EventEmitter {
       return Grid.spriteTexture.baseTexture.once('update', () => this.growCache(amount));
     // Trigger that we are going to grow the cache
     this.emit('cache:growing');
-    for (let i = 0; i < amount; i++)
-      this.cache.push(new PIXI.Sprite(Grid.spriteTexture));
+    for (let i = 0; i < amount; i++) this.cache.push(new PIXI.Sprite(Grid.spriteTexture));
     // If we are done growing, trigger it
     this.growingCache = false;
     this.emit('cache:grown');
@@ -95,35 +89,36 @@ export class Grid extends EventEmitter {
    */
   update(width: number, height: number): Grid {
     // If the cache is growing, wait until it is done and re-update
-    if (this.growingCache)
-      return this.once('cache:grown', () => this.update(width, height));
+    if (this.growingCache) return this.once('cache:grown', () => this.update(width, height));
     // Convert the viewport into container coordinates
-    let topLeft = this.container.toLocal(new PIXI.Point());
+    const topLeft = this.container.toLocal(new PIXI.Point());
     topLeft.x = Math.floor(topLeft.x / this.pWidth) * this.pWidth;
     topLeft.y = Math.floor(topLeft.y / this.pHeight) * this.pHeight;
 
     // Clear the sprite
     this.gridContainer.removeChildren();
 
-    let row = 0, col = 0;
-    let done = true, container: PIXI.Sprite;
+    let row = 0,
+      col = 0;
+    let done = true,
+      container: PIXI.Sprite;
     for (let i = 0, l = this.cache.length; i < l; i++) {
       container = this.cache[i];
       this.gridContainer.addChild(container);
       // Calculate the correct positions and offsets
-      let xx = topLeft.x + (col * Grid.rectangleCount.x) * this.pWidth;
-      let yy = topLeft.y + (row * Grid.rectangleCount.y) * this.pHeight;
-      let xOffset = -this.pWidth * Math.sign(Math.abs(xx) % (this.pWidth * 2 ));
-      let yOffset = -this.pHeight * Math.sign(Math.abs(yy) % (this.pHeight * 2));
+      const xx = topLeft.x + col * Grid.rectangleCount.x * this.pWidth;
+      const yy = topLeft.y + row * Grid.rectangleCount.y * this.pHeight;
+      const xOffset = -this.pWidth * Math.sign(Math.abs(xx) % (this.pWidth * 2));
+      const yOffset = -this.pHeight * Math.sign(Math.abs(yy) % (this.pHeight * 2));
       container.position.set(xx + xOffset, yy + yOffset);
       container.scale.set(this.pWidth / 16, this.pHeight / 16);
 
       // Get the global coordinates of the bottom right point
-      let bounds = container.getLocalBounds();
-      let bottomRight = container.toGlobal( new PIXI.Point(bounds.x + bounds.width, bounds.y + bounds.height) );
-      let reachedWidth = bottomRight.x >= width;
-      let reachedHeight = bottomRight.y >= height;
-      let isEnd = reachedWidth && reachedHeight;
+      const bounds = container.getLocalBounds();
+      const bottomRight = container.toGlobal(new PIXI.Point(bounds.x + bounds.width, bounds.y + bounds.height));
+      const reachedWidth = bottomRight.x >= width;
+      const reachedHeight = bottomRight.y >= height;
+      const isEnd = reachedWidth && reachedHeight;
 
       // If we did not fill up, increase the particle container cache
       if (i === this.cache.length - 1 && !isEnd) {
@@ -139,12 +134,10 @@ export class Grid extends EventEmitter {
         // Otherwise we jump to the next row and fill it
         col = 0;
         row++;
-      } else // Jump to the next column and render it
-        col++;
+      } else col++; // Jump to the next column and render it
     }
     // Trigger the event only if we completed the iterations without growing
-    if (done)
-      this.emit('update', width, height);
+    if (done) this.emit('update', width, height);
     return this;
   }
 
@@ -160,8 +153,7 @@ export class Grid extends EventEmitter {
 
   set container(container: PIXI.Container) {
     this.change('container', this.pContainer, container, () => {
-      if (this.pContainer)
-        this.pContainer.removeChild(this.gridContainer);
+      if (this.pContainer) this.pContainer.removeChild(this.gridContainer);
       this.pContainer = container;
       this.pContainer.addChildAt(this.gridContainer, 0);
     });
@@ -175,7 +167,7 @@ export class Grid extends EventEmitter {
   set width(width: number) {
     // We do not allow to fall below 8, since it causes issues and makes no sense
     width = Math.max(8, width);
-    this.change('width', this.pWidth, width, () => this.pWidth = width);
+    this.change('width', this.pWidth, width, () => (this.pWidth = width));
   }
 
   /** @type {number} height The grid height */
@@ -186,7 +178,7 @@ export class Grid extends EventEmitter {
   set height(height: number) {
     // We do not allow to fall below 8, since it causes issues and makes no sense
     height = Math.max(8, height);
-    this.change('height', this.pHeight, height, () => this.pHeight = height);
+    this.change('height', this.pHeight, height, () => (this.pHeight = height));
   }
 }
 

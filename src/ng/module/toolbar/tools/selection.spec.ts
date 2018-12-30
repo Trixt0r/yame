@@ -1,35 +1,46 @@
-import { SelectionTool } from "./selection";
-import { Tool } from "../tool";
-import { Pubsub } from "electron/idx";
-import { PixiService, SpriteEntity } from "ng/module/pixi/idx";
-import { SelectionRectangle } from "./selection/rectangle";
-import { SelectionRenderer } from "./selection/renderer";
-import { SelectionContainer } from "./selection/container";
-import { DisplayObject, Graphics } from "pixi.js";
-import { Rectangle } from "electron";
-import { Store, NgxsModule } from "@ngxs/store";
-import { TestBed } from "@angular/core/testing";
-import { SelectionState } from "./selection/ngxs/state";
+import { SelectionTool } from './selection';
+import { Tool } from '../tool';
+import { Pubsub } from 'electron/idx';
+import { PixiService, SpriteEntity } from 'ng/module/pixi/idx';
+import { SelectionRectangle } from './selection/rectangle';
+import { SelectionRenderer } from './selection/renderer';
+import { SelectionContainer } from './selection/container';
+import { DisplayObject, Graphics } from 'pixi.js';
+import { Rectangle } from 'electron';
+import { Store, NgxsModule, Actions } from '@ngxs/store';
+import { TestBed } from '@angular/core/testing';
+import { SelectionState } from './selection/ngxs/state';
 
 describe('SelectionTool', () => {
-
   let tool: SelectionTool;
   let pixiService: PixiService;
   let store: Store;
-  const ngRef = { injector: { get: function(type) { return type === Store ? store : pixiService; } } };
+  let actions: Actions;
+  const ngRef = {
+    injector: {
+      get: function(type) {
+        switch (type) {
+          case Store: return store;
+          case Actions: return actions;
+          default: return pixiService;
+        }
+      },
+    },
+  };
 
   beforeAll(() => {
     TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([
-        SelectionState
-    ])],
+      imports: [
+        NgxsModule.forRoot([SelectionState])
+      ],
     }).compileComponents();
     store = TestBed.get(Store);
-  })
+    actions = TestBed.get(Actions);
+  });
 
   beforeEach(() => {
     pixiService = new PixiService();
-    pixiService.setUp(<any>{ nativeElement: document.createElement('canvas') }, { });
+    pixiService.setUp(<any>{ nativeElement: document.createElement('canvas') }, {});
     tool = new SelectionTool('select');
   });
 
@@ -71,26 +82,32 @@ describe('SelectionTool', () => {
     });
 
     it('should add the container to the stage', () => {
-      expect(pixiService.scene.getChildIndex(tool.selectionContainer))
-        .toBeGreaterThanOrEqual(0, 'Container is not part of the map');
+      expect(pixiService.scene.getChildIndex(tool.selectionContainer)).toBeGreaterThanOrEqual(
+        0,
+        'Container is not part of the map'
+      );
     });
 
     it('should remove all container listeners on follow up calls', () => {
       let executed = false;
-      tool.selectionContainer.removeAllListeners = function() { executed = true; return tool.selectionContainer; };
+      tool.selectionContainer.removeAllListeners = function() {
+        executed = true;
+        return tool.selectionContainer;
+      };
       tool.setup();
       expect(executed).toBe(true, 'removeAllListeners not executed');
     });
 
     it('should execute addToolListeners only if active', () => {
       let executed = false;
-      tool.addToolListeners = function() { executed = true; };
+      tool.addToolListeners = function() {
+        executed = true;
+      };
       expect(executed).toBe(false, 'addToolListeners got executed');
-      return tool.onActivate()
-              .then(() => {
-                tool.setup();
-                expect(executed).toBe(true, 'addToolListeners not executed');
-              });
+      return tool.onActivate().then(() => {
+        tool.setup();
+        expect(executed).toBe(true, 'addToolListeners not executed');
+      });
     });
   });
 
@@ -98,18 +115,18 @@ describe('SelectionTool', () => {
     let executed = false;
     beforeEach(() => {
       executed = false;
-      tool.addToolListeners = function() { executed = true; };
+      tool.addToolListeners = function() {
+        executed = true;
+      };
     });
 
     it('should not execute addToolListeners if pixi service is not set', () => {
-      return tool.onActivate()
-              .then(() => expect(executed).toBe(false, 'addToolListeners has been executed'));
+      return tool.onActivate().then(() => expect(executed).toBe(false, 'addToolListeners has been executed'));
     });
 
     it('should execute addToolListeners pixi service is set', () => {
       Pubsub.emit('ready', ngRef);
-      return tool.onActivate()
-              .then(() => expect(executed).toBe(true, 'addToolListeners has been executed'));
+      return tool.onActivate().then(() => expect(executed).toBe(true, 'addToolListeners has been executed'));
     });
   });
 
@@ -117,12 +134,13 @@ describe('SelectionTool', () => {
     let executed = false;
     beforeEach(() => {
       executed = false;
-      tool.removeToolListeners = function() { executed = true; };
+      tool.removeToolListeners = function() {
+        executed = true;
+      };
     });
 
     it('should execute removeToolListeners', () => {
-      return tool.onDeactivate()
-              .then(() => expect(executed).toBe(true, 'removeToolListeners has been executed'));
+      return tool.onDeactivate().then(() => expect(executed).toBe(true, 'removeToolListeners has been executed'));
     });
   });
 
@@ -131,13 +149,15 @@ describe('SelectionTool', () => {
 
     it('should call initFunctions', () => {
       let executed = false;
-      (<any>tool).initFunctions = function() { executed = true; };
+      (<any>tool).initFunctions = function() {
+        executed = true;
+      };
       tool.addToolListeners();
       expect(executed).toBe(true, 'initFunctions not executed');
     });
 
     it('should call add mousedown, mouseup and mousemove handlers on the pixi canvas view', () => {
-      const handlers: { [key: string]: any[] } = { };
+      const handlers: { [key: string]: any[] } = {};
       pixiService.view.addEventListener = function(name, fn) {
         if (!handlers[name]) handlers[name] = [];
         handlers[name].push(fn);
@@ -153,7 +173,7 @@ describe('SelectionTool', () => {
     beforeEach(() => Pubsub.emit('ready', ngRef));
 
     it('should remove mousedown, mouseup and mousemove handlers on the pixi canvas view', () => {
-      const handlers: { [key: string]: any[] } = { };
+      const handlers: { [key: string]: any[] } = {};
       pixiService.view.removeEventListener = function(name, fn) {
         if (!handlers[name]) handlers[name] = [];
         handlers[name].push(fn);
@@ -166,7 +186,6 @@ describe('SelectionTool', () => {
   });
 
   describe('mousedown', () => {
-
     let unselected = false;
     let updated = false;
     let reset = false;
@@ -176,17 +195,33 @@ describe('SelectionTool', () => {
 
     beforeEach(() => {
       Pubsub.emit('ready', ngRef);
-      tool.selectionContainer.unselect = function() { unselected = true; return []; };
-      tool.selectionRectangle.reset = function() { reset = true; };
-      tool.selectionRectangle.update = function() { updated = true; return tool.selectionRectangle.rectangle; };
-      tool.finish = function() { finished = true; };
-      tool.selectionGraphics.clear = function() { cleared = true; return tool.selectionGraphics; };
-      pixiService.scene.removeChild = function(obj) { removed = <any>obj; return obj; };
+      tool.selectionContainer.unselect = function() {
+        unselected = true;
+        return [];
+      };
+      tool.selectionRectangle.reset = function() {
+        reset = true;
+      };
+      tool.selectionRectangle.update = function() {
+        updated = true;
+        return tool.selectionRectangle.rectangle;
+      };
+      tool.finish = function() {
+        finished = true;
+      };
+      tool.selectionGraphics.clear = function() {
+        cleared = true;
+        return tool.selectionGraphics;
+      };
+      pixiService.scene.removeChild = function(obj) {
+        removed = <any>obj;
+        return obj;
+      };
     });
 
     it('should skip if container is handling', () => {
       tool.selectionContainer.beginHandling(this);
-      const event = new MouseEvent('mousedown')
+      const event = new MouseEvent('mousedown');
       tool.mousedown(event);
       expect(unselected).toBe(false, 'Still executed');
       tool.selectionContainer.endHandling(this);
@@ -229,13 +264,17 @@ describe('SelectionTool', () => {
       expect(updated).toBe(true, 'Not updated');
       expect(reset).toBe(true, 'Not reset');
       expect(cleared).toBe(true, 'Not cleared');
-      expect(pixiService.stage.getChildIndex(tool.selectionGraphics))
-        .toBeGreaterThanOrEqual(0, 'Graphics are not added');
+      expect(pixiService.stage.getChildIndex(tool.selectionGraphics)).toBeGreaterThanOrEqual(
+        0,
+        'Graphics are not added'
+      );
     });
 
     it('should autoselect the underlying entity immediately and trigger mousedown on the container', () => {
       const event = new MouseEvent('mousedown');
-      pixiService.scene.filter = function(obj) { return <any>[new DisplayObject()]; };
+      pixiService.scene.filter = function(obj) {
+        return <any>[new DisplayObject()];
+      };
       let mousedown = false;
       tool.selectionContainer.off('mousedown');
       tool.selectionContainer.on('mousedown', function() {
@@ -257,12 +296,30 @@ describe('SelectionTool', () => {
 
     beforeEach(() => {
       Pubsub.emit('ready', ngRef);
-      tool.selectionRectangle.update = function() { updated = true; return tool.selectionRectangle.rectangle; };
-      tool.selectionGraphics.clear = function() { cleared = true; return tool.selectionGraphics; };
-      tool.selectionGraphics.lineStyle = function() { styled = true; return tool.selectionGraphics; };
-      tool.selectionGraphics.beginFill = function() { started = true; return tool.selectionGraphics; };
-      tool.selectionGraphics.drawShape = function(shape) { drawn = shape; return <any>tool.selectionGraphics; };
-      tool.selectionGraphics.endFill = function() { rendered = true; return tool.selectionGraphics; };
+      tool.selectionRectangle.update = function() {
+        updated = true;
+        return tool.selectionRectangle.rectangle;
+      };
+      tool.selectionGraphics.clear = function() {
+        cleared = true;
+        return tool.selectionGraphics;
+      };
+      tool.selectionGraphics.lineStyle = function() {
+        styled = true;
+        return tool.selectionGraphics;
+      };
+      tool.selectionGraphics.beginFill = function() {
+        started = true;
+        return tool.selectionGraphics;
+      };
+      tool.selectionGraphics.drawShape = function(shape) {
+        drawn = shape;
+        return <any>tool.selectionGraphics;
+      };
+      tool.selectionGraphics.endFill = function() {
+        rendered = true;
+        return tool.selectionGraphics;
+      };
     });
 
     it('should not execute if mousedown was not executed', () => {
@@ -293,7 +350,9 @@ describe('SelectionTool', () => {
 
     beforeEach(() => {
       Pubsub.emit('ready', ngRef);
-      tool.finish = function() { finished = true; };
+      tool.finish = function() {
+        finished = true;
+      };
     });
 
     it('should not execute if mousedown was not executed', () => {
@@ -321,22 +380,33 @@ describe('SelectionTool', () => {
 
     beforeEach(() => {
       Pubsub.emit('ready', ngRef);
-      pixiService.stage.removeChild = function(obj) { removed = <any>obj; return obj; };
-      pixiService.scene.addChild = function(obj) { added = <any>obj; return obj; };
-      tool.selectionContainer.select = function(obj) { current = <any>obj; return obj; };
+      pixiService.stage.removeChild = function(obj) {
+        removed = <any>obj;
+        return obj;
+      };
+      pixiService.scene.addChild = function(obj) {
+        added = <any>obj;
+        return obj;
+      };
+      tool.selectionContainer.select = function(obj) {
+        current = <any>obj;
+        return obj;
+      };
     });
 
     it('should remove the graphics from the stage and trigger "finish"', () => {
       let triggered = false;
-      tool.on('finish', () => triggered = true);
+      tool.on('finish', () => (triggered = true));
       tool.finish();
       expect(removed).toEqual(tool.selectionGraphics, 'Graphics not removed');
       expect(triggered).toBe(true, 'Not triggered');
     });
 
     it('should add the selection container to the scene if at least one entity has been selected and add them to the container', () => {
-      const selected = [ new DisplayObject() ];
-      pixiService.scene.filter = function() { return <any>selected; };
+      const selected = [new DisplayObject()];
+      pixiService.scene.filter = function() {
+        return <any>selected;
+      };
       tool.finish();
       expect(added).toEqual(tool.selectionContainer, 'Not added');
       expect(current).toEqual(selected, 'Not selected');
@@ -344,11 +414,12 @@ describe('SelectionTool', () => {
 
     it('should not add the selection container to the scene if no entities hit the selection rectangle', () => {
       const selected = [];
-      pixiService.scene.filter = function() { return <any>selected; };
+      pixiService.scene.filter = function() {
+        return <any>selected;
+      };
       tool.finish();
       expect(added).not.toEqual(tool.selectionContainer, 'Still added');
       expect(current).not.toEqual(selected, 'Still selected');
     });
   });
-
 });

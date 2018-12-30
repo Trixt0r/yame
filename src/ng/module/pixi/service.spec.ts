@@ -5,11 +5,10 @@ import { PixiService } from './service';
 import * as PIXI from 'pixi.js';
 
 interface ViewRef {
-  nativeElement: {offsetWidth: number, offsetHeight: number}
+  nativeElement: { offsetWidth: number; offsetHeight: number };
 }
 
 describe('PixiService', () => {
-
   let service: PixiService;
 
   let viewRef: ViewRef;
@@ -18,15 +17,14 @@ describe('PixiService', () => {
     viewRef = {
       nativeElement: {
         offsetWidth: 0,
-        offsetHeight: 0
-      }
+        offsetHeight: 0,
+      },
     };
     service = new PixiService();
   });
 
   afterEach(() => {
-    if (service.app)
-      return service.dispose();
+    if (service.app) return service.dispose();
   });
 
   describe('setUp', () => {
@@ -36,7 +34,7 @@ describe('PixiService', () => {
     });
 
     it('should have a pixi.js app with a scene after setUp', () => {
-      service.setUp(viewRef, { });
+      service.setUp(viewRef, {});
       expect(service.app).toBeDefined('No pixi.js application defined');
       expect(service.app instanceof PIXI.Application).toBe(true, 'Not a valid pixi.js application');
       expect(service.scene).toBeDefined('No scene defined');
@@ -44,10 +42,10 @@ describe('PixiService', () => {
     });
 
     it('should not change app on successive setUp', () => {
-      service.setUp(viewRef, { });
-      let app = service.app;
+      service.setUp(viewRef, {});
+      const app = service.app;
       for (let i = 0; i < 10; i++) {
-        service.setUp(viewRef, { });
+        service.setUp(viewRef, {});
         expect(app).toBe(service.app, 'App instance changed');
       }
     });
@@ -58,59 +56,57 @@ describe('PixiService', () => {
       let thrown = false;
       try {
         service.resize();
-      } catch(e) {
+      } catch (e) {
         expect(e instanceof PixiAppNotInitializedException).toBe(true);
-        expect(e.message).toEqual("Can't resize");
+        expect(e.message).toEqual('Can\'t resize');
         thrown = true;
       }
       expect(thrown).toBe(true, 'PixiAppNotInitializedException has not been thrown');
     });
 
     it('should be able to resize after setUp', () => {
-      service.setUp(viewRef, { });
-      expect(() => service.resize())
-        .not.toThrowError("Can't resize");
+      service.setUp(viewRef, {});
+      expect(() => service.resize()).not.toThrowError('Can\t resize');
     });
 
     it('should not resize if nothing changed', () => {
-      service.setUp(viewRef, { });
+      service.setUp(viewRef, {});
       expect(service.resize()).toBe(false, 'The renderer has been resized');
     });
 
     it('should not resize if the dimensions have initial values', () => {
-      service.setUp(viewRef, { });
+      service.setUp(viewRef, {});
       viewRef.nativeElement.offsetWidth = 0;
       viewRef.nativeElement.offsetHeight = 0;
       expect(service.resize()).toBe(false, 'The renderer has been resized');
     });
 
     it('should resize if the width changed', () => {
-      service.setUp(viewRef, { });
+      service.setUp(viewRef, {});
       viewRef.nativeElement.offsetWidth = 1;
-      let re = <PIXI.Point>service.resize();
+      const re = <PIXI.Point>service.resize();
       expect(re).not.toBeFalsy('The renderer has not been resized');
       expect(re.x).toBe(1, 'The width did not change');
       expect(re.y).toBe(viewRef.nativeElement.offsetHeight, 'The height changed');
     });
 
     it('should resize if the height changed', () => {
-      service.setUp(viewRef, { });
+      service.setUp(viewRef, {});
       viewRef.nativeElement.offsetHeight = 1;
-      let re = <PIXI.Point>service.resize();
+      const re = <PIXI.Point>service.resize();
       expect(re).not.toBeFalsy('The renderer has not been resized');
       expect(re.x).toBe(viewRef.nativeElement.offsetWidth, 'The width changed');
       expect(re.y).toBe(1, 'The height did not change');
     });
 
     it('should resize if the width and the height changed', () => {
-      service.setUp(viewRef, { });
+      service.setUp(viewRef, {});
       viewRef.nativeElement.offsetWidth = 1;
       viewRef.nativeElement.offsetHeight = 1;
-      let re = <PIXI.Point>service.resize();
+      const re = <PIXI.Point>service.resize();
       expect(re).not.toBeFalsy('The renderer has not been resized');
       expect(re.x).toBe(1, 'The width did not change');
       expect(re.y).toBe(1, 'The height did not change');
     });
   });
-
 });
