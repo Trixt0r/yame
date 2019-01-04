@@ -2,12 +2,15 @@
   {{ title }}
 </h5>
 
-<mat-tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl" class="example-tree">
-  <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle [class.changed]="isChanged(node)">
+<mat-tree #tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl" class="example-tree">
+  <mat-tree-node
+    *matTreeNodeDef="let node"
+    matTreeNodeToggle
+    [class.changed]="isChanged(node)"
+    [class.selected]="isSelected(node)"
+    (click)="toggleSelected(node)">
     <li>
-      <h5 class="mat-h5 node-name">
-        {{node.id}}
-      </h5>
+      <h5 class="mat-h5 node-name">{{node.id}}</h5>
       <div class="inline-actions">
         <button mat-icon-button (click)="toggleVisibility(node)">
           <mat-icon>{{ node.visibility ? 'visibility' : 'visibility_off' }}</mat-icon>

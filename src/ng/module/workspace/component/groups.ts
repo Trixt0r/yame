@@ -8,8 +8,6 @@ import { MatButton, MatListItem } from '@angular/material'
 
 import { WorkspaceService } from '../service';
 
-import { DirectoryContent } from "../../../../common/content/directory";
-
 /**
  * Open event definition.
  *
@@ -32,7 +30,7 @@ interface OpenEvent {
  */
 @Component({
   moduleId: module.id.toString(),
-  selector: 'groups',
+  selector: 'yame-groups',
   templateUrl: 'groups.html',
   styleUrls: ['./groups.scss'],
   animations: [
@@ -79,7 +77,7 @@ export class GroupsComponent implements OnInit {
    * @param {AssetGroup<Asset>} group The group to open.
    */
   open(group: AssetGroup<Asset>): void {
-    let close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
+    const close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
     // Store the scroll state for each group so we can restore it if the user moves back
     if (!close) this.previousScrolls.push(this.ref.nativeElement.scrollTop);
     this.slide = close ? 'close' : 'open';
@@ -160,7 +158,7 @@ export class GroupsComponent implements OnInit {
    */
   private fixScroll(event: AnimationEvent) {
     if (event.toState === 'close') {
-      let idx = this.assets.getParents(this.previous).reverse().indexOf(this.current);
+      const idx = this.assets.getParents(this.previous).reverse().indexOf(this.current);
       this.ref.nativeElement.scrollTop = this.previousScrolls[idx];
       this.previousScrolls.splice(idx, this.previousScrolls.length - idx); // Clear all states from the found index
     }
@@ -204,6 +202,6 @@ export class GroupsComponent implements OnInit {
    */
   public get displayBack(): boolean {
     return (this.slide === 'none' && this.current && this.current.id !== this.ws.directory.path) ||
-            (this.slide !== 'none' && this.previous && this.previous.id != this.ws.directory.path);
+            (this.slide !== 'none' && this.previous && this.previous.id !== this.ws.directory.path);
   }
 }

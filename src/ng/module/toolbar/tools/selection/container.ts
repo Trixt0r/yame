@@ -1,5 +1,5 @@
-import { Group, Entity } from "../../../pixi/idx";
-import { Rectangle, Point } from "pixi.js";
+import { Group, Entity } from '../../../pixi/idx';
+import { Rectangle, Point } from 'pixi.js';
 
 /**
  * The container which should contain the selected entities.
@@ -13,12 +13,11 @@ import { Rectangle, Point } from "pixi.js";
  * @extends {Group<Entity>}
  */
 export class SelectionContainer extends Group<Entity> {
-
   /**
    * @protected
    * @type {boolean} Whether user events are current
    */
-  protected handling: boolean = false;
+  protected handling = false;
 
   /**
    * @protected
@@ -52,8 +51,10 @@ export class SelectionContainer extends Group<Entity> {
    */
   endHandling(ref: any, ...arg: any[]) {
     if (!this.handling) throw new Error('beginHandling has to be called before!');
-    if (ref !== this.handlerRef) throw new Error('You are not allowed to call this,' +
-                                                  ' since the handling was not started by the given reference');
+    if (ref !== this.handlerRef)
+      throw new Error(
+        'You are not allowed to call this,' + ' since the handling was not started by the given reference'
+      );
     this.handlerRef = null;
     this.handling = false;
     const args = Array.prototype.slice.call(arguments, 1);
@@ -104,7 +105,7 @@ export class SelectionContainer extends Group<Entity> {
     });
     if (this.internalEntities.length > 0) {
       this.interactive = true;
-      const bounds: Rectangle = this.hitArea = this.getLocalBounds();
+      const bounds: Rectangle = (this.hitArea = this.getLocalBounds());
       const pivotX = bounds.x + bounds.width / 2;
       const pivotY = bounds.y + bounds.height / 2;
       if (this.parent) {
@@ -128,12 +129,13 @@ export class SelectionContainer extends Group<Entity> {
    * @return {Entity[]}
    */
   unselect(entities: Entity[] = this.entities): Entity[] {
-    if (this.handling)
-      this.endHandling(this.currentHandler);
+    if (this.handling) this.endHandling(this.currentHandler);
     const toRemove = entities.filter(child => this.indexOf(child) >= 0);
     entities.forEach(child => {
-      if (toRemove.indexOf(child) < 0) return console.warn('[SelectionContainer] You are trying to remove a child ' +
-                                                            'which is not part of this container!');
+      if (toRemove.indexOf(child) < 0)
+        return console.warn(
+          '[SelectionContainer] You are trying to remove a child ' + 'which is not part of this container!'
+        );
       this.removeChild(child);
       const idx = this.internalEntities.indexOf(child);
       if (idx >= 0) this.internalEntities.splice(idx, 1);
@@ -145,10 +147,8 @@ export class SelectionContainer extends Group<Entity> {
       }
       child.emit('unselected', this);
     });
-    if (this.internalEntities.length === 0)
-      this.interactive = false;
+    if (this.internalEntities.length === 0) this.interactive = false;
     this.emit('unselected', toRemove);
     return toRemove;
   }
-
 }

@@ -10,40 +10,40 @@ import { PixiService } from 'ng/module/pixi/idx';
  * @interface ResizeAnchorRenderingConfig
  */
 export interface ResizeAnchorRenderingConfig {
-  fill?: { alpha?: number; color?: number; };
-  line?: { width?: number, color?: number; alpha?: number; },
+  fill?: { alpha?: number; color?: number };
+  line?: { width?: number; color?: number; alpha?: number };
   size?: number;
 }
 
 /**
  * @var {number} HOR Defines that an anchor is aligned horizontally and not centered, i.e. left or right.
  */
-export const HOR: number = 1;
+export const HOR = 1;
 
 /**
  * @var {number} VERT Defines that an anchor is aligned horizontally and not centered, i.e. top or bottom.
  */
-export const VERT: number = 2;
+export const VERT = 2;
 
 /**
  * @var {number} RIGHT Defines that an anchor can be moved to the right and is aligned right.
  */
-export const RIGHT: number = 4;
+export const RIGHT = 4;
 
 /**
  * @var {number} DOWN Defines that an anchor can be moved downwards and is aligned at the bottom.
  */
-export const DOWN: number = 8;
+export const DOWN = 8;
 
 /**
  * @var {number} RIGHT Defines that an anchor can be moved to the left and is aligned left.
  */
-export const LEFT: number = 16;
+export const LEFT = 16;
 
 /**
  * @var {number} UP Defines that an anchor can be moved upwards and is aligned at the top.
  */
-export const UP: number = 32;
+export const UP = 32;
 
 const cursorOrder = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
 
@@ -52,7 +52,6 @@ const cursorOrder = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
  * It will make sure that the size can be changed via mouse and keep the visual position at the same point.
  */
 export class ResizeAnchor extends Graphics {
-
   private clickedPos: Point = null;
   private containerPos = new Point();
   private clickedScale = new Point();
@@ -88,9 +87,9 @@ export class ResizeAnchor extends Graphics {
    * @type {ResizeAnchorRenderingConfig}
    */
   config: ResizeAnchorRenderingConfig = {
-    fill: { },
-    line: { },
-    size: 10
+    fill: {},
+    line: {},
+    size: 10,
   };
 
   /**
@@ -162,7 +161,7 @@ export class ResizeAnchor extends Graphics {
     const lineColor = _.defaultTo(this.config.line.color, 0xffffff);
     const lineAlpha = _.defaultTo(this.config.line.alpha, 1);
     const fillColor = _.defaultTo(this.config.fill.color, 0x000000);
-    const fillAlpha =_.defaultTo(this.config.fill.alpha, 1);
+    const fillAlpha = _.defaultTo(this.config.fill.alpha, 1);
 
     this.clear();
     if (fillAlpha) this.beginFill(fillColor, fillAlpha);
@@ -192,7 +191,7 @@ export class ResizeAnchor extends Graphics {
       style = 'ew-resize';
     }
     const offset = cursorOrder.indexOf(style);
-    const closest = Math.round((this.rotation + offset * angleThresh) / angleThresh ) % cursorOrder.length;
+    const closest = Math.round((this.rotation + offset * angleThresh) / angleThresh) % cursorOrder.length;
     style = cursorOrder[closest];
     this.service.app.view.style.cursor = style;
   }
@@ -216,7 +215,8 @@ export class ResizeAnchor extends Graphics {
    */
   validate(): true {
     if (!this.target) throw new Error('No target specified');
-    if (!this.container) throw new Error('You have to define a selection container in order to be able to resize the target');
+    if (!this.container)
+      throw new Error('You have to define a selection container in order to be able to resize the target');
     return true;
   }
 
@@ -242,8 +242,7 @@ export class ResizeAnchor extends Graphics {
     this.tmpYDirection = this.yDirection * Math.sign(this.clickedScale.y);
     this.tmpXSignBounds = Math.sign(this.tmpXDirection + 1);
     this.tmpYSignBounds = Math.sign(this.tmpYDirection + 1);
-    this.clickedBound.set(bnds.x + bnds.width * this.tmpXSignBounds,
-                          bnds.y + bnds.height * this.tmpYSignBounds);
+    this.clickedBound.set(bnds.x + bnds.width * this.tmpXSignBounds, bnds.y + bnds.height * this.tmpYSignBounds);
     this.clickedSize.set(bnds.width, bnds.height);
     this.container.parent.toLocal(this.clickedBound, this.target, this.clickedBound);
     this.emit('handle:start');
@@ -270,8 +269,8 @@ export class ResizeAnchor extends Graphics {
     diff.set(currentPos.x - this.clickedPos.x, currentPos.y - this.clickedPos.y);
     diff.x *= this.tmpXDirection;
     diff.y *= this.tmpYDirection;
-    const scaleX = (diff.x / this.clickedSize.x);
-    const scaleY = (diff.y / this.clickedSize.y);
+    const scaleX = diff.x / this.clickedSize.x;
+    const scaleY = diff.y / this.clickedSize.y;
 
     if (this.matches(HOR)) {
       this.target.scale.x = this.clickedScale.x + scaleX;
@@ -281,10 +280,9 @@ export class ResizeAnchor extends Graphics {
     }
     const bnds = this.tmpLocalBounds;
     const bound = this.tmp;
-    bound.set(bnds.x + bnds.width * this.tmpXSignBounds,
-              bnds.y + bnds.height * this.tmpYSignBounds);
+    bound.set(bnds.x + bnds.width * this.tmpXSignBounds, bnds.y + bnds.height * this.tmpYSignBounds);
     this.container.parent.toLocal(bound, this.target, bound);
-    bound.set((bound.x - this.clickedBound.x), (bound.y - this.clickedBound.y));
+    bound.set(bound.x - this.clickedBound.x, bound.y - this.clickedBound.y);
     this.container.position.x = this.containerPos.x + bound.x;
     this.container.position.y = this.containerPos.y + bound.y;
     this.updateCursor();
@@ -319,5 +317,4 @@ export class ResizeAnchor extends Graphics {
     this.rotation = this.container.rotation;
     stage.toLocal(this.position, this.container, this.position);
   }
-
 }

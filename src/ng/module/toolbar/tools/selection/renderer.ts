@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
-import { Graphics, Container, Rectangle, Point, PointLike, } from "pixi.js";
-import { SelectionContainer } from "./container";
-import { PixiService, Entity } from "../../../pixi/idx";
+import { Graphics, Container, Rectangle, Point, PointLike } from 'pixi.js';
+import { SelectionContainer } from './container';
+import { PixiService, Entity } from '../../../pixi/idx';
 
 /**
  * The config interface for the rendering.
@@ -10,8 +10,8 @@ import { PixiService, Entity } from "../../../pixi/idx";
  * @interface SelectionRendererConfig
  */
 export interface SelectionRendererConfig {
-  fill?: { alpha?: number; color?: number; };
-  line?: { width?: number, color?: number; alpha?: number; }
+  fill?: { alpha?: number; color?: number };
+  line?: { width?: number; color?: number; alpha?: number };
 }
 
 /**
@@ -24,11 +24,13 @@ export interface SelectionRendererConfig {
  * @extends {Graphics}
  */
 export class SelectionRenderer extends Graphics {
+  // Point pool
+  private static points = [new Point(), new Point(), new Point(), new Point()];
 
   /**
    * @type {SelectionRendererConfig} The rendering config.
    */
-  config: SelectionRendererConfig = { fill: { }, line: { } };
+  config: SelectionRendererConfig = { fill: {}, line: {} };
 
   // Protected fields, for handling the rendering
   protected stage: Container;
@@ -41,24 +43,44 @@ export class SelectionRenderer extends Graphics {
   readonly boundingPoints: Point[];
 
   /**
+   * Draws rotated bounds of the given entity mapped to the given target.
+   *
+   * @param {Entity} entity The entity to draw the bounds for.
+   * @param {Graphics} target The target to draw the lines on.
+   * @param {PointLike[]} points Optional parameter for pooled points. Can be used to prevent unnecessary calculations, if already
+   *               done. Points have to be mapped to the parent coordinates of the target.
+   *               If not passed, an internal pool will be used.
+   */
+  static drawBounds(target: Graphics, entity?: Entity, points: PointLike[] = SelectionRenderer.points) {
+    if (points === SelectionRenderer.points && entity instanceof Entity) {
+      const bnds = entity.getLocalBounds();
+      points[0].set(bnds.x, bnds.y);
+      points[1].set(bnds.x + bnds.width, bnds.y);
+      points[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
+      points[3].set(bnds.x, bnds.y + bnds.height);
+      points.forEach(point => target.parent.toLocal(point, entity, point));
+    }
+    target.moveTo(points[0].x, points[0].y);
+    points.push(points.shift());
+    points.forEach(point => target.lineTo(point.x, point.y));
+  }
+
+  /**
    * Creates an instance of SelectionRenderer.
    * @param {PixiService} service The pixi service.
    * @param {SelectionContainer} [container=null] The selection container.
    * @param {boolean} [nativeLines=false]
    */
-  constructor(protected service: PixiService,
-              protected container: SelectionContainer = null,
-              nativeLines: boolean = false) {
+  constructor(
+    protected service: PixiService,
+    protected container: SelectionContainer = null,
+    nativeLines: boolean = false
+  ) {
     super(nativeLines);
     this.stage = this.service.stage;
     this.outerBounds = new Rectangle();
     this.attached = false;
-    this.boundingPoints = [
-      new Point(),
-      new Point(),
-      new Point(),
-      new Point(),
-    ]
+    this.boundingPoints = [new Point(), new Point(), new Point(), new Point()];
     this.service.scene.on('camera:updated', this.update, this); // Setup here, since the scene does not change
     this.setupContainerHandlers();
   }
@@ -74,7 +96,10 @@ export class SelectionRenderer extends Graphics {
     if (this.container === container) return;
     const old = this.container;
     if (old) {
-      old.off('selected', null, this).off('updated', null, this).off('unselected', null, this);
+      old
+        .off('selected', null, this)
+        .off('updated', null, this)
+        .off('unselected', null, this);
       this.detach(true);
     }
     this.container = container;
@@ -138,7 +163,7 @@ export class SelectionRenderer extends Graphics {
     const lineColor = _.defaultTo(this.config.line.color, 0xffffff);
     const lineAlpha = _.defaultTo(this.config.line.alpha, 1);
     const fillColor = _.defaultTo(this.config.fill.color, 0xffffff);
-    const fillAlpha =_.defaultTo(this.config.fill.alpha, 0);
+    const fillAlpha = _.defaultTo(this.config.fill.alpha, 0);
 
     if (fillAlpha) this.beginFill(fillColor, fillAlpha);
 
@@ -180,34 +205,4 @@ export class SelectionRenderer extends Graphics {
   get isAttached(): boolean {
     return this.attached;
   }
-
-  // Point pool
-  private static points = [ new Point(),
-                            new Point(),
-                            new Point(),
-                            new Point() ];
-
-  /**
-   * Draws rotated bounds of the given entity mapped to the given target.
-   *
-   * @param {Entity} entity The entity to draw the bounds for.
-   * @param {Graphics} target The target to draw the lines on.
-   * @param {PointLike[]} points Optional parameter for pooled points. Can be used to prevent unnecessary calculations, if already
-   *               done. Points have to be mapped to the parent coordinates of the target.
-   *               If not passed, an internal pool will be used.
-   */
-  static drawBounds(target: Graphics, entity?: Entity, points: PointLike[] = SelectionRenderer.points) {
-    if (points === SelectionRenderer.points && entity instanceof Entity) {
-      const bnds = entity.getLocalBounds();
-      points[0].set(bnds.x, bnds.y);
-      points[1].set(bnds.x + bnds.width, bnds.y);
-      points[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
-      points[3].set(bnds.x, bnds.y + bnds.height);
-      points.forEach(point => target.parent.toLocal(point, entity, point));
-    }
-    target.moveTo(points[0].x, points[0].y);
-    points.push(points.shift());
-    points.forEach(point => target.lineTo(point.x, point.y));
-  }
-
 }

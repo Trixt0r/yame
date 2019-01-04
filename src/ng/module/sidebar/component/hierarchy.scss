@@ -25,6 +25,10 @@ mat-tree li {
   display: inline-block;
 }
 
+mat-tree {
+  overflow-y: auto;
+}
+
 mat-tree-node {
   cursor: pointer;
   .node-name { float: left; }
@@ -45,5 +49,8 @@ mat-tree-node {
       opacity: inherit;
       transform: none;
     }
+  }
+  &.selected {
+    background: #5a5a5a;
   }
 }

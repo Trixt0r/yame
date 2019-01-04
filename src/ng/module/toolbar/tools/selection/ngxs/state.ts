@@ -30,9 +30,6 @@ export class SelectionState {
     ctx.setState({
       ...state,
       entities: action.entities,
-      position: action.postion,
-      rotation: action.rotation,
-      size: action.size ? action.size : { x: 1, y: 1 },
     });
   }
 

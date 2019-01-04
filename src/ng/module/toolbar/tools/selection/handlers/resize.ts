@@ -1,8 +1,10 @@
-import { Container } from "pixi.js";
-import { ResizeAnchor, HOR, VERT, LEFT, UP, RIGHT, DOWN } from "./resize/anchor";
-import { SelectionRenderer } from "../renderer";
-import { SelectionContainer } from "../container";
-import { Group, PixiService } from "ng/module/pixi/idx";
+import { Container } from 'pixi.js';
+import { ResizeAnchor, HOR, VERT, LEFT, UP, RIGHT, DOWN } from './resize/anchor';
+import { SelectionRenderer } from '../renderer';
+import { SelectionContainer } from '../container';
+import { Group, PixiService } from 'ng/module/pixi/idx';
+import { Store } from '@ngxs/store';
+import { Resize, Translate } from '../ngxs/actions';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -12,13 +14,12 @@ import { Group, PixiService } from "ng/module/pixi/idx";
  * @class SelectionResizeHandler
  */
 export class SelectionResizeHandler {
-
   /**
    * The list of anchor points.
    *
    * @type {ResizeAnchor[]}
    */
-  public readonly anchors: ResizeAnchor[] = [ ];
+  public readonly anchors: ResizeAnchor[] = [];
 
   /**
    * Creates an instance of SelectionResizeHandler.
@@ -27,7 +28,10 @@ export class SelectionResizeHandler {
    * @param {PixiService} service The pixi service.
    * @memberof SelectionResizeHandler
    */
-  constructor(private container: SelectionContainer, renderer: SelectionRenderer, service: PixiService) {
+  constructor(private container: SelectionContainer,
+              protected renderer: SelectionRenderer,
+              protected service: PixiService,
+              protected store: Store) {
     this.anchors.push(
       new ResizeAnchor(HOR | VERT | LEFT | UP, service), // top left
       new ResizeAnchor(VERT | UP, service), // top mid
@@ -36,7 +40,7 @@ export class SelectionResizeHandler {
       new ResizeAnchor(HOR | VERT | RIGHT | DOWN, service), // bot right
       new ResizeAnchor(VERT | DOWN, service), // bot mid
       new ResizeAnchor(HOR | VERT | LEFT | DOWN, service), // bot left
-      new ResizeAnchor(HOR | LEFT, service), // left mid
+      new ResizeAnchor(HOR | LEFT, service) // left mid
     );
 
     renderer.on('attached', this.attached, this);
@@ -68,9 +72,19 @@ export class SelectionResizeHandler {
       anchor.render();
       anchor.container = this.container;
       anchor.target = this.container.entities[0];
-      anchor.on('updated', () => this.container.emit('updated'))
-            .on('handle:start', () => this.container.beginHandling(anchor))
-            .on('handle:end', () => this.container.endHandling(anchor));
+      anchor
+        .on('updated', () => {
+          this.store.dispatch(new Resize({
+            x: anchor.target.scale.x,
+            y: anchor.target.scale.y,
+          }));
+          this.store.dispatch(new Translate({
+            x: this.container.position.x,
+            y: this.container.position.y,
+          }));
+        })
+        .on('handle:start', () => this.container.beginHandling(anchor))
+        .on('handle:end', () => this.container.endHandling(anchor));
       stage.addChild(anchor);
     });
   }
@@ -86,7 +100,10 @@ export class SelectionResizeHandler {
     this.anchors.forEach(anchor => {
       anchor.container = null;
       anchor.target = null;
-      anchor.off('updated').off('handle:start').off('handle:end');
+      anchor
+        .off('updated')
+        .off('handle:start')
+        .off('handle:end');
       stage.removeChild(anchor);
     });
   }
@@ -103,5 +120,4 @@ export class SelectionResizeHandler {
     const bnds = this.container.getLocalBounds();
     this.anchors.forEach(anchor => anchor.update(stage, bnds));
   }
-
 }

@@ -1,7 +1,9 @@
 import { Text, TextStyleOptions, Container, Rectangle, interaction, Point, Graphics, DisplayObject } from 'pixi.js';
-import { SelectionContainer } from "../container";
-import { Entity, PixiService } from "../../../../pixi/idx";
+import { SelectionContainer } from '../container';
+import { Entity, PixiService } from '../../../../pixi/idx';
 import { SelectionRenderer } from '../renderer';
+import { Store } from '@ngxs/store';
+import { Rotate } from '../ngxs/actions';
 
 /**
  * The rotation handler is responsible for changing the rotation of the current selection.
@@ -10,7 +12,6 @@ import { SelectionRenderer } from '../renderer';
  * @class SelectionRotateHandler
  */
 export class SelectionRotateHandler {
-
   private mouseStartPos: Point;
   private mouseCurrentPos: Point;
 
@@ -21,7 +22,7 @@ export class SelectionRotateHandler {
   private mouseupFn: EventListenerObject;
   private mouseLeft = false;
 
-  readonly areas: DisplayObject[] = [ ];
+  readonly areas: DisplayObject[] = [];
 
   /**
    * Creates an instance of SelectionRotateHandler.
@@ -30,9 +31,12 @@ export class SelectionRotateHandler {
    * @param {PixiService} service The pixi service.
    * @memberof SelectionRotateHandler
    */
-  constructor(private container: SelectionContainer,
-              private renderer: SelectionRenderer,
-              private service: PixiService) {
+  constructor(
+    private container: SelectionContainer,
+    private renderer: SelectionRenderer,
+    private service: PixiService,
+    private store: Store
+  ) {
     this.mouseCurrentPos = new Point();
     this.mouseStartPos = new Point();
     this.initRot = 0;
@@ -46,7 +50,7 @@ export class SelectionRotateHandler {
 
     this.areas.push(new DisplayObject(), new DisplayObject(), new DisplayObject(), new DisplayObject());
     this.areas.forEach(area => {
-      area.interactive = true
+      area.interactive = true;
       area.on('mousedown', this.mousedown, this);
       area.on('mousemove', this.mousemove, this);
       area.on('mouseover', this.updateCursor, this);
@@ -97,8 +101,10 @@ export class SelectionRotateHandler {
     this.mouseStartPos.set(event.data.global.x, event.data.global.y);
     this.container.parent.toLocal(this.mouseStartPos, null, this.mouseStartPos);
     this.initRot = this.container.rotation;
-    this.clickedRot = Math.atan2(this.mouseStartPos.y - this.container.position.y,
-                                  this.mouseStartPos.x - this.container.position.x);
+    this.clickedRot = Math.atan2(
+      this.mouseStartPos.y - this.container.position.y,
+      this.mouseStartPos.x - this.container.position.x
+    );
   }
 
   /**
@@ -125,9 +131,11 @@ export class SelectionRotateHandler {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
     this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
     this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
-    this.container.rotation = this.initRot + Math.atan2(this.mouseCurrentPos.y - this.clickedPos.y,
-                                                        this.mouseCurrentPos.x - this.clickedPos.x) - this.clickedRot;
-    this.container.emit('updated');
+    this.container.rotation =
+      this.initRot +
+      Math.atan2(this.mouseCurrentPos.y - this.clickedPos.y, this.mouseCurrentPos.x - this.clickedPos.x) -
+      this.clickedRot;
+    this.store.dispatch(new Rotate(this.container.rotation));
   }
 
   /**
@@ -148,8 +156,8 @@ export class SelectionRotateHandler {
     stage.toLocal(bottomLeft, this.container, bottomLeft);
     const horDiff = { x: topLeft.x - topRight.x, y: topLeft.y - topRight.y };
     const verDiff = { x: bottomLeft.x - topLeft.x, y: bottomLeft.y - topLeft.y };
-    const width = Math.sqrt((horDiff.x * horDiff.x) + (horDiff.y * horDiff.y)) + (offset + threshold) * 2;
-    const height = Math.sqrt((verDiff.x * verDiff.x) + (verDiff.y * verDiff.y));
+    const width = Math.sqrt(horDiff.x * horDiff.x + horDiff.y * horDiff.y) + (offset + threshold) * 2;
+    const height = Math.sqrt(verDiff.x * verDiff.x + verDiff.y * verDiff.y);
     // Top
     this.areas[0].hitArea = new Rectangle(-offset - threshold, -offset - threshold, width, threshold);
     this.areas[0].position.set(bnds.x, bnds.y);
@@ -225,8 +233,7 @@ export class SelectionRotateHandler {
    * @returns {void}
    */
   unselected(unselected: Entity[]): void {
-    unselected.forEach(entity => entity.rotation += this.container.rotation);
+    unselected.forEach(entity => (entity.rotation += this.container.rotation));
     this.container.rotation = 0;
   }
-
 }

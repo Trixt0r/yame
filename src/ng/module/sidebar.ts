@@ -5,6 +5,7 @@ import { UtilsModule } from "./utils";
 import { MaterialModule } from './material';
 import { HierarchyComponent } from './sidebar/component/hierarchy';
 import { HierarchyService } from './sidebar/service/hierarchy';
+import { PropertiesComponent } from './sidebar/component/properties';
 
 @NgModule({
   imports: [
@@ -15,10 +16,12 @@ import { HierarchyService } from './sidebar/service/hierarchy';
   declarations: [
     SidebarComponent,
     HierarchyComponent,
+    PropertiesComponent,
   ],
   exports: [
     SidebarComponent,
     HierarchyComponent,
+    PropertiesComponent,
   ],
   providers: [HierarchyService]
 })

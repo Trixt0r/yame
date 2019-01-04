@@ -1,6 +1,8 @@
-import { SelectionContainer } from "../container";
-import { interaction } from "pixi.js";
-import { PixiService } from "ng/idx";
+import { SelectionContainer } from '../container';
+import { interaction } from 'pixi.js';
+import { PixiService } from 'ng/idx';
+import { Store } from '@ngxs/store';
+import { Translate } from '../ngxs/actions';
 
 /**
  * The translate handler is responsible to move the selection container in the scene.
@@ -9,7 +11,6 @@ import { PixiService } from "ng/idx";
  * @class SelectionTranslateHandler
  */
 export class SelectionTranslateHandler {
-
   private startPos: PIXI.Point;
   private mouseCurrentPos: PIXI.Point;
   private mouseStartPos: PIXI.Point;
@@ -20,8 +21,7 @@ export class SelectionTranslateHandler {
    * @param {SelectionContainer} container The selection container.
    * @param {PixiService} service The pixi service.
    */
-  constructor(private container: SelectionContainer,
-              private service: PixiService) {
+  constructor(private container: SelectionContainer, private service: PixiService, private store: Store) {
     this.startPos = new PIXI.Point();
     this.mouseCurrentPos = new PIXI.Point();
     this.mouseStartPos = new PIXI.Point();
@@ -74,7 +74,11 @@ export class SelectionTranslateHandler {
     this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
     this.container.position.x = this.startPos.x + (this.mouseCurrentPos.x - this.mouseStartPos.x);
     this.container.position.y = this.startPos.y + (this.mouseCurrentPos.y - this.mouseStartPos.y);
-    this.container.emit('updated');
+    this.store.dispatch(
+      new Translate({
+        x: this.container.position.x,
+        y: this.container.position.y,
+      }));
   }
 
   /**
@@ -83,7 +87,6 @@ export class SelectionTranslateHandler {
    * @returns {void}
    */
   unselected(): void {
-    if (this.container.length === 0)
-      this.container.position.set(0, 0);
+    if (this.container.length === 0) this.container.position.set(0, 0);
   }
 }

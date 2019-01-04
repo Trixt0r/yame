@@ -78,16 +78,51 @@ export class SelectionTool extends Tool {
       this.service = ref.injector.get(PixiService);
       this.store = ref.injector.get(Store);
       this.actions = ref.injector.get(Actions);
-      this.actions.pipe(ofActionSuccessful(DeleteEntity))
-          .subscribe((action: DeleteEntity) => {
-            const idx = this.selectionContainer.indexOf(action.id);
-            if (idx < 0) return;
-            const prev = this.selectionContainer.entities;
-            prev.splice(idx, 1);
-            this.selectionContainer.unselect();
-            if (!prev.length) return;
-            this.selectionContainer.select(prev);
-          });
+      const scene = this.service.scene;
+      this.actions.pipe(ofActionSuccessful(Select)).subscribe((action: Select) => {
+        const filtered = scene.filter(entity => action.entities.indexOf(entity.id) >= 0);
+        if (filtered.length) {
+          this.map.addChild(this.container);
+          this.container.select(filtered);
+          this.store.dispatch(new Translate({ x: this.container.position.x, y: this.container.position.y }));
+          this.store.dispatch(new Rotate(this.container.rotation));
+          this.store.dispatch(
+            new Resize(
+              this.container.length > 1
+                ? void 0
+                : { x: this.container.entities[0].scale.x, y: this.container.entities[0].scale.y }
+            )
+          );
+        }
+      });
+      this.actions.pipe(ofActionSuccessful(Unselect)).subscribe((action: Unselect) => {
+        const filtered = action.entities ? scene.filter(entity => action.entities.indexOf(entity.id) >= 0) : void 0;
+        this.container.unselect(filtered);
+        this.map.removeChild(this.container);
+      });
+      this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((action: DeleteEntity) => {
+        const idx = this.container.indexOf(action.id);
+        if (idx < 0) return;
+        const prev = this.container.entities.map(entity => entity.id);
+        prev.splice(idx, 1);
+        this.store.dispatch(new Unselect()).subscribe(() => {
+          if (!prev.length) return;
+          this.store.dispatch(new Select(prev));
+        });
+      });
+
+      this.actions.pipe(ofActionSuccessful(Translate, Rotate, Resize))
+        .subscribe((action: (Translate | Rotate | Resize)) => {
+          if (action instanceof Translate)
+            this.container.position.copy(<PointLike>action.position);
+          else if (action instanceof Rotate)
+            this.container.rotation = action.rotation;
+          else if (action instanceof Resize && this.container.entities.length === 1)
+            this.container.entities[0].scale.copy(<PointLike>action.size);
+          else return;
+          this.container.emit('updated');
+        });
+
       this.setup();
     });
   }
@@ -110,42 +145,10 @@ export class SelectionTool extends Tool {
     if (this.isActive) this.addToolListeners();
     this.handlers.splice(0, this.handlers.length);
     this.handlers.push(
-      new SelectionTranslateHandler(this.container, this.service),
-      new SelectionRotateHandler(this.container, this.renderer, this.service),
-      new SelectionResizeHandler(this.container, this.renderer, this.service)
+      new SelectionTranslateHandler(this.container, this.service, this.store),
+      new SelectionRotateHandler(this.container, this.renderer, this.service, this.store),
+      new SelectionResizeHandler(this.container, this.renderer, this.service, this.store),
     );
-    this.container.on('selected', () =>
-      this.store.dispatch(
-        new Select(
-          this.container.map(entity => entity.id),
-          { x: this.container.position.x, y: this.container.position.y },
-          this.container.rotation,
-          this.container.length > 1
-            ? void 0
-            : { x: this.container.entities[0].scale.x, y: this.container.entities[0].scale.y }
-        )
-      )
-    );
-    this.container.on('unselected', () => this.store.dispatch(new Unselect()));
-    this.container.on('updated', () => {
-      if (!this.store) return console.warn('[SelectionTool] No store initialized!');
-      if (this.container.currentHandler instanceof SelectionTranslateHandler)
-        this.store.dispatch(
-          new Translate({
-            x: this.container.position.x,
-            y: this.container.position.y,
-          })
-        );
-      else if (this.container.currentHandler instanceof SelectionRotateHandler)
-        this.store.dispatch(new Rotate(this.container.rotation));
-      else if (this.handlers[this.handlers.length - 1].anchors.indexOf(this.container.currentHandler) >= 0)
-        this.store.dispatch(
-          new Resize({
-            x: this.container.entities[0].scale.x,
-            y: this.container.entities[0].scale.y,
-          })
-        );
-    });
   }
 
   /**
@@ -230,24 +233,23 @@ export class SelectionTool extends Tool {
     if (this.container.isHandling) return; // Delegate the work to the current container
     if (event.which !== 1) return;
     if (this.down) return;
-    if (this.container.length) this.container.unselect();
-    this.map.removeChild(this.container);
-    this.rectangle.reset();
-    this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
-    this.rectangle.bottomRight.copy(this.rectangle.topLeft);
-    this.rectangle.update();
-    const selection = this.map.filter(
-      child => this.isSelectable(child) && child.containsPoint(<Point>this.globalMouse)
-    );
-    if (selection.length > 0) {
-      this.finish();
-      this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
-      return;
-    }
-
-    this.graphics.clear();
-    this.stage.addChild(this.graphics);
-    this.down = true;
+    this.store.dispatch(new Unselect()).subscribe(() => {
+      this.rectangle.reset();
+      this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
+      this.rectangle.bottomRight.copy(this.rectangle.topLeft);
+      this.rectangle.update();
+      const selection = this.map.filter(
+        child => this.isSelectable(child) && child.containsPoint(<Point>this.globalMouse)
+      );
+      if (selection.length > 0) {
+        this.finish();
+        this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
+        return;
+      }
+      this.graphics.clear();
+      this.stage.addChild(this.graphics);
+      this.down = true;
+    });
   }
 
   /**
@@ -292,16 +294,12 @@ export class SelectionTool extends Tool {
   finish(): void {
     this.down = false;
     this.stage.removeChild(this.graphics);
-    const selection = this.map.filter(
-      child => this.isSelectable(child) && this.rectangle.contains(child),
-      this,
-      true
-    );
-    if (selection.length) {
-      this.map.addChild(this.container);
-      this.container.select(selection);
-    }
-    this.emit('finish', selection, this.rectangle);
+    const selection = this.map
+      .filter(child => this.isSelectable(child) && this.rectangle.contains(child), this, true)
+      .map(entity => entity.id);
+    this.store.dispatch(new Select(selection)).subscribe(() => {
+      this.emit('finish', selection, this.rectangle);
+    });
   }
 
   /** @inheritDoc */

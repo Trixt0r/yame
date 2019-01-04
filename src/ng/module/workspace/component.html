@@ -16,19 +16,19 @@
 
 
  <div #row class="fill-width" *ngIf="content">
-  <groups #groupsComponent
+  <yame-groups #groupsComponent
           (opened)="onGroupSelect($event.group)"
           class="absolute fill-height">
-  </groups>
-  <assets #assetsComponent
+  </yame-groups>
+  <yame-assets #assetsComponent
           class="absolute fill-height"
           [group]="assetGroup">
-  </assets>
-  <resizable #resizer
+  </yame-assets>
+  <yame-resizable #resizer
             class="left"
             [property]="'left'"
             [maxVal]="'500'"
             [minVal]="'200'"
             (sizeUpdated)="updateColumns($event)">
-  </resizable>
+  </yame-resizable>
 </div>

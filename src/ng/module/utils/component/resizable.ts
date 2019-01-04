@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 
 /**
  * Abstract component which is able to handle resizes.
@@ -12,17 +21,16 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, O
 @Component({
   moduleId: module.id.toString(),
   templateUrl: 'resizable.html',
-  selector: 'resizable',
+  selector: 'yame-resizable',
   providers: null,
-  styles: ['div { witdh: 100%; height: 100%; }']
+  styles: ['div { witdh: 100%; height: 100%; }'],
 })
 export class ResizeableComponent implements OnChanges, AfterViewInit {
-
   /**
    * @protected
    * @type {{ x: number, y: number }} position The click position
    */
-  protected position: { x: number, y: number };
+  protected position: { x: number; y: number };
 
   /**
    * @private
@@ -40,7 +48,7 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
    * @private
    * @type {boolean} isVer Whether the property has to be calculated clientY.
    */
-  protected isVer: boolean = false;
+  protected isVer = false;
 
   @Output() sizeUpdated = new EventEmitter();
   @Input() property: string;
@@ -52,8 +60,7 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
    *
    * @param {ElementRef} ref Injected by angular
    */
-  constructor(public ref: ElementRef) {
-  }
+  constructor(public ref: ElementRef) {}
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
@@ -71,7 +78,7 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
     // Cache the clicked position
     this.position = {
       x: event.clientX,
-      y: event.clientY
+      y: event.clientY,
     };
     this.clickedVal = this.propVal;
     // Prevents text selection
@@ -87,8 +94,10 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
       let diff = 0;
       if (this.isVer) diff = event.clientY - this.position.y;
       else diff = event.clientX - this.position.x;
+      if (this.property === 'bottom')
+        diff *= -1;
       // Add the difference and clamp
-      let newVal = this.clampValue(this.clickedVal + diff);
+      const newVal = this.clampValue(this.clickedVal + diff);
       // Skip if nothing changed
       if (Math.abs(this.clickedVal - newVal) === 0) return;
       this.updateValue(newVal);
@@ -97,14 +106,13 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
 
   /** Stops the resizing. */
   onMouseUp(): void {
-    if (this.position)
-      this.position = null;
+    if (this.position) this.position = null;
   }
 
   /** Handles window resize event. */
   onResize(): void {
-    let style = window.getComputedStyle(this.ref.nativeElement);
-    let newVal = parseFloat(style.getPropertyValue(this.property));
+    const style = window.getComputedStyle(this.ref.nativeElement);
+    const newVal = parseFloat(style.getPropertyValue(this.property));
     this.updateValue(this.clampValue(newVal));
   }
 
@@ -140,8 +148,8 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
    * @private
    */
   private updateFromStyle() {
-    let style = window.getComputedStyle(this.ref.nativeElement);
-    let val = parseFloat(style.getPropertyValue(this.property));
+    const style = window.getComputedStyle(this.ref.nativeElement);
+    const val = parseFloat(style.getPropertyValue(this.property));
     this.updateValue(this.clampValue(val));
   }
 

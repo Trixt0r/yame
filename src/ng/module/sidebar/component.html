@@ -4,4 +4,10 @@
     (window:mousemove)="onMouseMove($event)"
     (window:mouseup)="onMouseUp()">
 </div>
-<yame-hierarchy></yame-hierarchy>
+<yame-hierarchy #hierarchy></yame-hierarchy>
+<yame-properties #properties
+                 [property]="'top'"
+                 [minVal]="100"
+                 (sizeUpdated)="newSize()"
+                 (updateVisibility)="newSize()">
+</yame-properties>

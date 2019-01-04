@@ -6,11 +6,12 @@ interface IPoint {
 
 export class Select {
   static readonly type = '[SelectionTool] Select';
-  constructor(public entities: string[], public postion: IPoint, public rotation: number, public size?: IPoint) { }
+  constructor(public entities: string[]/*, public postion: IPoint, public rotation: number, public size?: IPoint*/) { }
 }
 
 export class Unselect {
   static readonly type = '[SelectionTool] Unselect';
+  constructor(public entities?: string[]) { }
 }
 
 export class Translate {
