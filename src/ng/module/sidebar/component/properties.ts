@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { ISelectionState } from 'ng/module/toolbar/tools/selection/ngxs/state';
 import { ISceneState } from 'ng/module/pixi/ngxs/state';
 import { Translate, Rotate, Resize } from 'ng/module/toolbar/tools/selection/ngxs/actions';
+import { DEG_TO_RAD } from 'pixi.js';
 
 @Component({
   moduleId: module.id.toString(),
@@ -50,7 +51,7 @@ export class PropertiesComponent extends ResizeableComponent {
   }
 
   change(event: Event, object: string, attr?: string) {
-    const value = parseFloat((<HTMLInputElement>event.currentTarget).value);
+    const value = parseFloat((<HTMLInputElement>event.currentTarget).value.replace(',', '.'));
     if (isNaN(value) || !isFinite(value)) return;
     const obj = this.data[object];
     const before = attr ? obj[attr] : obj;
@@ -58,9 +59,11 @@ export class PropertiesComponent extends ResizeableComponent {
     const newObj = typeof obj === 'object' ? Object.assign({ }, obj) : value;
     if (typeof newObj === 'object')
       newObj[attr] = value;
+    if (object === 'size')
+      newObj[attr] /= 100;
     switch (object) {
       case 'position': this.store.dispatch(new Translate(newObj)); break;
-      case 'rotation': this.store.dispatch(new Rotate(newObj)); break;
+      case 'rotation': this.store.dispatch(new Rotate(DEG_TO_RAD * newObj)); break;
       case 'size': this.store.dispatch(new Resize(newObj)); break;
     }
   }

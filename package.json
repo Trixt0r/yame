@@ -46,6 +46,7 @@
     "webpack:prod": "webpack --mode none --display-error-details"
   },
   "dependencies": {
+    "angular-pipes": "^9.0.2",
     "bluebird": "^3.5.0",
     "eventemitter3": "^2.0.2",
     "fs-extra": "^4.0.3",

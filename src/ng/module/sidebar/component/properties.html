@@ -13,49 +13,39 @@
     <input matInput
           type="number"
           placeholder="X-Position"
-          [value]="data.position.x"
-          (change)="change($event, 'position', 'x')"
-          (keyup)="change($event, 'position', 'x')"
-          (wheel)="change($event, 'position', 'x')">
+          [value]="data.position.x | round"
+          (input)="change($event, 'position', 'x')">
   </mat-form-field>
 
   <mat-form-field class="half">
     <input matInput
            type="number"
           placeholder="Y-Position"
-          [value]="data.position.y"
-          (change)="change($event, 'position', 'y')"
-          (keyup)="change($event, 'position', 'y')"
-          (wheel)="change($event, 'position', 'y')">
+          [value]="data.position.y | round"
+          (input)="change($event, 'position', 'y')">
   </mat-form-field>
 
   <mat-form-field class="full">
     <input matInput
            type="number"
            placeholder="Rotation"
-           [value]="data.rotation"
-           (change)="change($event, 'rotation')"
-           (keyup)="change($event, 'rotation')"
-           (wheel)="change($event, 'rotation')">
+           [value]="data.rotation | degrees | round"
+           (input)="change($event, 'rotation')">
   </mat-form-field>
 
   <mat-form-field *ngIf="data.size" class="half">
     <input matInput
            type="number"
            placeholder="X-Scale"
-           [value]="data.size.x"
-           (change)="change($event, 'size', 'x')"
-           (keyup)="change($event, 'size', 'x')"
-           (wheel)="change($event, 'size', 'x')">
+           [value]="data.size.x * 100 | round"
+           (input)="change($event, 'size', 'x')">
   </mat-form-field>
 
   <mat-form-field *ngIf="data.size" class="half">
     <input matInput
            type="number"
            placeholder="Y-Scale"
-           [value]="data.size.y"
-           (change)="change($event, 'size', 'y')"
-           (keyup)="change($event, 'size', 'y')"
-           (wheel)="change($event, 'size', 'y')">
+           [value]="data.size.y * 100 | round"
+           (input)="change($event, 'size', 'y')">
   </mat-form-field>
 </div>
