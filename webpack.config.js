@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const glob = require('glob');
+const nodeExternals = require('webpack-node-externals');
 
 const baseDir = path.resolve(__dirname, 'src', 'ng');
 
@@ -28,6 +29,8 @@ module.exports = (env, argv) => {
     workerEntries[relative] = [filePath];
   });
 
+  const externals = isDevelopmentMode ? [nodeExternals()] : [];
+
   return [{
     target: 'electron-renderer',
     entry: {
@@ -42,6 +45,7 @@ module.exports = (env, argv) => {
     resolve: {
       extensions: [ '.ts', '.js' ]
     },
+    externals: externals,
     module: {
       rules: [
         {

@@ -149,7 +149,7 @@
     "webpack": "^4.0.0",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "2.5.0",
-    "webpack-node-externals": "^1.6.0",
+    "webpack-node-externals": "^1.7.2",
     "zone.js": "^0.8.26"
   },
   "license": "SEE LICENSE IN LICENSE.md",
