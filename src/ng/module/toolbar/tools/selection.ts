@@ -14,7 +14,7 @@ import { SelectionResizeHandler } from './selection/handlers/resize';
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { Translate, Rotate, Resize, Select, Unselect } from './selection/ngxs/actions';
 import { Entity } from 'ng/module/pixi/scene/entity';
-import { DeleteEntity } from 'ng/module/pixi/ngxs/actions';
+import { DeleteEntity, UpdateEntity } from 'ng/module/pixi/ngxs/actions';
 
 /**
  *
@@ -97,8 +97,15 @@ export class SelectionTool extends Tool {
       });
       this.actions.pipe(ofActionSuccessful(Unselect)).subscribe((action: Unselect) => {
         const filtered = action.entities ? scene.filter(entity => action.entities.indexOf(entity.id) >= 0) : void 0;
+        const toUpdate = filtered ? filtered : this.container.entities;
         this.container.unselect(filtered);
         this.map.removeChild(this.container);
+        if (toUpdate.length === 0) return;
+        const proms = toUpdate.map(entity => entity.export('.'));
+        return Promise.all(proms)
+                .then(data => {
+                  this.store.dispatch(new UpdateEntity(data, 'update'));
+                });
       });
       this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((action: DeleteEntity) => {
         const idx = this.container.indexOf(action.id);

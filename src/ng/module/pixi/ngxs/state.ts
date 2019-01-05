@@ -43,10 +43,13 @@ export class SceneState {
   @Action(UpdateEntity)
   updateEntity(ctx: StateContext<ISceneState>, action: UpdateEntity) {
     const state = ctx.getState();
-    const idx = state.entities.findIndex(entity => entity.id === action.data.id);
-    if (idx < 0) return console.warn(`[SceneState] No entity found for id ${action.data.id}`);
+    const data = Array.isArray(action.data) ? action.data : [action.data];
     const entities = state.entities.slice();
-    entities[idx] = Object.assign({}, entities[idx], action.data);
+    data.forEach(d => {
+      const idx = state.entities.findIndex(entity => entity.id === d.id);
+      if (idx < 0) return console.warn(`[SceneState] No entity found for id ${d.id}`);
+      entities[idx] = Object.assign({}, entities[idx], action.data);
+    });
     ctx.setState({
       ...state,
       entities: entities,

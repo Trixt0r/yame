@@ -101,8 +101,12 @@ export class PixiService {
       });
 
       this.actions.pipe(ofActionSuccessful(UpdateEntity)).subscribe((update: UpdateEntity) => {
-        const found = this.scene.find(entity => update.data.id === entity.id);
-        if (found) return found.parse(update.data, '.');
+        const data = Array.isArray(update.data) ? update.data : [update.data];
+        const proms = data.map(d => {
+          const found = this.scene.find(entity => d.id === entity.id);
+          if (found) return found.parse(d, '.');
+        });
+        return Promise.all(proms);
       });
 
       this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((remove: DeleteEntity) => {

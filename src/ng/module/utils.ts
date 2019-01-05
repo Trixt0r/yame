@@ -1,17 +1,20 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ResizeableComponent } from './utils/component/resizable';
-import { ClearHostDirective } from "./utils/directive/clear-host";
+import { ClearHostDirective } from './utils/directive/clear-host';
+import { ColorPipe } from './utils/pipe/color';
 
 @NgModule({
   imports: [BrowserModule],
   declarations: [
     ResizeableComponent,
-    ClearHostDirective
+    ClearHostDirective,
+    ColorPipe,
   ],
   exports: [
     ResizeableComponent,
-    ClearHostDirective
+    ClearHostDirective,
+    ColorPipe,
   ],
 })
-export class UtilsModule { }
+export class UtilsModule {}

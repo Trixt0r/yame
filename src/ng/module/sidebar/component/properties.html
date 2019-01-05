@@ -9,7 +9,35 @@
 </h5>
 
 <div class="flex wrap">
-  <mat-form-field class="half">
+  <ng-container *ngFor="let attribute of data.additionalBefore">
+    <div *ngIf="attribute.type === 'range'" class="slider-container half">
+      <label class="mat-form-field-label">{{ attribute.name }}</label>
+      <mat-slider
+              [max]="attribute.max"
+              [min]="attribute.min"
+              [disabled]="!attribute.editable"
+              [step]="attribute.step"
+              [thumbLabel]="true"
+              [value]="attribute.value"
+              (input)="update($event, attribute.name)">
+      </mat-slider>
+    </div>
+    <mat-form-field *ngIf="attribute.type !== 'range'" class="half">
+      <input *ngIf="attribute.type === 'color'" matInput
+            type="{{ attribute.type }}"
+            placeholder="{{ attribute.name }}"
+            [disabled]="!attribute.editable"
+            [value]="attribute.value | color"
+            (input)="update($event, attribute.name)">
+      <input *ngIf="attribute.type !== 'color'" matInput
+            type="{{ attribute.type }}"
+            placeholder="{{ attribute.name }}"
+            [disabled]="!attribute.editable"
+            [value]="attribute.value"
+            (input)="update($event, attribute.name)">
+    </mat-form-field>
+  </ng-container>
+  <mat-form-field class="quarter">
     <input matInput
           type="number"
           placeholder="X-Position"
@@ -17,7 +45,7 @@
           (input)="change($event, 'position', 'x')">
   </mat-form-field>
 
-  <mat-form-field class="half">
+  <mat-form-field class="quarter">
     <input matInput
            type="number"
           placeholder="Y-Position"
@@ -25,7 +53,7 @@
           (input)="change($event, 'position', 'y')">
   </mat-form-field>
 
-  <mat-form-field class="full">
+  <mat-form-field class="half">
     <input matInput
            type="number"
            placeholder="Rotation"
@@ -33,7 +61,7 @@
            (input)="change($event, 'rotation')">
   </mat-form-field>
 
-  <mat-form-field *ngIf="data.size" class="half">
+  <mat-form-field *ngIf="data.size" class="quarter">
     <input matInput
            type="number"
            placeholder="X-Scale"
@@ -41,11 +69,40 @@
            (input)="change($event, 'size', 'x')">
   </mat-form-field>
 
-  <mat-form-field *ngIf="data.size" class="half">
+  <mat-form-field *ngIf="data.size" class="quarter">
     <input matInput
            type="number"
            placeholder="Y-Scale"
            [value]="data.size.y * 100 | round"
            (input)="change($event, 'size', 'y')">
   </mat-form-field>
+
+  <ng-container *ngFor="let attribute of data.additionalAfter">
+    <div *ngIf="attribute.type === 'range'" class="slider-container half">
+      <label class="mat-form-field-label">{{ attribute.name }}</label>
+      <mat-slider
+              [max]="attribute.max"
+              [min]="attribute.min"
+              [disabled]="!attribute.editable"
+              [step]="attribute.step"
+              [thumbLabel]="true"
+              [value]="attribute.value"
+              (input)="update($event, attribute.name)">
+      </mat-slider>
+    </div>
+    <mat-form-field *ngIf="attribute.type !== 'range'" class="half">
+      <input *ngIf="attribute.type === 'color'" matInput
+            type="{{ attribute.type }}"
+            placeholder="{{ attribute.name }}"
+            [disabled]="!attribute.editable"
+            [value]="attribute.value | color"
+            (input)="update($event, attribute.name)">
+      <input *ngIf="attribute.type !== 'color'" matInput
+            type="{{ attribute.type }}"
+            placeholder="{{ attribute.name }}"
+            [disabled]="!attribute.editable"
+            [value]="attribute.value"
+            (input)="update($event, attribute.name)">
+    </mat-form-field>
+  </ng-container>
 </div>

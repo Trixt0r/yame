@@ -1,6 +1,6 @@
-import { Entity, EntityType } from "./entity";
-import { Property } from "./property";
-import { SpriteEntityException } from "../exception/entity/sprite";
+import { Entity, EntityType, EntityData } from './entity';
+import { Property } from './property';
+import { SpriteEntityException } from '../exception/entity/sprite';
 
 /**
  * A sprite entity is an entity, which holds a pixi sprite instance as a child.
@@ -11,15 +11,16 @@ import { SpriteEntityException } from "../exception/entity/sprite";
  */
 @EntityType('sprite')
 export class SpriteEntity extends Entity {
-
   /** @type {PIXI.Sprite} The internal sprite to render. */
   protected internalSprite: PIXI.Sprite;
 
   /** @type {PIXI.Texture} The internal texture for the sprite. */
   @Property(false) texture: PIXI.Texture;
 
-  private baseLoading: boolean = false;
-  private baseLoaded: boolean = false;;
+  @Property({ type: 'color', export: true }) color: number;
+
+  private baseLoading = false;
+  private baseLoaded = false;
 
   constructor(texture?: PIXI.Texture, name?: string) {
     super(name);
@@ -27,14 +28,21 @@ export class SpriteEntity extends Entity {
     this.internalSprite = new PIXI.Sprite(texture);
     this.internalSprite.anchor.set(0.5);
     this.addChild(this.internalSprite);
-    this.on('change:texture', (texture: PIXI.Texture, prev: PIXI.Texture) => {
+    this.on('change:texture', (tex: PIXI.Texture, prev: PIXI.Texture) => {
       if (prev) {
         prev.baseTexture.off('loaded', null, this);
         prev.baseTexture.off('error', null, this);
       }
-      this.internalSprite.texture = texture;
+      this.internalSprite.texture = tex;
       this.handleTextureLoading();
     });
+
+    this.on('change:color', (color: number) => {
+      this.internalSprite.tint = color;
+    });
+
+    this.color = 0xffffff;
+
     setImmediate(() => this.handleTextureLoading());
   }
 
@@ -53,6 +61,14 @@ export class SpriteEntity extends Entity {
     return this.internalSprite;
   }
 
+  parse(data: EntityData, from: string): Promise<SpriteEntity> {
+    return super.parse(data, from)
+            .then(() => {
+              this.color = data.color;
+              return this;
+            });
+  }
+
   /**
    * Handles the texture loading events and emits events for that.
    * If the texture has been loaded or is already loaded,
@@ -62,9 +78,9 @@ export class SpriteEntity extends Entity {
    * @returns {void}
    */
   protected handleTextureLoading() {
-    let texture = this.texture;
+    const texture = this.texture;
     if (!texture) return; // Ignore this case
-    let baseTexture = texture.baseTexture;
+    const baseTexture = texture.baseTexture;
     if (baseTexture.hasLoaded) {
       this.baseLoaded = true;
       this.baseLoading = false;
@@ -72,18 +88,26 @@ export class SpriteEntity extends Entity {
     } else if (baseTexture.isLoading) {
       this.baseLoaded = false;
       this.baseLoading = true;
-      baseTexture.once('loaded', () => {
-        baseTexture.off('error', null, this);
-        this.baseLoaded = true;
-        this.baseLoading = false;
-        this.emit('texture:loaded', texture);
-      }, this);
-      baseTexture.once('error', () => {
-        baseTexture.off('loaded', null, this);
-        this.baseLoaded = false;
-        this.baseLoading = false;
-        this.emit('texture:error', texture, new SpriteEntityException('Source failed to load'));
-      }, this);
+      baseTexture.once(
+        'loaded',
+        () => {
+          baseTexture.off('error', null, this);
+          this.baseLoaded = true;
+          this.baseLoading = false;
+          this.emit('texture:loaded', texture);
+        },
+        this
+      );
+      baseTexture.once(
+        'error',
+        () => {
+          baseTexture.off('loaded', null, this);
+          this.baseLoaded = false;
+          this.baseLoading = false;
+          this.emit('texture:error', texture, new SpriteEntityException('Source failed to load'));
+        },
+        this
+      );
     } else {
       baseTexture.off('error', null, this);
       baseTexture.off('loaded', null, this);
@@ -95,7 +119,7 @@ export class SpriteEntity extends Entity {
 
   /** @inheritdoc */
   clone(): Promise<SpriteEntity> {
-    let sprite = new SpriteEntity(this.texture, `Copy of ${this.name}`);
+    const sprite = new SpriteEntity(this.texture, `Copy of ${this.name}`);
     return Promise.resolve(sprite);
   }
 

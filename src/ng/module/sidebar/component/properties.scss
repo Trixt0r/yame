@@ -7,6 +7,8 @@
   background: #303030;
   left: 5px;
   width: calc(100% - 5px);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .resizer {
@@ -16,12 +18,28 @@
   margin-top: -1px;
 }
 
-mat-form-field {
+mat-form-field, .slider-container {
   margin: 10px;
   &.full {
     width: calc(100% - 20px);
   }
   &.half {
     width: calc(50% - 20px);
+  }
+  &.quarter {
+    width: calc(25% - 20px);
+  }
+
+  mat-slider {
+    width: 100%;
+  }
+}
+
+.slider-container {
+  .mat-form-field-label {
+    position: initial;
+    display: block;
+    font: normal normal 400 normal 16px / 18px Roboto, "Helvetica Neue", sans-serif;
+    transform: scale(0.8);
   }
 }
