@@ -33,7 +33,7 @@
             type="{{ attribute.type }}"
             placeholder="{{ attribute.name }}"
             [disabled]="!attribute.editable"
-            [value]="attribute.value"
+            [value]="attribute.value ? attribute.value : ''"
             (input)="update($event, attribute.name)">
     </mat-form-field>
   </ng-container>
@@ -101,7 +101,7 @@
             type="{{ attribute.type }}"
             placeholder="{{ attribute.name }}"
             [disabled]="!attribute.editable"
-            [value]="attribute.value"
+            [value]="attribute.value ? attribute.value : ''"
             (input)="update($event, attribute.name)">
     </mat-form-field>
   </ng-container>

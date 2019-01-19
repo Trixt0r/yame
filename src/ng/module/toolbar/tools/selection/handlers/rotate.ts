@@ -118,6 +118,7 @@ export class SelectionRotateHandler {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
     this.container.endHandling(this);
     this.resetCursor();
+    this.store.dispatch(new Rotate(this.container.rotation));
   }
 
   /**
@@ -135,7 +136,7 @@ export class SelectionRotateHandler {
       this.initRot +
       Math.atan2(this.mouseCurrentPos.y - this.clickedPos.y, this.mouseCurrentPos.x - this.clickedPos.x) -
       this.clickedRot;
-    this.store.dispatch(new Rotate(this.container.rotation));
+    this.container.emit('updated');
   }
 
   /**

@@ -59,6 +59,11 @@ export class SelectionTranslateHandler {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
     this.container.endHandling(this, event);
     this.service.view.style.cursor = '';
+    this.store.dispatch(
+      new Translate({
+        x: this.container.position.x,
+        y: this.container.position.y,
+      }));
   }
 
   /**
@@ -74,11 +79,7 @@ export class SelectionTranslateHandler {
     this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
     this.container.position.x = this.startPos.x + (this.mouseCurrentPos.x - this.mouseStartPos.x);
     this.container.position.y = this.startPos.y + (this.mouseCurrentPos.y - this.mouseStartPos.y);
-    this.store.dispatch(
-      new Translate({
-        x: this.container.position.x,
-        y: this.container.position.y,
-      }));
+    this.container.emit('updated');
   }
 
   /**

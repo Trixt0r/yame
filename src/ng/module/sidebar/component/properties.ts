@@ -37,6 +37,8 @@ export class PropertiesComponent extends ResizeableComponent {
       delete (<any>data).additional;
       this.setVisibility(data.entities.length > 0);
       this.data = data;
+      delete (<any>this.data).additionalBefore;
+      delete (<any>this.data).additionalAfter;
       if (!this.visible || data.entities.length > 1) return;
       const id = data.entities[0];
       const entity = pixi.scene.find(e => e.id === id, void 0, true);
@@ -120,7 +122,6 @@ export class PropertiesComponent extends ResizeableComponent {
     }
     if (typeof options.transform === 'number' && transformable.indexOf(options.type) >= 0)
       val /= options.transform;
-    console.log(val);
     current.export('.')
       .then(data => {
         data[attr] = val;

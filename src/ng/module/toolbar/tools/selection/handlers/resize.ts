@@ -73,7 +73,9 @@ export class SelectionResizeHandler {
       anchor.container = this.container;
       anchor.target = this.container.entities[0];
       anchor
-        .on('updated', () => {
+        .on('updated', () => this.container.emit('updated'))
+        .on('handle:start', () => this.container.beginHandling(anchor))
+        .on('handle:end', () => {
           this.store.dispatch(new Resize({
             x: anchor.target.scale.x,
             y: anchor.target.scale.y,
@@ -82,9 +84,8 @@ export class SelectionResizeHandler {
             x: this.container.position.x,
             y: this.container.position.y,
           }));
-        })
-        .on('handle:start', () => this.container.beginHandling(anchor))
-        .on('handle:end', () => this.container.endHandling(anchor));
+          this.container.endHandling(anchor)
+        });
       stage.addChild(anchor);
     });
   }
