@@ -9,33 +9,8 @@
 </h5>
 
 <div class="flex wrap">
-  <ng-container *ngFor="let attribute of data.additionalBefore">
-    <div *ngIf="attribute.type === 'range'" class="slider-container half">
-      <label class="mat-form-field-label">{{ attribute.name }}</label>
-      <mat-slider
-              [max]="attribute.max"
-              [min]="attribute.min"
-              [disabled]="!attribute.editable"
-              [step]="attribute.step"
-              [thumbLabel]="true"
-              [value]="attribute.value"
-              (input)="update($event, attribute.name)">
-      </mat-slider>
-    </div>
-    <mat-form-field *ngIf="attribute.type !== 'range'" class="half">
-      <input *ngIf="attribute.type === 'color'" matInput
-            type="{{ attribute.type }}"
-            placeholder="{{ attribute.name }}"
-            [disabled]="!attribute.editable"
-            [value]="attribute.value | color"
-            (input)="update($event, attribute.name)">
-      <input *ngIf="attribute.type !== 'color'" matInput
-            type="{{ attribute.type }}"
-            placeholder="{{ attribute.name }}"
-            [disabled]="!attribute.editable"
-            [value]="attribute.value ? attribute.value : ''"
-            (input)="update($event, attribute.name)">
-    </mat-form-field>
+  <ng-container *ngFor="let property of data.additionalBefore">
+    <ng-container [propertyHost]="property" (update)="update($event.originalEvent, $event.property.name)"></ng-container>
   </ng-container>
   <mat-form-field class="quarter">
     <input matInput
@@ -77,32 +52,7 @@
            (input)="change($event, 'size', 'y')">
   </mat-form-field>
 
-  <ng-container *ngFor="let attribute of data.additionalAfter">
-    <div *ngIf="attribute.type === 'range'" class="slider-container half">
-      <label class="mat-form-field-label">{{ attribute.name }}</label>
-      <mat-slider
-              [max]="attribute.max"
-              [min]="attribute.min"
-              [disabled]="!attribute.editable"
-              [step]="attribute.step"
-              [thumbLabel]="true"
-              [value]="attribute.value"
-              (input)="update($event, attribute.name)">
-      </mat-slider>
-    </div>
-    <mat-form-field *ngIf="attribute.type !== 'range'" class="half">
-      <input *ngIf="attribute.type === 'color'" matInput
-            type="{{ attribute.type }}"
-            placeholder="{{ attribute.name }}"
-            [disabled]="!attribute.editable"
-            [value]="attribute.value | color"
-            (input)="update($event, attribute.name)">
-      <input *ngIf="attribute.type !== 'color'" matInput
-            type="{{ attribute.type }}"
-            placeholder="{{ attribute.name }}"
-            [disabled]="!attribute.editable"
-            [value]="attribute.value ? attribute.value : ''"
-            (input)="update($event, attribute.name)">
-    </mat-form-field>
+  <ng-container *ngFor="let property of data.additionalAfter">
+    <ng-container [propertyHost]="property" (update)="update($event.originalEvent, $event.property.name)"></ng-container>
   </ng-container>
 </div>

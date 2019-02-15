@@ -1,6 +1,4 @@
-import { Component, Input, EventEmitter,} from '@angular/core';
-import { AssetGroup } from "../../../../../../../common/asset/group";
-import { Asset } from "../../../../../../../common/asset";
+import { Component, Input, EventEmitter } from '@angular/core';
 import { GroupComponent } from './abstract';
 
 /**

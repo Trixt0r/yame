@@ -7,7 +7,7 @@ import { GroupDirective } from './workspace/component/groups/directive/group';
 import { DirectoryGroupComponent } from './workspace/component/groups/component/group/directory';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { UtilsModule } from "./utils";
+import { UtilsModule } from './utils';
 import { MaterialModule } from './material';
 
 import { AssetsComponent } from './workspace/component/assets';

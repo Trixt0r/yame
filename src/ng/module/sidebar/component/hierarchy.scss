@@ -27,6 +27,7 @@ mat-tree li {
 
 mat-tree {
   overflow-y: auto;
+  background: none;
 }
 
 mat-tree-node {
@@ -43,6 +44,9 @@ mat-tree-node {
         font-size: 18px;
       }
     }
+  }
+  &:hover {
+    background: rgba(255, 255, 255, .04);
   }
   &:hover, &.changed {
     .inline-actions {

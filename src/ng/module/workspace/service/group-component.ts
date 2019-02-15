@@ -1,5 +1,4 @@
 import { InvalidGroupComponentException } from '../exception/service/invalid-group-component';
-import { DirectoryGroupComponent } from '../component/groups/component/group/directory';
 import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
 import { GroupComponent } from '../component/groups/component/group/abstract';
