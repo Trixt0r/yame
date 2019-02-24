@@ -7,29 +7,36 @@ import {
   ComponentRef,
   EventEmitter,
   Output,
+  SimpleChanges,
+  NgZone,
 } from '@angular/core';
 import { PropertyService } from '../service/property';
-import { PropertyComponent, Property, InputEvent } from '../component/property/abstract';
+import { PropertyComponent, InputEvent } from '../component/property/abstract';
+import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
+
+const componentRefCache: { [key: string]: { ref: ComponentRef<PropertyComponent>, index: number; } } = { };
 
 @Directive({
   selector: '[propertyHost]',
 })
 export class PropertyDirective implements OnChanges {
   /** @type {Asset} The asset group to render. */
-  @Input('propertyHost') property: Property;
+  @Input('propertyHost') properties: PropertyOptionsExt[];
 
   /** @type {EventEmitter<InputEvent>} The click event, which should be triggered by the rendered component. */
   @Output() update: EventEmitter<InputEvent> = new EventEmitter();
 
   constructor(
-    private properties: PropertyService,
+    private service: PropertyService,
     private viewContainerRef: ViewContainerRef,
-    private componentFactoryResolver: ComponentFactoryResolver
-  ) {}
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private zone: NgZone,
+  ) { }
 
   /** @inheritdoc */
-  ngOnChanges(changes) {
-    if (changes.property) this.render();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.properties)
+      this.render();
   }
 
   /**
@@ -38,15 +45,38 @@ export class PropertyDirective implements OnChanges {
    * @returns {ComponentRef<AssetPreviewComponent>} The created component reference or `null`
    *                                          if no component found for the current group.
    */
-  render(): ComponentRef<PropertyComponent> {
-    const compType = this.properties.get(this.property.type);
-    if (!compType) return null;
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+  render(): ComponentRef<PropertyComponent>[] {
+    const comps: ComponentRef<PropertyComponent>[] = [];
     const viewContainerRef = this.viewContainerRef;
-    viewContainerRef.clear();
-    const componentRef = viewContainerRef.createComponent(componentFactory);
-    componentRef.instance.property = this.property;
-    componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
-    return componentRef;
+    this.properties.forEach((property) => {
+      const compType = this.service.get(property.type);
+      if (!compType) return;
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+      const cacheKey = `${property.type}-${property.name}`;
+      let componentRef: ComponentRef<PropertyComponent>;
+      const cached = componentRefCache[cacheKey];
+      if (cached) {
+        componentRef = cached.ref;
+        viewContainerRef.insert(componentRef.hostView, cached.index);
+        // componentRef.instance.property = Object.assign({ }, property, { value: void 0 });
+        // componentRef.changeDetectorRef.detectChanges();
+      } else {
+        componentRef = viewContainerRef.createComponent(componentFactory);
+        componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
+        componentRefCache[cacheKey] = { ref: componentRef, index: viewContainerRef.indexOf(componentRef.hostView) };
+      }
+      componentRef.instance.property = property;
+      // if (cached)
+      //   componentRef.changeDetectorRef.detectChanges();
+      comps.push(componentRef);
+    });
+    for (const key in componentRefCache) {
+      if (!componentRefCache.hasOwnProperty(key)) continue;
+      const cached = componentRefCache[key];
+      const idx = viewContainerRef.indexOf(cached.ref.hostView);
+      if (idx < 0 || comps.indexOf(cached.ref) >= 0) continue;
+      viewContainerRef.detach(idx);
+    }
+    return comps;
   }
 }

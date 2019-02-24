@@ -1,4 +1,4 @@
-import { PropertyComponent } from './abstract';
+import { PropertyComponent, InputEvent } from './abstract';
 import { Component } from '@angular/core';
 
 @Component({
@@ -14,5 +14,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./style.scss'],
 })
 export class InputPropertyComponent extends PropertyComponent {
+
+  /**
+   * @inheritdoc
+   */
+  update(event: InputEvent) {
+    this.property.value = (<HTMLInputElement>event.originalEvent.currentTarget).value;
+    return super.update(event);
+  }
 
 }

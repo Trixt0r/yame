@@ -216,13 +216,13 @@ export class SelectionContainer extends Group<Entity> {
     return toRemove;
   }
 
-  getProperties() {
-    if (this.entities.length === 0) return [];
+  getProperties(entities = this.entities) {
+    if (entities.length === 0) return [];
     const props = this.additionalProperties;
     props.forEach(prop => prop.read(prop));
-    if (this.entities.length > 1)
+    if (entities.length > 1)
       return props.slice(3).reverse().concat(props[0]);
-    const entityProps = this.entities[0].getProperties();
+    const entityProps = entities[0].getProperties();
     props.forEach(prop => entityProps.unshift(prop));
     return entityProps;
   }

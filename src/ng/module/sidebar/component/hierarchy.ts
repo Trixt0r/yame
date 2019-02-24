@@ -1,5 +1,5 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { Entity, EntityData } from 'ng/module/pixi/scene/entity';
+import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Entity, EntityData, PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 import { NodeData } from '../service/hierarchy';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource, MatTree } from '@angular/material';
@@ -27,6 +27,8 @@ export class HierarchyComponent implements AfterViewInit {
   protected treeElement: HTMLElement;
 
   selected: string[];
+  properties: PropertyOptionsExt[];
+  private timer: any;
 
   constructor(public element: ElementRef, private store: Store) {
     this.nestedTreeControl = new NestedTreeControl<NodeData>(() => []);
@@ -37,7 +39,13 @@ export class HierarchyComponent implements AfterViewInit {
       this.nestedDataSource.data = <any>data.entities;
     });
 
-    this.selection$.subscribe(data => this.selected = data.entities);
+    this.selection$.subscribe(data => {
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.selected = data.entities;
+        this.properties = data.properties;
+      }, 1000 / 60);
+    });
   }
 
   ngAfterViewInit(): void {

@@ -1,5 +1,6 @@
-import { PropertyComponent } from './abstract';
+import { PropertyComponent, InputEvent } from './abstract';
 import { Component } from '@angular/core';
+import { MatSliderChange } from '@angular/material';
 
 @Component({
   template: `
@@ -18,5 +19,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./style.scss'],
 })
 export class RangePropertyComponent extends PropertyComponent {
+
+  /**
+   * @inheritdoc
+   */
+  update(event: InputEvent) {
+    this.property.value = (<any>event.originalEvent).value;
+    return super.update(event);
+  }
 
 }

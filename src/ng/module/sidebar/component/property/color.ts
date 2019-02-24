@@ -1,5 +1,5 @@
-import { PropertyComponent } from './abstract';
 import { Component } from '@angular/core';
+import { InputPropertyComponent } from './input';
 
 @Component({
   template: `
@@ -13,6 +13,6 @@ import { Component } from '@angular/core';
   </mat-form-field>`,
   styleUrls: ['./style.scss'],
 })
-export class ColorPropertyComponent extends PropertyComponent {
+export class ColorPropertyComponent extends InputPropertyComponent {
 
 }

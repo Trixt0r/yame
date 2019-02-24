@@ -84,7 +84,9 @@ export class SelectionTool extends Tool {
         if (filtered.length) {
           this.map.addChild(this.container);
           this.container.select(filtered);
-          this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
+          this.store.dispatch(
+            new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+          );
         }
       });
       this.actions.pipe(ofActionSuccessful(Unselect)).subscribe((action: Unselect) => {
@@ -94,10 +96,12 @@ export class SelectionTool extends Tool {
         this.map.removeChild(this.container);
         if (toUpdate.length === 0) return;
         const proms = toUpdate.map(entity => entity.export('.'));
-        return Promise.all(proms)
-                .then(data => {
-                  this.store.dispatch(new UpdateEntity(data, 'update'));
-                });
+        return Promise.all(proms).then(data => {
+          this.store.dispatch([
+            new UpdateEntity(data, 'update'),
+            new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+          ]);
+        });
       });
       this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((action: DeleteEntity) => {
         const idx = this.container.indexOf(action.id);
@@ -110,12 +114,12 @@ export class SelectionTool extends Tool {
         });
       });
 
-      this.actions.pipe(ofActionSuccessful(UpdateSelection, UpdateEntityProperty))
-        .subscribe((action: (UpdateSelection | UpdateEntityProperty)) => {
+      this.actions
+        .pipe(ofActionSuccessful(UpdateSelection, UpdateEntityProperty))
+        .subscribe((action: UpdateSelection | UpdateEntityProperty) => {
           if (action instanceof UpdateEntityProperty && action.id !== 'select') return;
           if (action instanceof UpdateSelection && action.attributes) return;
-          if (this.container.updateFromAction(action))
-            this.container.emit('updated');
+          if (this.container.updateFromAction(action)) this.container.emit('updated');
         });
 
       this.setup();
@@ -142,7 +146,7 @@ export class SelectionTool extends Tool {
     this.handlers.push(
       new SelectionTranslateHandler(this.container, this.service, this.store),
       new SelectionRotateHandler(this.container, this.renderer, this.service, this.store),
-      new SelectionResizeHandler(this.container, this.renderer, this.service, this.store),
+      new SelectionResizeHandler(this.container, this.renderer, this.service, this.store)
     );
   }
 

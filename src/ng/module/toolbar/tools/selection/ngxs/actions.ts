@@ -2,7 +2,7 @@ import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 
 export class Select {
   static readonly type = '[SelectionTool] Select';
-  constructor(public entities: string[] /*, public postion: IPoint, public rotation: number, public size?: IPoint*/) {}
+  constructor(public entities: string[]) {}
 }
 
 export class Unselect {

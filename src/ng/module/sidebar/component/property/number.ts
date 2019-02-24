@@ -1,5 +1,6 @@
-import { PropertyComponent } from './abstract';
 import { Component } from '@angular/core';
+import { InputPropertyComponent } from './input';
+import { InputEvent, PropertyComponent } from './abstract';
 
 @Component({
   template: `
@@ -15,4 +16,11 @@ import { Component } from '@angular/core';
 })
 export class NumberPropertyComponent extends PropertyComponent {
 
+  /**
+   * @inheritdoc
+   */
+  update(event: InputEvent) {
+    this.property.value = parseFloat((<HTMLInputElement>event.originalEvent.currentTarget).value);
+    return super.update(event);
+  }
 }

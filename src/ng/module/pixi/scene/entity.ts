@@ -221,7 +221,6 @@ export abstract class Entity extends PIXI.Container {
 
   updateFromAction(action: UpdateEntityProperty) {
     if (this.id !== action.id) return;
-    const propertyValues: Object = (<any>this).internalValues;
     const typeOptions: Object = (<any>this).internalPropertyOptions;
     const data = action.data;
     let updated = false;

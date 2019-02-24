@@ -5,9 +5,6 @@ import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 export interface ISelectionState {
   entities: string[];
   properties: PropertyOptionsExt[];
-  // position: IPoint;
-  // size: IPoint;
-  // rotation: number;
 }
 
 @State<ISelectionState>({
@@ -20,18 +17,14 @@ export interface ISelectionState {
 export class SelectionState {
   @Action(Select)
   select(ctx: StateContext<ISelectionState>, action: Select) {
-    const state = ctx.getState();
-    ctx.setState({
-      ...state,
+    ctx.patchState({
       entities: action.entities,
     });
   }
 
   @Action(Unselect)
   unselect(ctx: StateContext<ISelectionState>, action: Unselect) {
-    const state = ctx.getState();
-    ctx.setState({
-      ...state,
+    ctx.patchState({
       entities: [],
       properties: [],
     });
@@ -39,9 +32,7 @@ export class SelectionState {
 
   @Action(UpdateSelection)
   update(ctx: StateContext<ISelectionState>, action: UpdateSelection) {
-    const state = ctx.getState();
-    ctx.setState({
-      ...state,
+    ctx.patchState({
       properties: action.properties,
     });
   }

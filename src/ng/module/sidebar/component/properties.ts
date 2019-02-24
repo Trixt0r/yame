@@ -1,17 +1,24 @@
-import { Component, ElementRef, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  AfterViewInit,
+  Input,
+} from '@angular/core';
 import { ResizeableComponent } from 'ng/module/utils/idx';
-import { Store, Select } from '@ngxs/store';
+import { Store, Select as StoreSelect } from '@ngxs/store';
 import { Observable } from 'rxjs/Observable';
 import { ISelectionState } from 'ng/module/toolbar/tools/selection/ngxs/state';
-import { ISceneState } from 'ng/module/pixi/ngxs/state';
-import { UpdateSelection } from 'ng/module/toolbar/tools/selection/ngxs/actions';
-import { DEG_TO_RAD } from 'pixi.js';
 import { PixiService } from 'ng/module/pixi/idx';
 import { UpdateEntity, UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
-import { EntityData } from 'ng/module/pixi/scene/entity';
 import { MatSliderChange } from '@angular/material';
+import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 
-const transformable = ['number', 'range'];
+function state(state: any) {
+  return state.selection;
+}
 
 @Component({
   moduleId: module.id.toString(),
@@ -19,24 +26,34 @@ const transformable = ['number', 'range'];
   templateUrl: 'properties.html',
   styleUrls: ['./properties.scss'],
 })
-export class PropertiesComponent extends ResizeableComponent {
+export class PropertiesComponent extends ResizeableComponent implements AfterViewInit {
   title = 'Properties';
 
-  @Select() scene$: Observable<ISceneState>;
-  @Select() selection$: Observable<ISelectionState>;
+  @StoreSelect(state) selection$: Observable<ISelectionState>;
   @Output() updateVisibility = new EventEmitter();
 
-  protected visible: boolean;
+  protected visible;
 
-  data: ISelectionState;
+  properties: PropertyOptionsExt[];
+  entities: string[] = [];
+  private timer: any;
 
-  constructor(public ref: ElementRef, protected store: Store, protected pixi: PixiService) {
+  constructor(
+    public ref: ElementRef,
+    protected store: Store,
+    protected pixi: PixiService,
+  ) {
     super(ref);
     this.maxVal = window.innerHeight - 100;
     this.selection$.subscribe(data => {
-      this.data = data;
-      this.setVisibility(data.entities.length > 0);
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.properties = data.properties;
+          this.entities = data.entities;
+          this.setVisibility(this.entities.length > 0);
+        }, 1000 / 30);
     });
+    this.setVisibility(false);
   }
 
   get isVisibile(): boolean {
@@ -58,12 +75,12 @@ export class PropertiesComponent extends ResizeableComponent {
 
   update(event: Event | MatSliderChange, attr: string) {
     const value = event instanceof MatSliderChange ? event.value : (<HTMLInputElement>event.currentTarget).value || '';
-    const data = { };
+    const data = {};
     data[attr] = value;
     const observable = this.store.dispatch(new UpdateEntityProperty('select', data));
-    if (this.data.entities.length !== 1) return;
+    if (this.entities.length !== 1) return;
     observable.subscribe(() => {
-      const current = this.pixi.scene.find(entity => entity.id === this.data.entities[0]);
+      const current = this.pixi.scene.find(entity => entity.id === this.entities[0]);
       if (!current) return;
       current.export('.').then(values => {
         this.store.dispatch(new UpdateEntity(values, `Update value ${attr}`));
