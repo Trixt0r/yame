@@ -1,6 +1,4 @@
 import { EntityData, Entity } from '../scene/entity';
-import { Asset } from 'common/asset';
-import { PointLike } from 'pixi.js';
 
 export class CreateEntity {
   static readonly type = '[Scene] Create entity';
@@ -10,6 +8,11 @@ export class CreateEntity {
 export class UpdateEntity {
   static readonly type = '[Scene] Update entity';
   constructor(public data: EntityData | EntityData[], public message: string) {}
+}
+
+export class UpdateEntityProperty {
+  static readonly type = '[Scene] Update entity property';
+  constructor(public id: string, public data: Object) {}
 }
 
 export class DeleteEntity {

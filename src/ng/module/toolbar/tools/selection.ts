@@ -12,9 +12,9 @@ import { SelectionTranslateHandler } from './selection/handlers/translate';
 import { SelectionRotateHandler } from './selection/handlers/rotate';
 import { SelectionResizeHandler } from './selection/handlers/resize';
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
-import { Translate, Rotate, Resize, Select, Unselect } from './selection/ngxs/actions';
+import { Select, Unselect, UpdateSelection } from './selection/ngxs/actions';
 import { Entity } from 'ng/module/pixi/scene/entity';
-import { DeleteEntity, UpdateEntity } from 'ng/module/pixi/ngxs/actions';
+import { DeleteEntity, UpdateEntity, UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
 
 /**
  *
@@ -84,15 +84,7 @@ export class SelectionTool extends Tool {
         if (filtered.length) {
           this.map.addChild(this.container);
           this.container.select(filtered);
-          this.store.dispatch(new Translate({ x: this.container.position.x, y: this.container.position.y }));
-          this.store.dispatch(new Rotate(this.container.rotation));
-          this.store.dispatch(
-            new Resize(
-              this.container.length > 1
-                ? void 0
-                : { x: this.container.entities[0].scale.x, y: this.container.entities[0].scale.y }
-            )
-          );
+          this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
         }
       });
       this.actions.pipe(ofActionSuccessful(Unselect)).subscribe((action: Unselect) => {
@@ -118,16 +110,12 @@ export class SelectionTool extends Tool {
         });
       });
 
-      this.actions.pipe(ofActionSuccessful(Translate, Rotate, Resize))
-        .subscribe((action: (Translate | Rotate | Resize)) => {
-          if (action instanceof Translate)
-            this.container.position.copy(<PointLike>action.position);
-          else if (action instanceof Rotate)
-            this.container.rotation = action.rotation;
-          else if (action instanceof Resize && this.container.entities.length === 1)
-            this.container.entities[0].scale.copy(<PointLike>action.size);
-          else return;
-          this.container.emit('updated');
+      this.actions.pipe(ofActionSuccessful(UpdateSelection, UpdateEntityProperty))
+        .subscribe((action: (UpdateSelection | UpdateEntityProperty)) => {
+          if (action instanceof UpdateEntityProperty && action.id !== 'select') return;
+          if (action instanceof UpdateSelection && action.attributes) return;
+          if (this.container.updateFromAction(action))
+            this.container.emit('updated');
         });
 
       this.setup();

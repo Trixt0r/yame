@@ -1,13 +1,19 @@
 import * as uuid from 'uuid/v4';
 import { Type } from '@angular/core';
 import * as _ from 'lodash';
-import { Property } from './property';
+import { Property, PropertyOptions, TransformProperty } from './property';
 import * as PIXI from 'pixi.js';
 import { EntityException } from '../exception/entity/entity';
+import { UpdateEntityProperty } from '../ngxs/actions';
 
 const tempPoint = new PIXI.Point();
 interface EntityTypes {
   [key: string]: Type<Entity>;
+}
+
+export interface PropertyOptionsExt extends PropertyOptions {
+  name: string;
+  value: any;
 }
 /**
  * Data which has to be exported for an entity.
@@ -130,11 +136,11 @@ export abstract class Entity extends PIXI.Container {
    * Override this to your needs, but make sure to call this implementation at the end, so the `exported` event gets
    * emitted right before resolving.
    *
-   * @param {string} target The target URI. Can be used for calculating relative paths, etc.
+   * @param {string} [target] The target URI. Can be used for calculating relative paths, etc.
    * @returns {Promise<EntityData>} Resolves the exported data on success.
    */
-  export(target: string): Promise<EntityData> {
-    const data = Object.assign({}, this.internalExportData, {
+  export(target?: string): Promise<EntityData> {
+    const data = Object.assign({ }, this.internalExportData, {
       position: { x: this.position.x, y: this.position.y },
       rotation: this.rotation,
       scale: { x: this.scale.x, y: this.scale.y },
@@ -198,6 +204,47 @@ export abstract class Entity extends PIXI.Container {
    */
   getShape(): PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle | any {
     return this.getLocalBounds();
+  }
+
+  getProperties(): PropertyOptionsExt[] {
+    const types = <{ [key: string]: PropertyOptions }> (<any>this).internalPropertyOptions;
+    delete types.id;
+    const properties = [];
+    for (const x in types) {
+      if (!types[x].export) continue;
+      const obj = <PropertyOptionsExt>Object.assign({}, types[x], { name: x, value: this[x] });
+      obj.value = TransformProperty(obj, obj.value, false);
+      properties.push(obj);
+    }
+    return properties;
+  }
+
+  updateFromAction(action: UpdateEntityProperty) {
+    if (this.id !== action.id) return;
+    const propertyValues: Object = (<any>this).internalValues;
+    const typeOptions: Object = (<any>this).internalPropertyOptions;
+    const data = action.data;
+    let updated = false;
+    for (const key in data) {
+      if (!typeOptions.hasOwnProperty(key)) continue;
+      const value = data[key];
+      const options = typeOptions[key];
+      if (!options) return;
+      let val;
+      switch (options.type) {
+        case 'color':
+          val = typeof value === 'string' ? parseInt(value.replace('#', ''), 16) : val;
+          break;
+        case 'number':
+          val = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : val;
+          break;
+        default:
+          val = value;
+      }
+      this[key] = TransformProperty(options, val, true);
+      updated = true;
+    }
+    return updated;
   }
 }
 

@@ -4,15 +4,13 @@
   (window:mousemove)="onMouseMove($event)"
   (window:mouseup)="onMouseUp()">
 </div>
-<h5 class="text-center mat-h5">
-  {{ title }}
-</h5>
+<h5 class="text-center mat-h5">{{ title }}</h5>
 
 <div class="flex wrap">
-  <ng-container *ngFor="let property of data.additionalBefore">
+  <!-- <ng-container *ngFor="let property of data.additionalBefore">
     <ng-container [propertyHost]="property" (update)="update($event.originalEvent, $event.property.name)"></ng-container>
-  </ng-container>
-  <mat-form-field class="quarter">
+  </ng-container> -->
+  <!-- <mat-form-field class="quarter">
     <input matInput
           type="number"
           placeholder="X-Position"
@@ -50,9 +48,9 @@
            placeholder="Y-Scale"
            [value]="data.size.y * 100 | round"
            (input)="change($event, 'size', 'y')">
-  </mat-form-field>
+  </mat-form-field> -->
 
-  <ng-container *ngFor="let property of data.additionalAfter">
+  <ng-container *ngFor="let property of data.properties">
     <ng-container [propertyHost]="property" (update)="update($event.originalEvent, $event.property.name)"></ng-container>
   </ng-container>
 </div>

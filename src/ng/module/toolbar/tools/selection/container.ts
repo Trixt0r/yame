@@ -1,5 +1,13 @@
 import { Group, Entity } from '../../../pixi/idx';
-import { Rectangle, Point } from 'pixi.js';
+import { Rectangle, Point, RAD_TO_DEG, DEG_TO_RAD } from 'pixi.js';
+import { UpdateSelection } from './ngxs/actions';
+import { UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
+import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
+
+interface SelectionPropertyOptions extends PropertyOptionsExt {
+  apply: (val: number) => void;
+  read: (prop: SelectionPropertyOptions) => void;
+}
 
 /**
  * The container which should contain the selected entities.
@@ -24,6 +32,62 @@ export class SelectionContainer extends Group<Entity> {
    * @type {*} The current handler reference.
    */
   protected handlerRef: any;
+
+  protected additionalProperties: SelectionPropertyOptions[] = [];
+  public readonly additionalPropertyNames: string[];
+
+  constructor() {
+    super();
+    this.additionalProperties.push({
+      value: this.position.x,
+      editable: true,
+      export: true,
+      name: 'X-Position',
+      type: 'number',
+      apply: val => this.position.x = val,
+      read: prop => prop.value = this.position.x,
+    });
+    this.additionalProperties.push({
+      value: this.position.y,
+      editable: true,
+      export: true,
+      name: 'Y-Position',
+      type: 'number',
+      apply: val => this.position.y = val,
+      read: prop => prop.value = this.position.y,
+    });
+    this.additionalProperties.push({
+      value: this.scale.x,
+      transform: 100,
+      editable: true,
+      export: true,
+      name: 'X-Scale',
+      type: 'number',
+      apply: val => this.entities.length === 1 ? this.entities[0].scale.x = val / 100 : void 0,
+      read: prop => this.entities.length === 1 ? prop.value = this.entities[0].scale.x * 100 : void 0,
+    });
+    this.additionalProperties.push({
+      value: this.scale.y,
+      transform: 100,
+      editable: true,
+      export: true,
+      name: 'Y-Scale',
+      type: 'number',
+      apply: val => this.entities.length === 1 ? this.entities[0].scale.y = val / 100 : void 0,
+      read: prop => this.entities.length === 1 ? prop.value = this.entities[0].scale.y * 100 : void 0,
+    });
+    this.additionalProperties.push({
+      value: this.rotation,
+      editable: true,
+      export: true,
+      name: 'Rotation',
+      type: 'number',
+      apply: val => this.rotation = val * DEG_TO_RAD,
+      read: prop => prop.value = this.rotation * RAD_TO_DEG,
+    });
+    this.additionalPropertyNames = this.additionalProperties.map(prop => prop.name);
+    this.additionalProperties.reverse();
+  }
 
   /**
    * Begins handling user events with the given reference and arguments.
@@ -150,5 +214,47 @@ export class SelectionContainer extends Group<Entity> {
     if (this.internalEntities.length === 0) this.interactive = false;
     this.emit('unselected', toRemove);
     return toRemove;
+  }
+
+  getProperties() {
+    if (this.entities.length === 0) return [];
+    const props = this.additionalProperties;
+    props.forEach(prop => prop.read(prop));
+    if (this.entities.length > 1)
+      return props.slice(3).reverse().concat(props[0]);
+    const entityProps = this.entities[0].getProperties();
+    props.forEach(prop => entityProps.unshift(prop));
+    return entityProps;
+  }
+
+  updateFromAction(action: UpdateSelection | UpdateEntityProperty) {
+    if (action instanceof UpdateEntityProperty) {
+      if (action.id !== 'select') return false;
+      for (const attr in action.data) {
+        if (!action.data.hasOwnProperty(attr)) continue;
+        const property = this.additionalProperties.find(prop => prop.name === attr);
+        if (!property) continue;
+        property.apply(parseInt(action.data[attr], 10));
+        delete action.data[attr];
+      }
+      if (Object.keys(action.data).length === 0) return true;
+      if (this.entities.length === 0) return false;
+      const updates = this.entities.map(entity => {
+        action.id = entity.id;
+        return entity.updateFromAction(action);
+      });
+      return updates.some(val => val);
+    } else {
+      const props = action.properties;
+      let updated = false;
+      props.forEach(prop => {
+        const myProp = this.additionalProperties[prop.name];
+        if (myProp) {
+          myProp.apply(prop.value);
+          updated = true;
+        }
+      });
+      return updated;
+    }
   }
 }

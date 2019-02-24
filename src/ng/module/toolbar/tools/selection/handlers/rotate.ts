@@ -3,7 +3,7 @@ import { SelectionContainer } from '../container';
 import { Entity, PixiService } from '../../../../pixi/idx';
 import { SelectionRenderer } from '../renderer';
 import { Store } from '@ngxs/store';
-import { Rotate } from '../ngxs/actions';
+import { UpdateSelection } from '../ngxs/actions';
 
 /**
  * The rotation handler is responsible for changing the rotation of the current selection.
@@ -118,7 +118,7 @@ export class SelectionRotateHandler {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
     this.container.endHandling(this);
     this.resetCursor();
-    this.store.dispatch(new Rotate(this.container.rotation));
+    this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
   }
 
   /**

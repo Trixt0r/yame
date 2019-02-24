@@ -4,10 +4,10 @@ import { Store, Select } from '@ngxs/store';
 import { Observable } from 'rxjs/Observable';
 import { ISelectionState } from 'ng/module/toolbar/tools/selection/ngxs/state';
 import { ISceneState } from 'ng/module/pixi/ngxs/state';
-import { Translate, Rotate, Resize } from 'ng/module/toolbar/tools/selection/ngxs/actions';
+import { UpdateSelection } from 'ng/module/toolbar/tools/selection/ngxs/actions';
 import { DEG_TO_RAD } from 'pixi.js';
 import { PixiService } from 'ng/module/pixi/idx';
-import { UpdateEntity } from 'ng/module/pixi/ngxs/actions';
+import { UpdateEntity, UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
 import { EntityData } from 'ng/module/pixi/scene/entity';
 import { MatSliderChange } from '@angular/material';
 
@@ -34,36 +34,8 @@ export class PropertiesComponent extends ResizeableComponent {
     super(ref);
     this.maxVal = window.innerHeight - 100;
     this.selection$.subscribe(data => {
-      delete (<any>data).additional;
-      this.setVisibility(data.entities.length > 0);
       this.data = data;
-      delete (<any>this.data).additionalBefore;
-      delete (<any>this.data).additionalAfter;
-      if (!this.visible || data.entities.length > 1) return;
-      const id = data.entities[0];
-      const entity = pixi.scene.find(e => e.id === id, void 0, true);
-      if (!entity) return;
-      const before = ['id', 'name'];
-      const additional = [];
-      const types = (<any>entity).internalPropertyOptions;
-      for (const x in types) {
-        if (before.indexOf(x) < 0 || !types[x].export) continue;
-        const obj = Object.assign({ }, types[x], { name: x, value: entity[x] });
-        if (typeof obj.transform === 'number' && transformable.indexOf(obj.type) >= 0)
-          obj.value *= obj.transform;
-        additional.push(obj);
-      }
-      (<any>data).additionalBefore = additional.slice();
-      const skip = ['visibility', 'locked', 'position', 'scale', 'rotation', 'type', 'parentEntity', 'id', 'name'];
-      additional.splice(0);
-      for (const x in types) {
-        if (skip.indexOf(x) >= 0 || !types[x].export) continue;
-        const obj = Object.assign({ }, types[x], { name: x, value: entity[x] });
-        if (typeof obj.transform === 'number' && transformable.indexOf(obj.type) >= 0)
-          obj.value *= obj.transform;
-        additional.push(obj);
-      }
-      (<any>data).additionalAfter = additional;
+      this.setVisibility(data.entities.length > 0);
     });
   }
 
@@ -84,48 +56,18 @@ export class PropertiesComponent extends ResizeableComponent {
     super.onResize();
   }
 
-  change(event: Event, object: string, attr?: string) {
-    const value = parseFloat((<HTMLInputElement>event.currentTarget).value.replace(',', '.'));
-    if (isNaN(value) || !isFinite(value)) return;
-    const obj = this.data[object];
-    const before = attr ? obj[attr] : obj;
-    if (value === before) return;
-    const newObj = typeof obj === 'object' ? Object.assign({}, obj) : value;
-    if (typeof newObj === 'object') newObj[attr] = value;
-    if (object === 'size') newObj[attr] /= 100;
-    switch (object) {
-      case 'position':
-        this.store.dispatch(new Translate(newObj));
-        break;
-      case 'rotation':
-        this.store.dispatch(new Rotate(DEG_TO_RAD * newObj));
-        break;
-      case 'size':
-        this.store.dispatch(new Resize(newObj));
-        break;
-    }
-  }
-
   update(event: Event | MatSliderChange, attr: string) {
-    if (this.data.entities.length !== 1) return;
     const value = event instanceof MatSliderChange ? event.value : (<HTMLInputElement>event.currentTarget).value || '';
-    const current = this.pixi.scene.find(entity => entity.id === this.data.entities[0]);
-    if (!current) return;
-    const typeOptions = (<any>current).internalPropertyOptions;
-    const options = typeOptions[attr];
-    if (!options) return;
-    let val;
-    switch (options.type) {
-      case 'color': val = typeof value === 'string' ? parseInt(value.replace('#', ''), 16) : val; break;
-      case 'number': val = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : val; break;
-      default: val = value;
-    }
-    if (typeof options.transform === 'number' && transformable.indexOf(options.type) >= 0)
-      val /= options.transform;
-    current.export('.')
-      .then(data => {
-        data[attr] = val;
-        this.store.dispatch(new UpdateEntity(data, `Update value ${attr}`));
+    const data = { };
+    data[attr] = value;
+    const observable = this.store.dispatch(new UpdateEntityProperty('select', data));
+    if (this.data.entities.length !== 1) return;
+    observable.subscribe(() => {
+      const current = this.pixi.scene.find(entity => entity.id === this.data.entities[0]);
+      if (!current) return;
+      current.export('.').then(values => {
+        this.store.dispatch(new UpdateEntity(values, `Update value ${attr}`));
       });
+    });
   }
 }

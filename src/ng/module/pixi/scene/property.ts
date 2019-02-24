@@ -2,9 +2,11 @@ import { Entity } from './entity';
 
 export type PropertyType = 'string' | 'number' | 'range' | 'boolean' | 'color';
 
+export type PropertyTransform = number | ((value: any, reverse?: boolean) => any);
+
 export interface PropertyOptions {
   export: boolean;
-  transform?: number;
+  transform?: PropertyTransform;
   type?: PropertyType;
   step?: number;
   min?: number;
@@ -12,6 +14,21 @@ export interface PropertyOptions {
   editable?: boolean;
 }
 
+export function TransformProperty(options: PropertyOptions, value: any, reverse: boolean) {
+  let val = value;
+  const transform = options.transform;
+  if (transform) {
+    switch (typeof transform) {
+      case 'function':
+        val = transform(value, reverse);
+        break;
+      case 'number':
+        val = reverse ? val / transform : val * transform;
+        break;
+    }
+  }
+  return val;
+}
 
 /**
  * Creates a dectorator function for entity properties.

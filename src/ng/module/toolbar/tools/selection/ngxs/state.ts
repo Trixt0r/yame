@@ -1,29 +1,23 @@
 import { State, StateContext, Action } from '@ngxs/store';
-import { Translate, Rotate, Resize, Select, Unselect } from './actions';
-
-interface IPoint {
-  x: number;
-  y: number;
-}
+import { Select, Unselect, UpdateSelection } from './actions';
+import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 
 export interface ISelectionState {
   entities: string[];
-  position: IPoint;
-  size: IPoint;
-  rotation: number;
-};
+  properties: PropertyOptionsExt[];
+  // position: IPoint;
+  // size: IPoint;
+  // rotation: number;
+}
 
 @State<ISelectionState>({
   name: 'selection',
   defaults: {
     entities: [],
-    position: { x: 0, y: 0 },
-    size: { x: 1, y: 1 },
-    rotation: 0,
-  }
+    properties: [],
+  },
 })
 export class SelectionState {
-
   @Action(Select)
   select(ctx: StateContext<ISelectionState>, action: Select) {
     const state = ctx.getState();
@@ -38,35 +32,17 @@ export class SelectionState {
     const state = ctx.getState();
     ctx.setState({
       ...state,
-      entities: []
+      entities: [],
+      properties: [],
     });
   }
 
-  @Action(Translate)
-  translate(ctx: StateContext<ISelectionState>, action: Translate) {
+  @Action(UpdateSelection)
+  update(ctx: StateContext<ISelectionState>, action: UpdateSelection) {
     const state = ctx.getState();
     ctx.setState({
       ...state,
-      position: action.position
+      properties: action.properties,
     });
   }
-
-  @Action(Rotate)
-  rotate(ctx: StateContext<ISelectionState>, action: Rotate) {
-    const state = ctx.getState();
-    ctx.setState({
-      ...state,
-      rotation: action.rotation
-    });
-  }
-
-  @Action(Resize)
-  resize(ctx: StateContext<ISelectionState>, action: Resize) {
-    const state = ctx.getState();
-    ctx.setState({
-      ...state,
-      size: action.size
-    });
-  }
-
 }

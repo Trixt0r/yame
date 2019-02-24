@@ -12,6 +12,7 @@ import { ColorPropertyComponent } from './sidebar/component/property/color';
 import { RangePropertyComponent } from './sidebar/component/property/range';
 import { InputPropertyComponent } from './sidebar/component/property/input';
 import { PropertyDirective } from './sidebar/directive/property';
+import { NumberPropertyComponent } from './sidebar/component/property/number';
 
 @NgModule({
   imports: [
@@ -22,6 +23,7 @@ import { PropertyDirective } from './sidebar/directive/property';
   ],
   entryComponents: [
     InputPropertyComponent,
+    NumberPropertyComponent,
     ColorPropertyComponent,
     RangePropertyComponent,
   ],
@@ -31,6 +33,7 @@ import { PropertyDirective } from './sidebar/directive/property';
     PropertyDirective,
     PropertiesComponent,
     InputPropertyComponent,
+    NumberPropertyComponent,
     ColorPropertyComponent,
     RangePropertyComponent,
   ],
@@ -40,6 +43,7 @@ import { PropertyDirective } from './sidebar/directive/property';
     PropertyDirective,
     PropertiesComponent,
     InputPropertyComponent,
+    NumberPropertyComponent,
     ColorPropertyComponent,
     RangePropertyComponent,
   ],
@@ -49,7 +53,7 @@ export class SidebarModule {
 
   constructor(hierarchy: HierarchyService, property: PropertyService) {
     property.register('string', InputPropertyComponent);
-    property.register('number', InputPropertyComponent);
+    property.register('number', NumberPropertyComponent);
     property.register('color', ColorPropertyComponent);
     property.register('range', RangePropertyComponent);
   }

@@ -4,7 +4,7 @@ import { SelectionRenderer } from '../renderer';
 import { SelectionContainer } from '../container';
 import { Group, PixiService } from 'ng/module/pixi/idx';
 import { Store } from '@ngxs/store';
-import { Resize, Translate } from '../ngxs/actions';
+import { UpdateSelection } from '../ngxs/actions';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -76,14 +76,7 @@ export class SelectionResizeHandler {
         .on('updated', () => this.container.emit('updated'))
         .on('handle:start', () => this.container.beginHandling(anchor))
         .on('handle:end', () => {
-          this.store.dispatch(new Resize({
-            x: anchor.target.scale.x,
-            y: anchor.target.scale.y,
-          }));
-          this.store.dispatch(new Translate({
-            x: this.container.position.x,
-            y: this.container.position.y,
-          }));
+          this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
           this.container.endHandling(anchor)
         });
       stage.addChild(anchor);
