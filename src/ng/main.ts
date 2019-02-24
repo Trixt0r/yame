@@ -47,7 +47,7 @@ import { enableProdMode } from '@angular/core';
 import { environment } from '../environments';
 import { PluginManager } from './module/plugin/manager';
 
-// if (environment.production)
+if (environment.production)
   enableProdMode();
 
 /**
