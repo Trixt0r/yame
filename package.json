@@ -92,7 +92,7 @@
     "cross-env": "5.0.1",
     "css-loader": "0.28.4",
     "cssnano": "3.10.0",
-    "electron": "^3.0.3",
+    "electron": "^4.0.5",
     "electron-packager": "8.7.2",
     "enhanced-resolve": "3.3.0",
     "exports-loader": "0.6.4",

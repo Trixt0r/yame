@@ -3,9 +3,8 @@ import {
   ElementRef,
   Output,
   EventEmitter,
-  ChangeDetectionStrategy,
   AfterViewInit,
-  Input,
+  NgZone,
 } from '@angular/core';
 import { ResizeableComponent } from 'ng/module/utils/idx';
 import { Store, Select as StoreSelect } from '@ngxs/store';
@@ -33,6 +32,7 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
   @Output() updateVisibility = new EventEmitter();
 
   protected visible;
+  protected onResizeBind: EventListenerObject;
 
   properties: PropertyOptionsExt[];
   entities: string[] = [];
@@ -42,18 +42,23 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
     public ref: ElementRef,
     protected store: Store,
     protected pixi: PixiService,
+    protected zone: NgZone,
   ) {
-    super(ref);
+    super(ref, zone);
     this.maxVal = window.innerHeight - 100;
-    this.selection$.subscribe(data => {
-        if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-          this.properties = data.properties;
-          this.entities = data.entities;
-          this.setVisibility(this.entities.length > 0);
-        }, 1000 / 30);
+    this.onResizeBind = this.onResize.bind(this);
+    this.zone.runOutsideAngular(() => {
+      this.selection$.subscribe(data => {
+          if (this.timer) clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
+            this.properties = data.properties;
+            this.entities = data.entities;
+            this.setVisibility(this.entities.length > 0);
+          }, 1000 / 30);
+      });
     });
     this.setVisibility(false);
+    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
   }
 
   get isVisibile(): boolean {
@@ -79,11 +84,13 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
     data[attr] = value;
     const observable = this.store.dispatch(new UpdateEntityProperty('select', data));
     if (this.entities.length !== 1) return;
-    observable.subscribe(() => {
-      const current = this.pixi.scene.find(entity => entity.id === this.entities[0]);
-      if (!current) return;
-      current.export('.').then(values => {
-        this.store.dispatch(new UpdateEntity(values, `Update value ${attr}`));
+    this.zone.runOutsideAngular(() => {
+      observable.subscribe(() => {
+        const current = this.pixi.scene.find(entity => entity.id === this.entities[0]);
+        if (!current) return;
+        current.export('.').then(values => {
+          this.store.dispatch(new UpdateEntity(values, `Update value ${attr}`));
+        });
       });
     });
   }

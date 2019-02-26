@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Tool } from '../tool';
-import { NgModuleRef } from '@angular/core';
+import { NgModuleRef, NgZone } from '@angular/core';
 import { PixiService } from '../../pixi/service';
 import { Map } from '../../pixi/scene/map';
 import { Pubsub, AppModule } from 'ng/idx';
@@ -63,6 +63,7 @@ export class SelectionTool extends Tool {
   protected service: PixiService;
   protected globalMouse: PointLike;
 
+  protected zone: NgZone;
   protected store: Store;
   protected actions: Actions;
 
@@ -76,53 +77,64 @@ export class SelectionTool extends Tool {
     this.container = new SelectionContainer();
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
       this.service = ref.injector.get(PixiService);
+      this.zone = ref.injector.get(NgZone);
       this.store = ref.injector.get(Store);
       this.actions = ref.injector.get(Actions);
-      const scene = this.service.scene;
-      this.actions.pipe(ofActionSuccessful(Select)).subscribe((action: Select) => {
-        const filtered = scene.filter(entity => action.entities.indexOf(entity.id) >= 0);
-        if (filtered.length) {
-          this.map.addChild(this.container);
-          this.container.select(filtered);
-          this.store.dispatch(
-            new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
-          );
-        }
-      });
-      this.actions.pipe(ofActionSuccessful(Unselect)).subscribe((action: Unselect) => {
-        const filtered = action.entities ? scene.filter(entity => action.entities.indexOf(entity.id) >= 0) : void 0;
-        const toUpdate = filtered ? filtered : this.container.entities;
-        this.container.unselect(filtered);
-        this.map.removeChild(this.container);
-        if (toUpdate.length === 0) return;
-        const proms = toUpdate.map(entity => entity.export('.'));
-        return Promise.all(proms).then(data => {
-          this.store.dispatch([
-            new UpdateEntity(data, 'update'),
-            new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
-          ]);
-        });
-      });
-      this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((action: DeleteEntity) => {
-        const idx = this.container.indexOf(action.id);
-        if (idx < 0) return;
-        const prev = this.container.entities.map(entity => entity.id);
-        prev.splice(idx, 1);
-        this.store.dispatch(new Unselect()).subscribe(() => {
-          if (!prev.length) return;
-          this.store.dispatch(new Select(prev));
-        });
-      });
+      this.zone.runOutsideAngular(() => {
+        const scene = this.service.scene;
+        this.actions
+          .pipe(ofActionSuccessful(Select))
+          .subscribe((action: Select) => {
+            const filtered = scene.filter(entity => action.entities.indexOf(entity.id) >= 0);
+            if (filtered.length) {
+              this.map.addChild(this.container);
+              this.container.select(filtered);
+              this.store.dispatch(
+                new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+              );
+            }
+          });
 
-      this.actions
-        .pipe(ofActionSuccessful(UpdateSelection, UpdateEntityProperty))
-        .subscribe((action: UpdateSelection | UpdateEntityProperty) => {
-          if (action instanceof UpdateEntityProperty && action.id !== 'select') return;
-          if (action instanceof UpdateSelection && action.attributes) return;
-          if (this.container.updateFromAction(action)) this.container.emit('updated');
-        });
+        this.actions
+          .pipe(ofActionSuccessful(Unselect))
+          .subscribe((action: Unselect) => {
+            const filtered = action.entities ? scene.filter(entity => action.entities.indexOf(entity.id) >= 0) : void 0;
+            const toUpdate = filtered ? filtered : this.container.entities;
+            this.container.unselect(filtered);
+            this.map.removeChild(this.container);
+            if (toUpdate.length === 0) return;
+            const proms = toUpdate.map(entity => entity.export('.'));
+            return Promise.all(proms).then(data => {
+              this.store.dispatch([
+                new UpdateEntity(data, 'update'),
+                new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+              ]);
+            });
+          });
 
-      this.setup();
+        this.actions
+          .pipe(ofActionSuccessful(DeleteEntity))
+          .subscribe((action: DeleteEntity) => {
+            const idx = this.container.indexOf(action.id);
+            if (idx < 0) return;
+            const prev = this.container.entities.map(entity => entity.id);
+            prev.splice(idx, 1);
+            this.store.dispatch(new Unselect()).subscribe(() => {
+              if (!prev.length) return;
+              this.store.dispatch(new Select(prev));
+            });
+          });
+
+        this.actions
+          .pipe(ofActionSuccessful(UpdateSelection, UpdateEntityProperty))
+          .subscribe((action: UpdateSelection | UpdateEntityProperty) => {
+            if (action instanceof UpdateEntityProperty && action.id !== 'select') return;
+            if (action instanceof UpdateSelection && action.attributes) return;
+            if (this.container.updateFromAction(action)) this.container.emit('updated');
+          });
+
+        this.setup();
+      });
     });
   }
 
@@ -205,9 +217,9 @@ export class SelectionTool extends Tool {
   addToolListeners(): void {
     this.initFunctions();
     const canvas = this.service.view;
-    canvas.addEventListener('mousedown', this.onMousedown);
-    canvas.addEventListener('mouseup', this.onMouseup);
-    canvas.addEventListener('mousemove', this.onMousemove);
+    this.zone.runOutsideAngular(() => {
+      canvas.addEventListener('mousedown', this.onMousedown);
+    });
   }
 
   /**
@@ -217,9 +229,9 @@ export class SelectionTool extends Tool {
    */
   removeToolListeners(): void {
     const canvas = this.service.view;
-    canvas.removeEventListener('mousedown', this.onMousedown);
-    canvas.removeEventListener('mouseup', this.onMouseup);
-    canvas.removeEventListener('mousemove', this.onMousemove);
+    this.zone.runOutsideAngular(() => {
+      canvas.removeEventListener('mousedown', this.onMousedown);
+    });
   }
 
   /**
@@ -232,22 +244,26 @@ export class SelectionTool extends Tool {
     if (this.container.isHandling) return; // Delegate the work to the current container
     if (event.which !== 1) return;
     if (this.down) return;
-    this.store.dispatch(new Unselect()).subscribe(() => {
-      this.rectangle.reset();
-      this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
-      this.rectangle.bottomRight.copy(this.rectangle.topLeft);
-      this.rectangle.update();
-      const selection = this.map.filter(
-        child => this.isSelectable(child) && child.containsPoint(<Point>this.globalMouse)
-      );
-      if (selection.length > 0) {
-        this.finish();
-        this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
-        return;
-      }
-      this.graphics.clear();
-      this.stage.addChild(this.graphics);
-      this.down = true;
+    window.addEventListener('mouseup', this.onMouseup);
+    window.addEventListener('mousemove', this.onMousemove);
+    this.zone.runOutsideAngular(() => {
+      this.store.dispatch(new Unselect()).subscribe(() => {
+        this.rectangle.reset();
+        this.stage.toLocal(this.globalMouse, void 0, this.rectangle.topLeft);
+        this.rectangle.bottomRight.copy(this.rectangle.topLeft);
+        this.rectangle.update();
+        const selection = this.map.filter(
+          child => this.isSelectable(child) && child.containsPoint(<Point>this.globalMouse)
+        );
+        if (selection.length > 0) {
+          this.finish();
+          this.container.emit('mousedown', this.service.renderer.plugins.interaction.eventData);
+          return;
+        }
+        this.graphics.clear();
+        this.stage.addChild(this.graphics);
+        this.down = true;
+      });
     });
   }
 
@@ -261,6 +277,8 @@ export class SelectionTool extends Tool {
     if (!this.down) return;
     if (event.which !== 1) return;
     this.finish();
+    window.removeEventListener('mouseup', this.onMouseup);
+    window.removeEventListener('mousemove', this.onMousemove);
   }
 
   /**
@@ -296,8 +314,10 @@ export class SelectionTool extends Tool {
     const selection = this.map
       .filter(child => this.isSelectable(child) && this.rectangle.contains(child), this, true)
       .map(entity => entity.id);
-    this.store.dispatch(new Select(selection)).subscribe(() => {
-      this.emit('finish', selection, this.rectangle);
+    this.zone.runOutsideAngular(() => {
+      this.store.dispatch(new Select(selection)).subscribe(() => {
+        this.emit('finish', selection, this.rectangle);
+      });
     });
   }
 

@@ -52,11 +52,9 @@ export class SelectionRotateHandler {
     this.areas.forEach(area => {
       area.interactive = true;
       area.on('mousedown', this.mousedown, this);
-      area.on('mousemove', this.mousemove, this);
       area.on('mouseover', this.updateCursor, this);
       area.on('mouseout', this.resetCursor, this);
     });
-    window.addEventListener('mouseup', this.mouseupFn);
 
     container.on('selected', this.selected, this);
     container.on('unselected', this.unselected, this);
@@ -78,10 +76,10 @@ export class SelectionRotateHandler {
   /**
    * Resets the cursor of the pixi view.
    *
-   * @param {interaction.InteractionEvent} [event]
+   * @param {any} [event]
    * @returns {void}
    */
-  resetCursor(event?: interaction.InteractionEvent): void {
+  resetCursor(event?: any): void {
     if (event !== void 0) this.mouseLeft = true;
     if ((this.container.isHandling && this.container.currentHandler === this) || !this.mouseLeft) return;
     this.service.view.style.cursor = '';
@@ -96,6 +94,12 @@ export class SelectionRotateHandler {
    */
   mousedown(event: interaction.InteractionEvent) {
     if (this.container.isHandling) return;
+    this.areas.forEach(area => {
+      area.on('mousemove', this.mousemove, this);
+      area.off('mouseover', this.updateCursor, this);
+      area.off('mouseout', this.resetCursor, this);
+    });
+    window.addEventListener('mouseup', this.mouseupFn);
     this.clickedPos.set(this.container.position.x, this.container.position.y);
     this.container.beginHandling(this, event);
     this.mouseStartPos.set(event.data.global.x, event.data.global.y);
@@ -116,8 +120,14 @@ export class SelectionRotateHandler {
    */
   mouseup(): void {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
+    this.areas.forEach(area => {
+      area.off('mousemove', this.mousemove, this);
+      area.on('mouseover', this.updateCursor, this);
+      area.on('mouseout', this.resetCursor, this);
+    });
+    window.removeEventListener('mouseup', this.mouseupFn);
     this.container.endHandling(this);
-    this.resetCursor();
+    this.resetCursor(true);
     this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
   }
 

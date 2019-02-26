@@ -13,6 +13,7 @@ import {
   OnInit,
   Output,
   ViewContainerRef,
+  OnChanges,
 } from '@angular/core';
 
 /**
@@ -29,8 +30,7 @@ import {
 @Directive({
   selector: '[groupHost]',
 })
-export class GroupDirective {
-
+export class GroupDirective implements OnChanges {
   /** @type {AssetGroup<Asset>} The asset group to render. */
   @Input('groupHost') group: AssetGroup<Asset>;
 
@@ -41,12 +41,11 @@ export class GroupDirective {
     private groups: GroupComponentService,
     private viewContainerRef: ViewContainerRef,
     private componentFactoryResolver: ComponentFactoryResolver
-  ) { }
+  ) {}
 
   /** @inheritdoc */
   ngOnChanges(changes) {
-    if (changes.group)
-      this.render();
+    if (changes.group) this.render();
   }
 
   /**
@@ -56,12 +55,12 @@ export class GroupDirective {
    *                                          if no component found for the current group.
    */
   render(): ComponentRef<GroupComponent> {
-    let compType = this.groups.get(this.group);
+    const compType = this.groups.get(this.group);
     if (!compType) return null;
-    let componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
-    let viewContainerRef = this.viewContainerRef;
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+    const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
-    let componentRef = viewContainerRef.createComponent(componentFactory);
+    const componentRef = viewContainerRef.createComponent(componentFactory);
     componentRef.instance.group = this.group;
     componentRef.instance.clickEvent.subscribe(event => this.click.emit(event));
     return componentRef;

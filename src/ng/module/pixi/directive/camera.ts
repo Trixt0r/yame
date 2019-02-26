@@ -1,6 +1,6 @@
 import { PixiComponent } from '../component';
 import { Camera } from '../utils/camera';
-import { AfterViewInit, Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostListener, Input, NgZone } from '@angular/core';
 
 const tmpPos = new PIXI.Point();
 
@@ -19,11 +19,23 @@ export class PixiCameraDirective implements AfterViewInit {
   private prevPos: PIXI.Point;
   private camPos: PIXI.Point;
 
-  constructor(private host: PixiComponent) {
+  private onMouseWheelBind: EventListenerObject;
+  private onMouseDownBind: EventListenerObject;
+  private onMouseMoveBind: EventListenerObject;
+  private onMouseUpBind: EventListenerObject;
+
+  constructor(private host: PixiComponent, private zone: NgZone) {
     this.prevPos = null;
+    this.onMouseWheelBind = this.onMouseWheel.bind(this);
+    this.onMouseDownBind = this.onMouseDown.bind(this);
+    this.onMouseMoveBind = this.onMouseMove.bind(this);
+    this.onMouseUpBind = this.onMouseUp.bind(this);
+    this.zone.runOutsideAngular(() => {
+      (<HTMLElement>host.ref.nativeElement).addEventListener('mousewheel', this.onMouseWheelBind);
+      (<HTMLElement>host.ref.nativeElement).addEventListener('mousedown', this.onMouseDownBind);
+    });
   }
 
-  @HostListener('mousewheel', ['$event'])
   onMouseWheel(event: MouseWheelEvent) {
     if (!this.interactive) return;
     const service = this.host.pixiService;
@@ -33,24 +45,25 @@ export class PixiCameraDirective implements AfterViewInit {
     else if (event.deltaY > 0) this.cam.zoom = this.cam.minZoom;
   }
 
-  @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent) {
     if (!this.interactive) return;
     if (event.which !== 3) return; // Only listen for right click
+    window.addEventListener('mousemove', this.onMouseMoveBind);
+    window.addEventListener('mouseup', this.onMouseUpBind);
     const service = this.host.pixiService;
     const data = service.renderer.plugins.interaction.eventData.data;
     this.prevPos = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
     this.camPos = new PIXI.Point(this.cam.position.x, this.cam.position.y);
   }
 
-  @HostListener('window:mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
     if (!this.interactive) return;
     if (event.which !== 3) return; // Only listen for right click
+    window.removeEventListener('mousemove', this.onMouseMoveBind);
+    window.removeEventListener('mouseup', this.onMouseUpBind);
     this.prevPos = null;
   }
 
-  @HostListener('window:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (!this.interactive) return;
     if (event.which !== 3 || !this.prevPos) return; // Only listen for right click

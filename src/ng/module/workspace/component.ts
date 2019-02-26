@@ -6,7 +6,7 @@ import { GroupsComponent } from './component/groups';
 import { ResizeableComponent } from '../utils/component/resizable';
 import { AssetsComponent } from './component/assets';
 import { WorkspaceService } from './service';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, NgZone } from '@angular/core';
 import * as _ from 'lodash';
 import { DirectoryContent } from '../../../common/content/directory';
 import { FileContent } from '../../../common/content/file';
@@ -65,14 +65,19 @@ export class WorkspaceComponent extends ResizeableComponent {
    */
   @ViewChild('row') row: ElementRef;
 
+  protected onResizeBind: EventListenerObject;
+
   constructor(
     public ref: ElementRef,
     private service: WorkspaceService,
     private assets: AssetService,
-    private electron: ElectronService
+    private electron: ElectronService,
+    protected zone: NgZone,
   ) {
-    super(ref);
+    super(ref, zone);
+    this.onResizeBind = this.onResize.bind(this);
     this.maxVal = window.innerHeight - 100;
+    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
   }
 
   /** @override */

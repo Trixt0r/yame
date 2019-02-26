@@ -1,16 +1,16 @@
-import { Injectable, Type } from "@angular/core";
-import { ToolComponent } from "./component/tool";
-import { DefaultToolComponent } from "./component/default";
-import { Tool } from "./tool";
-import { Subject } from "rxjs";
-import { ToolbarServiceException } from "./exception/service";
+import { Injectable, Type } from '@angular/core';
+import { ToolComponent } from './component/tool';
+import { DefaultToolComponent } from './component/default';
+import { Tool } from './tool';
+import { Subject } from 'rxjs';
+import { ToolbarServiceException } from './exception/service';
 
 interface ToolComponents {
-  [key: string]: Type<ToolComponent>
+  [key: string]: Type<ToolComponent>;
 }
 
 interface Tools {
-  [key: string]: Tool
+  [key: string]: Tool;
 }
 
 /**
@@ -21,12 +21,11 @@ interface Tools {
  */
 @Injectable()
 export class ToolbarService {
-
   /** @type {ToolComponents} A tool components map, which maps a tool to a tool component, for rendering. */
-  protected toolComponents: ToolComponents = { };
+  protected toolComponents: ToolComponents = {};
 
   /** @type {ToolComponents} A tool map for accessing tool instances via id easier and faster. */
-  protected tooInstances: Tools = { };
+  protected tooInstances: Tools = {};
 
   /** @type {Tool[]} The list of all currently registered tools. */
   protected toolArray: Tool[] = [];
@@ -58,7 +57,9 @@ export class ToolbarService {
     if (this.registering)
       return new Promise((resolve, reject) => {
         this.registered$.first().subscribe(() => {
-          this.register(tool, component).then(resolve).catch(reject);
+          this.register(tool, component)
+            .then(resolve)
+            .catch(reject);
         });
       });
     this.toolArray.push(tool);
@@ -66,12 +67,11 @@ export class ToolbarService {
     this.toolComponents[tool.id] = component;
     if (!this.currentTool) {
       this.registering = true;
-      return this.activate(tool)
-              .then(re => {
-                this.registering = false;
-                this.registeredSource.next(tool);
-                return re;
-              });
+      return this.activate(tool).then(re => {
+        this.registering = false;
+        this.registeredSource.next(tool);
+        return re;
+      });
     }
     this.registeredSource.next(tool);
     return Promise.resolve(false);
@@ -84,7 +84,7 @@ export class ToolbarService {
    * @returns {Type<ToolComponent>} The tool component prototype.
    */
   getComponent(tool: string | Tool): Type<ToolComponent> {
-    return this.toolComponents[ typeof tool === 'string' ? tool : tool.id ];
+    return this.toolComponents[typeof tool === 'string' ? tool : tool.id];
   }
 
   /**
@@ -118,19 +118,20 @@ export class ToolbarService {
    */
   activate(tool: string | Tool): Promise<boolean> {
     const toActivate = typeof tool === 'string' ? this.getTool(tool) : this.getTool(tool.id);
-    if (!toActivate)
-      throw new ToolbarServiceException('Tool to activate not found');
+    if (!toActivate) throw new ToolbarServiceException('Tool to activate not found');
     const currentTool = this.currentTool;
     if (currentTool === toActivate) return Promise.resolve(false);
-    let deactivate = currentTool && currentTool.isActive ?
-                      currentTool.deactivate()
-                                  .then(re => {
-                                    this.deactivatedSource.next(currentTool);
-                                    return re;
-                                  }) : Promise.resolve(false);
-    return deactivate.then(() => toActivate.activate())
-                      .then(() => this.currentTool = toActivate)
-                      .then(() => this.activatedSource.next(this.currentTool))
-                      .then(() => true);
+    let deactivate =
+      currentTool && currentTool.isActive
+        ? currentTool.deactivate().then(re => {
+            this.deactivatedSource.next(currentTool);
+            return re;
+          })
+        : Promise.resolve(false);
+    return deactivate
+      .then(() => toActivate.activate())
+      .then(() => (this.currentTool = toActivate))
+      .then(() => this.activatedSource.next(this.currentTool))
+      .then(() => true);
   }
 }

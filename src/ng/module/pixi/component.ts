@@ -1,5 +1,5 @@
 import { PixiService } from './service';
-import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, OnDestroy, OnInit, NgZone } from '@angular/core';
 
 import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
@@ -27,8 +27,15 @@ export class PixiComponent implements OnDestroy, OnInit {
 
   private preview: PIXI.DisplayObject;
   private dragLeft = false;
+  protected onResizeBind: EventListenerObject;
 
-  constructor(public ref: ElementRef, public pixiService: PixiService, public store: Store) {}
+  constructor(public ref: ElementRef,
+              public pixiService: PixiService,
+              public store: Store,
+              public zone: NgZone) {
+  this.onResizeBind = this.onResize.bind(this);
+  zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
+  }
 
   /** @type {PIXI.DisplayObject} The current drag and drop preview. */
   get dndPreview(): PIXI.DisplayObject {
@@ -40,17 +47,19 @@ export class PixiComponent implements OnDestroy, OnInit {
    * @inheritdoc
    */
   ngOnInit() {
-    this.pixiService.setUp(this.ref, {
-      view: <HTMLCanvasElement>this.canvas.nativeElement,
-      transparent: true,
+    this.zone.runOutsideAngular(() => {
+      this.pixiService.setUp(this.ref, {
+        view: <HTMLCanvasElement>this.canvas.nativeElement,
+        transparent: true,
+      });
     });
   }
 
   /** @returns {void} Handler for resizing the canvas. Delegate to the pixi service. */
-  @HostListener('window:resize')
   onResize() {
     let newSize;
-    if ((newSize = this.pixiService.resize())) this.resized.emit({ width: newSize.x, height: newSize.y });
+    if ((newSize = this.pixiService.resize()))
+      this.resized.emit({ width: newSize.x, height: newSize.y });
   }
 
   /**
@@ -141,5 +150,6 @@ export class PixiComponent implements OnDestroy, OnInit {
    */
   ngOnDestroy(): void {
     this.pixiService.dispose().catch(error => alert(error.message));
+    this.zone.runOutsideAngular(() => window.removeEventListener('resize', this.onResizeBind));
   }
 }

@@ -27,8 +27,6 @@ export class SelectionTranslateHandler {
     this.mouseStartPos = new PIXI.Point();
     this.mouseupFn = this.mouseup.bind(this);
     container.on('mousedown', this.mousedown, this);
-    window.addEventListener('mouseup', this.mouseupFn);
-    container.on('mousemove', this.mousemove, this);
     container.on('unselected', this.unselected, this);
   }
 
@@ -41,6 +39,8 @@ export class SelectionTranslateHandler {
    */
   mousedown(event: interaction.InteractionEvent) {
     if (this.container.isHandling) return;
+    this.container.on('mousemove', this.mousemove, this);
+    window.addEventListener('mouseup', this.mouseupFn);
     this.container.beginHandling(this, event);
     this.mouseStartPos.set(event.data.global.x, event.data.global.y);
     this.container.parent.toLocal(this.mouseStartPos, null, this.mouseStartPos);
@@ -57,6 +57,8 @@ export class SelectionTranslateHandler {
    */
   mouseup(event: interaction.InteractionEvent): void {
     if (!this.container.isHandling || this.container.currentHandler !== this) return;
+    this.container.off('mousemove', this.mousemove, this);
+    window.removeEventListener('mouseup', this.mouseupFn);
     this.container.endHandling(this, event);
     this.service.view.style.cursor = '';
     this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));

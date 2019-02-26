@@ -117,10 +117,8 @@ export class ResizeAnchor extends Graphics {
     this.interactive = true;
     this.mouseupFn = this.mouseup.bind(this);
     this.on('mousedown', this.mousedown, this);
-    this.on('mousemove', this.mousemove, this);
     this.on('mouseover', this.updateCursor, this);
     this.on('mouseout', this.resetCursor, this);
-    window.addEventListener('mouseup', this.mouseupFn);
     this.offset = new Point();
     this.setUpOffset();
   }
@@ -230,6 +228,10 @@ export class ResizeAnchor extends Graphics {
    */
   mousedown(event: interaction.InteractionEvent): void {
     if (this.clickedPos) return;
+    this.on('mousemove', this.mousemove, this);
+    this.off('mouseover', this.updateCursor, this);
+    this.off('mouseout', this.resetCursor, this);
+    window.addEventListener('mouseup', this.mouseupFn);
     this.validate();
     this.clickedScale.copy(this.target.scale);
     this.target.scale.set(1);
@@ -299,6 +301,10 @@ export class ResizeAnchor extends Graphics {
    */
   mouseup(event?: interaction.InteractionEvent): void {
     if (!this.clickedPos) return;
+    this.off('mousemove', this.mousemove, this);
+    this.on('mouseover', this.updateCursor, this);
+    this.on('mouseout', this.resetCursor, this);
+    window.removeEventListener('mouseup', this.mouseupFn);
     this.clickedPos = null;
     this.resetCursor();
     this.emit('handle:end');

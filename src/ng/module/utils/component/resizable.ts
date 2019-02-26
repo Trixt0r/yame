@@ -7,6 +7,8 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  OnDestroy,
+  NgZone,
 } from '@angular/core';
 
 /**
@@ -25,7 +27,7 @@ import {
   providers: null,
   styles: ['div { witdh: 100%; height: 100%; }'],
 })
-export class ResizeableComponent implements OnChanges, AfterViewInit {
+export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy {
   /**
    * @protected
    * @type {{ x: number, y: number }} position The click position
@@ -55,12 +57,20 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
   @Input() minVal: number;
   @Input() maxVal: number;
 
+  protected onMouseDownBind: EventListenerObject;
+  protected onMouseMoveBind: EventListenerObject;
+  protected onMouseUpBind: EventListenerObject;
+
   /**
    * Creates an instance of ResizeableComponent.
    *
    * @param {ElementRef} ref Injected by angular
    */
-  constructor(public ref: ElementRef) {}
+  constructor(public ref: ElementRef, protected zone: NgZone) {
+    this.onMouseDownBind = this.onMouseDown.bind(this);
+    this.onMouseMoveBind = this.onMouseMove.bind(this);
+    this.onMouseUpBind = this.onMouseUp.bind(this);
+  }
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
@@ -71,18 +81,44 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
   }
 
   /**
+   * Adds the mouse listeners to the relevant elements.
+   */
+  addListeners(): void {
+    const elem = <HTMLElement>this.ref.nativeElement;
+    if (elem.childNodes.length > 0) {
+      const resizer = elem.querySelector('.resizer');
+      if (resizer) resizer.addEventListener('mousedown', this.onMouseDownBind);
+    } else elem.addEventListener('mousedown', this.onMouseDownBind);
+  }
+
+  /**
+   * Removes the previously mouse listeners from the respective elements.
+   */
+  removeListeners(): void {
+    if (this.position) this.onMouseUp();
+    const elem = <HTMLElement>this.ref.nativeElement;
+    if (elem.childNodes.length > 0) {
+      const resizer = elem.querySelector('.resizer');
+      if (resizer) resizer.removeEventListener('mousedown', this.onMouseDownBind);
+    } else elem.addEventListener('mousedown', this.onMouseDownBind);
+    window.removeEventListener('mouseup', this.onMouseUpBind);
+  }
+
+  /**
    * Starts the resizing.
    * @param {MouseEvent} event
    */
   onMouseDown(event: MouseEvent): void {
+    // Prevents text selection
+    event.preventDefault();
     // Cache the clicked position
     this.position = {
       x: event.clientX,
       y: event.clientY,
     };
     this.clickedVal = this.propVal;
-    // Prevents text selection
-    event.preventDefault();
+    window.addEventListener('mousemove', this.onMouseMoveBind);
+    window.addEventListener('mouseup', this.onMouseUpBind);
   }
 
   /**
@@ -106,7 +142,11 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
 
   /** Stops the resizing. */
   onMouseUp(): void {
-    if (this.position) this.position = null;
+    if (this.position) {
+      this.position = null;
+      window.removeEventListener('mousemove', this.onMouseMoveBind);
+      window.removeEventListener('mouseup', this.onMouseUpBind);
+    }
   }
 
   /** Handles window resize event. */
@@ -137,9 +177,21 @@ export class ResizeableComponent implements OnChanges, AfterViewInit {
     return value;
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   */
   ngAfterViewInit() {
-    setTimeout(() => this.updateFromStyle());
+    this.zone.runOutsideAngular(() => {
+      this.addListeners();
+      setTimeout(() => this.updateFromStyle());
+    });
+  }
+
+  /**
+   * @inheritdoc
+   */
+  ngOnDestroy() {
+    this.zone.runOutsideAngular(() => this.removeListeners());
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, NgZone, OnDestroy } from '@angular/core';
 import { ResizeableComponent } from '../utils/component/resizable';
 import { HierarchyComponent } from './component/hierarchy';
 import { PropertiesComponent } from './component/properties';
@@ -14,9 +14,12 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
   @ViewChild('hierarchy') hierarchy: HierarchyComponent;
   @ViewChild('properties') properties: PropertiesComponent;
 
-  constructor(public ref: ElementRef) {
-    super(ref);
+  protected onResizeBind: EventListenerObject;
+
+  constructor(public ref: ElementRef, protected zone: NgZone) {
+    super(ref, zone);
     this.maxVal = window.innerWidth - 400;
+    this.onResizeBind = this.onResize.bind(this);
   }
 
   /** @override */
@@ -34,6 +37,7 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
 
   ngAfterViewInit() {
     this.properties.updateValue(this.properties.clampValue(window.innerHeight * 0.5));
+    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
     super.ngAfterViewInit();
   }
 }
