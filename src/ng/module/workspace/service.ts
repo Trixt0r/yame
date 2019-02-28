@@ -48,7 +48,7 @@ export class WorkspaceService {
       return Promise.resolve(this.internalFiles);
     this.internalState = 'init';
     this.initSource.next();
-    let provider = this.electron.getProvider(DirectoryProvider);
+    const provider = this.electron.getProvider(DirectoryProvider);
     return provider.scan(rootDir)
       .then(json => {
         this.internalFiles = json;

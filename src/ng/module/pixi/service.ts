@@ -6,8 +6,8 @@ import { PixiAssetConverter } from './service/converter';
 import { Map } from './scene/map';
 import { Entity } from './scene/entity';
 import { Subject, Observable } from 'rxjs/Rx';
-import { Store, Actions, ofActionSuccessful, ofActionDispatched } from '@ngxs/store';
-import { DeleteEntity, UpdateEntity, CreateEntity } from './ngxs/actions';
+import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
+import { DeleteEntity, UpdateEntity, CreateEntity, EntityAction } from './ngxs/actions';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
@@ -96,23 +96,22 @@ export class PixiService {
     this.readySource.next();
     this.resize();
     if (this.store) {
-      this.actions.pipe(ofActionSuccessful(CreateEntity)).subscribe((create: CreateEntity) => {
-        return this.scene.addEntity(create.entity);
-      });
-
-      this.actions.pipe(ofActionSuccessful(UpdateEntity)).subscribe((update: UpdateEntity) => {
-        const data = Array.isArray(update.data) ? update.data : [update.data];
-        const proms = data.map(d => {
-          const found = this.scene.find(entity => d.id === entity.id);
-          if (found) return found.parse(d, '.');
+      this.actions.pipe(ofActionSuccessful(CreateEntity, UpdateEntity, DeleteEntity))
+        .subscribe((action: EntityAction) => {
+          if (action instanceof CreateEntity) {
+            return this.scene.addEntity(action.entity);
+          } else if (action instanceof UpdateEntity) {
+            const data = Array.isArray(action.data) ? action.data : [action.data];
+            const proms = data.map(d => {
+              const found = this.scene.find(entity => d.id === entity.id);
+              if (found) return found.parse(d, '.');
+            });
+            return Promise.all(proms);
+          } else if (action instanceof DeleteEntity) {
+            const found = this.scene.find(entity => action.id === entity.id);
+            if (found) return this.scene.removeEntity(found);
+          }
         });
-        return Promise.all(proms);
-      });
-
-      this.actions.pipe(ofActionSuccessful(DeleteEntity)).subscribe((remove: DeleteEntity) => {
-        const found = this.scene.find(entity => remove.id === entity.id);
-        if (found) return this.scene.removeEntity(found);
-      });
     }
   }
 

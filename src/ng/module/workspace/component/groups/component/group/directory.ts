@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { GroupComponent } from './abstract';
 
 /**
@@ -13,6 +13,7 @@ import { GroupComponent } from './abstract';
     <mat-list-item (click)="click($event)">
       <mat-icon mat-list-icon>folder</mat-icon>
       <h4 mat-line> {{ group.content.name }} </h4>
-    </mat-list-item>`
+    </mat-list-item>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DirectoryGroupComponent extends GroupComponent { }

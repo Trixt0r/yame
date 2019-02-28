@@ -9,6 +9,7 @@ import {
   SimpleChanges,
   OnDestroy,
   NgZone,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 /**
@@ -26,6 +27,7 @@ import {
   selector: 'yame-resizable',
   providers: null,
   styles: ['div { witdh: 100%; height: 100%; }'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy {
   /**

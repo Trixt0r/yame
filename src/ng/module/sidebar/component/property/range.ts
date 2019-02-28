@@ -1,5 +1,5 @@
 import { PropertyComponent, InputEvent } from './abstract';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatSliderChange } from '@angular/material';
 
 @Component({

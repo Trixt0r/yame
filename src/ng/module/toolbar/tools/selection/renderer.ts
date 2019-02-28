@@ -83,6 +83,7 @@ export class SelectionRenderer extends Graphics {
     this.boundingPoints = [new Point(), new Point(), new Point(), new Point()];
     this.service.scene.on('camera:updated', this.update, this); // Setup here, since the scene does not change
     this.setupContainerHandlers();
+    this.setConfig({ line: { }, fill: { } });
   }
 
   /**
@@ -159,11 +160,11 @@ export class SelectionRenderer extends Graphics {
     this.outerBounds.y = _.minBy(this.boundingPoints, 'y').y;
     this.outerBounds.height = _.maxBy(this.boundingPoints, 'y').y - this.outerBounds.y;
 
-    const lineWidth = _.defaultTo(this.config.line.width, 1);
-    const lineColor = _.defaultTo(this.config.line.color, 0xffffff);
-    const lineAlpha = _.defaultTo(this.config.line.alpha, 1);
-    const fillColor = _.defaultTo(this.config.fill.color, 0xffffff);
-    const fillAlpha = _.defaultTo(this.config.fill.alpha, 0);
+    const lineWidth = this.config.line.width;
+    const lineColor = this.config.line.color;
+    const lineAlpha = this.config.line.alpha;
+    const fillColor = this.config.fill.color;
+    const fillAlpha = this.config.fill.alpha;
 
     if (fillAlpha) this.beginFill(fillColor, fillAlpha);
 
@@ -204,5 +205,13 @@ export class SelectionRenderer extends Graphics {
    */
   get isAttached(): boolean {
     return this.attached;
+  }
+
+  setConfig(config: SelectionRendererConfig) {
+    this.config.line.width = _.defaultTo(config.line.width, 1);
+    this.config.line.color = _.defaultTo(config.line.color, 0xffffff);
+    this.config.line.alpha = _.defaultTo(config.line.alpha, 1);
+    this.config.fill.color = _.defaultTo(config.fill.color, 0xffffff);
+    this.config.fill.alpha = _.defaultTo(config.fill.alpha, 0);
   }
 }

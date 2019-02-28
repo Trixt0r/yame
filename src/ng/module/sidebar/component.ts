@@ -1,4 +1,11 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, NgZone, OnDestroy } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  NgZone,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ResizeableComponent } from '../utils/component/resizable';
 import { HierarchyComponent } from './component/hierarchy';
 import { PropertiesComponent } from './component/properties';
@@ -8,9 +15,9 @@ import { PropertiesComponent } from './component/properties';
   selector: 'yame-sidebar',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent extends ResizeableComponent implements AfterViewInit {
-
   @ViewChild('hierarchy') hierarchy: HierarchyComponent;
   @ViewChild('properties') properties: PropertiesComponent;
 
@@ -29,8 +36,7 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
   }
 
   newSize() {
-    if (!this.properties.isVisibile)
-      return this.hierarchy.resetMaxHeight();
+    if (!this.properties.isVisibile) return this.hierarchy.resetMaxHeight();
     const val = this.properties.propertyValue;
     this.hierarchy.updateMaxHeight(val);
   }

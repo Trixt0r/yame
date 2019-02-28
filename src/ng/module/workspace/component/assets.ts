@@ -1,5 +1,5 @@
 import { AssetComponentService } from '../service/asset-component';
-import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { AssetService } from '../service/asset';
 import { AssetGroup } from '../../../../common/asset/group';
@@ -23,6 +23,7 @@ const dragImage = new Image(0, 0);
   selector: 'yame-assets',
   templateUrl: 'assets.html',
   styleUrls: ['./assets.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetsComponent implements OnChanges {
   /** @type {AssetGroup<Asset>} The group this component displays.*/

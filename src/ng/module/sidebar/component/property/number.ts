@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { InputPropertyComponent } from './input';
 import { InputEvent, PropertyComponent } from './abstract';
 
 @Component({

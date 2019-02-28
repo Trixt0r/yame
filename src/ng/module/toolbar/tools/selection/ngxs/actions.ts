@@ -15,4 +15,4 @@ export class UpdateSelection {
   constructor(public properties: PropertyOptionsExt[], public attributes?: string[]) {}
 }
 
-export type Actions = Select | Unselect | UpdateSelection;
+export type SelectionActions = Select | Unselect | UpdateSelection;

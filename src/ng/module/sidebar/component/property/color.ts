@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { InputPropertyComponent } from './input';
 
 @Component({
@@ -12,6 +12,7 @@ import { InputPropertyComponent } from './input';
         (input)="update({ originalEvent: $event, property: property })" />
   </mat-form-field>`,
   styleUrls: ['./style.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ColorPropertyComponent extends InputPropertyComponent {
 

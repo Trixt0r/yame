@@ -1,17 +1,14 @@
 import { AssetPreviewComponent } from '../component/preview/interface';
 import { AssetComponentService } from '../../../service/asset-component';
-import { AssetService } from '../../../service/asset';
-import { Asset } from '../../../../../../common/asset';
+import { Asset } from 'common/asset';
 
 import {
   ComponentFactoryResolver,
   ComponentRef,
   Directive,
-  EventEmitter,
   Input,
-  OnInit,
-  Output,
   ViewContainerRef,
+  OnChanges,
 } from '@angular/core';
 
 /**
@@ -22,7 +19,7 @@ import {
 @Directive({
   selector: '[assetPreview]',
 })
-export class AssetPreviewDirective {
+export class AssetPreviewDirective implements OnChanges {
 
   /** @type {Asset} The asset group to render. */
   @Input('assetPreview') asset: Asset;
@@ -46,12 +43,12 @@ export class AssetPreviewDirective {
    *                                          if no component found for the current group.
    */
   render(): ComponentRef<AssetPreviewComponent> {
-    let compType = this.assets.getPreview(this.asset);
+    const compType = this.assets.getPreview(this.asset);
     if (!compType) return null;
-    let componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
-    let viewContainerRef = this.viewContainerRef;
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+    const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
-    let componentRef = viewContainerRef.createComponent(componentFactory);
+    const componentRef = viewContainerRef.createComponent(componentFactory);
     componentRef.instance.asset = this.asset;
     return componentRef;
   }

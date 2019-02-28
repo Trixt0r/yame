@@ -178,7 +178,9 @@ export class SelectionContainer extends Group<Entity> {
       }
       this.pivot.set(pivotX, pivotY);
     }
+    // const time = performance.now();
     this.emit('selected', added);
+    // console.log('select', performance.now() - time);
     return added;
   }
 

@@ -113,7 +113,7 @@ export class SelectionRotateHandler {
 
   /**
    * Mouse up handler.
-   * Finishs the handling.
+   * Finishes the handling.
    *
    * @returns {void}
    * @memberof SelectionRotateHandler

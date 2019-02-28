@@ -5,6 +5,8 @@ import {
   EventEmitter,
   AfterViewInit,
   NgZone,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { ResizeableComponent } from 'ng/module/utils/idx';
 import { Store, Select as StoreSelect } from '@ngxs/store';
@@ -24,6 +26,7 @@ function state(state: any) {
   selector: 'yame-properties',
   templateUrl: 'properties.html',
   styleUrls: ['./properties.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PropertiesComponent extends ResizeableComponent implements AfterViewInit {
   title = 'Properties';
@@ -43,10 +46,12 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
     protected store: Store,
     protected pixi: PixiService,
     protected zone: NgZone,
+    protected cdr: ChangeDetectorRef
   ) {
     super(ref, zone);
     this.maxVal = window.innerHeight - 100;
     this.onResizeBind = this.onResize.bind(this);
+    // this.cdr.detach();
     this.zone.runOutsideAngular(() => {
       this.selection$.subscribe(data => {
           if (this.timer) clearTimeout(this.timer);
@@ -54,6 +59,7 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
             this.properties = data.properties;
             this.entities = data.entities;
             this.setVisibility(this.entities.length > 0);
+            cdr.detectChanges();
           }, 1000 / 30);
       });
     });

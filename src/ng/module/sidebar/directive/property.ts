@@ -8,7 +8,6 @@ import {
   EventEmitter,
   Output,
   SimpleChanges,
-  NgZone,
 } from '@angular/core';
 import { PropertyService } from '../service/property';
 import { PropertyComponent, InputEvent } from '../component/property/abstract';
@@ -30,7 +29,6 @@ export class PropertyDirective implements OnChanges {
     private service: PropertyService,
     private viewContainerRef: ViewContainerRef,
     private componentFactoryResolver: ComponentFactoryResolver,
-    private zone: NgZone,
   ) { }
 
   /** @inheritdoc */
@@ -58,16 +56,12 @@ export class PropertyDirective implements OnChanges {
       if (cached) {
         componentRef = cached.ref;
         viewContainerRef.insert(componentRef.hostView, cached.index);
-        // componentRef.instance.property = Object.assign({ }, property, { value: void 0 });
-        // componentRef.changeDetectorRef.detectChanges();
       } else {
         componentRef = viewContainerRef.createComponent(componentFactory);
         componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
         componentRefCache[cacheKey] = { ref: componentRef, index: viewContainerRef.indexOf(componentRef.hostView) };
       }
       componentRef.instance.property = property;
-      // if (cached)
-      //   componentRef.changeDetectorRef.detectChanges();
       comps.push(componentRef);
     });
     for (const key in componentRefCache) {

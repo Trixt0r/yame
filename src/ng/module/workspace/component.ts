@@ -6,7 +6,7 @@ import { GroupsComponent } from './component/groups';
 import { ResizeableComponent } from '../utils/component/resizable';
 import { AssetsComponent } from './component/assets';
 import { WorkspaceService } from './service';
-import { Component, ElementRef, ViewChild, NgZone } from '@angular/core';
+import { Component, ElementRef, ViewChild, NgZone, ChangeDetectionStrategy } from '@angular/core';
 import * as _ from 'lodash';
 import { DirectoryContent } from '../../../common/content/directory';
 import { FileContent } from '../../../common/content/file';
@@ -28,6 +28,7 @@ import { Asset } from '../../../common/asset';
   selector: 'yame-workspace',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkspaceComponent extends ResizeableComponent {
   /**

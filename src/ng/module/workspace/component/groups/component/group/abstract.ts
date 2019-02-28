@@ -1,6 +1,6 @@
 import { EventEmitter } from '@angular/core';
-import { Asset } from '../../../../../../../common/asset';
-import { AssetGroup } from '../../../../../../../common/asset/group';
+import { Asset } from 'common/asset';
+import { AssetGroup } from 'common/asset/group';
 
 /**
  * Abstract component for rendering a group asset in the groups list.

@@ -2,7 +2,7 @@ import { DirectoryAsset } from '../../../../common/asset/directory';
 import { AssetService } from '../service/asset';
 import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
-import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 import { MatButton, MatListItem } from '@angular/material'
 
@@ -41,7 +41,8 @@ interface OpenEvent {
       transition('none => open, none => close', animate('200ms ease-in')),
       transition('* => none, void => *', animate('0s')),
     ])
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupsComponent implements OnInit {
 

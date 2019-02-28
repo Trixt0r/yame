@@ -19,3 +19,5 @@ export class DeleteEntity {
   static readonly type = '[Scene] Remove entity';
   constructor(public id: string) {}
 }
+
+export type EntityAction = CreateEntity | UpdateEntity | DeleteEntity | UpdateEntityProperty;

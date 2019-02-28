@@ -1,5 +1,5 @@
-import { Component } from "@angular/core";
-import { ToolComponent } from "./tool";
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ToolComponent } from './tool';
 
 /**
  * The default tool component displays the icon of the tool,
@@ -8,15 +8,19 @@ import { ToolComponent } from "./tool";
  * @extends {ToolComponent}
  */
 @Component({
-  template: `<mat-icon mat-list-icon>{{ tool.icon ? tool.icon : 'build' }}</mat-icon>`,
-  styles: [`
-    mat-icon {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }`]
+  template: `
+    <mat-icon mat-list-icon>{{ tool.icon ? tool.icon : 'build' }}</mat-icon>
+  `,
+  styles: [
+    `
+      mat-icon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+    `,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DefaultToolComponent extends ToolComponent {
-
-}
+export class DefaultToolComponent extends ToolComponent {}

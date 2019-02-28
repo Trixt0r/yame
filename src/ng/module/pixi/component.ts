@@ -1,5 +1,15 @@
 import { PixiService } from './service';
-import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, OnDestroy, OnInit, NgZone } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  ViewChild,
+  OnDestroy,
+  OnInit,
+  NgZone,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
@@ -20,6 +30,7 @@ import { PointLike } from 'pixi.js';
   selector: 'yame-pixi',
   templateUrl: 'component.html',
   styleUrls: ['./component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PixiComponent implements OnDestroy, OnInit {
   @Output() resized = new EventEmitter();
@@ -29,12 +40,9 @@ export class PixiComponent implements OnDestroy, OnInit {
   private dragLeft = false;
   protected onResizeBind: EventListenerObject;
 
-  constructor(public ref: ElementRef,
-              public pixiService: PixiService,
-              public store: Store,
-              public zone: NgZone) {
-  this.onResizeBind = this.onResize.bind(this);
-  zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
+  constructor(public ref: ElementRef, public pixiService: PixiService, public store: Store, public zone: NgZone) {
+    this.onResizeBind = this.onResize.bind(this);
+    zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
   }
 
   /** @type {PIXI.DisplayObject} The current drag and drop preview. */
@@ -58,8 +66,7 @@ export class PixiComponent implements OnDestroy, OnInit {
   /** @returns {void} Handler for resizing the canvas. Delegate to the pixi service. */
   onResize() {
     let newSize;
-    if ((newSize = this.pixiService.resize()))
-      this.resized.emit({ width: newSize.x, height: newSize.y });
+    if ((newSize = this.pixiService.resize())) this.resized.emit({ width: newSize.x, height: newSize.y });
   }
 
   /**
@@ -71,15 +78,16 @@ export class PixiComponent implements OnDestroy, OnInit {
    */
   onDrop(event: DragDropData): Promise<Entity> {
     const asset: Asset = event.dragData;
-    return this.pixiService.createFromAsset(asset)
-            .then(entity => {
-              this.pixiService.toScene(event.mouseEvent, entity.position);
-              return this.store.dispatch(new CreateEntity(entity)).toPromise()
-                .then(() => {
-                  this.onDragLeave(event);
-                  return entity;
-                });
-            });
+    return this.pixiService.createFromAsset(asset).then(entity => {
+      this.pixiService.toScene(event.mouseEvent, entity.position);
+      return this.store
+        .dispatch(new CreateEntity(entity))
+        .toPromise()
+        .then(() => {
+          this.onDragLeave(event);
+          return entity;
+        });
+    });
   }
 
   /**

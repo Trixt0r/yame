@@ -1,6 +1,6 @@
 import { MainComponent } from './main';
 import { PixiService } from '../module/pixi/service';
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { SidebarComponent } from '../module/sidebar/component';
 
 /**
@@ -14,6 +14,7 @@ import { SidebarComponent } from '../module/sidebar/component';
   selector: 'yame-root',
   templateUrl: 'app.html',
   styleUrls: ['./app.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements AfterViewInit {
   name = 'YAME';

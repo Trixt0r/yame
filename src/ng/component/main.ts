@@ -1,5 +1,5 @@
 import { PixiComponent } from '../module/pixi/component';
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { WorkspaceComponent } from '../module/workspace/component';
 import { PixiCameraDirective } from 'ng/module/pixi/directive/camera';
 import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
@@ -10,6 +10,7 @@ import { ToolbarComponent } from '../module/toolbar/component';
   selector: 'yame-main',
   templateUrl: 'main.html',
   styleUrls: ['./main.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements AfterViewInit {
   @ViewChild('pixi') pixi: PixiComponent;

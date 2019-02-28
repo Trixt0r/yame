@@ -8,6 +8,7 @@ import {
   HostListener,
   Output,
   EventEmitter,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { RippleAnimationConfig } from '@angular/material';
 import { ToolbarService } from './service';
@@ -32,6 +33,7 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
       transition('open => closed, closed => open', animate('100ms ease-in')),
     ]),
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolbarComponent implements OnChanges {
   /** @type {'open' | 'closed'} The internal state for animating the component. */

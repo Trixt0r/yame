@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { Entity, EntityData, PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 import { NodeData } from '../service/hierarchy';
 import { NestedTreeControl } from '@angular/cdk/tree';
@@ -15,6 +15,7 @@ import { Unselect, Select } from 'ng/module/toolbar/tools/selection/ngxs/actions
   selector: 'yame-hierarchy',
   templateUrl: 'hierarchy.html',
   styleUrls: ['./hierarchy.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchyComponent implements AfterViewInit {
   nestedTreeControl: NestedTreeControl<NodeData>;
@@ -26,30 +27,34 @@ export class HierarchyComponent implements AfterViewInit {
 
   protected treeElement: HTMLElement;
 
-  selected: string[];
+  selected: string[] = [];
   properties: PropertyOptionsExt[];
   private timer: any;
 
-  constructor(public element: ElementRef, private store: Store) {
+  constructor(public element: ElementRef, private store: Store, private cdr: ChangeDetectorRef, private zone: NgZone) {
     this.nestedTreeControl = new NestedTreeControl<NodeData>(() => []);
     this.nestedDataSource = new MatTreeNestedDataSource();
     this.nestedDataSource.data = [];
-    this.scene$.subscribe(data => {
-      this.nestedDataSource.data = null;
-      this.nestedDataSource.data = <any>data.entities;
-    });
-
-    this.selection$.subscribe(data => {
-      if (this.timer) clearTimeout(this.timer);
-      this.timer = setTimeout(() => {
-        this.selected = data.entities;
-        this.properties = data.properties;
-      }, 1000 / 60);
-    });
+    this.cdr.detach();
   }
 
   ngAfterViewInit(): void {
     this.treeElement = <HTMLElement>(<HTMLElement>this.element.nativeElement).getElementsByTagName('mat-tree')[0];
+    this.zone.runOutsideAngular(() => {
+      this.scene$.subscribe(data => {
+        this.nestedDataSource.data = <any>data.entities;
+        this.cdr.detectChanges();
+      });
+
+      this.selection$.subscribe(data => {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.selected = data.entities;
+          this.properties = data.properties;
+          this.cdr.detectChanges();
+        }, 1000 / 60);
+      });
+    });
   }
 
   hasNestedChild = (_: number, nodeData: NodeData) => nodeData.entities;
@@ -82,6 +87,7 @@ export class HierarchyComponent implements AfterViewInit {
     const whereMulti = this.selected.length > 1;
     const wasSelected = this.isSelected(node);
     this.store.dispatch(new Unselect())
+      .first()
       .subscribe(() => {
         if (!wasSelected || whereMulti)
           this.store.dispatch(new Select([node.id]));
