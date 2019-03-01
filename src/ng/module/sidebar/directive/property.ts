@@ -8,17 +8,21 @@ import {
   EventEmitter,
   Output,
   SimpleChanges,
+  AfterViewInit,
+  OnInit,
 } from '@angular/core';
 import { PropertyService } from '../service/property';
 import { PropertyComponent, InputEvent } from '../component/property/abstract';
 import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
 
-const componentRefCache: { [key: string]: { ref: ComponentRef<PropertyComponent>, index: number; } } = { };
+const componentRefCache: { [key: string]: { ref: ComponentRef<PropertyComponent>; index: number } } = {};
+const componentRefPool: { [key: string]: ComponentRef<PropertyComponent>[] } = {};
+const poolSizePerType = 20;
 
 @Directive({
   selector: '[propertyHost]',
 })
-export class PropertyDirective implements OnChanges {
+export class PropertyDirective implements OnChanges, OnInit, AfterViewInit {
   /** @type {Asset} The asset group to render. */
   @Input('propertyHost') properties: PropertyOptionsExt[];
 
@@ -28,13 +32,66 @@ export class PropertyDirective implements OnChanges {
   constructor(
     private service: PropertyService,
     private viewContainerRef: ViewContainerRef,
-    private componentFactoryResolver: ComponentFactoryResolver,
-  ) { }
+    private componentFactoryResolver: ComponentFactoryResolver
+  ) {
+  }
 
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.properties)
+    if (changes.properties) {
       this.render();
+    }
+  }
+
+  /**
+   * Sets up the compnent ref pool.
+   */
+  ngOnInit(): void {
+    this.setUpPool();
+  }
+
+  /**
+   * Sets up the component ref pool
+   */
+  setUpPool(): void {
+    const types = this.service.types;
+    types.forEach(type => {
+      if (!componentRefPool[type]) componentRefPool[type] = [];
+      const pool = componentRefPool[type];
+      const compType = this.service.get(type);
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+      const count = poolSizePerType - pool.length;
+      for (let i = 0; i < count; i++) {
+        const componentRef = this.viewContainerRef.createComponent(componentFactory);
+        componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
+        componentRef.instance.property = <any>{ };
+        pool.push(componentRef);
+      }
+    });
+  }
+
+  /**
+   * Detaches all previously pooled component refs.
+   */
+  ngAfterViewInit(): void {
+    const types = this.service.types;
+    types.forEach(type => {
+      componentRefPool[type].forEach(ref => {
+        this.viewContainerRef.detach( this.viewContainerRef.indexOf(ref.hostView));
+      });
+    });
+  }
+
+  /**
+   * Obtains a component reference from the pool.
+   *
+   * @param {string} type
+   * @returns {ComponentRef<PropertyComponent>}
+   */
+  obtainComponentRef(type: string): ComponentRef<PropertyComponent> {
+    const pool = componentRefPool[type];
+    if (!pool || pool.length === 0) return null;
+    return pool.shift();
   }
 
   /**
@@ -46,24 +103,31 @@ export class PropertyDirective implements OnChanges {
   render(): ComponentRef<PropertyComponent>[] {
     const comps: ComponentRef<PropertyComponent>[] = [];
     const viewContainerRef = this.viewContainerRef;
-    this.properties.forEach((property) => {
-      const compType = this.service.get(property.type);
-      if (!compType) return;
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
-      const cacheKey = `${property.type}-${property.name}`;
-      let componentRef: ComponentRef<PropertyComponent>;
-      const cached = componentRefCache[cacheKey];
-      if (cached) {
-        componentRef = cached.ref;
-        viewContainerRef.insert(componentRef.hostView, cached.index);
-      } else {
-        componentRef = viewContainerRef.createComponent(componentFactory);
-        componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
-        componentRefCache[cacheKey] = { ref: componentRef, index: viewContainerRef.indexOf(componentRef.hostView) };
-      }
-      componentRef.instance.property = property;
-      comps.push(componentRef);
-    });
+    if (this.properties) {
+      this.properties.forEach(property => {
+        const compType = this.service.get(property.type);
+        if (!compType) return;
+        const cacheKey = `${property.type}-${property.name}`;
+        let componentRef: ComponentRef<PropertyComponent>;
+        const cached = componentRefCache[cacheKey];
+        if (cached) {
+          componentRef = cached.ref;
+          viewContainerRef.insert(componentRef.hostView, cached.index);
+        } else {
+          componentRef = this.obtainComponentRef(property.type);
+          if (!componentRef) {
+            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+            componentRef = viewContainerRef.createComponent(componentFactory);
+            componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
+          } else {
+            viewContainerRef.insert(componentRef.hostView);
+          }
+          componentRefCache[cacheKey] = { ref: componentRef, index: viewContainerRef.indexOf(componentRef.hostView) };
+        }
+        componentRef.instance.property = property;
+        comps.push(componentRef);
+      });
+    }
     for (const key in componentRefCache) {
       if (!componentRefCache.hasOwnProperty(key)) continue;
       const cached = componentRefCache[key];

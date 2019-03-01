@@ -19,6 +19,8 @@ export class PropertyService {
   // Internal map of component classes
   private components: Components = { };
 
+  private currentTypes: string[] = [];
+
   /**
    * Registers a component class for the given property type.
    *
@@ -30,6 +32,7 @@ export class PropertyService {
       throw new InvalidPropertyComponentException('The property component class has to extend PropertyComponent');
     }
     this.components[type] = clazz;
+    this.currentTypes.push(type);
   }
 
   /**
@@ -40,5 +43,15 @@ export class PropertyService {
    */
   get(type: string): Type<PropertyComponent> {
     return this.components[type];
+  }
+
+
+  /**
+   * All types for which components are currently registered.
+   *
+   * @type {string[]}
+   */
+  get types(): string[] {
+    return this.currentTypes.slice();
   }
 }

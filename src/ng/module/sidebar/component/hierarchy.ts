@@ -52,7 +52,7 @@ export class HierarchyComponent implements AfterViewInit {
           this.selected = data.entities;
           this.properties = data.properties;
           this.cdr.detectChanges();
-        }, 1000 / 60);
+        }, 1000 / 30);
       });
     });
   }

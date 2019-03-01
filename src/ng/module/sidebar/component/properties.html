@@ -1,6 +1,6 @@
 <div class="resizer"></div>
 <h5 class="text-center mat-h5">{{ title }}</h5>
 
-<div class="flex wrap" *ngIf="properties">
+<div class="flex wrap">
   <ng-container [propertyHost]="properties" (update)="update($event.originalEvent, $event.property.name)"></ng-container>
 </div>

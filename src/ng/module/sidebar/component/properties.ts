@@ -51,7 +51,6 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
     super(ref, zone);
     this.maxVal = window.innerHeight - 100;
     this.onResizeBind = this.onResize.bind(this);
-    // this.cdr.detach();
     this.zone.runOutsideAngular(() => {
       this.selection$.subscribe(data => {
           if (this.timer) clearTimeout(this.timer);

@@ -15,6 +15,7 @@ import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { Select, Unselect, UpdateSelection, SelectionActions } from './selection/ngxs/actions';
 import { Entity } from 'ng/module/pixi/scene/entity';
 import { DeleteEntity, UpdateEntity, UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
+import { Group, SpriteEntity } from 'ng/module/pixi/idx';
 
 /**
  *
@@ -83,6 +84,11 @@ export class SelectionTool extends Tool {
       this.zone = ref.injector.get(NgZone);
       this.store = ref.injector.get(Store);
       this.actions = ref.injector.get(Actions);
+
+      const tmpEntity = new SpriteEntity();
+      this.container.select([tmpEntity]);
+      setImmediate(() => this.container.unselect());
+
       this.zone.runOutsideAngular(() => {
         const scene = this.service.scene;
         this.actions
