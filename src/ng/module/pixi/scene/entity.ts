@@ -6,6 +6,14 @@ import * as PIXI from 'pixi.js';
 import { EntityException } from '../exception/entity/entity';
 import { UpdateEntityProperty } from '../ngxs/actions';
 
+function getAllPropertyNames(obj) {
+  let props = [];
+  do {
+    props = props.concat(Object.getOwnPropertyNames( obj ));
+  } while (obj = Object.getPrototypeOf(obj));
+  return props;
+}
+
 const tempPoint = new PIXI.Point();
 interface EntityTypes {
   [key: string]: Type<Entity>;
@@ -171,6 +179,20 @@ export abstract class Entity extends PIXI.Container {
     return Promise.resolve(this);
   }
 
+  apply(data: Partial<EntityData>): { [key: string]: { old: any, new: any } } {
+    const keys = Object.keys(data);
+    const changes = { };
+    const typeOptions: Object = (<any>this).internalPropertyOptions;
+    keys.forEach(key => {
+      if (!typeOptions.hasOwnProperty(key)) return;
+      if (this[key] !== data[key]) {
+        changes[key] = { old: this[key], new: data[key] };
+        this[key] = data[key];
+      }
+    });
+    return changes;
+  }
+
   /**
    * Clones, i.e. creates a copy of, this entity, with the exact same properties, but with a new id.
    *
@@ -229,18 +251,7 @@ export abstract class Entity extends PIXI.Container {
       const value = data[key];
       const options = typeOptions[key];
       if (!options) return;
-      let val;
-      switch (options.type) {
-        case 'color':
-          val = typeof value === 'string' ? parseInt(value.replace('#', ''), 16) : val;
-          break;
-        case 'number':
-          val = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : val;
-          break;
-        default:
-          val = value;
-      }
-      this[key] = TransformProperty(options, val, true);
+      this[key] = TransformProperty(options, value, true);
       updated = true;
     }
     return updated;

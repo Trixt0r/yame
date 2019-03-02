@@ -7,7 +7,7 @@ export class CreateEntity {
 
 export class UpdateEntity {
   static readonly type = '[Scene] Update entity';
-  constructor(public data: EntityData | EntityData[], public message: string) {}
+  constructor(public data: Partial<EntityData> | Partial<EntityData>[], public message: string) {}
 }
 
 export class UpdateEntityProperty {

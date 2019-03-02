@@ -5,10 +5,14 @@ import {
   AfterViewInit,
   NgZone,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { ResizeableComponent } from '../utils/component/resizable';
 import { HierarchyComponent } from './component/hierarchy';
 import { PropertiesComponent } from './component/properties';
+import { Store, Select } from '@ngxs/store';
+import { Observable } from 'rxjs/Observable';
+import { ISelectionState } from '../toolbar/tools/selection/ngxs/state';
 
 @Component({
   moduleId: module.id.toString(),
@@ -21,12 +25,31 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
   @ViewChild('hierarchy') hierarchy: HierarchyComponent;
   @ViewChild('properties') properties: PropertiesComponent;
 
+  @Select(state => state.selection) selection$: Observable<ISelectionState>;
+
   protected onResizeBind: EventListenerObject;
 
-  constructor(public ref: ElementRef, protected zone: NgZone) {
+  private timer: any;
+
+  constructor(public ref: ElementRef,
+              protected store: Store,
+              protected zone: NgZone,
+              private cdr: ChangeDetectorRef) {
     super(ref, zone);
     this.maxVal = window.innerWidth - 400;
     this.onResizeBind = this.onResize.bind(this);
+    this.zone.runOutsideAngular(() => {
+      this.selection$.subscribe(data => {
+          if (this.timer) clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
+            this.hierarchy.selected = data.entities;
+            this.properties.properties = data.properties;
+            this.properties.entities = data.entities;
+            this.properties.setVisibility(data.entities.length > 0);
+            cdr.detectChanges();
+          }, 1000 / 30);
+      });
+    });
   }
 
   /** @override */

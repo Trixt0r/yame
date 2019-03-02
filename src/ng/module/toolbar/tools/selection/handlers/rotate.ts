@@ -4,6 +4,7 @@ import { Entity, PixiService } from '../../../../pixi/idx';
 import { SelectionRenderer } from '../renderer';
 import { Store } from '@ngxs/store';
 import { UpdateSelection } from '../ngxs/actions';
+import { UpdateEntity } from 'ng/module/pixi/ngxs/actions';
 
 /**
  * The rotation handler is responsible for changing the rotation of the current selection.
@@ -128,7 +129,13 @@ export class SelectionRotateHandler {
     window.removeEventListener('mouseup', this.mouseupFn);
     this.container.endHandling(this);
     this.resetCursor(true);
-    this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
+    const updates = this.container.map(entity => {
+      return Object.assign({ id: entity.id }, this.container.getActualTransform(entity));
+    });
+    this.store.dispatch([
+      new UpdateEntity(updates, 'Rotation update'),
+      new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+    ]);
   }
 
   /**

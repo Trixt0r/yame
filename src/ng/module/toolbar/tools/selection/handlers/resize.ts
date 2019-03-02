@@ -5,6 +5,7 @@ import { SelectionContainer } from '../container';
 import { Group, PixiService } from 'ng/module/pixi/idx';
 import { Store } from '@ngxs/store';
 import { UpdateSelection } from '../ngxs/actions';
+import { UpdateEntity } from 'ng/module/pixi/ngxs/actions';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -76,7 +77,13 @@ export class SelectionResizeHandler {
         .on('updated', () => this.container.emit('updated'))
         .on('handle:start', () => this.container.beginHandling(anchor))
         .on('handle:end', () => {
-          this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
+          const updates = this.container.map(entity => {
+            return Object.assign({ id: entity.id }, this.container.getActualTransform(entity));
+          });
+          this.store.dispatch([
+            new UpdateEntity(updates, 'Resize update'),
+            new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+          ]);
           this.container.endHandling(anchor)
         });
       stage.addChild(anchor);

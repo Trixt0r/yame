@@ -7,8 +7,9 @@ export interface Property extends PropertyOptions {
 }
 
 export interface InputEvent {
-  originalEvent: KeyboardEvent | MouseEvent | FocusEvent;
-  property: string;
+  originalEvent: any;
+  value: any;
+  property: Property;
 }
 
 export abstract class PropertyComponent {
@@ -23,11 +24,17 @@ export abstract class PropertyComponent {
   updateEvent: EventEmitter<InputEvent> = new EventEmitter();
 
   /**
-   * Click handler, which delegates the event.
+   * Click handler, which emits the update event.
    *
-   * @param {KeyboardEvent} event
+   * @param {any} value
    */
-  update(event: InputEvent) {
-    this.updateEvent.emit(event);
+  update(event: any, value: any) {
+    const data: InputEvent = {
+      originalEvent: event,
+      value,
+      property: this.property
+    };
+    this.property.value = value;
+    this.updateEvent.emit(data);
   }
 }

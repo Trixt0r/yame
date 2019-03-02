@@ -1,8 +1,9 @@
 import { Group, Entity } from '../../../pixi/idx';
 import { Rectangle, Point, RAD_TO_DEG, DEG_TO_RAD } from 'pixi.js';
 import { UpdateSelection } from './ngxs/actions';
-import { UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
-import { PropertyOptionsExt } from 'ng/module/pixi/scene/entity';
+import { UpdateEntityProperty, UpdateEntity } from 'ng/module/pixi/ngxs/actions';
+import { PropertyOptionsExt, EntityData } from 'ng/module/pixi/scene/entity';
+import { Store } from '@ngxs/store';
 
 interface SelectionPropertyOptions extends PropertyOptionsExt {
   apply: (val: number) => void;
@@ -33,10 +34,12 @@ export class SelectionContainer extends Group<Entity> {
    */
   protected handlerRef: any;
 
+  protected timer: any;
+
   protected additionalProperties: SelectionPropertyOptions[] = [];
   public readonly additionalPropertyNames: string[];
 
-  constructor() {
+  constructor(protected store: Store) {
     super();
     this.additionalProperties.push({
       value: this.position.x,
@@ -178,9 +181,7 @@ export class SelectionContainer extends Group<Entity> {
       }
       this.pivot.set(pivotX, pivotY);
     }
-    // const time = performance.now();
     this.emit('selected', added);
-    // console.log('select', performance.now() - time);
     return added;
   }
 
@@ -218,6 +219,29 @@ export class SelectionContainer extends Group<Entity> {
     return toRemove;
   }
 
+  getActualTransform(entity: Entity): Partial<EntityData> {
+    if (entity.parentEntity) {
+      const position = entity.parentEntity.toLocal(entity.position, this);
+      position.x = Math.round(position.x * 1000) / 1000;
+      position.y = Math.round(position.y * 1000) / 1000;
+      const rotation = DEG_TO_RAD * (Math.round((entity.rotation + this.rotation) * RAD_TO_DEG * 1000) / 1000);
+      const scale = new PIXI.Point(entity.scale.x, entity.scale.y);
+      scale.x = Math.round(scale.x * 1000) / 1000;
+      scale.y = Math.round(scale.y * 1000) / 1000;
+      return {
+        position: position,
+        rotation: rotation,
+        scale: scale,
+      };
+    } else {
+      return {
+        position: entity.position.clone(),
+        rotation: entity.rotation,
+        scale: entity.scale.clone(),
+      };
+    }
+  }
+
   getProperties(entities = this.entities) {
     if (entities.length === 0) return [];
     const props = this.additionalProperties;
@@ -239,13 +263,34 @@ export class SelectionContainer extends Group<Entity> {
         property.apply(parseInt(action.data[attr], 10));
         delete action.data[attr];
       }
-      if (Object.keys(action.data).length === 0) return true;
+      if (Object.keys(action.data).length === 0) {
+        if (this.timer) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+        this.timer = setTimeout(() => {
+          const updates = this.map(entity => {
+            return Object.assign({ id: entity.id }, this.getActualTransform(entity));
+          });
+          this.store.dispatch(new UpdateEntity(updates, `Update transform`));
+        }, 250);
+        this.emit('updated');
+        return true;
+      }
       if (this.entities.length === 0) return false;
       const updates = this.entities.map(entity => {
         action.id = entity.id;
-        return entity.updateFromAction(action);
+        const re = entity.updateFromAction(action);
+        entity.export('.')
+          .then(data => {
+            const transform = this.getActualTransform(entity);
+            this.store.dispatch(new UpdateEntity(Object.assign(data, transform), `Update ${entity.id}`))
+          });
+        return re;
       });
-      return updates.some(val => val);
+      const re = updates.some(val => val);
+      if (re) this.emit('updated');
+      return re;
     } else {
       const props = action.properties;
       let updated = false;
@@ -256,6 +301,7 @@ export class SelectionContainer extends Group<Entity> {
           updated = true;
         }
       });
+      if (updated) this.emit('updated');
       return updated;
     }
   }

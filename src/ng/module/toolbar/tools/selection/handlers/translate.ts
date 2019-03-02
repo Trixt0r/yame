@@ -3,6 +3,7 @@ import { interaction } from 'pixi.js';
 import { PixiService } from 'ng/idx';
 import { Store } from '@ngxs/store';
 import { UpdateSelection } from '../ngxs/actions';
+import { UpdateEntity } from 'ng/module/pixi/ngxs/actions';
 
 /**
  * The translate handler is responsible to move the selection container in the scene.
@@ -61,7 +62,13 @@ export class SelectionTranslateHandler {
     window.removeEventListener('mouseup', this.mouseupFn);
     this.container.endHandling(this, event);
     this.service.view.style.cursor = '';
-    this.store.dispatch(new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames));
+    const updates = this.container.map(entity => {
+      return Object.assign({ id: entity.id }, this.container.getActualTransform(entity));
+    });
+    this.store.dispatch([
+      new UpdateEntity(updates, 'Translation update'),
+      new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
+    ]);
   }
 
   /**

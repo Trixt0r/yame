@@ -10,18 +10,11 @@ import { Component } from '@angular/core';
         placeholder="{{ property.name }}"
         [disabled]="!property.editable"
         [value]="property.value ? property.value : ''"
-        (input)="update({ originalEvent: $event, property: property })"
+        (input)="update($event, $event.currentTarget.value)"
       />
     </mat-form-field>
   `,
   styleUrls: ['./style.scss'],
 })
 export class InputPropertyComponent extends PropertyComponent {
-  /**
-   * @inheritdoc
-   */
-  update(event: InputEvent) {
-    this.property.value = (<HTMLInputElement>event.originalEvent.currentTarget).value;
-    return super.update(event);
-  }
 }

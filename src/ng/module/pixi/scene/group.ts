@@ -36,7 +36,7 @@ export class Group<T extends Entity> extends Entity {
   }
 
   /** @inheritdoc */
-  export(target: string): Promise<GroupData> {
+  export(target?: string): Promise<GroupData> {
     const entities = this.internalEntities.map(entity => entity.export(target));
     return Promise.all(entities).then(result => {
       this.exportData.entities = result;

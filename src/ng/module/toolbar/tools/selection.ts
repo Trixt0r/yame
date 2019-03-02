@@ -78,12 +78,12 @@ export class SelectionTool extends Tool {
 
   constructor(id: string, icon?: string) {
     super(id, icon);
-    this.container = new SelectionContainer();
     Pubsub.once('ready', (ref: NgModuleRef<AppModule>) => {
       this.service = ref.injector.get(PixiService);
       this.zone = ref.injector.get(NgZone);
       this.store = ref.injector.get(Store);
       this.actions = ref.injector.get(Actions);
+      this.container = new SelectionContainer(this.store);
 
       const tmpEntity = new SpriteEntity();
       this.container.select([tmpEntity]);
@@ -92,7 +92,7 @@ export class SelectionTool extends Tool {
       this.zone.runOutsideAngular(() => {
         const scene = this.service.scene;
         this.actions
-          .pipe(ofActionSuccessful(Select, Unselect, UpdateEntity, UpdateEntityProperty, DeleteEntity))
+          .pipe(ofActionSuccessful(Select, Unselect, UpdateEntityProperty, DeleteEntity))
           .subscribe((action: SelectionActions | DeleteEntity | UpdateEntityProperty) => {
             if (action instanceof Select) {
               const filtered = scene.filter(entity => action.entities.indexOf(entity.id) >= 0);
@@ -105,17 +105,8 @@ export class SelectionTool extends Tool {
               }
             } else if (action instanceof Unselect) {
               const filtered = action.entities ? scene.filter(entity => action.entities.indexOf(entity.id) >= 0) : void 0;
-              const toUpdate = filtered ? filtered : this.container.entities;
               this.container.unselect(filtered);
               this.map.removeChild(this.container);
-              if (toUpdate.length === 0) return;
-              const proms = toUpdate.map(entity => entity.export('.'));
-              return Promise.all(proms).then(data => {
-                this.store.dispatch([
-                  new UpdateEntity(data, 'update'),
-                  new UpdateSelection(this.container.getProperties(), this.container.additionalPropertyNames)
-                ]);
-              });
             } else if (action instanceof DeleteEntity) {
               const idx = this.container.indexOf(action.id);
               if (idx < 0) return;

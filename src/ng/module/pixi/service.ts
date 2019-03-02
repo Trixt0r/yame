@@ -1,5 +1,5 @@
 import { PixiAppNotInitializedException } from './exception/service/not-initialized';
-import { ElementRef, Injectable } from '@angular/core';
+import { ElementRef, Injectable, NgZone } from '@angular/core';
 import * as PIXI from 'pixi.js';
 import { Asset } from '../../../common/asset';
 import { PixiAssetConverter } from './service/converter';
@@ -33,7 +33,7 @@ export class PixiService {
   ready$ = this.readySource.asObservable();
   dipose$ = this.disposeSource.asObservable();
 
-  constructor(protected store?: Store, protected actions?: Actions) {}
+  constructor(protected zone: NgZone, protected store: Store, protected actions: Actions) {}
 
   /** @type {PIXI.Application} app The pixi js application instance. */
   get app(): PIXI.Application {
@@ -96,22 +96,24 @@ export class PixiService {
     this.readySource.next();
     this.resize();
     if (this.store) {
-      this.actions.pipe(ofActionSuccessful(CreateEntity, UpdateEntity, DeleteEntity))
-        .subscribe((action: EntityAction) => {
-          if (action instanceof CreateEntity) {
-            return this.scene.addEntity(action.entity);
-          } else if (action instanceof UpdateEntity) {
-            const data = Array.isArray(action.data) ? action.data : [action.data];
-            const proms = data.map(d => {
-              const found = this.scene.find(entity => d.id === entity.id);
-              if (found) return found.parse(d, '.');
-            });
-            return Promise.all(proms);
-          } else if (action instanceof DeleteEntity) {
-            const found = this.scene.find(entity => action.id === entity.id);
-            if (found) return this.scene.removeEntity(found);
-          }
-        });
+      this.zone.runOutsideAngular(() => {
+        this.actions.pipe(ofActionSuccessful(CreateEntity, UpdateEntity, DeleteEntity))
+          .subscribe((action: EntityAction) => {
+            if (action instanceof CreateEntity) {
+              return this.scene.addEntity(action.entity);
+            } else if (action instanceof UpdateEntity) {
+              const data = Array.isArray(action.data) ? action.data : [action.data];
+              const proms = data.map(d => {
+                const found = this.scene.find(entity => d.id === entity.id);
+                if (found) return found.apply(d);
+              });
+              return Promise.all(proms);
+            } else if (action instanceof DeleteEntity) {
+              const found = this.scene.find(entity => action.id === entity.id);
+              if (found) return this.scene.removeEntity(found);
+            }
+          });
+      });
     }
   }
 

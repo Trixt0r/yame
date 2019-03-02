@@ -10,10 +10,16 @@ import { InputPropertyComponent } from './input';
         placeholder="{{ property.name }}"
         [disabled]="!property.editable"
         [value]="property.value | color"
-        (input)="update({ originalEvent: $event, property: property })"
+        (input)="update($event, $event.currentTarget.value)"
       />
     </mat-form-field>
   `,
   styleUrls: ['./style.scss'],
 })
-export class ColorPropertyComponent extends InputPropertyComponent {}
+export class ColorPropertyComponent extends InputPropertyComponent {
+
+  update(event: any, value: any) {
+    return super.update(event, typeof value === 'string' ? parseInt(value.replace('#', ''), 16) : value);
+  }
+
+}

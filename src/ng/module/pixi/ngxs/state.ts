@@ -20,10 +20,7 @@ export class SceneState {
   addEntity(ctx: StateContext<ISceneState>, action: CreateEntity) {
     return action.entity.export('.').then(data => {
       const state = ctx.getState();
-      ctx.setState({
-        ...state,
-        entities: [ ...state.entities, data ]
-      });
+      ctx.patchState({ entities: [ ...state.entities, data ] });
     });
   }
 
@@ -34,10 +31,7 @@ export class SceneState {
     if (idx < 0) return console.warn(`[SceneState] No entity found for id ${action.id}`);
     const entities = state.entities.slice();
     entities.splice(idx, 1);
-    ctx.setState({
-      ...state,
-      entities: entities,
-    });
+    ctx.patchState({ entities: entities });
   }
 
   @Action(UpdateEntity)
@@ -45,14 +39,20 @@ export class SceneState {
     const state = ctx.getState();
     const data = Array.isArray(action.data) ? action.data : [action.data];
     const entities = state.entities.slice();
-    data.forEach(d => {
-      const idx = state.entities.findIndex(entity => entity.id === d.id);
-      if (idx < 0) return console.warn(`[SceneState] No entity found for id ${d.id}`);
-      entities[idx] = Object.assign({}, entities[idx], action.data);
-    });
-    ctx.setState({
-      ...state,
-      entities: entities,
-    });
+    const hasChanges = data.reduce((mem, newData) => {
+      const idx = entities.findIndex(entity => entity.id === newData.id);
+      if (idx < 0) return console.warn(`[SceneState] No entity found for id ${newData.id}`);
+      const newEntityData = Object.assign({ }, entities[idx], newData);
+      const snapshot = JSON.stringify(entities[idx]);
+      const newSnap = JSON.stringify(newEntityData);
+      if (snapshot !== newSnap) {
+        entities[idx] = newEntityData;
+        return mem;
+      } else {
+        return false;
+      }
+    }, true);
+    if (hasChanges)
+      ctx.patchState({ entities: entities });
   }
 }

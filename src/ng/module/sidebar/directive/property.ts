@@ -27,7 +27,7 @@ export class PropertyDirective implements OnChanges, OnInit, AfterViewInit {
   @Input('propertyHost') properties: PropertyOptionsExt[];
 
   /** @type {EventEmitter<InputEvent>} The click event, which should be triggered by the rendered component. */
-  @Output() update: EventEmitter<InputEvent> = new EventEmitter();
+  @Output() input: EventEmitter<InputEvent> = new EventEmitter();
 
   constructor(
     private service: PropertyService,
@@ -63,7 +63,7 @@ export class PropertyDirective implements OnChanges, OnInit, AfterViewInit {
       const count = poolSizePerType - pool.length;
       for (let i = 0; i < count; i++) {
         const componentRef = this.viewContainerRef.createComponent(componentFactory);
-        componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
+        componentRef.instance.updateEvent.subscribe(event => this.input.emit(event));
         componentRef.instance.property = <any>{ };
         pool.push(componentRef);
       }
@@ -118,7 +118,7 @@ export class PropertyDirective implements OnChanges, OnInit, AfterViewInit {
           if (!componentRef) {
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
             componentRef = viewContainerRef.createComponent(componentFactory);
-            componentRef.instance.updateEvent.subscribe(event => this.update.emit(event));
+            componentRef.instance.updateEvent.subscribe(event => this.input.emit(event));
           } else {
             viewContainerRef.insert(componentRef.hostView);
           }

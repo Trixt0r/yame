@@ -23,7 +23,7 @@ export class SelectionState {
   }
 
   @Action(Unselect)
-  unselect(ctx: StateContext<ISelectionState>, action: Unselect) {
+  unselect(ctx: StateContext<ISelectionState>) {
     ctx.patchState({
       entities: [],
       properties: [],

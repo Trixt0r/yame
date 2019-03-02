@@ -1,7 +1,5 @@
-import { Group } from "./group";
-import { Entity, EntityType } from "./entity";
+import { Group } from './group';
+import { Entity, EntityType } from './entity';
 
 @EntityType()
-export class Layer extends Group<Entity> {
-
-}
+export class Layer extends Group<Entity> {}

@@ -1,5 +1,6 @@
 import { PropertyComponent, InputEvent } from './abstract';
 import { Component } from '@angular/core';
+import { MatSliderChange } from '@angular/material';
 
 @Component({
   template: `
@@ -12,7 +13,7 @@ import { Component } from '@angular/core';
         [step]="property.step"
         [thumbLabel]="true"
         [value]="property.value"
-        (input)="update({ originalEvent: $event, property: property })"
+        (change)="update($event, $event.value)"
       >
       </mat-slider>
     </div>
@@ -20,11 +21,4 @@ import { Component } from '@angular/core';
   styleUrls: ['./style.scss'],
 })
 export class RangePropertyComponent extends PropertyComponent {
-  /**
-   * @inheritdoc
-   */
-  update(event: InputEvent) {
-    this.property.value = (<any>event.originalEvent).value;
-    return super.update(event);
-  }
 }

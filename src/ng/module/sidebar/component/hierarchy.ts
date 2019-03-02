@@ -7,7 +7,6 @@ import { Store, Select as StoreSelect } from '@ngxs/store';
 import { ISceneState } from 'ng/module/pixi/ngxs/state';
 import { Observable } from 'rxjs/Observable';
 import { DeleteEntity, UpdateEntity } from 'ng/module/pixi/ngxs/actions';
-import { ISelectionState } from 'ng/module/toolbar/tools/selection/ngxs/state';
 import { Unselect, Select } from 'ng/module/toolbar/tools/selection/ngxs/actions';
 
 @Component({
@@ -15,7 +14,6 @@ import { Unselect, Select } from 'ng/module/toolbar/tools/selection/ngxs/actions
   selector: 'yame-hierarchy',
   templateUrl: 'hierarchy.html',
   styleUrls: ['./hierarchy.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchyComponent implements AfterViewInit {
   nestedTreeControl: NestedTreeControl<NodeData>;
@@ -23,19 +21,18 @@ export class HierarchyComponent implements AfterViewInit {
   title = 'Hierarchy';
 
   @StoreSelect() scene$: Observable<ISceneState>;
-  @StoreSelect() selection$: Observable<ISelectionState>;
 
   protected treeElement: HTMLElement;
 
   selected: string[] = [];
-  properties: PropertyOptionsExt[];
-  private timer: any;
 
-  constructor(public element: ElementRef, private store: Store, private cdr: ChangeDetectorRef, private zone: NgZone) {
+  constructor(public element: ElementRef,
+              protected store: Store,
+              protected cdr: ChangeDetectorRef,
+              protected zone: NgZone) {
     this.nestedTreeControl = new NestedTreeControl<NodeData>(() => []);
     this.nestedDataSource = new MatTreeNestedDataSource();
     this.nestedDataSource.data = [];
-    this.cdr.detach();
   }
 
   ngAfterViewInit(): void {
@@ -44,15 +41,6 @@ export class HierarchyComponent implements AfterViewInit {
       this.scene$.subscribe(data => {
         this.nestedDataSource.data = <any>data.entities;
         this.cdr.detectChanges();
-      });
-
-      this.selection$.subscribe(data => {
-        if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-          this.selected = data.entities;
-          this.properties = data.properties;
-          this.cdr.detectChanges();
-        }, 1000 / 30);
       });
     });
   }
@@ -65,13 +53,13 @@ export class HierarchyComponent implements AfterViewInit {
 
   toggleLock(node: EntityData) {
     const message = node.locked ? 'unlock' : 'lock';
-    const data = Object.assign({}, node, { id: node.id, locked: !node.locked });
+    const data = Object.assign({}, { id: node.id, locked: !node.locked });
     this.store.dispatch(new UpdateEntity(data, message));
   }
 
   toggleVisibility(node: EntityData) {
     const message = node.visibility ? 'hide' : 'show';
-    const data = Object.assign({}, node, { id: node.id, visibility: !node.visibility });
+    const data = Object.assign({}, { id: node.id, visibility: !node.visibility });
     this.store.dispatch(new UpdateEntity(data, message));
   }
 
@@ -95,7 +83,6 @@ export class HierarchyComponent implements AfterViewInit {
   }
 
   updateMaxHeight(val) {
-    // if (!this.treeElement) return;
     this.treeElement.style.maxHeight = `${val - 40}px`;
   }
 
