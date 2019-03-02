@@ -12,24 +12,10 @@ import imageConverter from './pixi/service/converter/image';
 import { SceneState } from './pixi/ngxs/state';
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    DndModule.forRoot(),
-    NgxsModule.forFeature([
-      SceneState
-    ])
-  ],
-  exports: [
-    PixiCameraDirective,
-    PixiGridDirective,
-    PixiComponent
-  ],
-  declarations: [
-    PixiCameraDirective,
-    PixiGridDirective,
-    PixiComponent,
-  ],
-  providers: [PixiService]
+  imports: [BrowserModule, DndModule.forRoot(), NgxsModule.forFeature([SceneState])],
+  exports: [PixiCameraDirective, PixiGridDirective, PixiComponent],
+  declarations: [PixiCameraDirective, PixiGridDirective, PixiComponent],
+  providers: [PixiService],
 })
 export class PixiModule {
   constructor(service: PixiService) {

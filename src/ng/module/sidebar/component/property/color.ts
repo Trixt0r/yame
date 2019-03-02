@@ -10,7 +10,7 @@ import { InputPropertyComponent } from './input';
         placeholder="{{ property.name }}"
         [disabled]="!property.editable"
         [value]="property.value | color"
-        (input)="update($event, $event.currentTarget.value)"
+        (change)="update($event, $event.currentTarget.value)"
       />
     </mat-form-field>
   `,

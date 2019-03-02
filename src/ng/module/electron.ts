@@ -4,11 +4,10 @@ import { NgModule } from '@angular/core';
 import { ElectronService } from './electron/service';
 
 @NgModule({
-  providers: [ElectronService]
+  providers: [ElectronService],
 })
 export class ElectronModule {
   constructor(electron: ElectronService) {
-    electron.registerProvider(DialogProvider)
-            .registerProvider(DirectoryProvider);
+    electron.registerProvider(DialogProvider).registerProvider(DirectoryProvider);
   }
 }

@@ -1,7 +1,7 @@
-import { NgModule } from "@angular/core";
-import { Pubsub } from "../idx";
+import { NgModule } from '@angular/core';
+import { Pubsub } from '../idx';
 import { Environment } from '../environment';
-import { RendererPlugin } from "./plugin/interface";
+import { RendererPlugin } from './plugin/interface';
 
 let pluginModules = [];
 
@@ -16,8 +16,6 @@ Pubsub.emit('plugin:NgModules', pluginModules);
   declarations: [],
   entryComponents: [],
   imports: pluginModules,
-  exports: pluginModules
+  exports: pluginModules,
 })
-export class PluginModule {
-
-}
+export class PluginModule {}

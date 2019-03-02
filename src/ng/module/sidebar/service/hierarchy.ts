@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { PixiService } from 'ng/module/pixi/idx';
 import { Entity } from 'ng/module/pixi/scene/entity';
 import { Group } from 'ng/module/pixi/scene/group';
 
@@ -13,9 +12,6 @@ export interface NodeData {
 
 @Injectable()
 export class HierarchyService {
-
-  constructor(public pixiService: PixiService) {
-  }
 
   getNodeData<T extends Entity>(entity: Entity | Group<T>): NodeData {
     return {

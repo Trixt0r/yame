@@ -2,6 +2,6 @@
 <h5 class="text-center mat-h5">{{ title }}</h5>
 
 <div class="flex wrap">
-  <ng-container [propertyHost]="properties"
+  <ng-container [propertiesHost]="properties"
                 (input)="dispatch($event.property)"></ng-container>
 </div>

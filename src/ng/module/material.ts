@@ -1,4 +1,3 @@
-
 import { NgModule } from '@angular/core';
 import {
   MatButtonModule,
@@ -57,4 +56,4 @@ import {
     MatSliderModule,
   ],
 })
-export class MaterialModule { }
+export class MaterialModule {}

@@ -1,15 +1,19 @@
 import { Component, ElementRef, Output, EventEmitter, AfterViewInit, NgZone } from '@angular/core';
 import { ResizeableComponent } from 'ng/module/utils/idx';
-import { Store, Select as StoreSelect } from '@ngxs/store';
-import { Observable } from 'rxjs/Observable';
-import { ISelectionState } from 'ng/module/toolbar/tools/selection/ngxs/state';
+import { Store } from '@ngxs/store';
 import { UpdateEntityProperty } from 'ng/module/pixi/ngxs/actions';
 import { Property } from './property/abstract';
 
-function state(state: any) {
-  return state.selection;
-}
-
+/**
+ * The properties component is responsible for rendering the assigned property array.
+ *
+ * It delegates the specific property rendering the propertiesHost directive.
+ *
+ * @export
+ * @class PropertiesComponent
+ * @extends {ResizeableComponent}
+ * @implements {AfterViewInit}
+ */
 @Component({
   moduleId: module.id.toString(),
   selector: 'yame-properties',
@@ -17,42 +21,96 @@ function state(state: any) {
   styleUrls: ['./properties.scss'],
 })
 export class PropertiesComponent extends ResizeableComponent implements AfterViewInit {
-  title = 'Properties';
+  /**
+   * The amount to substract from the window height on resize events.
+   *
+   * @static
+   * @type {number}
+   */
+  static readonly HEIGHT_SUB: number = 100;
 
-  @Output() updateVisibility = new EventEmitter();
+  /**
+   * The update visibility event, when this component changes visibility.
+   *
+   * @type {EventEmitter<boolean>}
+   */
+  @Output() updateVisibility: EventEmitter<boolean> = new EventEmitter();
 
-  protected visible;
-  protected onResizeBind: EventListenerObject;
+  /**
+   * @type {string} The title of this properties component.
+   */
+  title: string;
 
+  /**
+   * @type {Property[]} A list of properties to render.
+   */
   properties: Property[];
-  entities: string[] = [];
+
+  /**
+   * @protected
+   * @type {boolean} The internal visibility state.
+   */
+  protected visibility: boolean;
+
+  /**
+   * @protected
+   * @type {EventListenerObject} The resize handler, which is bound to the scope of the component.
+   */
+  protected onResizeBound: EventListenerObject;
 
   constructor(public ref: ElementRef, protected store: Store, protected zone: NgZone) {
     super(ref, zone);
-    this.maxVal = window.innerHeight - 100;
-    this.onResizeBind = this.onResize.bind(this);
-    this.setVisibility(false);
-    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
+    this.title = 'Properties';
+    this.properties = [];
+    this.maxVal = window.innerHeight - PropertiesComponent.HEIGHT_SUB;
+    this.onResizeBound = this.onResize.bind(this);
+    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBound));
   }
 
-  get isVisibile(): boolean {
-    return this.visible;
+  /**
+   * The visibility state.
+   *
+   * @type {boolean}
+   */
+  get visible(): boolean {
+    return this.visibility;
   }
 
-  setVisibility(visible: boolean) {
-    if (visible === this.visible) return;
-    this.visible = visible;
-    (<HTMLElement>this.ref.nativeElement).style.display = this.visible ? 'block' : 'none';
-    this.updateVisibility.next(this.visible);
+  /**
+   * Updates the visibility state.
+   */
+  set visible(visible: boolean) {
+    if (visible === this.visibility) return;
+    this.visibility = visible;
+    (<HTMLElement>this.ref.nativeElement).style.display = visible ? 'block' : 'none';
+    this.updateVisibility.next(visible);
   }
 
-  /** @override */
-  onResize() {
-    this.maxVal = window.innerHeight - 100;
+  /**
+   * Updates the max value based on the window height.
+   *
+   * @override
+   */
+  onResize(): void {
+    this.maxVal = window.innerHeight - PropertiesComponent.HEIGHT_SUB;
     super.onResize();
   }
 
-  dispatch(property: Property) {
+  /**
+   * Dispatches a property update action.
+   *
+   * @param {Property} property
+   */
+  dispatch(property: Property): void {
     this.store.dispatch(new UpdateEntityProperty('select', { [property.name]: property.value }));
+  }
+
+  /**
+   * Sets the visibility to false.
+   *
+   * @override
+   */
+  ngAfterViewInit(): void {
+    this.visible = false;
   }
 }

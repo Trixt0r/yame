@@ -1,4 +1,4 @@
-import { PropertyComponent, InputEvent } from './abstract';
+import { PropertyComponent } from './abstract';
 import { Component } from '@angular/core';
 
 @Component({

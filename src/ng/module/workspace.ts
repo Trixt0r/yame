@@ -23,16 +23,8 @@ import { DndModule } from 'ng2-dnd';
 
 @NgModule({
   imports: [BrowserModule, UtilsModule, MaterialModule, DndModule.forRoot()],
-  entryComponents: [
-    DirectoryGroupComponent,
-    FileAssetPreviewComponent,
-    ImageAssetPreviewComponent,
-  ],
-  exports: [
-    WorkspaceComponent,
-    GroupsComponent,
-    AssetsComponent,
-  ],
+  entryComponents: [DirectoryGroupComponent, FileAssetPreviewComponent, ImageAssetPreviewComponent],
+  exports: [WorkspaceComponent, GroupsComponent, AssetsComponent],
   declarations: [
     WorkspaceComponent,
     GroupsComponent,
@@ -43,12 +35,15 @@ import { DndModule } from 'ng2-dnd';
     FileAssetPreviewComponent,
     ImageAssetPreviewComponent,
   ],
-  providers: [ WorkspaceService, AssetService, GroupComponentService, AssetComponentService ],
+  providers: [WorkspaceService, AssetService, GroupComponentService, AssetComponentService],
 })
 export class WorkspaceModule {
-  constructor(workspace: WorkspaceService, assets: AssetService,
-              groupComps: GroupComponentService, assetComps: AssetComponentService) {
-
+  constructor(
+    workspace: WorkspaceService,
+    assets: AssetService,
+    groupComps: GroupComponentService,
+    assetComps: AssetComponentService
+  ) {
     // Register default directory converter and component
     assets.registerFsConverter('directory', convertDirectory);
     assets.registerFsConverter('png', convertImage);
