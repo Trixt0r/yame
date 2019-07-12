@@ -53,7 +53,7 @@ export class GroupsComponent implements OnInit {
   @Output('opened') opened: EventEmitter<OpenEvent> = new EventEmitter();
 
   /** @type {MatButton} The menu trigger button for the parent menu, which is not visible. */
-  @ViewChild('parentMenuTrigger') parentMenuTrigger: MatButton;
+  @ViewChild('parentMenuTrigger', { static: false }) parentMenuTrigger: MatButton;
 
   // Internal vars which have not to be available to the public
   groups: AssetGroup<Asset>[]; // Current files

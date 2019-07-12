@@ -3,7 +3,6 @@ import * as angularCdk from '@angular/cdk';
 import * as angularCommon from '@angular/common';
 import * as angularCore from '@angular/core';
 import * as angularForm from '@angular/forms';
-import * as angularHttp from '@angular/http';
 import * as angularMaterial from '@angular/material';
 import * as angularPlatformBrowser from '@angular/platform-browser';
 import * as angularPlatformBrowserDynamic from '@angular/platform-browser-dynamic';
@@ -23,7 +22,6 @@ const mapping = {
   '@angular/common': angularCommon,
   '@angular/core': angularCore,
   '@angular/forms': angularForm,
-  '@angular/http': angularHttp,
   '@angular/material': angularMaterial,
   '@angular/platform-browser': angularPlatformBrowser,
   '@angular/platform-browser-dynamic': angularPlatformBrowserDynamic,

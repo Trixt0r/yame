@@ -20,8 +20,8 @@ export class AppComponent implements AfterViewInit {
   name = 'YAME';
   private initialized = false;
 
-  @ViewChild('main') main: MainComponent;
-  @ViewChild('sidebar') sidebar: SidebarComponent;
+  @ViewChild('main', { static: false }) main: MainComponent;
+  @ViewChild('sidebar', { static: false }) sidebar: SidebarComponent;
 
   constructor(public ref: ElementRef, private pixiService: PixiService) {}
 

@@ -13,11 +13,11 @@ import { ToolbarComponent } from '../module/toolbar/component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements AfterViewInit {
-  @ViewChild('pixi') pixi: PixiComponent;
-  @ViewChild('toolbar') toolbar: ToolbarComponent;
-  @ViewChild('workspace') workspace: WorkspaceComponent;
-  @ViewChild(PixiCameraDirective) pixiCamera: PixiCameraDirective;
-  @ViewChild(PixiGridDirective) pixiGrid: PixiGridDirective;
+  @ViewChild('pixi', { static: false }) pixi: PixiComponent;
+  @ViewChild('toolbar', { static: false }) toolbar: ToolbarComponent;
+  @ViewChild('workspace', { static: false }) workspace: WorkspaceComponent;
+  @ViewChild(PixiCameraDirective, { static: false }) pixiCamera: PixiCameraDirective;
+  @ViewChild(PixiGridDirective, { static: false }) pixiGrid: PixiGridDirective;
 
   constructor(public ref: ElementRef) {}
 
@@ -38,10 +38,14 @@ export class MainComponent implements AfterViewInit {
    * @returns {void}
    */
   sizeUpdated(top: number): void {
-    this.pixi.ref.nativeElement.style['height'] = `${top}px`;
-    this.toolbar.ref.nativeElement.style['height'] = `${top}px`;
-    this.pixiGrid.update();
-    this.pixi.onResize();
+    if (this.pixi)
+      this.pixi.ref.nativeElement.style['height'] = `${top}px`;
+    if (this.toolbar)
+      this.toolbar.ref.nativeElement.style['height'] = `${top}px`;
+    if (this.pixiGrid)
+      this.pixiGrid.update();
+    if (this.pixi)
+      this.pixi.onResize();
   }
 
   /** @inheritdoc */

@@ -9,6 +9,7 @@ import {
   OnInit,
   NgZone,
   ChangeDetectionStrategy,
+  AfterViewInit,
 } from '@angular/core';
 
 import * as PIXI from 'pixi.js';
@@ -32,9 +33,9 @@ import { PointLike } from 'pixi.js';
   styleUrls: ['./component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PixiComponent implements OnDestroy, OnInit {
+export class PixiComponent implements OnDestroy, AfterViewInit {
   @Output() resized = new EventEmitter();
-  @ViewChild('canvas') canvas: ElementRef;
+  @ViewChild('canvas', { static: false }) canvas: ElementRef;
 
   private preview: PIXI.DisplayObject;
   private dragLeft = false;
@@ -54,7 +55,7 @@ export class PixiComponent implements OnDestroy, OnInit {
    * Initializes the pixi service.
    * @inheritdoc
    */
-  ngOnInit() {
+  ngAfterViewInit() {
     this.zone.runOutsideAngular(() => {
       this.pixiService.setUp(this.ref, {
         view: <HTMLCanvasElement>this.canvas.nativeElement,

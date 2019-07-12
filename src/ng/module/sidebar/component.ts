@@ -46,12 +46,12 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
   /**
    * @type {HierarchyComponent} The hierarchy child component.
    */
-  @ViewChild('hierarchy') hierarchy: HierarchyComponent;
+  @ViewChild('hierarchy', { static: true }) hierarchy: HierarchyComponent;
 
   /**
    * @type {PropertiesComponent} The properties child component.
    */
-  @ViewChild('properties') properties: PropertiesComponent;
+  @ViewChild('properties', { static: true }) properties: PropertiesComponent;
 
   /**
    * @type {Observable<ISelectionState>} The selection observable.
@@ -109,6 +109,7 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
    * Decides to reset the hierarchy max height if the properties are invisible.
    */
   newSize(): void {
+    if (!this.properties || !this.hierarchy) return;
     if (!this.properties.visible) return this.hierarchy.resetMaxHeight();
     const val = this.properties.propertyValue;
     this.hierarchy.updateMaxHeight(val);

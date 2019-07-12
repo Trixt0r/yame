@@ -49,22 +49,22 @@ export class WorkspaceComponent extends ResizeableComponent {
   /**
    * @type {ResizeableComponent} The resizer between both inner components.
    */
-  @ViewChild('resizer') resizer: ResizeableComponent;
+  @ViewChild('resizer', { static: false }) resizer: ResizeableComponent;
 
   /**
    * @type {GroupsComponent} The groups component, on the left.
    */
-  @ViewChild('groupsComponent') groupsComponent: GroupsComponent;
+  @ViewChild('groupsComponent', { static: false }) groupsComponent: GroupsComponent;
 
   /**
    * @type {AssetsComponent} The assets component, on the right.
    */
-  @ViewChild('assetsComponent') assetsComponent: AssetsComponent;
+  @ViewChild('assetsComponent', { static: false }) assetsComponent: AssetsComponent;
 
   /**
    * @type {ElementRef} The row, which is wrapped around all inner components.
    */
-  @ViewChild('row') row: ElementRef;
+  @ViewChild('row', { static: false }) row: ElementRef;
 
   protected onResizeBind: EventListenerObject;
 
