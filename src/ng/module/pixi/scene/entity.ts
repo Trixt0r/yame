@@ -6,14 +6,6 @@ import * as PIXI from 'pixi.js';
 import { EntityException } from '../exception/entity/entity';
 import { UpdateEntityProperty } from '../ngxs/actions';
 
-function getAllPropertyNames(obj) {
-  let props = [];
-  do {
-    props = props.concat(Object.getOwnPropertyNames( obj ));
-  } while (obj = Object.getPrototypeOf(obj));
-  return props;
-}
-
 const tempPoint = new PIXI.Point();
 interface EntityTypes {
   [key: string]: Type<Entity>;
@@ -47,7 +39,7 @@ export interface EntityData {
   [key: string]: any;
 }
 
-/** @type {EntityTypes} A map of entity types, which are registred. */
+/** @type {EntityTypes} A map of entity types, which are registered. */
 const TYPES: EntityTypes = {};
 
 /**

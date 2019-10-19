@@ -7,7 +7,7 @@ export interface GroupData extends EntityData {
 }
 
 /**
- * A group contains a collection of entites.
+ * A group contains a collection of entities.
  * It can be used to put a bunch of entities into one container.
  * It makes sure, that exporting, parsing and cloning works as expected, i.e. deep.
  * A group provides methods for adding, removing and querying entities.
@@ -69,7 +69,7 @@ export class Group<T extends Entity> extends Entity {
    * Adds the given entity to the flat entity list.
    *
    * Makes sure, that the flat hierarchy is maintained if entities get added or removed in sub groups.
-   * Should be called if you add entites to the `internalEntities` array by your own,
+   * Should be called if you add entities to the `internalEntities` array by your own,
    * to guarantee that the flat entity list is in synch with the hierarchy in this group.
    *
    * @param {T} entity The entity to add.
@@ -95,7 +95,7 @@ export class Group<T extends Entity> extends Entity {
   /**
    * Removes the given entity from the flat entity list and all its entities.
    *
-   * Should be called if you add entites to the `internalEntities` array by your own,
+   * Should be called if you add entities to the `internalEntities` array by your own,
    * to guarantee that the flat entity list is in synch with the hierarchy in this group.
    *
    * @param {T} entity
@@ -142,7 +142,7 @@ export class Group<T extends Entity> extends Entity {
   }
 
   /**
-   * Adds the given entities or entity datas to this group.
+   * Adds the given entities or entity data to this group.
    * Emits the `entities:added` event with the added entities as a parameter.
    *
    * @param {((T | EntityData)[])} entitiesOrData
@@ -212,7 +212,7 @@ export class Group<T extends Entity> extends Entity {
    * Returns the index of the given entity or id.
    *
    * @param {(T | string)} entityOrId The actual entity or id of the entity.
-   * @returns {number} The index of the given entitiy or id.
+   * @returns {number} The index of the given entity or id.
    */
   indexOf(entityOrId: T | string): number {
     if (entityOrId instanceof Entity) return this.internalEntities.indexOf(entityOrId);
@@ -223,7 +223,7 @@ export class Group<T extends Entity> extends Entity {
    * Returns the flat index of the given entity or id.
    *
    * @param {(T | string)} entityOrId The actual entity or id of the entity.
-   * @returns {number} The flat index of the given entitiy or id.
+   * @returns {number} The flat index of the given entity or id.
    */
   flatIndexOf(entityOrId: T | string): number {
     if (entityOrId instanceof Entity) return this.flatEntities.indexOf(entityOrId);
@@ -283,7 +283,7 @@ export class Group<T extends Entity> extends Entity {
    *        findIndex immediately returns that element index. Otherwise, findIndex returns -1.
    * @param {any} [thisArg] An object to which the this keyword can refer in the callbackfn function.
    *                        If thisArg is omitted, undefined is used as the this value.
-   * @param {boolena} [deep=false] Whether to search all sub groups, if any are present.
+   * @param {boolean} [deep=false] Whether to search all sub groups, if any are present.
    * @returns {number}
    */
   findIndex(predicate: (entity: T, index: number, array: T[]) => any, thisArg?: any, deep: boolean = false): number {

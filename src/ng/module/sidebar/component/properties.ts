@@ -112,5 +112,6 @@ export class PropertiesComponent extends ResizeableComponent implements AfterVie
    */
   ngAfterViewInit(): void {
     this.visible = false;
+    super.ngAfterViewInit();
   }
 }

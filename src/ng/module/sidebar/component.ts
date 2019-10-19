@@ -105,7 +105,7 @@ export class SidebarComponent extends ResizeableComponent implements AfterViewIn
   }
 
   /**
-   * Handles visbility and resize events of the child components.
+   * Handles visibility and resize events of the child components.
    * Decides to reset the hierarchy max height if the properties are invisible.
    */
   newSize(): void {

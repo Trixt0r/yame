@@ -31,7 +31,7 @@ export function TransformProperty(options: PropertyOptions, value: any, reverse:
 }
 
 /**
- * Creates a dectorator function for entity properties.
+ * Creates a decorator function for entity properties.
  * A property defines a field in an entity instance, which should be checked for changes on assignment and emit the
  * `change:myProperty` event if changes happens.
  * Furthermore a property can be considered to be written to the export data on value changes.
