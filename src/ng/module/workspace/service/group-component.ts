@@ -1,11 +1,11 @@
 import { InvalidGroupComponentException } from '../exception/service/invalid-group-component';
-import { Asset } from '../../../../common/asset';
-import { AssetGroup } from '../../../../common/asset/group';
+import { Asset } from 'common/asset';
+import { AssetGroup } from 'common/asset/group';
 import { GroupComponent } from '../component/groups/component/group/abstract';
 import { Injectable, Type } from '@angular/core';
 
 /**
- * Components map definition
+ * Components map definition.
  *
  * @interface Components
  */

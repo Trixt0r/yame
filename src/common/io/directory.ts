@@ -55,18 +55,18 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
     this.emit('scan');
     return fs.readdir(this.pathName)
       .then((files: string[]) => {
-        let scans: Promise<any>[] = [];
+        const scans: Promise<any>[] = [];
         files.forEach(filename => {
-          let abs = path.resolve(this.path, filename);
-          let stats = fs.lstatSync(abs);
+          const abs = path.resolve(this.path, filename);
+          const stats = fs.lstatSync(abs);
           if (stats.isDirectory()) {
-              let dir = new Directory(abs);
+              const dir = new Directory(abs);
               this._children.push(dir);
               this.emit('scan:dir', dir);
               if (deep)
                 scans.push(dir.scan(force));
           } else {
-              let file = new File(abs);
+              const file = new File(abs);
               this._children.push(file);
               this.emit('scan:file', file);
           }
@@ -121,7 +121,7 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
 
   /** @returns {DirectoryContent} A JSON representation of this directory. */
   export(): DirectoryContent {
-    let children = this._children.map(child => child.export());
+    const children = this._children.map(child => child.export());
     return {
       path: this.path,
       name: this.name,

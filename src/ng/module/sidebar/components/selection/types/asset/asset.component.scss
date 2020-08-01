@@ -1,0 +1,25 @@
+:host {
+  position: relative;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.preview {
+  max-height: 40px;
+  position: absolute;
+  right: 0;
+}
+
+mat-select-trigger .preview {
+  right: 20px;
+  bottom: -4px;
+}
+
+mat-form-field.removable,
+mat-form-field.editable {
+  width: calc(100% - 40px);
+}
+
+mat-form-field.editable.removable {
+  width: calc(100% - 90px);
+}

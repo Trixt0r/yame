@@ -12,7 +12,6 @@
     "curly": false,
     "eofline": true,
     "forin": true,
-    "import-blacklist": [true, "rxjs"],
     "import-spacing": true,
     "indent": [
       true,
@@ -27,8 +26,7 @@
     "member-access": false,
     "member-ordering": [
       true,
-      "static-before-instance",
-      "variables-before-functions"
+      "static-before-instance,variables-before-functions"
     ],
     "no-arg": true,
     "no-bitwise": false,
@@ -46,7 +44,6 @@
     "no-empty": false,
     "no-empty-interface": true,
     "no-eval": true,
-    "no-inferrable-types": [true, "ignore-params"],
     "no-shadowed-variable": true,
     "no-string-literal": false,
     "no-string-throw": true,
@@ -69,9 +66,6 @@
       "single"
     ],
     "radix": true,
-    "semicolon": [
-      "always"
-    ],
     "triple-equals": [
       true,
       "allow-null-check"
@@ -99,10 +93,9 @@
     ],
 
     "directive-selector": [true, "attribute", "", "camelCase"],
-    "component-selector": [true, "element", "yame", "kebab-case"],
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,
-    "use-host-property-decorator": true,
+    "use-host-property-decorator": false,
     "no-input-rename": false,
     "no-output-rename": true,
     "use-life-cycle-interface": true,

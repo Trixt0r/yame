@@ -12,13 +12,12 @@ import {
   AfterViewInit,
 } from '@angular/core';
 
-import * as PIXI from 'pixi.js';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from '../../../common/asset';
 import { Entity } from './scene/entity';
 import { Store } from '@ngxs/store';
 import { CreateEntity } from './ngxs/actions';
-import { PointLike } from 'pixi.js';
+import { DisplayObject } from 'pixi.js';
 
 /**
  * A pixi component provides a canvas element and initializes the injected pixi service.
@@ -37,7 +36,7 @@ export class PixiComponent implements OnDestroy, AfterViewInit {
   @Output() resized = new EventEmitter();
   @ViewChild('canvas', { static: false }) canvas: ElementRef;
 
-  private preview: PIXI.DisplayObject;
+  private preview: DisplayObject;
   private dragLeft = false;
   protected onResizeBind: EventListenerObject;
 
@@ -46,8 +45,8 @@ export class PixiComponent implements OnDestroy, AfterViewInit {
     zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
   }
 
-  /** @type {PIXI.DisplayObject} The current drag and drop preview. */
-  get dndPreview(): PIXI.DisplayObject {
+  /** The current drag and drop preview. */
+  get dndPreview(): DisplayObject {
     return this.preview;
   }
 
@@ -109,7 +108,7 @@ export class PixiComponent implements OnDestroy, AfterViewInit {
       this.preview = object;
       this.preview.alpha = 0.5;
       this.pixiService.scene.addChild(object); // Do not add it as an entity, since it is just a preview
-      object.position.copy(this.pixiService.toScene(event.mouseEvent));
+      object.position.copyFrom(this.pixiService.toScene(event.mouseEvent));
       return object;
     });
   }
@@ -136,9 +135,8 @@ export class PixiComponent implements OnDestroy, AfterViewInit {
    * @returns {void}
    */
   onDragOver(event: DragDropData) {
-    const asset: Asset = event.dragData;
     if (!this.preview) return;
-    this.preview.position.copy(this.pixiService.toScene(event.mouseEvent));
+    this.preview.position.copyFrom(this.pixiService.toScene(event.mouseEvent));
   }
 
   /**

@@ -21,7 +21,7 @@ import {
 })
 export class AssetPreviewDirective implements OnChanges {
 
-  /** @type {Asset} The asset group to render. */
+  /** @type {Asset} The asset to render. */
   @Input('assetPreview') asset: Asset;
 
   constructor(

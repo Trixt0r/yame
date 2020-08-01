@@ -1,4 +1,4 @@
-import { YameEnvironment } from "./interface/environment";
+import { YameEnvironment } from './interface/environment';
 
 const env: YameEnvironment = {
   appDir: '',

@@ -5,7 +5,12 @@ import { AssetPreviewComponent } from './interface';
 
 @Component({
   moduleId: module.id.toString(),
-  template: `<img draggable="false" mat-card-image [src]="sanitize(asset.content.path)" />`,
+  template: `
+    <div class="image-wrapper">
+    <img draggable="false" mat-card-image [src]="sanitize(asset.content.path)" />
+    </div>
+  `,
+  styleUrls: ['./image.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageAssetPreviewComponent implements AssetPreviewComponent {

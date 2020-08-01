@@ -1,22 +1,12 @@
-.text-center {
-  text-align: center;
-}
+.text-center { text-align: center; }
 
-.text-right {
-  text-align: right;
-}
+.text-right { text-align: right; }
 
-.text-left {
-  text-align: left;
-}
+.text-left { text-align: left; }
 
-.fill-width {
-  width: 100%;
-}
+.fill-width { width: 100%; }
 
-.fill-height {
-  height: 100%;
-}
+.fill-height { height: 100%; }
 
 .relative {
   position: relative;
@@ -32,21 +22,15 @@
   }
 }
 
-.absolute {
-  position: absolute !important;
-}
+.absolute { position: absolute !important; }
 
-.inline {
-  display: inline;
-}
+.block { display: block; }
 
-.inline-block {
-  display: inline-block;
-}
+.inline { display: inline; }
 
-.inline-flex {
-  display: inline-flex;
-}
+.inline-block { display: inline-block; }
+
+.inline-flex { display: inline-flex; }
 
 .flex {
   display: flex;
@@ -55,6 +39,60 @@
   &.wrap-reverse { flex-wrap: wrap-reverse; }
 }
 
-.invisible {
-  visibility: hidden;
+.invisible { visibility: hidden; }
+
+.hidden { display: none; }
+
+.fill {
+  &.full {
+    width: 100%;
+  }
+  &.threequarter {
+    width: 75%;
+  }
+  &.half {
+    width: 50%;
+  }
+  &.quarter {
+    width: 25%;
+  }
+
+  mat-slider {
+    width: 100%;
+  }
+}
+
+.no-padding { padding: 0; }
+.no-padding-left { padding-left: 0; }
+.no-padding-right { padding-right: 0; }
+.no-padding-top { padding-top: 0; }
+.no-padding-bottom { padding-bottom: 0; }
+.no-padding-hor { padding-left: 0; padding-right: 0; }
+.no-padding-vert { padding-top: 0; padding-bottom: 0; }
+
+.no-margin { margin: 0; }
+.no-margin-left { margin-left: 0; }
+.no-margin-right { margin-right: 0; }
+.no-margin-top { margin-top: 0; }
+.no-margin-bottom { margin-bottom: 0; }
+.no-margin-hor { margin-left: 0; margin-right: 0; }
+.no-margin-vert { margin-top: 0; margin-bottom: 0; }
+
+$sizes: 4, 8, 16, 24, 32, 48, 64;
+@each $i in $sizes {
+  .padding-#{$i} { padding: #{$i}px; }
+  .padding-left-#{$i} { padding-left: #{$i}px; }
+  .padding-right-#{$i} { padding-right: #{$i}px; }
+  .padding-top-#{$i} { padding-top: #{$i}px; }
+  .padding-bottom-#{$i} { padding-bottom: #{$i}px; }
+  .padding-hor-#{$i} { padding-left: #{$i}px; padding-right: #{$i}px; }
+  .padding-vert-#{$i} { padding-top: #{$i}px; padding-bottom: #{$i}px; }
+
+  .margin-#{$i} { margin: #{$i}px; }
+  .margin-left-#{$i} { margin-left: #{$i}px; }
+  .margin-right-#{$i} { margin-right: #{$i}px; }
+  .margin-top-#{$i} { margin-top: #{$i}px; }
+  .margin-bottom-#{$i} { margin-bottom: #{$i}px; }
+  .margin-hor-#{$i} { margin-left: #{$i}px; margin-right: #{$i}px; }
+  .margin-vert-#{$i} { margin-top: #{$i}px; margin-bottom: #{$i}px; }
 }

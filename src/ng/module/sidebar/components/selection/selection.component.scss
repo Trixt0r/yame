@@ -1,0 +1,36 @@
+@import '../../../../variables.scss';
+
+:host {
+  width: 100%;
+  bottom: 0;
+  position: absolute;
+  display: block;
+  left: $resizer-size;
+  width: calc(100% - 10px);
+  overflow: hidden;
+  border-radius: 4px;
+  background: $main-background-color;
+  margin-bottom: 5px;
+}
+
+ng-component {
+  width: calc(50% - 20px);
+}
+
+.resizer {
+  width: 100%;
+  height: $resizer-size;
+  cursor: ns-resize;
+  margin-top: -1px;
+}
+
+.flex.wrap {
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
+mat-accordion {
+  font-size: 14px;
+}

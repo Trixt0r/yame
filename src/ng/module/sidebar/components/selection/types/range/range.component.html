@@ -1,0 +1,20 @@
+<div class="slider-container full inline-block"
+      [class.editable]="component.editable"
+      [class.removable]="component.removable">
+  <label class="mat-form-field-label">{{ component.id }}</label>
+  <mat-slider
+    [max]="max"
+    [min]="min"
+    [disabled]="disabled"
+    [step]="step"
+    [thumbLabel]="true"
+    [tickInterval]="ticks"
+    [value]="value"
+    (input)="update($event)"
+  >
+  </mat-slider>
+</div>
+<yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
+<button *ngIf="component.removable" mat-icon-button class="remove" (click)="remove($event)">
+  <mat-icon>delete</mat-icon>
+</button>

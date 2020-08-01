@@ -2,11 +2,11 @@ import * as uuid from 'uuid/v4';
 import { Type } from '@angular/core';
 import * as _ from 'lodash';
 import { Property, PropertyOptions, TransformProperty } from './property';
-import * as PIXI from 'pixi.js';
 import { EntityException } from '../exception/entity/entity';
 import { UpdateEntityProperty } from '../ngxs/actions';
+import { Point, Container, Rectangle, Circle, Ellipse, Polygon, RoundedRectangle } from 'pixi.js';
 
-const tempPoint = new PIXI.Point();
+const tempPoint = new Point();
 interface EntityTypes {
   [key: string]: Type<Entity>;
 }
@@ -45,13 +45,8 @@ const TYPES: EntityTypes = {};
 /**
  * An entity represents any object which can be rendered in a scene.
  * The scene holds a collection/list of entities.
- *
- * @export
- * @abstract
- * @class Entity
- * @extends {PIXI.Container}
  */
-export abstract class Entity extends PIXI.Container {
+export abstract class Entity extends Container {
   /** @type {Entity} The parent entity, which may be different from the parent. This will not be exported or parsed. */
   @Property(false) parentEntity: Entity;
 
@@ -195,10 +190,10 @@ export abstract class Entity extends PIXI.Container {
   /**
    * Tests if the given global point is inside this entity based on its calculated bounding box.
    *
-   * @param {PIXI.Point} point The global point to test.
-   * @returns {boolean} The result of the test
+   * @param point The global point to test.
+   * @returns The result of the test
    */
-  containsPoint(point: PIXI.Point): boolean {
+  containsPoint(point: Point): boolean {
     const bounds = this.getShape();
     if (!bounds) return false;
     if (typeof bounds.contains !== 'function') {
@@ -213,10 +208,8 @@ export abstract class Entity extends PIXI.Container {
    * Returns the shape of this entity in local coordinates.
    * By default this is equal to the local bounds of this entity.
    * This can be overridden by any more specific entity.
-   *
-   * @returns {(PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle | any)}
    */
-  getShape(): PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle | any {
+  getShape(): Rectangle | Circle | Ellipse | Polygon | RoundedRectangle | any {
     return this.getLocalBounds();
   }
 

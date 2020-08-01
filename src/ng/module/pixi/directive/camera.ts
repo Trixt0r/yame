@@ -1,8 +1,9 @@
 import { PixiComponent } from '../component';
 import { Camera } from '../utils/camera';
 import { AfterViewInit, Directive, ElementRef, HostListener, Input, NgZone } from '@angular/core';
+import { Point } from 'pixi.js';
 
-const tmpPos = new PIXI.Point();
+const tmpPos = new Point();
 
 /**
  * Directive which can be attached to a pixi component.
@@ -16,8 +17,8 @@ export class PixiCameraDirective implements AfterViewInit {
   interactive = true;
 
   private cam: Camera;
-  private prevPos: PIXI.Point;
-  private camPos: PIXI.Point;
+  private prevPos: Point;
+  private camPos: Point;
 
   private onMouseWheelBind: EventListenerObject;
   private onMouseDownBind: EventListenerObject;
@@ -53,7 +54,7 @@ export class PixiCameraDirective implements AfterViewInit {
     const service = this.host.pixiService;
     const data = service.renderer.plugins.interaction.eventData.data;
     this.prevPos = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
-    this.camPos = new PIXI.Point(this.cam.position.x, this.cam.position.y);
+    this.camPos = new Point(this.cam.position.x, this.cam.position.y);
   }
 
   onMouseUp(event: MouseEvent) {

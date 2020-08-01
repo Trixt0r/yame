@@ -55,7 +55,7 @@ export abstract class CommonPluginManager {
    * @returns {Promise<any>}
    */
   protected initializeFromFiles(files: string[]): Promise<any> {
-    let promises = [];
+    const promises = [];
     files.forEach(file => {
       try {
         const config: PluginConfig = this.require(path.resolve(`${file}`, 'package.json'));
@@ -76,6 +76,7 @@ export abstract class CommonPluginManager {
         plugin.environment = this.environment;
         plugin.config.file = file;
         if (!plugin.isActive)
+          // tslint:disable-next-line:no-console
           return console.info('Plugin', config.name, 'is deactivated');
         promises.push(
           plugin.initialize(this.type)
@@ -83,7 +84,7 @@ export abstract class CommonPluginManager {
             .catch(e => console.warn('Error occurred while loading plugin ', file, e.message))
         );
       } catch (e) {
-        // TODO: logs this in a persistant place
+        // TODO: log this in a persistent place
         console.error('require error', e);
       }
     });
@@ -133,7 +134,7 @@ export abstract class CommonPluginManager {
    * @returns {Promise<any>} Resolves on success.
    */
   activate(id: string): Promise<any> {
-    const plugin = this.environment.plugins.find(plugin => plugin.id === id);
+    const plugin = this.environment.plugins.find(it => it.id === id);
     if (!plugin) return Promise.resolve();
     if (plugin.isActive) return Promise.resolve();
     const done = () => {
@@ -151,7 +152,7 @@ export abstract class CommonPluginManager {
    * @returns {Promise<any>} Resolves on success.
    */
   deactivate(id: string): Promise<any> {
-    const plugin = this.environment.plugins.find(plugin => plugin.id === id);
+    const plugin = this.environment.plugins.find(it => it.id === id);
     if (!plugin) return Promise.resolve();
     if (!plugin.isActive) return Promise.resolve();
     const done = () => {

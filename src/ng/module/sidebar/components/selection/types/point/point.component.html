@@ -1,0 +1,15 @@
+<mat-form-field class="full"
+                [class.editable]="component.editable"
+                [class.removable]="component.removable">
+  <point-input
+    #input
+    (input)="update($event)"
+    [value]="transform(component) || { x: 0, y: 0 }"
+    [placeholder]="component.id"
+    [disabled]="disabled"
+  ></point-input>
+</mat-form-field>
+<yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
+<button *ngIf="component.removable" mat-icon-button class="remove" (click)="remove($event)">
+  <mat-icon>delete</mat-icon>
+</button>

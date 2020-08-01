@@ -1,0 +1,24 @@
+<h1 mat-dialog-title>Edit ID</h1>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>ID</mat-label>
+    <input matInput
+            name="id"
+            [formControl]="formControl"
+            (keyup.enter)="onSave()"
+            [errorStateMatcher]="matcher">
+    <mat-error *ngIf="formControl.hasError('idUsed')">
+      This ID is already in use.
+    </mat-error>
+    <mat-error *ngIf="formControl.hasError('idReserved')">
+      This ID is reserved.
+    </mat-error>
+    <mat-error *ngIf="formControl.hasError('required')">
+      An ID is <strong>required</strong>
+    </mat-error>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button [disabled]="disabled" (click)="onSave()">Save</button>
+</div>

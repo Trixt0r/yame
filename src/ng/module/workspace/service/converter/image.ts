@@ -1,5 +1,5 @@
-import { ImageAsset } from '../../../../../common/asset/image';
-import { FileContent } from '../../../../../common/content/file';
+import { ImageAsset } from 'common/asset/image';
+import { FileContent } from 'common/content/file';
 import { AssetService } from '../asset';
 
 import * as _ from 'lodash';
@@ -12,7 +12,7 @@ import * as _ from 'lodash';
  * @returns {ImageAsset} The converted image asset.
  */
 export default function(file: FileContent, service?: AssetService): Promise<ImageAsset> {
-  let asset = new ImageAsset();
+  const asset = new ImageAsset();
 
   asset.id = file.path; // The asset id is the full path
   asset.content = _.extend({}, file);

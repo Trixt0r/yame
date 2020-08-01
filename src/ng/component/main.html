@@ -1,3 +1,4 @@
-<yame-toolbar #toolbar [open]="true"></yame-toolbar>
-<yame-pixi #pixi pixiCamera pixiGrid></yame-pixi>
-<yame-workspace #workspace [property]="'top'" (sizeUpdated)="sizeUpdated($event)" [minVal]="100"></yame-workspace>
+<yame-toolbar [open]="true" [height]="sceneHeight"></yame-toolbar>
+<!-- <yame-pixi #pixi pixiCamera pixiGrid></yame-pixi> -->
+<yame-scene [height]="sceneHeight" [width]="width"></yame-scene>
+<yame-workspace property="top" (sizeUpdated)="onWorkspaceSizeUpdated($event)" [minVal]="100"></yame-workspace>

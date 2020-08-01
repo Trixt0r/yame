@@ -1,3 +1,5 @@
+@import '../../variables.scss';
+
 $init-padding: 32px;
 
 :host {
@@ -6,6 +8,7 @@ $init-padding: 32px;
   position: absolute;
   display: block;
   box-shadow: 0 -3px 5px -1px rgba(0, 0, 0, 0.3), 0 -6px 10px 0 rgba(0, 0, 0, 0.25), 0 -1px 18px 0 rgba(0, 0, 0, 0.2);
+  background: #303030;
 }
 
 #openWorkspace {
@@ -14,7 +17,7 @@ $init-padding: 32px;
 
 .resizer {
   width: 100%;
-  height: 5px;
+  height: $resizer-size;
   cursor: ns-resize;
   margin-top: -1px;
 }
@@ -28,7 +31,7 @@ yame-resizable {
     float: left;
   }
   position: absolute;
-  width: 5px;
+  width: $resizer-size;
   height: 100%;
   cursor: ew-resize;
   // background: #121212;

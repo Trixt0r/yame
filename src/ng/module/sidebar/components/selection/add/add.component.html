@@ -1,0 +1,6 @@
+<button mat-raised-button class="mat-elevation-z2 fill-width" [matMenuTriggerFor]="menu.childMenu">
+  <mat-icon>add</mat-icon>
+  <h5 class="inline">Component</h5>
+</button>
+
+<nested-menu-item #menu [items]="items" (selected)="onSelected($event.id)"></nested-menu-item>

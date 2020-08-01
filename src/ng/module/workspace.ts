@@ -47,6 +47,9 @@ export class WorkspaceModule {
     // Register default directory converter and component
     assets.registerFsConverter('directory', convertDirectory);
     assets.registerFsConverter('png', convertImage);
+    assets.registerFsConverter('jpg', convertImage);
+    assets.registerFsConverter('jpeg', convertImage);
+    assets.registerFsConverter('gif', convertImage);
     groupComps.register('directory', DirectoryGroupComponent);
     assetComps.registerPreview('file', FileAssetPreviewComponent);
     assetComps.registerPreview('image', ImageAssetPreviewComponent);

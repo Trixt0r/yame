@@ -10,7 +10,7 @@ import {
   EventEmitter,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { RippleAnimationConfig } from '@angular/material';
+import { RippleAnimationConfig } from '@angular/material/core';
 import { ToolbarService } from './service';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 
@@ -42,6 +42,8 @@ export class ToolbarComponent implements OnChanges {
   /** @type {boolean} Whether the toolbar is opened or closed. */
   @Input('open') open = false;
 
+  @Input('height') height;
+
   /** @type {EventEmitter} Event which gets emitted when the toolbar gets opened. */
   @Output('opening') opening = new EventEmitter();
 
@@ -65,6 +67,7 @@ export class ToolbarComponent implements OnChanges {
   /** @inheritdoc */
   ngOnChanges(changes: SimpleChanges) {
     if (changes.open) this.updateState();
+    if (changes.height) this.ref.nativeElement.style['height'] = `${changes.height.currentValue}px`;
   }
 
   /**

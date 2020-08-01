@@ -1,4 +1,4 @@
-import { Asset } from '../../../../common/asset';
+import { Asset } from 'common/asset';
 import { PixiInvalidConverterException } from '../exception/service/invalid-converter';
 import { PixiAssetNotSupportedException } from '../exception/service/asset-not-supported';
 import { Entity } from '../scene/entity';
@@ -53,7 +53,7 @@ export class PixiAssetConverter {
   }
 
   /**
-   * Checks for the existance of an asset converter for the given asset.
+   * Checks for the existence of an asset converter for the given asset.
    *
    * @param {Asset} asset
    * @returns {boolean} Whether a converter for the given asset exists.

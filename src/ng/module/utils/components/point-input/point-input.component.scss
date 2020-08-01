@@ -1,0 +1,13 @@
+.point-input-container {
+  display: flex;
+}
+.point-input-element {
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  font: inherit;
+  text-align: center;
+  width: 50%;
+  color: currentColor;
+}

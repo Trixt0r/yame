@@ -19,7 +19,7 @@ interface Tools {
  *
  * @class ToolbarService
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ToolbarService {
   /** @type {ToolComponents} A tool components map, which maps a tool to a tool component, for rendering. */
   protected toolComponents: ToolComponents = {};
@@ -121,13 +121,12 @@ export class ToolbarService {
     if (!toActivate) throw new ToolbarServiceException('Tool to activate not found');
     const currentTool = this.currentTool;
     if (currentTool === toActivate) return Promise.resolve(false);
-    let deactivate =
-      currentTool && currentTool.isActive
-        ? currentTool.deactivate().then(re => {
-            this.deactivatedSource.next(currentTool);
-            return re;
-          })
-        : Promise.resolve(false);
+    const deactivate = currentTool && currentTool.isActive ?
+            currentTool.deactivate().then(re => {
+              this.deactivatedSource.next(currentTool);
+              return re;
+            }) :
+            Promise.resolve(false);
     return deactivate
       .then(() => toActivate.activate())
       .then(() => (this.currentTool = toActivate))

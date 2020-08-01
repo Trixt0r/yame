@@ -1,6 +1,7 @@
 import { Entity, EntityType, EntityData } from './entity';
 import { Property } from './property';
 import { SpriteEntityException } from '../exception/entity/sprite';
+import { Sprite, Texture, Point } from 'pixi.js';
 
 /**
  * A sprite entity is an entity, which holds a pixi sprite instance as a child.
@@ -11,24 +12,24 @@ import { SpriteEntityException } from '../exception/entity/sprite';
  */
 @EntityType('sprite')
 export class SpriteEntity extends Entity {
-  /** @type {PIXI.Sprite} The internal sprite to render. */
-  protected internalSprite: PIXI.Sprite;
+  /** The internal sprite to render. */
+  protected internalSprite: Sprite;
 
-  /** @type {PIXI.Texture} The internal texture for the sprite. */
-  @Property(false) texture: PIXI.Texture;
+  /** The internal texture for the sprite. */
+  @Property(false) texture: Texture;
 
   @Property({ type: 'color', export: true }) color: number;
 
   private baseLoading = false;
   private baseLoaded = false;
 
-  constructor(texture?: PIXI.Texture, name?: string) {
+  constructor(texture?: Texture, name?: string) {
     super(name);
     this.texture = texture;
-    this.internalSprite = new PIXI.Sprite(texture);
+    this.internalSprite = new Sprite(texture);
     this.internalSprite.anchor.set(0.5);
     this.addChild(this.internalSprite);
-    this.on('change:texture', (tex: PIXI.Texture, prev: PIXI.Texture) => {
+    this.on('change:texture', (tex: Texture, prev: Texture) => {
       if (prev) {
         prev.baseTexture.off('loaded', null, this);
         prev.baseTexture.off('error', null, this);
@@ -56,8 +57,8 @@ export class SpriteEntity extends Entity {
     return this.baseLoaded;
   }
 
-  /** @returns {PIXI.Sprite} The pixi sprite instance for this entity. */
-  get sprite(): PIXI.Sprite {
+  /** @returns The pixi sprite instance for this entity. */
+  get sprite(): Sprite {
     return this.internalSprite;
   }
 
@@ -81,11 +82,11 @@ export class SpriteEntity extends Entity {
     const texture = this.texture;
     if (!texture) return; // Ignore this case
     const baseTexture = texture.baseTexture;
-    if (baseTexture.hasLoaded) {
+    if ((baseTexture as any).hasLoaded) {
       this.baseLoaded = true;
       this.baseLoading = false;
       this.emit('texture:loaded', texture);
-    } else if (baseTexture.isLoading) {
+    } else if ((baseTexture as any).isLoading) {
       this.baseLoaded = false;
       this.baseLoading = true;
       baseTexture.once(
@@ -124,7 +125,7 @@ export class SpriteEntity extends Entity {
   }
 
   /** @inheritdoc */
-  containsPoint(point: PIXI.Point): boolean {
+  containsPoint(point: Point): boolean {
     return this.sprite.containsPoint(point);
   }
 }

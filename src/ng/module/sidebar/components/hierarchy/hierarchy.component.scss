@@ -1,0 +1,130 @@
+@import '../../../../variables.scss';
+
+$tree-node-toggle-size: $tree-indent-size;
+$tree-node-icon-size: $tree-indent-size + 8px;
+
+:host {
+  display: block;
+}
+
+h5 {
+  margin: 6px 0;
+  padding: 0 12px 0 0;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+tree-node-wrapper > .node-wrapper {
+  overflow: hidden;
+  transition: all ease-in 200ms;
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style-type: none;
+  width: 100%;
+}
+.invisible {
+  display: none;
+}
+.mat-tree-ul {
+  padding-left: 0;
+  mat-tree-node {
+    padding-left: 40px;
+  }
+}
+.mat-list-text {
+  display: inline-block;
+}
+
+tree-root {
+  display: block;
+  max-height: 100%;
+  overflow-y: auto;
+  background: none;
+}
+
+tree-node-wrapper {
+  cursor: pointer;
+
+  display: block;
+  &> .node-wrapper {
+    position: relative;
+    padding-left: $tree-node-toggle-size;
+    width: calc(100% - #{$tree-node-toggle-size});
+    .toggle-btn {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      line-height: inherit;
+      width: $tree-node-toggle-size;
+      height: $tree-node-toggle-size;
+      transform: translateY(-50%);
+
+      mat-icon {
+        width: $tree-node-toggle-size;
+        height: $tree-node-toggle-size;
+      }
+    }
+  }
+
+  .node-name { float: left; }
+  .inline-actions {
+    float: right;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all ease-in-out 100ms;
+    margin-top: 4px;
+    .mat-icon-button {
+      line-height: inherit;
+      height: 100%;
+    }
+  }
+  &:hover {
+    background: rgba(255, 255, 255, .04);
+  }
+  &:hover, &.changed {
+    .inline-actions {
+      opacity: inherit;
+      transform: none;
+    }
+  }
+  &.selected {
+    background: #5a5a5a;
+  }
+
+  button {
+    width: $tree-inline-btn-size;
+  }
+}
+.mat-tree-node {
+  min-height: 32px;
+}
+
+
+.header {
+  display: inline-block;
+  width: calc(100% - #{$resizer-size});
+  h4 {
+    float: left;
+    margin: 0 0 4px 0;
+    padding: 0 12px 0 0;
+  }
+  .btn-group { float: right; }
+}
+
+.placeholder {
+  height: 30px;
+  border: 1px dashed grey;
+}
+
+h5.node-name, .inline-actions {
+  display: inline;
+}
+
+.inline-actions {
+  float: right;
+}
+mat-icon {
+  font-size: $tree-icon-font-size;
+}

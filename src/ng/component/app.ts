@@ -1,7 +1,6 @@
 import { MainComponent } from './main';
-import { PixiService } from '../module/pixi/service';
-import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
-import { SidebarComponent } from '../module/sidebar/component';
+import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { SidebarComponent } from '../module/sidebar/components/sidebar.component';
 
 /**
  * Entry point for the main application.
@@ -18,17 +17,18 @@ import { SidebarComponent } from '../module/sidebar/component';
 })
 export class AppComponent implements AfterViewInit {
   name = 'YAME';
+
+  mainWidth = window.innerWidth;
+
   private initialized = false;
 
-  @ViewChild('main', { static: false }) main: MainComponent;
-  @ViewChild('sidebar', { static: false }) sidebar: SidebarComponent;
+  @ViewChild(MainComponent, { static: false }) main: MainComponent;
+  @ViewChild(SidebarComponent, { static: false }) sidebar: SidebarComponent;
 
-  constructor(public ref: ElementRef, private pixiService: PixiService) {}
+  constructor(private cdr: ChangeDetectorRef) {}
 
   /** @inheritdoc */
   ngAfterViewInit() {
-    this.sidebar.updateValue(this.sidebar.clampValue(window.innerWidth * 0.75));
-    this.main.workspace.updateValue(this.main.workspace.clampValue(window.innerHeight * 0.75));
     this.initialized = true;
   }
 
@@ -36,8 +36,9 @@ export class AppComponent implements AfterViewInit {
    * Sidebar update handler.
    * @param {number} left
    */
-  sidebarUpdate(left: number): void {
+  onSidebarSizeUpdate(left: number): void {
     if (!this.initialized) return;
-    this.main.sidebarUpdate(left);
+    this.mainWidth = left;
+    this.cdr.detectChanges();
   }
 }

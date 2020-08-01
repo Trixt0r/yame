@@ -11,15 +11,15 @@ declare type Electron = typeof electron;
 export class IpcDialog extends IpcAction {
 
   /** @inheritdoc */
-  public init(electron: Electron): Promise<any> {
-    electron.ipcMain.on('dialog:open', (event, options, id) => {
+  public async init(electron: Electron): Promise<any> {
+    electron.ipcMain.on('dialog:open', async (event, options, id) => {
+      const result = await electron.dialog.showOpenDialog(options);
       if (id) {
-        event.sender.send(`dialog:open:${id}`, electron.dialog.showOpenDialog(options));
+        event.sender.send(`dialog:open:${id}`, result);
       } else {
-        event.sender.send('dialog:open', electron.dialog.showOpenDialog(options));
+        event.sender.send('dialog:open', result);
       }
     });
     this.internalInitialized = true;
-    return Promise.resolve();
   }
 }

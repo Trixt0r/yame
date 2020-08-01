@@ -1,0 +1,29 @@
+mat-expansion-panel-header {
+
+  position: relative;
+
+  .inline-actions {
+    position: absolute;
+    top: 0;
+    right: 32px;
+    max-height: 100%;
+    transform: translate(50%, -4px);
+    opacity: 0;
+    transition: all ease-in-out 50ms;
+    .mat-icon-button {
+      line-height: inherit;
+      mat-icon {
+        font-size: 1.125em;
+      }
+    }
+  }
+  &:hover .inline-actions {
+    opacity: inherit;
+    transform: translate(0, -4px);
+  }
+  &.mat-expanded .inline-actions,
+  &.mat-expanded:hover {
+    opacity: inherit;
+    transform: translate(0, 0);
+  }
+}

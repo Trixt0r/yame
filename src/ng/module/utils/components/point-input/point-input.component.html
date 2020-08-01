@@ -1,0 +1,19 @@
+<div [formGroup]="parts" class="point-input-container">
+  <input class="point-input-element"
+          formControlName="x"
+          aria-label="x"
+          placeholder="x"
+          yameNumber
+          (yameNumberInput)="value = { x: $event.value, y: value.y }; input.next($event.event);"
+          (input)="_handleInput()"
+          [type]="type">
+  <span *ngIf="delimiter" class="point-input-spacer">{{ delimiter }}</span>
+  <input class="point-input-element"
+          formControlName="y"
+          aria-label="y"
+          placeholder="y"
+          yameNumber
+          (yameNumberInput)="value = { x: value.x, y: $event.value }; input.next($event.event);"
+          (input)="_handleInput()"
+          [type]="type">
+</div>

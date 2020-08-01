@@ -12,10 +12,10 @@ export class DialogProvider extends ElectronProvider {
    */
   open(options: Electron.OpenDialogOptions): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      let id = _.uniqueId('dialog-');
+      const id = _.uniqueId('dialog-');
       this.ipc.send('dialog:open', options, id);
-      this.ipc.once(`dialog:open:${id}`, (event, files) => {
-        if (files && files.length) resolve(files);
+      this.ipc.once(`dialog:open:${id}`, (event, dialog) => {
+        if (dialog && dialog.filePaths && dialog.filePaths.length > 0) resolve(dialog.filePaths);
         else reject(new DialogProviderException('No files chosen'));
       });
     });

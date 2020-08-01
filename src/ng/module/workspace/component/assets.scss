@@ -1,5 +1,5 @@
 $max-width: 100px;
-$max-height: 50px;
+$max-height: 75px;
 $options-height: 0px;
 $bc-height: 20px;
 $options-bg-color: #191c1d;
@@ -21,7 +21,7 @@ $options-bg-color: #191c1d;
   max-height: calc(100% - #{$options-height});
   mat-card {
     width: $max-width;
-    margin: 0 2.5px 5px 2.5px;
+    margin: 0 2px 4px 2px;
     height: 138px;
     mat-card-header {
       overflow: hidden;

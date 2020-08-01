@@ -1,0 +1,18 @@
+<div class="half">
+  <mat-expansion-panel>
+    <mat-expansion-panel-header [class.editable]="component.editable" [class.removable]="component.removable">
+      <h5 class="mat-h5">{{ component.id }}</h5>
+      <div class="preview-wrapper">
+        <span class="preview bg"></span>
+        <span class="preview" [style.background-color]="rgbaString"></span>
+      </div>
+      <div class="inline-actions">
+        <yame-edit-component *ngIf="component.editable" [entities]="entities" [component]="component"></yame-edit-component>
+        <button *ngIf="component.removable" mat-icon-button (click)="remove($event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </mat-expansion-panel-header>
+    <sketch-picker [control]="control"></sketch-picker>
+  </mat-expansion-panel>
+</div>

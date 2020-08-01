@@ -1,26 +1,20 @@
-import { AssetGroup } from '../../../../common/asset/group';
-import { FileAsset } from '../../../../common/asset/file';
-import { DirectoryAsset } from '../../../../common/asset/directory';
-import { Asset } from '../../../../common/asset';
-import { FileContent } from '../../../../common/content/file';
-import { DirectoryContent } from '../../../../common/content/directory';
+import { AssetGroup } from 'common/asset/group';
+import { FileAsset } from 'common/asset/file';
+import { DirectoryAsset } from 'common/asset/directory';
+import { Asset } from 'common/asset';
+import { FileContent } from 'common/content/file';
+import { DirectoryContent } from 'common/content/directory';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
 /**
- * Interface for a convert which is able to convert a fs resource to an asset.
+ * Interface for a converter which is able to convert a fs resource to an asset.
  *
  * @interface FsConverter
+ * @param {FileContent | DirectoryContent} source The content to convert to an asset.
+ * @returns {FileAsset | DirectoryAsset} The converted asset.
  */
-interface FsConverter {
-
-  /**
-   * @param {FileContent | DirectoryContent} source The content to convert to an asset.
-   * @returns {FileAsset | DirectoryAsset} The converted asset.
-   */
-  (source: FileContent | DirectoryContent, service: AssetService): Promise<FileAsset | DirectoryAsset>;
-
-}
+type FsConverter = (source: FileContent | DirectoryContent, service: AssetService) => Promise<FileAsset | DirectoryAsset>;
 
 /**
  * Definition for the internal converters.
@@ -63,6 +57,8 @@ export class AssetService {
   // Internal cache for accessing assets directly without running any conversion
   private cache: Cache = { };
 
+  private rootGroup: AssetGroup<Asset>;
+
   /**
    * Registers an new file system resource converter for a certain file type.
    *
@@ -96,7 +92,7 @@ export class AssetService {
   fromFs(source: FileContent | DirectoryContent, cache: boolean = true): Promise<FileAsset | DirectoryAsset> {
     if (this.cache[source.path] && cache)
       return Promise.resolve(this.cache[source.path]);
-    let converter = this.converters[source.type];
+    const converter = this.converters[source.type];
     return (converter ? converter(source, this) : this.toFileAsset(source))
             .then(re => this.cache[source.path] = re)
   }
@@ -108,8 +104,8 @@ export class AssetService {
    * @returns {FileAsset} The converted result
    */
   toFileAsset(source: FileContent | DirectoryContent): Promise<FileAsset> {
-    let file = <FileContent>source;
-    let asset = new FileAsset();
+    const file = <FileContent>source;
+    const asset = new FileAsset();
     asset.id = file.path;
     asset.content = _.extend({}, file);
     return Promise.resolve(asset);
@@ -141,6 +137,14 @@ export class AssetService {
     );
   }
 
+  getAssetsRecursive(root: AssetGroup<Asset> = this.rootGroup): Asset[] {
+    if (!root) throw new Error('No root set');
+    let assets = this.getAssets(root);
+    this.getGroups(root)
+      .forEach(group => assets = assets.concat(this.getAssetsRecursive(group)) );
+    return assets;
+  }
+
   /**
    * Returns all parents of the given asset by climbing the hierarchy up.
    *
@@ -148,11 +152,19 @@ export class AssetService {
    * @returns {AssetGroup<Asset>[]} A list of all parents of the given asset.
    */
   getParents(asset: Asset): AssetGroup<Asset>[] {
-    let parents = [];
+    const parents = [];
     let parent = asset;
     while (parent = parent.parent)
       parents.push(parent);
     return parents;
+  }
+
+  set root(root: AssetGroup<Asset>) {
+    this.rootGroup = root;
+  }
+
+  get root(): AssetGroup<Asset> {
+    return this.rootGroup;
   }
 
 }

@@ -1,22 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DebugElement, SimpleChange } from '@angular/core';
-import { ResizeableComponent } from './resizable';
+import { SimpleChange } from '@angular/core';
+import { ResizableComponent } from './resizable';
 
 class EventHandler {
   fn() {}
 }
 
-describe('ResizeableComponent', () => {
-  let comp: ResizeableComponent;
-  let fixture: ComponentFixture<ResizeableComponent>;
+describe('ResizableComponent', () => {
+  let comp: ResizableComponent;
+  let fixture: ComponentFixture<ResizableComponent>;
   let updateSpy: jasmine.Spy;
 
   beforeEach(done => {
     TestBed.configureTestingModule({
-      declarations: [ResizeableComponent],
+      declarations: [ResizableComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ResizeableComponent);
+    fixture = TestBed.createComponent(ResizableComponent);
     comp = fixture.componentInstance;
     comp.ref = fixture.elementRef;
     comp.maxVal = 500;

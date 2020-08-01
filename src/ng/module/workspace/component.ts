@@ -3,7 +3,7 @@ import { ElectronService } from '../electron/service';
 import { AssetGroup } from '../../../common/asset/group';
 import { AssetService } from './service/asset';
 import { GroupsComponent } from './component/groups';
-import { ResizeableComponent } from '../utils/component/resizable';
+import { ResizableComponent } from '../utils/component/resizable';
 import { AssetsComponent } from './component/assets';
 import { WorkspaceService } from './service';
 import { Component, ElementRef, ViewChild, NgZone, ChangeDetectionStrategy } from '@angular/core';
@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 import { DirectoryContent } from '../../../common/content/directory';
 import { FileContent } from '../../../common/content/file';
 import { Asset } from '../../../common/asset';
+import { DirectoryAsset } from 'common/asset/directory';
 
 /**
  * The workspace component represents the workspace.
@@ -21,7 +22,7 @@ import { Asset } from '../../../common/asset';
  *
  * @export
  * @class WorkspaceComponent
- * @extends {ResizeableComponent}
+ * @extends {ResizableComponent}
  */
 @Component({
   moduleId: module.id.toString(),
@@ -30,7 +31,7 @@ import { Asset } from '../../../common/asset';
   styleUrls: ['./component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkspaceComponent extends ResizeableComponent {
+export class WorkspaceComponent extends ResizableComponent {
   /**
    * @type {((DirectoryContent | FileContent)[])} All currently loaded content.
    */
@@ -47,9 +48,9 @@ export class WorkspaceComponent extends ResizeableComponent {
   assetGroup: AssetGroup<Asset>;
 
   /**
-   * @type {ResizeableComponent} The resizer between both inner components.
+   * @type {ResizableComponent} The resizer between both inner components.
    */
-  @ViewChild('resizer', { static: false }) resizer: ResizeableComponent;
+  @ViewChild('resizer', { static: false }) resizer: ResizableComponent;
 
   /**
    * @type {GroupsComponent} The groups component, on the left.
@@ -116,7 +117,10 @@ export class WorkspaceComponent extends ResizeableComponent {
           ];
           return this.assets
             .fromFs(json)
-            .then(group => this.onGroupSelect(<AssetGroup<Asset>>group))
+            .then(group => {
+              this.assets.root = <DirectoryAsset>group;
+              this.onGroupSelect(<AssetGroup<Asset>>group)
+            })
             .then(() => setTimeout(() => this.onResize()))
             .then(() => true);
         });

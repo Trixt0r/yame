@@ -4,12 +4,12 @@ import { AssetPreviewComponent } from './interface';
 
 @Component({
   template: `
-    <mat-icon class="no-preview">{{ 'web_asset' }}</mat-icon>
+    <mat-icon class="no-preview">{{ 'insert_drive_file' }}</mat-icon>
   `,
   styles: [
     `
       mat-icon {
-        font-size: 100px;
+        font-size: 5em;
         width: 100%;
         color: rgba(255, 255, 255, 0.7);
       }

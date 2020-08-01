@@ -9,8 +9,8 @@ import * as path from 'path';
  * @return {void}
  */
 export function extend(mapping: { [key: string]: any }) {
-  var Module = require('module');
-  var originalRequire = Module.prototype.require;
+  const Module = require('module');
+  const originalRequire = Module.prototype.require;
   const nodeModules = path.resolve(__dirname, '..', 'node_modules');
 
   Module.prototype.require = function(name) {

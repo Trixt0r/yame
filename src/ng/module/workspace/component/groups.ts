@@ -1,10 +1,9 @@
-import { DirectoryAsset } from '../../../../common/asset/directory';
 import { AssetService } from '../service/asset';
 import { Asset } from '../../../../common/asset';
 import { AssetGroup } from '../../../../common/asset/group';
-import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, Output, EventEmitter, ViewChild, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
-import { MatButton, MatListItem } from '@angular/material'
+import { MatButton } from '@angular/material/button'
 
 import { WorkspaceService } from '../service';
 

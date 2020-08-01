@@ -1,4 +1,4 @@
-import { SelectionTool } from './selection';
+import { SelectionToolService } from './selection';
 import { Tool } from '../tool';
 import { Pubsub } from 'electron/idx';
 import { PixiService, SpriteEntity } from 'ng/module/pixi/idx';
@@ -12,7 +12,7 @@ import { TestBed } from '@angular/core/testing';
 import { SelectionState } from './selection/ngxs/state';
 
 describe('SelectionTool', () => {
-  let tool: SelectionTool;
+  let tool: SelectionToolService;
   let pixiService: PixiService;
   let store: Store;
   let actions: Actions;
@@ -41,7 +41,7 @@ describe('SelectionTool', () => {
   beforeEach(() => {
     pixiService = new PixiService();
     pixiService.setUp(<any>{ nativeElement: document.createElement('canvas') }, {});
-    tool = new SelectionTool('select');
+    tool = new SelectionToolService('select');
   });
 
   describe('initial', () => {

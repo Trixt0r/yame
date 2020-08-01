@@ -1,2 +1,2 @@
-<yame-main #main></yame-main>
-<yame-sidebar #sidebar [property]="'left'" [minVal]="720" (sizeUpdated)="sidebarUpdate($event)"></yame-sidebar>
+<yame-main [width]="mainWidth"></yame-main>
+<yame-sidebar [property]="'left'" [minVal]="720" (sizeUpdated)="onSidebarSizeUpdate($event)"></yame-sidebar>

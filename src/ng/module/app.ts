@@ -3,20 +3,19 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainComponent } from '../component/main';
 
-//  Modules
-import { PixiModule } from './pixi';
-import { SidebarModule } from './sidebar';
+// Modules
+import { SidebarModule } from './sidebar/sidebar.module';
 import { WorkspaceModule } from './workspace';
 import { MaterialModule } from './material';
 import { ElectronModule } from './electron';
 import { UtilsModule } from './utils';
 
-import { PixiService } from './pixi/service';
-
 import { AppComponent } from '../component/app';
-import { ToolbarModule } from './toolbar';
 import { PluginModule } from './plugin';
 import { NgxsModule } from '@ngxs/store';
+import { SceneModule } from './scene';
+import { PixiModule } from './pixi/pixi.module';
+import { ToolbarModule } from './toolbar/toolbar.module';
 
 @NgModule({
   imports: [
@@ -27,13 +26,15 @@ import { NgxsModule } from '@ngxs/store';
     UtilsModule,
     ElectronModule,
     PixiModule,
+    SceneModule,
     MaterialModule,
     WorkspaceModule,
     SidebarModule,
     ToolbarModule,
   ],
   declarations: [AppComponent, MainComponent],
-  providers: [PixiService],
+  providers: [],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+}

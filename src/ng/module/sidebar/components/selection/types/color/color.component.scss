@@ -1,0 +1,69 @@
+:host ::ng-deep sketch-picker {
+  width: 100%;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.preview-wrapper {
+  position: relative !important;
+  width: calc(100% - 64px);
+  margin-left: 16px;
+  transition: all ease-in-out 50ms;
+}
+
+.preview {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 10px;
+  transform: translate(-50%, -50%);
+}
+.preview.bg {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==);
+  background-position: left center;
+}
+
+mat-expansion-panel-header {
+
+  position: relative;
+
+  .inline-actions {
+    position: absolute;
+    top: 0;
+    right: 32px;
+    max-height: 100%;
+    transform: translate(50%, -4px);
+    opacity: 0;
+    transition: all ease-in-out 50ms;
+    .mat-icon-button {
+      line-height: inherit;
+      mat-icon {
+        font-size: 1.125em;
+      }
+    }
+  }
+
+  &:hover .inline-actions {
+    opacity: inherit;
+    transform: translate(0, -4px);
+  }
+
+  &.editable:hover .preview-wrapper,
+  &.removable:hover .preview-wrapper,
+  &.mat-expanded.editable .preview-wrapper,
+  &.mat-expanded.removable .preview-wrapper {
+    width: calc(100% - 124px);
+  }
+  &.editable.removable:hover .preview-wrapper,
+  &.mat-expanded.editable.removable .preview-wrapper {
+    width: calc(100% - 144px);
+  }
+
+  &.mat-expanded .inline-actions,
+  &.mat-expanded:hover {
+    opacity: inherit;
+    transform: translate(0, 0);
+  }
+}

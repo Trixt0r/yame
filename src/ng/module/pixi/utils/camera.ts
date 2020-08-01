@@ -1,18 +1,18 @@
 import EventEmitter from '../../../../common/event-emitter';
 
-import * as PIXI from 'pixi.js';
+import { DisplayObject, Point } from 'pixi.js';
 
 /**
  * A camera is responsible for updating the users view correctly.
  */
 export class Camera extends EventEmitter {
   private _zoom: number;
-  private _container: PIXI.DisplayObject;
+  private _container: DisplayObject;
   private _minZoom: number;
   private _maxZoom: number;
-  public targetPosition: PIXI.Point;
+  public targetPosition: Point;
   public zoomStep: number;
-  private localTargetPosition: PIXI.Point;
+  private localTargetPosition: Point;
 
   constructor() {
     super();
@@ -20,8 +20,8 @@ export class Camera extends EventEmitter {
     this._zoom = 1;
     this._minZoom = 0.05;
     this._maxZoom = 3;
-    this.targetPosition = new PIXI.Point();
-    this.localTargetPosition = new PIXI.Point();
+    this.targetPosition = new Point();
+    this.localTargetPosition = new Point();
     this.zoomStep = 0.03;
     this.on('updated', () => {
       if (!this._container) return;
@@ -35,10 +35,10 @@ export class Camera extends EventEmitter {
    * Triggers the `camera:attached` event on the given container.
    * If a container is already is set, it will be detached before.
    *
-   * @param {PIXI.DisplayObject} container
+   * @param container
    * @chainable
    */
-  attach(container: PIXI.DisplayObject) {
+  attach(container: DisplayObject) {
     if (this._container) this.detach();
     this._zoom = Math.max(container.scale.x, container.scale.y);
     this._container = container;
@@ -143,17 +143,17 @@ export class Camera extends EventEmitter {
     return this._minZoom;
   }
 
-  /** @returns {PIXI.Point} Shortcut for `container.position` */
-  get position(): PIXI.Point {
-    return <PIXI.Point>this._container.position;
+  /**
+   * The container position.
+   */
+  get position(): Point {
+    return this._container.position;
   }
 
   /**
    * Sets the position of this camera, i.e. shifts the container this camera is attached to.
-   * @param  {number} value
-   * @returns {void}
    */
-  set position(pos: PIXI.Point) {
+  set position(pos: Point) {
     if (this.position.x !== pos.x || this.position.y !== pos.y) {
       this._container.position.set(pos.x, pos.y);
       this.emit('updated');

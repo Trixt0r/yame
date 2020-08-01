@@ -1,0 +1,17 @@
+<mat-expansion-panel [expanded]="expanded">
+  <mat-expansion-panel-header>
+    <h5 class="mat-h5">{{ component.id }}</h5>
+    <div class="inline-actions">
+      <yame-edit-component *ngIf="component.editable" [entities]="entities" [component]="component"></yame-edit-component>
+      <button *ngIf="component.removable" mat-icon-button (click)="remove($event)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </mat-expansion-panel-header>
+  <ng-container [yameSceneComponents]="components"
+                [yameSceneComponentsEntities]="entities"
+                [yameSelectState]="selectState"
+                (yameSceneComponentsInput)="update($event)"
+                (yameSceneComponentsRemove)="removedComponent($event)"></ng-container>
+  <yame-add-component *ngIf="canAddComponents" [entities]="entities" [component]="component"></yame-add-component>
+</mat-expansion-panel>

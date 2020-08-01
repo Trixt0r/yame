@@ -1,13 +1,13 @@
 import { PixiAppNotInitializedException } from './exception/service/not-initialized';
 import { ElementRef, Injectable, NgZone } from '@angular/core';
-import * as PIXI from 'pixi.js';
 import { Asset } from '../../../common/asset';
 import { PixiAssetConverter } from './service/converter';
 import { Map } from './scene/map';
 import { Entity } from './scene/entity';
-import { Subject, Observable } from 'rxjs/Rx';
+import { Subject } from 'rxjs/Rx';
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { DeleteEntity, UpdateEntity, CreateEntity, EntityAction } from './ngxs/actions';
+import { Point, Application, Renderer, IPoint, IPointData, Container, Ticker, Rectangle } from 'pixi.js';
 
 /**
  * The pixi service is responsible for setting up a pixi js application.
@@ -17,15 +17,15 @@ import { DeleteEntity, UpdateEntity, CreateEntity, EntityAction } from './ngxs/a
  * @export
  * @class PixiService
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class PixiService {
-  private internalApp: PIXI.Application;
+  private internalApp: Application;
   private internalScene: Map;
   private viewRef: ElementRef;
-  private newSize = new PIXI.Point();
+  private newSize = new Point();
   private internalAssetConverter = new PixiAssetConverter();
 
-  private resizeSource = new Subject<PIXI.Point>();
+  private resizeSource = new Subject<Point>();
   private readySource = new Subject<void>();
   private disposeSource = new Subject<void>();
 
@@ -35,13 +35,17 @@ export class PixiService {
 
   constructor(protected zone: NgZone, protected store: Store, protected actions: Actions) {}
 
-  /** @type {PIXI.Application} app The pixi js application instance. */
-  get app(): PIXI.Application {
+  /**
+   * The pixi js application instance.
+   */
+  get app(): Application {
     return this.internalApp;
   }
 
-  /** @type {PIXI.WebGLRenderer | PIXI.CanvasRenderer} renderer The pixi js renderer instance. */
-  get renderer(): PIXI.WebGLRenderer | PIXI.CanvasRenderer {
+  /**
+   * The pixi js renderer instance.
+   */
+  get renderer(): Renderer {
     return this.internalApp.renderer;
   }
 
@@ -50,8 +54,8 @@ export class PixiService {
     return this.internalScene;
   }
 
-  /** @type {PIXI.Container} stage The stage container. The root container.*/
-  get stage(): PIXI.Container {
+  /** The stage container. The root container.*/
+  get stage(): Container {
     return this.internalApp.stage;
   }
 
@@ -60,13 +64,13 @@ export class PixiService {
     return this.internalApp.view;
   }
 
-  /** @type {PIXI.ticker.Ticker} ticker The pixi js ticker, i.e. main loop.*/
-  get ticker(): PIXI.ticker.Ticker {
+  /** The pixi js ticker, i.e. main loop.*/
+  get ticker(): Ticker {
     return this.internalApp.ticker;
   }
 
-  /** @type {PIXI.Rectangle} screen The pixi js scree, i.e. current dimensions.*/
-  get screen(): PIXI.Rectangle {
+  /** @type The pixi js scree, i.e. current dimensions.*/
+  get screen(): Rectangle {
     return this.internalApp.screen;
   }
 
@@ -79,17 +83,17 @@ export class PixiService {
    * Initializes a pixi js application.
    * Call this method can only be called one.
    *
-   * @param {number} width
-   * @param {number} height
-   * @param {PIXI.ApplicationOptions} options
+   * @param width
+   * @param height
+   * @param options
    */
-  setUp(viewRef: ElementRef, options: PIXI.ApplicationOptions) {
+  setUp(viewRef: ElementRef, options?: any) {
     if (this.internalApp) return;
     this.viewRef = viewRef;
-    this.internalApp = new PIXI.Application(
-      viewRef.nativeElement.offsetWidth,
-      viewRef.nativeElement.offsetHeight,
-      options
+    this.internalApp = new Application(Object.assign({
+      width: viewRef.nativeElement.offsetWidth,
+      height: viewRef.nativeElement.offsetHeight
+    }, options)
     );
     this.internalScene = new Map();
     this.internalApp.stage.addChild(this.internalScene);
@@ -120,9 +124,9 @@ export class PixiService {
   /**
    * Resizes the pixi renderer based on the canvas' parent dimensions.
    *
-   * @returns {(boolean | PIXI.Point)}
+   * @returns The new size or `false` if nothing has changed.
    */
-  resize(): boolean | PIXI.Point {
+  resize(): boolean | Point {
     if (!this.viewRef) throw new PixiAppNotInitializedException('Can\'t resize');
     this.newSize.set(this.viewRef.nativeElement.offsetWidth, this.viewRef.nativeElement.offsetHeight);
     if (this.renderer.width !== this.newSize.x || this.renderer.height !== this.newSize.y) {
@@ -136,13 +140,13 @@ export class PixiService {
   /**
    * Converts the mouse coordinates from the given mouse event to local scene coordinates.
    *
-   * @param {MouseEvent} event The mouse event from which to convert the coordinates.
-   * @param {PIXI.PointLike} [target] Optional parameter to store the result in.
-   * @returns {PIXI.PointLike}
+   * @param event The mouse event from which to convert the coordinates.
+   * @param target Optional parameter to store the result in.
+   * @returns The point in scene coordinates.
    */
-  toScene(event: MouseEvent | PIXI.PointLike, target?: PIXI.PointLike): PIXI.PointLike {
+  toScene(event: MouseEvent | IPointData, target?: Point): IPointData {
     if (event instanceof MouseEvent)
-      return this.scene.toLocal(<PIXI.PointLike>{ x: event.clientX, y: event.clientY }, void 0, target);
+      return this.scene.toLocal(<IPointData>{ x: event.clientX, y: event.clientY }, void 0, target);
     else return this.scene.toLocal(event, void 0, target);
   }
 

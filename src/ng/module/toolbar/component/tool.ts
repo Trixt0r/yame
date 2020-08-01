@@ -1,4 +1,4 @@
-import { Tool } from "../tool";
+import { Tool } from '../tool';
 
 /**
  * A tool component draws it's current assigned tool

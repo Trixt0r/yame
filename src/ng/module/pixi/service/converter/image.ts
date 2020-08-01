@@ -1,5 +1,6 @@
 import { ImageAsset } from 'common/asset/image';
 import { SpriteEntity } from 'ng/module/pixi/scene/sprite';
+import { Texture } from 'pixi.js';
 
 /**
  * Converts the given image asset into a sprite.
@@ -10,7 +11,7 @@ import { SpriteEntity } from 'ng/module/pixi/scene/sprite';
  */
 export default function(asset: ImageAsset): Promise<SpriteEntity> {
   return new Promise((resolve, reject) => {
-    const sprite = new SpriteEntity(PIXI.Texture.fromImage(asset.content.path));
+    const sprite = new SpriteEntity(Texture.from(asset.content.path));
     sprite.once(
       'texture:loaded',
       () => {

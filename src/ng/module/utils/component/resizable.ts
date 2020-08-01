@@ -19,17 +19,17 @@ import {
  *
  * @export
  * @abstract
- * @class ResizeableComponent
+ * @class ResizableComponent
  */
 @Component({
   moduleId: module.id.toString(),
   templateUrl: 'resizable.html',
   selector: 'yame-resizable',
   providers: null,
-  styles: ['div { witdh: 100%; height: 100%; }'],
+  styles: ['div { width: 100%; height: 100%; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy {
+export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   /**
    * @protected
    * @type {{ x: number, y: number }} position The click position
@@ -64,7 +64,7 @@ export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy 
   protected onMouseUpBind: EventListenerObject;
 
   /**
-   * Creates an instance of ResizeableComponent.
+   * Creates an instance of ResizableComponent.
    *
    * @param {ElementRef} ref Injected by angular
    */
@@ -111,16 +111,18 @@ export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy 
    * @param {MouseEvent} event
    */
   onMouseDown(event: MouseEvent): void {
-    // Prevents text selection
-    event.preventDefault();
-    // Cache the clicked position
-    this.position = {
-      x: event.clientX,
-      y: event.clientY,
-    };
-    this.clickedVal = this.propVal;
-    window.addEventListener('mousemove', this.onMouseMoveBind);
-    window.addEventListener('mouseup', this.onMouseUpBind);
+    this.zone.runOutsideAngular(() => {
+      // Prevents text selection
+      event.preventDefault();
+      // Cache the clicked position
+      this.position = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      this.clickedVal = this.propVal;
+      window.addEventListener('mousemove', this.onMouseMoveBind);
+      window.addEventListener('mouseup', this.onMouseUpBind);
+    });
   }
 
   /**
@@ -145,9 +147,11 @@ export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy 
   /** Stops the resizing. */
   onMouseUp(): void {
     if (this.position) {
-      this.position = null;
-      window.removeEventListener('mousemove', this.onMouseMoveBind);
-      window.removeEventListener('mouseup', this.onMouseUpBind);
+      this.zone.runOutsideAngular(() => {
+        this.position = null;
+        window.removeEventListener('mousemove', this.onMouseMoveBind);
+        window.removeEventListener('mouseup', this.onMouseUpBind);
+      });
     }
   }
 
@@ -198,10 +202,8 @@ export class ResizeableComponent implements OnChanges, AfterViewInit, OnDestroy 
 
   /**
    * Runs an update based on the current style value of the property
-   *
-   * @private
    */
-  private updateFromStyle() {
+  protected updateFromStyle(): void {
     const style = window.getComputedStyle(this.ref.nativeElement);
     const val = parseFloat(style.getPropertyValue(this.property));
     this.updateValue(this.clampValue(val));

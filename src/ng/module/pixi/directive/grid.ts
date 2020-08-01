@@ -4,7 +4,7 @@ import { Grid } from '../utils/grid';
 import { Camera } from '../utils/camera';
 
 /**
- * Grid directive which can be attched to the pixi component.
+ * Grid directive which can be attached to the pixi component.
  * This directive will create a grid and render it below the current scene.
  */
 @Directive({
