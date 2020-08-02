@@ -97,7 +97,6 @@ export class PixiSelectionContainerService {
 
   updateComponents(): void {
     this.components.clear();
-    console.log('Here');
     let comps = [];
     // if (this.entities.length === 1)
       comps = this.entities[0].components.filter(it => it.id.indexOf('transformation') < 0);
