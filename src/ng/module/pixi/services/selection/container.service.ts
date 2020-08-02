@@ -52,8 +52,8 @@ export class PixiSelectionContainerService {
   }
 
   constructor(
-    protected selection: SelectionToolService,
     @Inject(YAME_RENDERER) public readonly pixi: PixiRendererService,
+    protected selection: SelectionToolService,
     protected store: Store,
   ) {
     this.transformationComps = createTransformationComponents()

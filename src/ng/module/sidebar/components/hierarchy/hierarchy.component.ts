@@ -11,12 +11,11 @@ import {
 } from '@angular/core';
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { SceneEntity, StringSceneComponent, SceneEntityType, SceneComponent } from 'common/scene';
-import { UpdateEntity, DeleteEntity, SortEntity, CloneEntity } from 'ng/module/scene/states/actions/entity.action';
+import { CreateEntity, UpdateEntity, DeleteEntity, SortEntity, CloneEntity } from 'ng/module/scene/states/actions/entity.action';
 import { Unselect, Select } from 'ng/module/scene/states/actions/select.action';
 import { SceneService } from 'ng/module/scene';
 import { ITreeNode } from 'angular-tree-component/dist/defs/api';
 import { TreeComponent } from 'angular-tree-component';
-import { CreateEntity } from 'ng/module/pixi/ngxs/actions';
 import { Subscription } from 'rxjs';
 import { cloneDeep } from 'lodash';
 

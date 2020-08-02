@@ -6,13 +6,42 @@ import { DisplayObject, Point } from 'pixi.js';
  * A camera is responsible for updating the users view correctly.
  */
 export class Camera extends EventEmitter {
-  private _zoom: number;
-  private _container: DisplayObject;
-  private _minZoom: number;
-  private _maxZoom: number;
+
+  /**
+   * The target position.
+   * The coordinate space should be the one of the attached container's parent.
+   */
   public targetPosition: Point;
+
+  /**
+   * The zoom step value, i.e. how fast the camera zooms to the set value.
+   */
   public zoomStep: number;
-  private localTargetPosition: Point;
+
+  /**
+   * The current bound container.
+   */
+  protected _container: DisplayObject;
+
+  /**
+   * Internal zoom value.
+   */
+  protected _zoom: number;
+
+  /**
+   * Internal min zoom value.
+   */
+  protected _minZoom: number;
+
+  /**
+   * Internal max zoom value.
+   */
+  protected _maxZoom: number;
+
+  /**
+   * Internal local target position.
+   */
+  protected localTargetPosition: Point;
 
   constructor() {
     super();
@@ -36,9 +65,9 @@ export class Camera extends EventEmitter {
    * If a container is already is set, it will be detached before.
    *
    * @param container
-   * @chainable
+   * @returns This instance, useful for chaining.
    */
-  attach(container: DisplayObject) {
+  attach(container: DisplayObject): Camera {
     if (this._container) this.detach();
     this._zoom = Math.max(container.scale.x, container.scale.y);
     this._container = container;
@@ -50,9 +79,10 @@ export class Camera extends EventEmitter {
    * Detaches this camera from the current container, if this camera is attached to any.
    *
    * Triggers the `camera:detached` event on the current container.
-   * @chainable
+   *
+   * @returns This instance, useful for chaining.
    */
-  detach() {
+  detach(): Camera {
     if (!this._container) return this;
     this._zoom = 1;
     const prev = this._container;
@@ -61,12 +91,16 @@ export class Camera extends EventEmitter {
     return this;
   }
 
-  /** @returns {PIXI.DisplayObject} The container this camera is attached to. */
+  /**
+   * The container this camera is attached to.
+   */
   get container(): PIXI.DisplayObject {
     return this._container;
   }
 
-  /** @returns {boolean} Whether this camera is attached to a container. */
+  /**
+   * Whether this camera is attached to a container.
+   */
   isAttached(): boolean {
     return this._container !== null;
   }
@@ -76,10 +110,10 @@ export class Camera extends EventEmitter {
    * The zoom value will not be set immediately to the given value.
    * The resulting value of the camera's zoom depends on the current set
    * Camera#zoomStep.
+   *
    * Idea taken from
    * http://stackoverflow.com/questions/29035084/zoom-to-cursor-position-pixi-js
-   * @param  {number} target
-   * @returns {void}
+   * @param target
    */
   set zoom(target: number) {
     if (!this.isAttached()) return;
@@ -96,15 +130,17 @@ export class Camera extends EventEmitter {
     }
   }
 
-  /** @returns {number} The current zoom value. */
+  /**
+   * The current zoom value.
+   */
   get zoom(): number {
     return this._zoom;
   }
 
   /**
    * Sets the max. possible zoom value for this camera.
-   * @param  {number} value
-   * @returns {void}
+   *
+   * @param value
    */
   set maxZoom(value: number) {
     this._maxZoom = value;
@@ -117,15 +153,16 @@ export class Camera extends EventEmitter {
     }
   }
 
-  /** @returns {number} The current max. zoom value possible */
+  /**
+   * The current max. zoom value possible
+   */
   get maxZoom(): number {
     return this._maxZoom;
   }
 
   /**
    * Sets the min. possible zoom value for this camera.
-   * @param  {number} value
-   * @returns {void}
+   * @param value
    */
   set minZoom(value: number) {
     this._minZoom = value;
@@ -138,7 +175,9 @@ export class Camera extends EventEmitter {
     }
   }
 
-  /** @returns {number} The current min. zoom value possible */
+  /**
+   * The current min. zoom value possible.
+   */
   get minZoom(): number {
     return this._minZoom;
   }

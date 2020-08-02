@@ -14,36 +14,12 @@ import {
   Ticker,
   Transform,
 } from 'pixi.js';
-import { Injectable, Component, ElementRef, NgZone, ChangeDetectionStrategy } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { SceneEntity, PointSceneComponent, RangeSceneComponent } from 'common/scene';
-import {
-  PixiGridSystem,
-  PixiCameraSystem,
-  PixiTransformationSystem,
-  PixiRenderingSystem,
-  PixiDebugSystem,
-  PixiSpriteSystem,
-  PixiForegroundSystem,
-} from '../systems';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
 
 const tempPoint = new Point();
-
-@Component({
-  template: `<canvas></canvas>`,
-  styles: [
-    `
-      canvas {
-        cursor: auto;
-      }
-    `,
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class PixiRendererComponent implements ISceneRendererComponent<HTMLCanvasElement> {
-  constructor(public readonly ref: ElementRef<HTMLCanvasElement>) {}
-}
 
 @Injectable({ providedIn: 'root' })
 export class PixiRendererService implements ISceneRenderer {
@@ -219,14 +195,6 @@ export class PixiRendererService implements ISceneRenderer {
           });
         },
       });
-
-      engine.systems.add(new PixiGridSystem(this, 0));
-      engine.systems.add(new PixiCameraSystem(this, 1));
-      engine.systems.add(new PixiTransformationSystem(this, 2));
-      engine.systems.add(new PixiSpriteSystem(this, 3));
-      engine.systems.add(new PixiRenderingSystem(this, 4));
-      engine.systems.add(new PixiForegroundSystem(this, 999));
-      engine.systems.add(new PixiDebugSystem(this, 9999));
     });
   }
 

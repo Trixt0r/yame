@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Engine } from '@trixt0r/ecs';
 import { ofActionSuccessful, Actions } from '@ngxs/store';
-import { CreateEntity, DeleteEntity, SortEntity } from '../states/actions';
-import { UpdateEntity } from 'ng/module/pixi/ngxs/actions';
+import { CreateEntity, DeleteEntity, SortEntity, UpdateEntity } from '../states/actions';
 import { SceneEntity } from 'common/scene';
 
 @Injectable({ providedIn: 'root' })

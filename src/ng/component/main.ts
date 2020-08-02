@@ -1,4 +1,3 @@
-import { PixiComponent } from '../module/pixi/component';
 import {
   AfterViewInit,
   Component,
@@ -11,8 +10,6 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { WorkspaceComponent } from '../module/workspace/component';
-import { PixiCameraDirective } from 'ng/module/pixi/directive/camera';
-import { PixiGridDirective } from 'ng/module/pixi/directive/grid';
 import { ToolbarComponent } from '../module/toolbar/component';
 import { SceneComponent } from 'ng/module/scene';
 
@@ -33,8 +30,6 @@ export class MainComponent implements AfterViewInit, OnChanges {
   @ViewChild(SceneComponent, { static: false }) scene: SceneComponent;
   @ViewChild(ToolbarComponent, { static: false }) toolbar: ToolbarComponent;
   @ViewChild(WorkspaceComponent, { static: false }) workspace: WorkspaceComponent;
-  // @ViewChild(PixiCameraDirective, { static: false }) pixiCamera: PixiCameraDirective;
-  // @ViewChild(PixiGridDirective, { static: false }) pixiGrid: PixiGridDirective;
 
   sceneHeight = 0;
 
@@ -46,8 +41,6 @@ export class MainComponent implements AfterViewInit, OnChanges {
    */
   sidebarUpdate(left: number): void {
     this.ref.nativeElement.style.width = `${left}px`;
-    // this.pixi.ref.nativeElement.width = `${left}px`;
-    // this.pixi.onResize();
     this.workspace.onResize();
   }
 
@@ -59,14 +52,6 @@ export class MainComponent implements AfterViewInit, OnChanges {
   onWorkspaceSizeUpdated(top: number): void {
     this.sceneHeight = top;
     this.cdr.detectChanges();
-    // if (this.pixi)
-    //   this.pixi.ref.nativeElement.style['height'] = `${top}px`;
-    // if (this.toolbar)
-    //   this.toolbar.ref.nativeElement.style['height'] = `${top}px`;
-    // if (this.pixiGrid)
-    //   this.pixiGrid.update();
-    // if (this.pixi)
-    //   this.pixi.onResize();
   }
 
   /**
@@ -74,7 +59,6 @@ export class MainComponent implements AfterViewInit, OnChanges {
    */
   ngAfterViewInit() {
     this.workspace.updateValue(this.workspace.clampValue(MainComponent.DEFAULT_SIZE));
-    // this.pixiGrid.listenToCamera(this.pixiCamera.camera);
   }
 
   /**

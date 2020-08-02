@@ -1,5 +1,5 @@
 import { System } from '@trixt0r/ecs';
-import { Grid } from '../idx';
+import { Grid } from '../';
 import { PixiRendererService } from '../services/renderer.service';
 
 export class PixiGridSystem extends System {
