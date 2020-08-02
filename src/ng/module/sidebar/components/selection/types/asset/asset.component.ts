@@ -47,8 +47,6 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   open(event: any) {
     this.cdkVirtualScrollViewport.scrollToIndex(this.currentIndex + 1);
     this.cdkVirtualScrollViewport.checkViewportSize();
-    // this.cdr.detectChanges();
-    // this.matSelect.stateChanges.next();
   }
 
   checkType(asset: Asset) {

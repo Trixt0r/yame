@@ -35,7 +35,6 @@ export class PixiSelectionContainerService {
   readonly unselected$ = new Subject<SceneEntity[]>();
   readonly update$ = new Subject();
   readonly components = new SceneComponentCollection();
-  readonly transformationComps: SceneComponent[];
 
   /**
    * Whether user events handled via this container.
@@ -56,9 +55,6 @@ export class PixiSelectionContainerService {
     protected selection: SelectionToolService,
     protected store: Store,
   ) {
-    this.transformationComps = createTransformationComponents()
-    this.components.add.apply(this.components, this.transformationComps);
-
     this.update$.subscribe(() => this.updateComponents());
   }
 
@@ -97,10 +93,23 @@ export class PixiSelectionContainerService {
 
   updateComponents(): void {
     this.components.clear();
-    let comps = [];
-    // if (this.entities.length === 1)
-      comps = this.entities[0].components.filter(it => it.id.indexOf('transformation') < 0);
-    this.components.set.apply(this.components, this.transformationComps.concat(comps));
+    const comps = [];
+    const ids: { [ id: string ]: { comp: SceneComponent, entities: SceneEntity[] } } = { };
+    this.entities.forEach(entity => {
+      entity.components.forEach(comp => {
+        if (!ids[comp.id]) ids[comp.id] = { comp: comp, entities: [] };
+        if (ids[comp.id].comp.type !== comp.type) return;
+        ids[comp.id].entities.push(entity);
+      });
+    });
+
+    Object.keys(ids).forEach(key => {
+      const data = ids[key];
+      if (data.entities.length !== this.entities.length) return;
+      comps.push(data.comp);
+    });
+
+    this.components.set.apply(this.components, comps);
 
     const position = this.components.byId('transformation.position') as PointSceneComponent;
     const scale = this.components.byId('transformation.scale') as PointSceneComponent;
@@ -108,15 +117,27 @@ export class PixiSelectionContainerService {
     const skew = this.components.byId('transformation.skew') as PointSceneComponent;
     const pivot = this.components.byId('transformation.pivot') as PointSceneComponent;
 
-    rotation.value = this.container.rotation;
-    position.x = this.container.position.x;
-    position.y = this.container.position.y;
+    if (rotation) rotation.value = this.container.rotation;
+
+    if (position) {
+      position.x = this.container.position.x;
+      position.y = this.container.position.y;
+    }
+
+    if (scale) {
     scale.x = this.container.scale.x;
     scale.y = this.container.scale.y;
-    skew.x = this.container.skew.x;
-    skew.y = this.container.skew.y;
-    pivot.x = this.container.pivot.x;
-    pivot.y = this.container.pivot.y;
+    }
+
+    if (skew) {
+      skew.x = this.container.skew.x;
+      skew.y = this.container.skew.y;
+    }
+
+    if (pivot) {
+      pivot.x = this.container.pivot.x;
+      pivot.y = this.container.pivot.y;
+    }
   }
 
   applyComponents() {
@@ -125,11 +146,11 @@ export class PixiSelectionContainerService {
     const rotation = this.components.byId('transformation.rotation') as RangeSceneComponent;
     const skew = this.components.byId('transformation.skew') as PointSceneComponent;
     const pivot = this.components.byId('transformation.pivot') as PointSceneComponent;
-    this.container.rotation = rotation.value;
-    this.container.position.copyFrom(position);
-    this.container.scale.copyFrom(scale);
-    this.container.skew.copyFrom(skew);
-    this.container.pivot.copyFrom(pivot);
+    if (rotation) this.container.rotation = rotation.value;
+    if (position) this.container.position.copyFrom(position);
+    if (scale) this.container.scale.copyFrom(scale);
+    if (skew) this.container.skew.copyFrom(skew);
+    if (pivot) this.container.pivot.copyFrom(pivot);
   }
 
   /**
@@ -156,11 +177,10 @@ export class PixiSelectionContainerService {
    *
    * @param entities The entities to add.
    * @param silent Whether to skip the subject notification.
-   * @return The added entities.
+   * @returns The added entities.
    */
   select(entities: SceneEntity[], silent = false) {
     const added: SceneEntity[] = [];
-    // const tmpRot = this.container.rotation;
     const tmp = this.entities.slice();
     this.unselect(this.entities, true);
     tmp.forEach((it) => this.entities.push(it));
@@ -231,7 +251,7 @@ export class PixiSelectionContainerService {
    *
    * @param entities The entities to remove. By default all currently selected entities will be removed.
    * @param silent Whether to skip the subject notification.
-   * @return The removed entities.
+   * @returns The removed entities.
    */
   unselect(entities: SceneEntity[] = this.entities.slice(), silent = false): SceneEntity[] {
     if (this.handling) this.endHandling(this.currentHandler);

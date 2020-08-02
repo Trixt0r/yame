@@ -75,10 +75,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     this.maxVal = window.innerHeight - SelectionComponent.HEIGHT_SUB;
     this.onResizeBound = this.onResize.bind(this);
     this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBound));
-    this.actions.pipe(ofActionSuccessful(UpdateComponents))
-      .subscribe((action: UpdateComponents) => {
-        this.entityComponentsDirective.componentsUpdate.next(action.components);
-      });
+    this.actions.pipe(ofActionSuccessful(UpdateComponents)).subscribe((action: UpdateComponents) => {
+      this.entityComponentsDirective.componentsUpdate.next(action.components);
+    });
   }
 
   get visible(): boolean {
@@ -107,7 +106,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    * @param event
    */
   dispatch(event: AbstractInputEvent<any>): void {
-    const data = this.entities.map(it => ( { id: it.id, parent: it.parent, components: [event.component] } ));
+    const data = this.entities
+      .filter((entity) => entity.components.byId(event.component.id))
+      .map((it) => ({ id: it.id, parent: it.parent, components: [event.component] }));
     this.store.dispatch(new UpdateEntity(data, 'Component update'));
   }
 
@@ -119,9 +120,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     if (changes.selected) this.updateFromStyle();
     const selected = this.selected;
     const ids = this.selected ? this.selected.entities : [];
-    this.entities = this.store.selectSnapshot(state => state.scene.entities).filter(it => ids.indexOf(it.id) >= 0);
+    this.entities = this.store.selectSnapshot((state) => state.scene.entities).filter((it) => ids.indexOf(it.id) >= 0);
     if (selected && selected.components) {
-      this.components = selected.components.filter(it => !it.group);
+      this.components = selected.components.filter((it) => !it.group);
     } else {
       this.components = [];
     }

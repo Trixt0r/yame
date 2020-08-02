@@ -20,6 +20,7 @@ import { SceneComponent, SceneEntity } from 'common/scene';
 import { Subscription, Subject } from 'rxjs';
 import { ISelectState } from 'ng/module/scene/states/select.state';
 import * as _ from 'lodash';
+import { isEqual } from 'lodash';
 
 type SceneComponentRef = ComponentRef<AbstractTypeComponent>;
 
@@ -223,7 +224,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
           componentRef.instance.component = component;
           componentRef.instance.entities = this.entities;
           componentRef.instance.selectState = this.selectState;
-          if (typeof (componentRef.instance as any).ngOnChanges === 'function')
+          if (typeof (componentRef.instance as any).ngOnChanges === 'function' && !isEqual(component, previous))
             (componentRef.instance as any).ngOnChanges({ component: new SimpleChange(previous, component, previous === void 0) });
           componentRef.changeDetectorRef.detectChanges();
           this.setUpSubs(componentRef);
@@ -261,7 +262,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    *
    * @param componentRef
    */
-  setUpSubs(componentRef: SceneComponentRef) {
+  setUpSubs(componentRef: SceneComponentRef): void {
     this.removeSubs(componentRef);
     EntityComponentsDirective.componentRefSubs.set(componentRef, [
       componentRef.instance.updateEvent.subscribe(event => this.yameSceneComponentsInput.emit(event)),
@@ -283,7 +284,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    *
    * @param componentRef
    */
-  removeSubs(componentRef: SceneComponentRef) {
+  removeSubs(componentRef: SceneComponentRef): void {
     const subs = EntityComponentsDirective.componentRefSubs.get(componentRef);
     if (!subs || subs.length === 0) return;
     subs.forEach(sub => sub.unsubscribe());

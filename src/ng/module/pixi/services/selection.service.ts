@@ -128,6 +128,8 @@ export class PixiSelectionService {
                 if (action instanceof Select) {
                   containerService.select(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
                   action.components = containerService.components.elements as SceneComponent[];
+                } else {
+                  containerService.unselect();
                 }
                 (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
                 this.service.engineService.run();

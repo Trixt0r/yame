@@ -149,7 +149,10 @@ export class SceneComponentService {
     const data = entityObjects.map(it => ({ id: it.id, components: [_.cloneDeep(component)] }));
     selected.components = selected.components.concat([component]);
     return this.store.dispatch([
-      new UpdateEntity(data, `Component added in entities ${data.map(it => it.id).join(',')}`),
+      new UpdateEntity(
+        data,
+        `Component added in entities ${data.map(it => it.id).join(',')}`
+      ),
       selected && selected.entities.length > 0 ? new Select(selected.entities, selected.components) : void 0
     ]);
   }
@@ -200,7 +203,7 @@ export class SceneComponentService {
       if (!this.scene.assertEntity(entityObj))
         throw new EntityNotFoundException('No entity found', it);
       return entityObj;
-    });
+    }).filter(entity => !!entity.components.byId(old.id));
     const selected = this.store.selectSnapshot(data => data.select);
     old.markedForDelete = true;
     const data = entityObjects.map(it => ({ id: it.id, components: [_.cloneDeep(component), _.cloneDeep(old)] }));
