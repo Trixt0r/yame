@@ -50,7 +50,9 @@ export class NumberDirective {
    */
   get value(): number {
     const input = this.vcr.element.nativeElement as HTMLInputElement;
-    return parseFloat(input.value);
+    let re = parseFloat(input.value);
+    if (isNaN(re)) re = 0;
+    return re;
   }
 
   constructor(protected vcr: ViewContainerRef, protected zone: NgZone) {

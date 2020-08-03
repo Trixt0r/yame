@@ -2,6 +2,7 @@ import { Component, ViewChild, ChangeDetectionStrategy, OnChanges, ViewEncapsula
 import { AbstractTypeComponent, AbstractInputEvent } from '../abstract';
 import { PointSceneComponent } from 'common/scene/component/point';
 import { PointInputComponent } from 'ng/module/utils';
+import { IPoint } from 'pixi.js';
 
 @Component({
   templateUrl: './point.component.html',
@@ -17,10 +18,14 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
 
   @ViewChild('input', { static: true }) input: PointInputComponent;
 
+  get value() {
+    return this.component.mixed ? { x: '', y: '' } : this.transform(this.component) || { x: 0, y: 0 };
+  }
+
   constructor() {
     super();
     this.externalEvent.subscribe(() => {
-      this.input.value = this.transform(this.component);
+      this.input.value = this.value;
       this.ngOnChanges();
     });
   }
@@ -33,6 +38,7 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
     const reversed = this.reverse(this.input.value);
     this.component.x = reversed.x;
     this.component.y = reversed.y;
+    this.component.mixed = false;
     const data: AbstractInputEvent<PointSceneComponent> = {
       originalEvent: event,
       component: this.component

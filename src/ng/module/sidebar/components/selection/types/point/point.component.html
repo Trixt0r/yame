@@ -4,8 +4,8 @@
   <point-input
     #input
     (input)="update($event)"
-    [value]="transform(component) || { x: 0, y: 0 }"
-    [placeholder]="component.id"
+    [value]="value"
+    [placeholder]="component.mixed ? component.id + ' ' + placeholder : component.id"
     [disabled]="disabled"
   ></point-input>
 </mat-form-field>

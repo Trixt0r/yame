@@ -22,6 +22,7 @@ export class InputTypeComponent<T extends SceneComponent = SceneComponent> exten
    */
   update(event: any) {
     (this.component as unknown as StringSceneComponent).string = this.reverse(event.currentTarget.value);
+    this.component.mixed = false;
     return super.update(event);
   }
 

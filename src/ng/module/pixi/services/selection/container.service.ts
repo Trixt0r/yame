@@ -7,6 +7,7 @@ import { SceneEntity, SceneComponent, PointSceneComponent, RangeSceneComponent, 
 import { YAME_RENDERER, UpdateComponents } from 'ng/module/scene';
 import { SceneComponentCollection } from 'common/scene/component.collection';
 import { Store } from '@ngxs/store';
+import { merge, isEqual } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionContainerService {
@@ -106,7 +107,9 @@ export class PixiSelectionContainerService {
     Object.keys(ids).forEach(key => {
       const data = ids[key];
       if (data.entities.length !== this.entities.length) return;
-      comps.push(data.comp);
+      const notEqual = !!data.entities.find(it => !isEqual(it.components.byId(key), data.comp));
+      const mixed = key.indexOf('transformation') < 0 && notEqual;
+      comps.push(merge({}, data.comp, { mixed }));
     });
 
     this.components.set.apply(this.components, comps);

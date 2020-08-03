@@ -63,6 +63,14 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   }
 
   /**
+   * The placeholder.
+   */
+  get placeholder(): any {
+    if (!this.component) return '';
+    return this.component && this.component.mixed ? '(mixed)' : this.component.placeholder || '';
+  }
+
+  /**
    * Handler, which emits the update event.
    *
    * @param event The original event emitted.

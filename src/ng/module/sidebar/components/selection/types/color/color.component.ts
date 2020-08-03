@@ -29,6 +29,7 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
         blue: value.blue,
         alpha: value.alpha,
       });
+      this.component.mixed = false;
       this.updateEvent.emit({
         originalEvent: val,
         component: this.component
@@ -41,8 +42,10 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
     const val = this.component ? this.component : null;
     if (val && typeof val === 'object') {
       const parts = [ val.red, val.green, val.blue, val.alpha ];
-      this._rgbaString = `rgba(${parts.join(',')})`;
+      this._rgbaString = this.component.mixed ? 'rgba(255, 255, 255, 1)' : `rgba(${parts.join(',')})`;
+      const wasMixed = this.component.mixed;
       this.control.setValueFrom(new NgxColor(this._rgbaString));
+      this.component.mixed = wasMixed;
     }
     this.cdr.markForCheck();
   }

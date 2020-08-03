@@ -5,7 +5,8 @@
   <input
     matInput
     [disabled]="disabled"
-    [value]="component.string ? transform(component.string) : ''"
+    [placeholder]="placeholder"
+    [value]="component.string && !component.mixed ? transform(component.string) : ''"
     (input)="update($event)"
   />
 </mat-form-field>

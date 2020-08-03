@@ -1,5 +1,5 @@
 <mat-form-field class="full" [class.editable]="component.editable" [class.removable]="component.removable">
-  <mat-label>{{ component.id }}</mat-label>
+  <mat-label>{{ component.mixed ? component.id + ' ' + placeholder : component.id }}</mat-label>
   <mat-select
     (opened)="open($event)"
     [(ngModel)]="selected"

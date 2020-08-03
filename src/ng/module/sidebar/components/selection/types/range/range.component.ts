@@ -34,7 +34,7 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
   }
 
   get value(): number {
-    return typeof this.component.value === 'number' ? this.transform(this.component.value) : 0;
+    return !this.component.mixed && typeof this.component.value === 'number' ? this.transform(this.component.value) : 0;
   }
 
   constructor(private cdr: ChangeDetectorRef) {
@@ -47,6 +47,7 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
    */
   update(event: any) {
     this.component.value = this.reverse(event.value);
+    this.component.mixed = false;
     return super.update(event);
   }
 
@@ -54,6 +55,7 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
    * @inheritdoc
    */
   ngOnChanges() {
+    if (!this.slider) return;
     const change = new MatSliderChange();
     change.value = this.value;
     this.slider.change.emit(change);

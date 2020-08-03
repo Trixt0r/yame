@@ -19,7 +19,7 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
 
   decimal = 2;
 
-  get number(): number {
+  get number(): number | string {
     return typeof this.component.number === 'number' ? this.transform(this.component.number) : 0;
   }
 
@@ -29,6 +29,7 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
   update(event: any) {
     const val: string | number = event.currentTarget.value;
     this.component.number = this.reverse(typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val);
+    this.component.mixed = false;
     return super.update(event);
   }
 

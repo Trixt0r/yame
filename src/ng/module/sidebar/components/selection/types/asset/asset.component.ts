@@ -41,7 +41,9 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this._allAssets = allAssets.filter(asset => this.checkType(asset));
     if (Object.keys(this.sanitized).length === 0)
       this._allAssets.forEach(it => this.sanitized[it.id] = this.sanitizer.bypassSecurityTrustUrl(it.content.path));
-    this.selected = this.component.asset;
+    const wasMixed = this.component.mixed;
+    this.selected = this.component.mixed ? null : this.component.asset;
+    this.component.mixed = wasMixed;
   }
 
   open(event: any) {
@@ -81,6 +83,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this.currentIndex = id ? this._allAssets.findIndex(it => it.id === id) : -1;
     const asset = this._allAssets[this.currentIndex];
     this.component.asset = asset ? id : null;
+    this.component.mixed = false;
     this.cdr.detectChanges();
     this.updateEvent.emit(data);
   }
