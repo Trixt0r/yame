@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { State, StateContext, Action, Store, Actions } from '@ngxs/store';
-import { Select, Unselect } from './actions/select.action';
+import { Select, Unselect, UpdateComponents } from './actions/select.action';
 import { SceneComponent } from 'common/scene';
 import { ISceneState } from './scene.state';
 
@@ -31,6 +31,12 @@ export class SelectState {
       entities.push(entity.id);
     });
     ctx.setState({ entities, components });
+  }
+
+  @Action(UpdateComponents)
+  update(ctx: StateContext<ISelectState>, action: UpdateComponents) {
+    if (!action.patch) return;
+    ctx.patchState({ components: action.components });
   }
 
   @Action(Unselect)

@@ -6,7 +6,7 @@ import { SceneService } from './scene.service';
 import { Observable } from 'rxjs';
 import { UpdateEntity } from '../states/actions/entity.action';
 import { EntityNotFoundException } from '../exceptions/scene/entity-not-found.exception';
-import { Select } from '../states/actions/select.action';
+import { Select, UpdateComponents } from '../states/actions/select.action';
 
 @Injectable({ providedIn: 'root' })
 export class SceneComponentService {
@@ -153,7 +153,7 @@ export class SceneComponentService {
         data,
         `Component added in entities ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new Select(selected.entities, selected.components) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components, true) : void 0
     ]);
   }
 
@@ -185,7 +185,7 @@ export class SceneComponentService {
         data,
         `Component ${component.id} removed in entity ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new Select(selected.entities, selected.components ) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components, true) : void 0
     ]);
   }
 
@@ -214,7 +214,7 @@ export class SceneComponentService {
         data,
         `Component ${component.id} update in entity ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new Select(selected.entities, selected.components ) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components, true) : void 0
     ]);
   }
 }

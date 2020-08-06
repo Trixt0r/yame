@@ -1,8 +1,8 @@
-import { CommonPluginManager } from "common/plugin-manager";
+import { CommonPluginManager } from 'common/plugin-manager';
 import { ipcRenderer } from 'electron';
 import * as _ from 'lodash';
-import { YameEnvironment } from "../../../common/interface/environment";
-import { Environment } from "../../environment";
+import { YameEnvironment } from '../../../common/interface/environment';
+import { Environment } from '../../environment';
 
 /**
  * Plugin manager for the angular side of the editor.
@@ -11,7 +11,6 @@ import { Environment } from "../../environment";
  * @extends CommonPluginManager
  */
 export class PluginManager extends CommonPluginManager {
-
   /** @inheritdoc */
   protected environment: YameEnvironment = Environment;
 

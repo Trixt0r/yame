@@ -7,7 +7,7 @@ export class Select {
 
 export class UpdateComponents {
   static readonly type = '[Selection] UpdateComponents';
-  constructor(public components: SceneComponent[] = []) {}
+  constructor(public components: SceneComponent[] = [], public patch = false) {}
 }
 
 export class Unselect {
