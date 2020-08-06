@@ -70,9 +70,9 @@ module.exports = (env, argv) => {
           loaders: [ 'raw-loader', 'sass-loader' ]
         },
         {
-          include: [ path.join(baseDir, 'style.scss') ],
+          include: [ path.join(baseDir, 'style.scss'), path.join(baseDir, 'loading.scss') ],
           test: /\.scss$|\.sass$/,
-          use: [ 'style-loader', 'css-loader','sass-loader' ],
+          use: [ 'style-loader', 'css-loader', 'sass-loader' ],
         },
       ]
     },

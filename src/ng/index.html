@@ -7,16 +7,17 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="assets/loading.css" />
 </head>
 <body>
   <yame-root>
     <div class="text-center loading">
-      <div class="sk-folding-cube">
-        <div class="sk-cube1 sk-cube"></div>
-        <div class="sk-cube2 sk-cube"></div>
-        <div class="sk-cube4 sk-cube"></div>
-        <div class="sk-cube3 sk-cube"></div>
+      <div id="spinner" class="active">
+        <span class="ball"></span>
+        <span class="ball"></span>
+        <span class="ball"></span>
       </div>
+      <div class="info">Loading</div>
     </div>
   </yame-root>
 </body>
