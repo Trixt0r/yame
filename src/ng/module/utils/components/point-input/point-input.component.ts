@@ -193,7 +193,7 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
   set value(point: IPoint | null) {
     const { x, y } = point || { x: 0, y: 0 };
     if (x === void 0 || y === void 0) return;
-    this.parts.setValue({ x, y });
+    this.parts.setValue({ x: Math.round(x * 100) / 100, y: Math.round(y * 100) / 100 });
     this.stateChanges.next();
   }
 

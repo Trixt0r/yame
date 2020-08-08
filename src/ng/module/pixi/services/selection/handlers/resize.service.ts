@@ -82,9 +82,9 @@ export class PixiSelectionHandlerResizeService {
     this.updateSub = this.service.actions.pipe(ofActionDispatched(UpdateEntity))
                           .subscribe((action: UpdateEntity) => {
                             const data = Array.isArray(action.data) ? action.data : [action.data];
-                            const hasScale = data.find(it => it.components.find(comp => comp.id === 'transformation.scale'));
-                            if (!hasScale) return;
-                            const scale = this.containerService.components.byId('transformation.scale') as PointSceneComponent;
+                            if (data.length <= 0) return;
+                            const scale = data[0].components.find(comp => comp.id === 'transformation.scale') as PointSceneComponent;
+                            if (!scale) return;
                             this.containerService.container.scale.copyFrom(scale);
                           });
   }

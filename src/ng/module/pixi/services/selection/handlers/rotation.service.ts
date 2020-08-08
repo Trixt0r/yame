@@ -240,9 +240,9 @@ export class PixiSelectionHandlerRotationService {
     this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
                           .subscribe((action: UpdateEntity) => {
                             const data = Array.isArray(action.data) ? action.data : [action.data];
-                            const hasScale = data.find(it => it.components.find(comp => comp.id === 'transformation.rotation'));
-                            if (!hasScale) return;
-                            const rotation = this.containerService.components.byId('transformation.rotation') as RangeSceneComponent;
+                            if (data.length <= 0) return;
+                            const rotation = data[0].components.find(comp => comp.id === 'transformation.rotation') as RangeSceneComponent;
+                            if (!rotation) return;
                             this.containerService.container.rotation = rotation.value;
                           });
   }

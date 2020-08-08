@@ -479,9 +479,9 @@ export class PixiSelectionHandlerSkewService {
     this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
                           .subscribe((action: UpdateEntity) => {
                             const data = Array.isArray(action.data) ? action.data : [action.data];
-                            const hasSkew = data.find(it => it.components.find(comp => comp.id === 'transformation.skew'));
-                            if (!hasSkew) return;
-                            const skew = this.containerService.components.byId('transformation.skew') as PointSceneComponent;
+                            if (data.length <= 0) return;
+                            const skew = data[0].components.find(comp => comp.id === 'transformation.skew') as PointSceneComponent;
+                            if (!skew) return;
                             this.container.skew.copyFrom(skew);
                           });
   }

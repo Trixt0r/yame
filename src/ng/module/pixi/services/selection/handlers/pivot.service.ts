@@ -163,12 +163,11 @@ export class PixiSelectionHandlerPivotService {
     this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
                           .subscribe((action: UpdateEntity) => {
                             const data = Array.isArray(action.data) ? action.data : [action.data];
-                            const hasPivot = data.find(it => it.components.find(comp => comp.id === 'transformation.pivot'));
-                            if (!hasPivot) return;
-                            const pivot = this.containerService.components.byId('transformation.pivot') as PointSceneComponent;
-                            const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
+                            if (data.length <= 0) return;
+                            const pivot = data[0].components.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
+                            if (!pivot) return;
 
-                            const oldPos = this.container.position.copyTo(tmp2);
+                            const oldPos = tmp2.copyFrom(this.container.position);
                             this.container.parent.toLocal(pivot, this.container, this.container.position);
 
                             const diffX = oldPos.x - this.container.position.x;
@@ -176,6 +175,7 @@ export class PixiSelectionHandlerPivotService {
 
                             this.container.position.set(oldPos.x - diffX, oldPos.y - diffY);
 
+                            const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
                             position.x = this.container.position.x;
                             position.y = this.container.position.y;
 

@@ -104,9 +104,9 @@ export class PixiSelectionHandlerPositionService {
     this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
                           .subscribe((action: UpdateEntity) => {
                             const data = Array.isArray(action.data) ? action.data : [action.data];
-                            const hasPosition = data.find(it => it.components.find(comp => comp.id === 'transformation.position'));
-                            if (!hasPosition) return;
-                            const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
+                            if (data.length <= 0) return;
+                            const position = data[0].components.find(comp => comp.id === 'transformation.position') as PointSceneComponent;
+                            if (!position) return;
                             this.container.position.copyFrom(position);
                           });
   }
