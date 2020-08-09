@@ -169,6 +169,36 @@ export class PixiSelectionContainerService {
     return this.store.dispatch(this.updateAction);
   }
 
+  updateContainer(): void {
+    if (this.entities.length > 0) {
+      this.container.interactive = true;
+      let bounds: Rectangle;
+      if (this.container.parent && this.entities.length > 1) {
+        this.entities.forEach(entity => {
+          transformTo(this.pixi.getContainer(entity.id), this.container.parent);
+        });
+        bounds = this.container.getLocalBounds();
+        const pivotX = bounds.x + bounds.width / 2;
+        const pivotY = bounds.y + bounds.height / 2;
+        this.container.parent.toLocal(new Point(pivotX, pivotY), this.container, this.container.position);
+        this.container.pivot.set(pivotX, pivotY);
+      } else {
+        // Apply the transformation of the child directly to the container
+        const child = this.pixi.getContainer(this.entities[0].id);
+        transformTo(child, this.container.parent);
+        this.container.transform.setFromMatrix(child.localTransform);
+        this.container.pivot.copyFrom(child.pivot);
+        // The child has to have no transformation, i.e. identity matrix
+        child.transform.setFromMatrix(Matrix.IDENTITY);
+        child.pivot.set(0, 0); // Needed, since above line is not resetting the pivot coordinates
+        bounds = this.container.getLocalBounds();
+      }
+      this.container.hitArea = bounds;
+    }
+
+    this.updateComponents();
+  }
+
   /**
    * Selects the given entities, i.e. adds them to this container.
    * This happens without changing the parent entity reference.
@@ -207,33 +237,7 @@ export class PixiSelectionContainerService {
       this.container.addChild(this.pixi.getContainer(entity.id));
     });
 
-    if (this.entities.length > 0) {
-      this.container.interactive = true;
-      let bounds: Rectangle;
-      if (this.container.parent && this.entities.length > 1) {
-        this.entities.forEach(entity => {
-          transformTo(this.pixi.getContainer(entity.id), this.container.parent);
-        });
-        bounds = this.container.getLocalBounds();
-        const pivotX = bounds.x + bounds.width / 2;
-        const pivotY = bounds.y + bounds.height / 2;
-        this.container.parent.toLocal(new Point(pivotX, pivotY), this.container, this.container.position);
-        this.container.pivot.set(pivotX, pivotY);
-      } else {
-        // Apply the transformation of the child directly to the container
-        const child = this.pixi.getContainer(this.entities[0].id);
-        transformTo(child, this.container.parent);
-        this.container.transform.setFromMatrix(child.localTransform);
-        this.container.pivot.copyFrom(child.pivot);
-        // The child has to have no transformation, i.e. identity matrix
-        child.transform.setFromMatrix(Matrix.IDENTITY);
-        child.pivot.set(0, 0); // Needed, since above line is not resetting the pivot coordinates
-        bounds = this.container.getLocalBounds();
-      }
-      this.container.hitArea = bounds;
-    }
-
-    this.updateComponents();
+    this.updateContainer();
 
     if (added.length > 0 && !silent) this.selected$.next(added);
 
@@ -254,7 +258,8 @@ export class PixiSelectionContainerService {
   unselect(entities: SceneEntity[] = this.entities.slice(), silent = false): SceneEntity[] {
     if (this.handling) this.endHandling(this.currentHandler);
     const toRemove = entities.filter((child) => this.entities.indexOf(child) >= 0);
-    entities.forEach((entity) => {
+    const hadOnlyOne = this.entities.length === 1;
+    entities.forEach(entity => {
       if (toRemove.indexOf(entity) < 0)
         return console.warn(
           '[SelectionContainer] You are trying to remove a child ' + 'which is not part of this container!'
@@ -266,24 +271,17 @@ export class PixiSelectionContainerService {
         this.entities.splice(idx, 1);
         entity.components.remove(this.comp);
       }
-      // Restoring the internal relation and transformation
+      // Restore the internal relation
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
-
-      const mat = parentContainer.worldTransform.clone().invert().append(child.worldTransform.clone());
-      const transform = new Transform();
-      mat.decompose(transform);
-
-      child.scale.copyFrom(transform.scale);
-      child.rotation = transform.rotation;
-      child.skew.copyFrom(transform.skew);
-
-      // Note, that the position is not extracted from the decomposed transform, due to pivot issues
-      parentContainer.toLocal(child.position, this.container, child.position);
       parentContainer.addChild(child);
+      // And apply the proper transformation values
+      if (hadOnlyOne && !silent) child.pivot.copyFrom(this.container.pivot);
+      transformTo(child, parentContainer);
     });
     if (this.entities.length === 0) this.container.interactive = false;
     if (toRemove.length > 0 && !silent) this.unselected$.next(toRemove);
     if (!this.container.interactive) this.pixi.scene.removeChild(this.container);
+    else this.select(this.entities);
     return toRemove;
   }
 }

@@ -88,7 +88,10 @@ export class PixiSelectionRendererService {
     service.init$.subscribe(() => {
       this.stage = this.service.stage;
       container.selected$.subscribe(() => this.attach());
-      container.unselected$.subscribe(() => this.detach());
+      container.unselected$.subscribe(() => {
+        if (container.entities.length === 0)
+          this.detach();
+      });
       container.update$.subscribe(() => {
         this.lastSizeUpdate.set(0, 0);
         service.engineService.run();

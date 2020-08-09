@@ -201,23 +201,14 @@ export class PixiSelectionHandlerPivotService {
    * @param entities The unselected entities.
    */
   unselected(entities: SceneEntity[]): void {
-    if (entities.length > 1)
-      return entities.forEach(entity => {
-        const pivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
-        if (!pivot) return;
-        const child = this.rendererService.getContainer(entity.id);
-        if (!child) return;
-        pivot.x = child.pivot.x;
-        pivot.y = child.pivot.y;
-      });
-    const entity = entities[0];
-    if (!entity) return;
-    const child = this.rendererService.getContainer(entity.id);
-    const pivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
-    if (!pivot) return;
-    pivot.x = this.container.pivot.x;
-    pivot.y = this.container.pivot.y;
-    child.parent.toLocal(pivot, child, entity.components.byId('transformation.position') as unknown as Point);
+    entities.forEach(entity => {
+      const pivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
+      if (!pivot) return;
+      const child = this.rendererService.getContainer(entity.id);
+      if (!child) return;
+      pivot.x = child.pivot.x;
+      pivot.y = child.pivot.y;
+    });
   }
 
 }

@@ -14,8 +14,8 @@ import { SceneEntity, StringSceneComponent, SceneEntityType, SceneComponent } fr
 import { CreateEntity, UpdateEntity, DeleteEntity, SortEntity, CloneEntity } from 'ng/module/scene/states/actions/entity.action';
 import { Unselect, Select } from 'ng/module/scene/states/actions/select.action';
 import { SceneService } from 'ng/module/scene';
-import { ITreeNode } from 'angular-tree-component/dist/defs/api';
-import { TreeComponent } from 'angular-tree-component';
+import { ITreeNode, ITreeOptions } from 'angular-tree-component/dist/defs/api';
+import { TreeComponent, TREE_ACTIONS, IActionMapping, TreeModel } from 'angular-tree-component';
 import { Subscription } from 'rxjs';
 import { cloneDeep } from 'lodash';
 
@@ -34,6 +34,16 @@ interface TreeNode {
   isExpanded?: boolean;
   virtual?: boolean;
 }
+
+const actionMapping: IActionMapping = {
+  mouse: {
+    click: (tree: TreeModel, node, $event: MouseEvent) => {
+      $event.ctrlKey || $event.shiftKey
+        ? TREE_ACTIONS.TOGGLE_ACTIVE_MULTI(tree, node, $event)
+        : TREE_ACTIONS.TOGGLE_ACTIVE(tree, node, $event);
+    }
+  }
+};
 
 /**
  * The hierarchy component is responsible for outlining the scene hierarchy.
@@ -57,7 +67,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
   scrollTop: number = 0;
 
   nodes: TreeNode[];
-  options: any = {
+  options: ITreeOptions = {
     allowDrop: (element: ITreeNode, to: any) => {
       const node = element.data as TreeNode;
       const target = to.parent.data as TreeNode;
@@ -73,6 +83,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     allowDrag: (node: ITreeNode) => {
       return this.scene.entities.length > 1 && !this.isLocked(node.data as TreeNode);
     },
+    actionMapping
   };
 
   /**
@@ -338,7 +349,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    * @param event The triggered event.
    */
   onDeactivate(event: any) {
-    this.store.dispatch(new TreeUnselect());
+    const data = event.node.data as TreeNode;
+    this.store.dispatch(new TreeUnselect([data.id]));
   }
 
   /**
