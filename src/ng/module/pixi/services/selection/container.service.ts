@@ -1,13 +1,14 @@
 import { Injectable, Inject } from '@angular/core';
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiRendererService } from '../renderer.service';
-import { Container, Rectangle, Point, Transform } from 'pixi.js';
+import { Container, Rectangle, Point, Transform, Matrix } from 'pixi.js';
 import { Subject, Observable } from 'rxjs';
 import { SceneEntity, SceneComponent, PointSceneComponent, RangeSceneComponent, createTransformationComponents } from 'common/scene';
 import { YAME_RENDERER, UpdateComponents } from 'ng/module/scene';
 import { SceneComponentCollection } from 'common/scene/component.collection';
 import { Store } from '@ngxs/store';
 import { merge, isEqual } from 'lodash';
+import { transformTo } from '../../utils/transform.utils';
 
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionContainerService {
@@ -201,38 +202,32 @@ export class PixiSelectionContainerService {
       added.push(entity);
     });
 
-    this.entities.forEach((entity) => {
+    this.entities.forEach(entity => {
       entity.components.add(this.comp);
-      const entityContainer = this.pixi.getContainer(entity.id);
-      const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
-      this.container.toLocal(entityContainer.position, parentContainer, entityContainer.position);
-      this.container.addChild(entityContainer);
+      this.container.addChild(this.pixi.getContainer(entity.id));
     });
 
     if (this.entities.length > 0) {
       this.container.interactive = true;
       let bounds: Rectangle;
       if (this.container.parent && this.entities.length > 1) {
+        this.entities.forEach(entity => {
+          transformTo(this.pixi.getContainer(entity.id), this.container.parent);
+        });
         bounds = this.container.getLocalBounds();
         const pivotX = bounds.x + bounds.width / 2;
         const pivotY = bounds.y + bounds.height / 2;
         this.container.parent.toLocal(new Point(pivotX, pivotY), this.container, this.container.position);
         this.container.pivot.set(pivotX, pivotY);
       } else {
+        // Apply the transformation of the child directly to the container
         const child = this.pixi.getContainer(this.entities[0].id);
-        // Copy the transformation over
-        this.container.rotation = child.rotation;
-        this.container.position.copyFrom(child.position);
-        this.container.scale.copyFrom(child.scale);
-        this.container.skew.copyFrom(child.skew);
+        transformTo(child, this.container.parent);
+        this.container.transform.setFromMatrix(child.localTransform);
         this.container.pivot.copyFrom(child.pivot);
-        // And set the identity transformation on the child
-        child.position.copyFrom(child.pivot);
-        this.container.toLocal(child.position, child, child.position);
-        child.scale.set(1, 1);
-        child.skew.set(0, 0);
-        child.rotation = 0;
-        // Now we have the correct bounds
+        // The child has to have no transformation, i.e. identity matrix
+        child.transform.setFromMatrix(Matrix.IDENTITY);
+        child.pivot.set(0, 0); // Needed, since above line is not resetting the pivot coordinates
         bounds = this.container.getLocalBounds();
       }
       this.container.hitArea = bounds;
