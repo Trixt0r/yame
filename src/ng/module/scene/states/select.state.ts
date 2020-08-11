@@ -43,10 +43,11 @@ export class SelectState {
   unselect(ctx: StateContext<ISelectState>, action: Unselect) {
     if (!action.entities || action.entities.length === 0) return ctx.setState({ entities: [], components: [] });
     const entities: string[] = ctx.getState().entities.slice();
+    const components: SceneComponent[] = action.components || [];
     action.entities.forEach(id => {
       const idx = entities.indexOf(id);
       if (idx >= 0) entities.splice(idx, 1);
     });
-    ctx.patchState({ entities });
+    ctx.patchState({ entities, components });
   }
 }

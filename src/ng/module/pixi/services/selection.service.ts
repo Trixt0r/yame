@@ -127,12 +127,12 @@ export class PixiSelectionService {
               .subscribe((action: Select | Unselect) => {
                 if (action instanceof Select) {
                   containerService.select(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
-                  action.components = containerService.components.elements as SceneComponent[];
                 } else {
                   if (!action.entities || action.entities.length === 0) containerService.unselect();
                   else containerService.unselect(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
                 }
                 (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
+                action.components = containerService.components.elements.slice() as SceneComponent[];
                 containerService.update$.next();
               });
 

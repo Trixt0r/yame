@@ -75,9 +75,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     this.maxVal = window.innerHeight - SelectionComponent.HEIGHT_SUB;
     this.onResizeBound = this.onResize.bind(this);
     this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBound));
-    this.actions.pipe(ofActionSuccessful(UpdateComponents)).subscribe((action: UpdateComponents) => {
-      this.entityComponentsDirective.componentsUpdate.next(action.components);
-    });
+    this.actions
+      .pipe(ofActionSuccessful(UpdateComponents))
+      .subscribe((action: UpdateComponents) => this.updateDirective(action.components));
   }
 
   get visible(): boolean {
@@ -123,6 +123,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     this.entities = this.store.selectSnapshot((state) => state.scene.entities).filter((it) => ids.indexOf(it.id) >= 0);
     if (selected && selected.components) {
       this.components = selected.components.filter((it) => !it.group);
+      this.updateDirective(selected.components.slice());
     } else {
       this.components = [];
     }
@@ -130,5 +131,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
 
   removed(event: AbstractRemoveEvent) {
     this.sceneComponents.removeSceneComponent(this.entities, event.component);
+  }
+
+  updateDirective(components: SceneComponent[]) {
+    if (this.entityComponentsDirective) this.entityComponentsDirective.componentsUpdate.next(components);
   }
 }

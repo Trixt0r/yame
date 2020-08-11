@@ -129,8 +129,8 @@ export class PixiSelectionContainerService {
     }
 
     if (scale) {
-    scale.x = this.container.scale.x;
-    scale.y = this.container.scale.y;
+      scale.x = this.container.scale.x;
+      scale.y = this.container.scale.y;
     }
 
     if (skew) {
@@ -144,7 +144,10 @@ export class PixiSelectionContainerService {
     }
   }
 
-  applyComponents() {
+  /**
+   * Applies the scene components to the actual pixi transformation values.
+   */
+  applyComponents(): void {
     const position = this.components.byId('transformation.position') as PointSceneComponent;
     const scale = this.components.byId('transformation.scale') as PointSceneComponent;
     const rotation = this.components.byId('transformation.rotation') as RangeSceneComponent;
@@ -170,6 +173,7 @@ export class PixiSelectionContainerService {
   }
 
   updateContainer(): void {
+    this.container.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
     if (this.entities.length > 0) {
       this.container.interactive = true;
       let bounds: Rectangle;
@@ -216,13 +220,8 @@ export class PixiSelectionContainerService {
   select(entities: SceneEntity[], silent = false) {
     const added: SceneEntity[] = [];
     const tmp = this.entities.slice();
-    this.unselect(this.entities, true);
+    this.unselect(tmp, true);
     tmp.forEach((it) => this.entities.push(it));
-    this.container.rotation = 0;
-    this.container.position.set(0, 0);
-    this.container.scale.set(1, 1);
-    this.container.skew.set(0, 0);
-    this.container.pivot.set(0, 0);
     this.pixi.scene.addChild(this.container);
 
     entities.forEach((entity) => {
@@ -259,6 +258,7 @@ export class PixiSelectionContainerService {
     if (this.handling) this.endHandling(this.currentHandler);
     const toRemove = entities.filter((child) => this.entities.indexOf(child) >= 0);
     const hadOnlyOne = this.entities.length === 1;
+    const first = this.entities[0];
     entities.forEach(entity => {
       if (toRemove.indexOf(entity) < 0)
         return console.warn(
@@ -275,13 +275,13 @@ export class PixiSelectionContainerService {
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
       parentContainer.addChild(child);
       // And apply the proper transformation values
-      if (hadOnlyOne && !silent) child.pivot.copyFrom(this.container.pivot);
+      if (hadOnlyOne && entity === first) child.pivot.copyFrom(this.container.pivot);
       transformTo(child, parentContainer);
     });
     if (this.entities.length === 0) this.container.interactive = false;
     if (toRemove.length > 0 && !silent) this.unselected$.next(toRemove);
     if (!this.container.interactive) this.pixi.scene.removeChild(this.container);
-    else this.select(this.entities);
+    else this.updateContainer();
     return toRemove;
   }
 }
