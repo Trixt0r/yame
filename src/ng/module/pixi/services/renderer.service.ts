@@ -1,4 +1,4 @@
-import { ISceneRenderer, SceneComponent, ISceneRendererComponent, EngineService, SortEntity, SceneService } from '../../scene';
+import { ISceneRenderer, SceneComponent as SceneComponentView, EngineService, SortEntity, SceneService } from '../../scene';
 import { Asset } from 'common/asset';
 import {
   Application,
@@ -12,12 +12,13 @@ import {
   IPointData,
   Renderer,
   Ticker,
-  Transform,
 } from 'pixi.js';
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
-import { SceneEntity, PointSceneComponent, RangeSceneComponent } from 'common/scene';
+import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent } from 'common/scene';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
+import { transformTo } from '../utils/transform.utils';
+import { SceneComponentCollection } from 'common/scene/component.collection';
 
 const tempPoint = new Point();
 
@@ -26,7 +27,7 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * Internal scene component reference.
    */
-  protected comp: SceneComponent;
+  protected comp: SceneComponentView;
 
   /**
    * Internal application reference.
@@ -117,28 +118,12 @@ export class PixiRendererService implements ISceneRenderer {
                 data.forEach(it => {
                   if (it.parent === it.oldParent) return
                   const container = this.getContainer(it.id);
-                  const oldParent = this.getContainer(it.oldParent) || this.scene;
                   const newParent = this.getContainer(it.parent) || this.scene;
 
-                  const mat = newParent.worldTransform.clone().invert().append(container.worldTransform.clone());
-                  const transform = new Transform();
-                  mat.decompose(transform);
-
-                  newParent.toLocal(container.position, oldParent, container.position);
-                  const entity = this.sceneService.getEntity(it.id);
-                  const position = entity.components.byId('transformation.position') as PointSceneComponent;
-                  const scale = entity.components.byId('transformation.scale') as PointSceneComponent;
-                  const skew = entity.components.byId('transformation.skew') as PointSceneComponent;
-                  const rotation = entity.components.byId('transformation.rotation') as RangeSceneComponent;
-
-                  rotation.value = transform.rotation;
-                  scale.x = transform.scale.x;
-                  scale.y = transform.scale.y;
-                  skew.x = transform.skew.x;
-                  skew.y = transform.skew.y;
-                  position.x = container.position.x;
-                  position.y = container.position.y;
                   newParent.addChild(container);
+                  transformTo(container, newParent);
+                  const entity = this.sceneService.getEntity(it.id);
+                  this.updateComponents(entity.components, container);
                   if (it.parent && parents.indexOf(it.parent) < 0) parents.push(it.parent);
                   if (it.oldParent && parents.indexOf(it.oldParent) < 0) parents.push(it.oldParent);
                 });
@@ -169,13 +154,17 @@ export class PixiRendererService implements ISceneRenderer {
                   if (container.parent) {
                     container.parent.toLocal(tempPoint, container, container.position);
                     const parentPosition = parentEntity.components.byId('transformation.position') as PointSceneComponent;
-                    parentPosition.x = container.position.x;
-                    parentPosition.y = container.position.y;
+                    if (parentPosition) {
+                      parentPosition.x = container.position.x;
+                      parentPosition.y = container.position.y;
+                    }
                   }
                   const parentPivot = parentEntity.components.byId('transformation.pivot') as PointSceneComponent;
-                  parentPivot.x = tempPoint.x
-                  parentPivot.y = tempPoint.y;
-                  container.pivot.set( parentPivot.x, parentPivot.y);
+                  if (parentPivot) {
+                    parentPivot.x = tempPoint.x
+                    parentPivot.y = tempPoint.y;
+                    container.pivot.copyFrom(parentPivot);
+                  }
                 });
               });
 
@@ -198,7 +187,7 @@ export class PixiRendererService implements ISceneRenderer {
     });
   }
 
-  set component(comp: SceneComponent) {
+  set component(comp: SceneComponentView) {
     if (this._app) this._app.destroy();
     this.comp = comp;
     this._app = new Application({
@@ -213,7 +202,7 @@ export class PixiRendererService implements ISceneRenderer {
     this.init$.next();
   }
 
-  get component(): SceneComponent {
+  get component(): SceneComponentView {
     return this.comp;
   }
 
@@ -291,5 +280,45 @@ export class PixiRendererService implements ISceneRenderer {
     const container = this.getContainer(id);
     container.worldTransform.applyInverse(point, tempPoint);
     return bounds.contains(tempPoint.x, tempPoint.y);
+  }
+
+  /**
+   * Updates the given components by reading the pixi values from the given container.
+   *
+   * @param components The components to update.
+   * @param container The container to get the pixi values from.
+   */
+  updateComponents(components: SceneComponentCollection<SceneComponent>, container: Container): void {
+    if (!container) return;
+
+    const position = components.byId('transformation.position') as PointSceneComponent;
+    const scale = components.byId('transformation.scale') as PointSceneComponent;
+    const skew = components.byId('transformation.skew') as PointSceneComponent;
+    const pivot = components.byId('transformation.pivot') as PointSceneComponent;
+    const rotation = components.byId('transformation.rotation') as RangeSceneComponent;
+
+    if (rotation) {
+      rotation.value = container.rotation;
+    }
+
+    if (scale) {
+      scale.x = container.scale.x;
+      scale.y = container.scale.y;
+    }
+
+    if (skew) {
+      skew.x = container.skew.x;
+      skew.y = container.skew.y;
+    }
+
+    if (position) {
+      position.x = container.position.x;
+      position.y = container.position.y;
+    }
+
+    if (pivot) {
+      pivot.x = container.pivot.x;
+      pivot.y = container.pivot.y;
+    }
   }
 }

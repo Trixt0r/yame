@@ -45,8 +45,6 @@ export class PixiSelectionHandlerResizeService {
     renderer.attached$.subscribe(() => this.attached());
     renderer.detached$.subscribe(() => this.detached());
     renderer.update$.subscribe(() => this.updated());
-
-    containerService.unselected$.subscribe((entities) => this.unselected(entities));
   }
 
   /**
@@ -113,21 +111,5 @@ export class PixiSelectionHandlerResizeService {
   updated(): void {
     const bnds = this.containerService.container.getLocalBounds();
     this.anchors.forEach(anchor => anchor.update(bnds));
-  }
-
-  /**
-   * Applies the rotation back to all entities in the container.
-   *
-   * @param unselected
-   */
-  unselected(unselected: SceneEntity[]): void {
-    unselected.forEach(entity => {
-      const child = this.service.getContainer(entity.id);
-      const scale = entity.components.byId('transformation.scale') as PointSceneComponent;
-      if (scale) {
-        scale.x = child.scale.x;
-        scale.y = child.scale.y;
-      }
-    });
   }
 }

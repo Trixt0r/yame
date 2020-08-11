@@ -93,6 +93,9 @@ export class PixiSelectionContainerService {
     this.handleEnd$.next(args);
   }
 
+  /**
+   * Updates the components based on the current entities.
+   */
   updateComponents(): void {
     this.components.clear();
     const comps = [];
@@ -114,34 +117,7 @@ export class PixiSelectionContainerService {
     });
 
     this.components.set.apply(this.components, comps);
-
-    const position = this.components.byId('transformation.position') as PointSceneComponent;
-    const scale = this.components.byId('transformation.scale') as PointSceneComponent;
-    const rotation = this.components.byId('transformation.rotation') as RangeSceneComponent;
-    const skew = this.components.byId('transformation.skew') as PointSceneComponent;
-    const pivot = this.components.byId('transformation.pivot') as PointSceneComponent;
-
-    if (rotation) rotation.value = this.container.rotation;
-
-    if (position) {
-      position.x = this.container.position.x;
-      position.y = this.container.position.y;
-    }
-
-    if (scale) {
-      scale.x = this.container.scale.x;
-      scale.y = this.container.scale.y;
-    }
-
-    if (skew) {
-      skew.x = this.container.skew.x;
-      skew.y = this.container.skew.y;
-    }
-
-    if (pivot) {
-      pivot.x = this.container.pivot.x;
-      pivot.y = this.container.pivot.y;
-    }
+    this.pixi.updateComponents(this.components, this.container);
   }
 
   /**
@@ -277,6 +253,7 @@ export class PixiSelectionContainerService {
       // And apply the proper transformation values
       if (hadOnlyOne && entity === first) child.pivot.copyFrom(this.container.pivot);
       transformTo(child, parentContainer);
+      this.pixi.updateComponents(entity.components, child);
     });
     if (this.entities.length === 0) this.container.interactive = false;
     if (toRemove.length > 0 && !silent) this.unselected$.next(toRemove);

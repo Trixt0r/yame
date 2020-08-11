@@ -72,7 +72,6 @@ export class PixiSelectionHandlerPivotService {
     selectionRenderer.attached$.subscribe(() => this.attached());
     selectionRenderer.detached$.subscribe(() => this.detached());
     selectionRenderer.update$.subscribe(() => this.updateArea());
-    containerService.unselected$.subscribe((entities) => this.unselected(entities));
   }
 
   /**
@@ -193,22 +192,6 @@ export class PixiSelectionHandlerPivotService {
   detached(): void {
     (this.rendererService.stage.getChildByName('foreground') as Container).removeChild(this.area);
     this.clearSub();
-  }
-
-  /**
-   * Handles the un-selection of the given entities.
-   *
-   * @param entities The unselected entities.
-   */
-  unselected(entities: SceneEntity[]): void {
-    entities.forEach(entity => {
-      const pivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
-      if (!pivot) return;
-      const child = this.rendererService.getContainer(entity.id);
-      if (!child) return;
-      pivot.x = child.pivot.x;
-      pivot.y = child.pivot.y;
-    });
   }
 
 }

@@ -63,8 +63,6 @@ export class PixiSelectionHandlerRotationService {
     this.area.on('pointerdown', this.mousedown, this);
     this.area.on('pointerover', this.updateCursor, this);
     this.area.on('pointerout', this.resetCursor, this);
-
-    containerService.unselected$.subscribe(entities => this.unselected(entities));
   }
 
   /**
@@ -255,17 +253,5 @@ export class PixiSelectionHandlerRotationService {
     this.clearSub();
     if (this.debugGraphics) (this.rendererService.stage.getChildByName('debug') as Container).removeChild(this.debugGraphics);
     this.rendererService.stage.removeChild(this.area);
-  }
-
-  /**
-   * Applies the rotation back to all entities in the container.
-   *
-   * @param unselected
-   */
-  unselected(unselected: SceneEntity[]): void {
-    unselected.forEach(entity => {
-      const rotation = entity.components.byId('transformation.rotation') as RangeSceneComponent;
-      if (rotation) rotation.value = this.rendererService.getContainer(entity.id).rotation;
-    });
   }
 }

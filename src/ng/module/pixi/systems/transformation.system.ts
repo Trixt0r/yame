@@ -18,10 +18,11 @@ export class PixiTransformationSystem extends AbstractEntitySystem<SceneEntity> 
     const skew = entity.components.byId('transformation.skew') as PointSceneComponent;
     const pivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
     const rotation = entity.components.byId('transformation.rotation') as RangeSceneComponent;
-    container.position.set(position.x, position.y);
-    container.scale.set(scale.x, scale.y);
-    container.skew.set(skew.x, skew.y);
-    container.pivot.set(pivot.x, pivot.y);
+
+    if (position) container.position.copyFrom(position);
+    if (scale) container.scale.copyFrom(scale);
+    if (skew) container.skew.copyFrom(skew);
+    if (pivot) container.pivot.copyFrom(pivot);
     container.rotation = rotation.value;
   }
 }

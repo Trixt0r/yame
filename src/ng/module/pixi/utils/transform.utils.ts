@@ -7,6 +7,8 @@ const invertedParentTransform = new Matrix();
  * Transforms the given object with its world transform
  * to the coordinate space of the given parent object.
  *
+ * Note: Make sure, that the object is already a child of the given parent.
+ *
  * @param object The object to transform.
  * @param parent The parent object into which to transform the values.
  */

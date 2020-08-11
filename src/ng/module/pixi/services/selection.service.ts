@@ -1,5 +1,5 @@
 import { Point, Rectangle, Container, RoundedRectangle, Graphics } from 'pixi.js';
-import { SceneEntity, SceneComponent } from 'common/scene';
+import { SceneEntity, SceneComponent, SceneEntityType } from 'common/scene';
 import { Injectable, Inject, NgZone } from '@angular/core';
 import { PixiRendererService } from '../services/renderer.service';
 import { YAME_RENDERER, SceneService, Select, Unselect, UpdateEntity, UpdateComponents } from 'ng/module/scene';
@@ -14,7 +14,11 @@ const globalTopLeft = new Point();
 const globalBottomRight = new Point();
 
 class SelectInteractionSystem extends System {
-  constructor(private service: PixiRendererService, private selectionContainerService: PixiSelectionContainerService, priority?: number) {
+  constructor(
+    private service: PixiRendererService,
+    private selectionContainerService: PixiSelectionContainerService,
+    priority?: number
+  ) {
     super(priority);
   }
 
@@ -74,7 +78,8 @@ export class PixiSelectionService {
     actions: Actions,
     zone: NgZone,
     selectionTool: SelectionToolService,
-    containerService: PixiSelectionContainerService) {
+    containerService: PixiSelectionContainerService
+  ) {
     zone.runOutsideAngular(() => {
       this.reset();
       service.engineService.engine.systems.add(new SelectInteractionSystem(service, containerService, 99999));
@@ -114,39 +119,42 @@ export class PixiSelectionService {
 
       selectionTool.end$.subscribe(() => {
         if (containerService.isHandling) return;
-        const entities = scene.entities.filter(it => !it.parent && this.contains(it));
+        const entities = scene.entities.filter((it) => !it.parent && this.contains(it));
         if (entities.length === 0) {
           (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
           this.service.engineService.run();
           return;
         }
-        selectionTool.dispatchSelect(entities.map(it => it.id), []);
+        selectionTool.dispatchSelect(
+          entities.map((it) => it.id),
+          []
+        );
       });
 
-      actions.pipe(ofActionDispatched(Select, Unselect))
-              .subscribe((action: Select | Unselect) => {
-                if (action instanceof Select) {
-                  containerService.select(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
-                } else {
-                  if (!action.entities || action.entities.length === 0) containerService.unselect();
-                  else containerService.unselect(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
-                }
-                (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
-                action.components = containerService.components.elements.slice() as SceneComponent[];
-                containerService.update$.next();
-              });
+      actions.pipe(ofActionDispatched(Select, Unselect)).subscribe((action: Select | Unselect) => {
+        if (action instanceof Select) {
+          containerService.select(
+            scene.entities.filter((it) => it.type !== SceneEntityType.Layer && action.entities.indexOf(it.id) >= 0)
+          );
+        } else {
+          if (!action.entities || action.entities.length === 0) containerService.unselect();
+          else containerService.unselect(scene.entities.filter((it) => action.entities.indexOf(it.id) >= 0));
+        }
+        (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
+        action.components = containerService.components.elements.slice() as SceneComponent[];
+        containerService.update$.next();
+      });
 
       let updateSub: Subscription;
       containerService.selected$.subscribe(() => {
         if (updateSub) updateSub.unsubscribe();
-        updateSub = actions.pipe(ofActionSuccessful(UpdateEntity))
-                .subscribe((action: UpdateEntity) => {
-                  const components = Array.isArray(action.data) ? action.data[0].components : action.data.components;
-                  if (!components) return;
-                  containerService.components.set.apply(containerService.components, components);
-                  containerService.applyComponents();
-                  containerService.update$.next();
-                });
+        updateSub = actions.pipe(ofActionSuccessful(UpdateEntity)).subscribe((action: UpdateEntity) => {
+          const components = Array.isArray(action.data) ? action.data[0].components : action.data.components;
+          if (!components) return;
+          containerService.components.set.apply(containerService.components, components);
+          containerService.applyComponents();
+          containerService.update$.next();
+        });
       });
       containerService.unselected$.subscribe(() => {
         if (containerService.entities.length > 0 || !updateSub) return;
@@ -181,11 +189,16 @@ export class PixiSelectionService {
    * @returns Whether the given entity lies in the rectangle or not.
    */
   contains(entity: SceneEntity): boolean {
+    if (entity.type === SceneEntityType.Layer) return false;
     const stage = this.service.stage;
     stage.toGlobal(this.topLeft, globalTopLeft);
     stage.toGlobal(this.bottomRight, globalBottomRight);
     const bounds = this.service.getShape(entity.id);
-    if (this.service.containsPoint(entity.id, globalTopLeft) || this.service.containsPoint(entity.id, globalBottomRight)) return true;
+    if (
+      this.service.containsPoint(entity.id, globalTopLeft) ||
+      this.service.containsPoint(entity.id, globalBottomRight)
+    )
+      return true;
     if (!bounds) return false;
     const rect = this.rectangle;
     const container = this.service.getContainer(entity.id);

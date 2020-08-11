@@ -41,7 +41,6 @@ export class PixiSelectionHandlerPositionService {
     this.container.on('pointerdown', this.mousedown, this);
     selectionRenderer.attached$.subscribe(() => this.attached());
     selectionRenderer.detached$.subscribe(() => this.detached());
-    containerService.unselected$.subscribe((entities) => this.unselected(entities));
   }
 
   /**
@@ -113,19 +112,5 @@ export class PixiSelectionHandlerPositionService {
 
   detached(): void {
     this.clearSub();
-  }
-
-  /**
-   * The unselected handler.
-   */
-  unselected(entities: SceneEntity[]): void {
-    entities.forEach(entity => {
-      const child = this.rendererService.getContainer(entity.id);
-      const position = entity.components.byId('transformation.position') as PointSceneComponent;
-      if (position) {
-        position.x = child.position.x;
-        position.y = child.position.y;
-      }
-    });
   }
 }

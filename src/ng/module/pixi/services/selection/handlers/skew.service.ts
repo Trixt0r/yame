@@ -183,7 +183,6 @@ export class PixiSelectionHandlerSkewService {
     selectionRenderer.attached$.subscribe(() => this.attached());
     selectionRenderer.detached$.subscribe(() => this.detached());
     selectionRenderer.update$.subscribe(() => this.updateAreaPositions());
-    containerService.unselected$.subscribe((entities) => this.unselected(entities));
   }
 
   /**
@@ -499,21 +498,5 @@ export class PixiSelectionHandlerSkewService {
     if (this.debugGraphics)
       (this.rendererService.stage.getChildByName('debug') as Container).removeChild(this.debugGraphics);
     this.rendererService.stage.removeChild(this.area);
-  }
-
-  /**
-   * Applies the rotation back to all entities in the container.
-   *
-   * @param unselected The entities to update.
-   */
-  unselected(unselected: SceneEntity[]): void {
-    unselected.forEach((entity) => {
-      const container = this.rendererService.getContainer(entity.id);
-      const skew = entity.components.byId('transformation.skew') as PointSceneComponent;
-      if (skew) {
-        skew.x = container.skew.x;
-        skew.y = container.skew.y;
-      }
-    });
   }
 }
