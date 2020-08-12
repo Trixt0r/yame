@@ -175,19 +175,14 @@ export class PixiSelectionContainerService {
       }
       this.container.hitArea = bounds;
     }
+    this.container.transform.updateTransform(this.container.parent.transform);
 
     this.updateComponents();
   }
 
   /**
-   * Selects the given entities, i.e. adds them to this container.
-   * This happens without changing the parent entity reference.
-   *
-   * An already selected entity won't be added to the selection.
-   * An entity is considered selected if it is part of this container.
-   *
-   * Emits the `selected` event with the added entities.
-   * Each newly selected entity will also emit the `selected` event with the selection container reference as an arg.
+   * Selects the given entities.
+   * Adds them to this container, applies the correct transformation and preserves the parent relation.
    *
    * @param entities The entities to add.
    * @param silent Whether to skip the subject notification.
@@ -195,9 +190,13 @@ export class PixiSelectionContainerService {
    */
   select(entities: SceneEntity[], silent = false) {
     const added: SceneEntity[] = [];
-    const tmp = this.entities.slice();
-    this.unselect(tmp, true);
-    tmp.forEach((it) => this.entities.push(it));
+
+    this.entities.forEach(entity => {
+      const child = this.pixi.getContainer(entity.id);
+      const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
+      parentContainer.addChild(child);
+      transformTo(child, parentContainer);
+    });
     this.pixi.scene.addChild(this.container);
 
     entities.forEach((entity) => {
@@ -221,12 +220,9 @@ export class PixiSelectionContainerService {
 
   /**
    * Unselects the given entities, i.e. removes them from this container.
-   * Makes sure to restore each entity to their original parent.
+   * Makes sure to restore each entity to their original parent with the correct transformation.
    *
-   * Emits the `unselected` event with the removed entities.
-   * Each unselected entity will also emit the `unselected` event with the selection container reference as an arg.
-   *
-   * @param entities The entities to remove. By default all currently selected entities will be removed.
+   * @param entities The entities to remove.
    * @param silent Whether to skip the subject notification.
    * @returns The removed entities.
    */
@@ -238,15 +234,15 @@ export class PixiSelectionContainerService {
     entities.forEach(entity => {
       if (toRemove.indexOf(entity) < 0)
         return console.warn(
-          '[SelectionContainer] You are trying to remove a child ' + 'which is not part of this container!'
+          `[SelectionContainer] You are trying to remove a child ${entity.id} which is not part of this container!`
         );
-      const child = this.pixi.getContainer(entity.id);
-      this.container.removeChild(child);
       const idx = this.entities.indexOf(entity);
       if (idx >= 0) {
         this.entities.splice(idx, 1);
         entity.components.remove(this.comp);
       }
+      const child = this.pixi.getContainer(entity.id);
+      child.transform.updateTransform(this.container.transform);
       // Restore the internal relation
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
       parentContainer.addChild(child);

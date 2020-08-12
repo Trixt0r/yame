@@ -23,6 +23,6 @@ export class PixiTransformationSystem extends AbstractEntitySystem<SceneEntity> 
     if (scale) container.scale.copyFrom(scale);
     if (skew) container.skew.copyFrom(skew);
     if (pivot) container.pivot.copyFrom(pivot);
-    container.rotation = rotation.value;
+    if (rotation) container.rotation = rotation.value;
   }
 }

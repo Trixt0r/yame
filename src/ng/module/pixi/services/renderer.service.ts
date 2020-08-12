@@ -15,7 +15,7 @@ import {
 } from 'pixi.js';
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
-import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent } from 'common/scene';
+import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent, SceneEntityType } from 'common/scene';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { SceneComponentCollection } from 'common/scene/component.collection';
@@ -115,17 +115,22 @@ export class PixiRendererService implements ISceneRenderer {
               .subscribe((action: SortEntity) => {
                 const data = Array.isArray(action.data) ? action.data : [action.data];
                 const parents: string[] = [];
+                const restoreParent = { };
                 data.forEach(it => {
                   if (it.parent === it.oldParent) return
                   const container = this.getContainer(it.id);
+                  const oldParent = this.getContainer(it.oldParent) || this.scene;
                   const newParent = this.getContainer(it.parent) || this.scene;
-
-                  newParent.addChild(container);
-                  transformTo(container, newParent);
                   const entity = this.sceneService.getEntity(it.id);
-                  this.updateComponents(entity.components, container);
+
                   if (it.parent && parents.indexOf(it.parent) < 0) parents.push(it.parent);
                   if (it.oldParent && parents.indexOf(it.oldParent) < 0) parents.push(it.oldParent);
+
+                  const enabled = oldParent === container.parent;
+                  if (!enabled) return;
+                  newParent.addChild(container);
+                  transformTo(container, newParent);
+                  this.updateComponents(entity.components, container);
                 });
 
                 const pushParents = (source: string[]) => {
@@ -147,23 +152,26 @@ export class PixiRendererService implements ISceneRenderer {
                 parents.forEach(id => {
                   const container = this.getContainer(id);
                   if (!container) return;
-                  const parentEntity = this.sceneService.getEntity(id);
-                  container.calculateBounds();
+                  const entity = this.sceneService.getEntity(id);
+                  if (entity.type === SceneEntityType.Layer) return;
+                  const parentContainer = this.getContainer(entity.parent) || this.scene;
+                  const enabled = container.parent === parentContainer;
+                  if (!enabled) return;
                   const bounds: Rectangle = container.getLocalBounds();
                   tempPoint.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
                   if (container.parent) {
                     container.parent.toLocal(tempPoint, container, container.position);
-                    const parentPosition = parentEntity.components.byId('transformation.position') as PointSceneComponent;
+                    const parentPosition = entity.components.byId('transformation.position') as PointSceneComponent;
                     if (parentPosition) {
                       parentPosition.x = container.position.x;
                       parentPosition.y = container.position.y;
                     }
                   }
-                  const parentPivot = parentEntity.components.byId('transformation.pivot') as PointSceneComponent;
+                  const parentPivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
                   if (parentPivot) {
                     parentPivot.x = tempPoint.x
                     parentPivot.y = tempPoint.y;
-                    container.pivot.copyFrom(parentPivot);
+                    container.pivot.copyFrom(tempPoint);
                   }
                 });
               });

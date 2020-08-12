@@ -119,7 +119,11 @@ export class PixiSelectionService {
 
       selectionTool.end$.subscribe(() => {
         if (containerService.isHandling) return;
-        const entities = scene.entities.filter((it) => !it.parent && this.contains(it));
+        const entities = scene.entities.filter((it) => {
+          const parent = it.parent ? scene.getEntity(it.parent) : null;
+          const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
+          return (!it.parent || isOnLayer) && this.contains(it);
+        });
         if (entities.length === 0) {
           (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
           this.service.engineService.run();
@@ -134,7 +138,11 @@ export class PixiSelectionService {
       actions.pipe(ofActionDispatched(Select, Unselect)).subscribe((action: Select | Unselect) => {
         if (action instanceof Select) {
           containerService.select(
-            scene.entities.filter((it) => it.type !== SceneEntityType.Layer && action.entities.indexOf(it.id) >= 0)
+            scene.entities.filter((it) => {
+              const parent = it.parent ? scene.getEntity(it.parent) : null;
+              const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
+              return (it.type !== SceneEntityType.Layer || isOnLayer) && action.entities.indexOf(it.id) >= 0;
+            })
           );
         } else {
           if (!action.entities || action.entities.length === 0) containerService.unselect();
