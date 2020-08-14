@@ -16,6 +16,9 @@ import { EntityComponentsDirective } from 'ng/module/sidebar/directives/entity-c
 export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponent> implements OnChanges {
   static readonly type: string = 'group';
 
+  /**
+   * The entity components directive reference.
+   */
   @ViewChild(EntityComponentsDirective) entityComponentsDirective: EntityComponentsDirective;
 
   /**
@@ -23,7 +26,17 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
    */
   components: SceneComponent[] = [];
 
+  /**
+   * Determines whether components can be added to this group or not.
+   */
   canAddComponents: boolean = true;
+
+  /**
+   * Whether this group component is expanded or not.
+   */
+  get expanded(): boolean {
+    return this.component.expanded;
+  }
 
   constructor(
     protected store: Store,
@@ -31,11 +44,32 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
     private cdr: ChangeDetectorRef
   ) {
     super();
-    this.externalEvent.subscribe(event => this.externalUpdate(event));
+    this._externalEventSub.unsubscribe();
+    this._externalEventSub = this.externalEvent.subscribe((comps: SceneComponent[]) => this.onExternalUpdate(comps));
   }
 
-  get expanded(): boolean {
-    return this.component.expanded;
+  /**
+   * @inheritdoc
+   */
+  onUpdate(event: any): void {
+    this.updateEvent.emit(event);
+  }
+
+  /**
+   * Handles the removal of a component by emitting its event
+   * for bubbling up to the handlers for this component.
+   *
+   * @param event The triggered event.
+   */
+  onRemovedComponent(event: AbstractRemoveEvent<GroupSceneComponent>): void {
+    this.removeEvent.emit(event);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  onExternalUpdate(comps: SceneComponent[]): void {
+    this.entityComponentsDirective.componentsUpdate.next(comps);
   }
 
   /**
@@ -50,20 +84,5 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
       return this.sceneComponents.canSceneComponentBeAddedToGroup(this.component, item);
     });
     this.cdr.markForCheck();
-  }
-
-  /**
-   * @inheritdoc
-   */
-  update(event: any) {
-    this.updateEvent.emit(event);
-  }
-
-  removedComponent(event: AbstractRemoveEvent<GroupSceneComponent>) {
-    this.removeEvent.emit(event);
-  }
-
-  externalUpdate(event) {
-    this.entityComponentsDirective.componentsUpdate.next(event);
   }
 }

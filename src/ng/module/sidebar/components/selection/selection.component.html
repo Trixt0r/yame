@@ -4,8 +4,8 @@
     <ng-container [yameSceneComponents]="components"
                   [yameSceneComponentsEntities]="entities"
                   [yameSelectState]="selected"
-                  (yameSceneComponentsInput)="dispatch($event)"
-                  (yameSceneComponentsRemove)="removed($event)"></ng-container>
+                  (yameSceneComponentsInput)="onInput($event)"
+                  (yameSceneComponentsRemove)="onRemove($event)"></ng-container>
   </mat-accordion>
   <yame-add-component class="padding-hor-32" [entities]="entities"></yame-add-component>
 </div>

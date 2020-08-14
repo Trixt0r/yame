@@ -1,8 +1,9 @@
-import { Component, OnChanges, SimpleChanges, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
 import { InputTypeComponent } from '../index';
-import { ColorPickerControl, Color as NgxColor } from '@iplab/ngx-color-picker';
+import { ColorPickerControl } from '@iplab/ngx-color-picker';
 import { Subscription } from 'rxjs';
 import { ColorSceneComponent } from 'common/scene/component/color';
+import { SceneComponent } from 'common/scene';
 
 @Component({
   templateUrl: './color.component.html',
@@ -13,9 +14,27 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
 
   static readonly type: string = 'color';
 
-  control = new ColorPickerControl();
+  /**
+   * The color control.
+   */
+  protected control = new ColorPickerControl();
+
+  /**
+   * The subscription to the color control value changes.
+   */
   protected sub: Subscription;
-  _rgbaString: string;
+
+  /**
+   * The internal rgba string.
+   */
+  protected _rgbaString: string;
+
+  /**
+   * The current rgba values as a string.
+   */
+  get rgbaString(): string {
+    return this._rgbaString;
+  }
 
   constructor(private cdr: ChangeDetectorRef) {
     super();
@@ -37,6 +56,25 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
     });
   }
 
+  /**
+   * @inheritdoc
+   */
+  onExternalUpdate(): void {
+    if (this.component.mixed) {
+      this._rgbaString = 'rgba(255, 255, 255, 1)';
+      const tmp = this.component;
+      this.component = null; // This skips the handler above, so the color stays as is
+      this.control.setValueFrom(this._rgbaString);
+      this.component = tmp;
+      this.cdr.markForCheck();
+    } else {
+      this.ngOnChanges({ component: new SimpleChange(this.component, this.component, false) });
+    }
+  }
+
+  /**
+   * @inheritdoc
+   */
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes.component) return;
     const val = this.component ? this.component : null;
@@ -44,18 +82,17 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
       const parts = [ val.red, val.green, val.blue, val.alpha ];
       this._rgbaString = this.component.mixed ? 'rgba(255, 255, 255, 1)' : `rgba(${parts.join(',')})`;
       const wasMixed = this.component.mixed;
-      this.control.setValueFrom(new NgxColor(this._rgbaString));
+      this.control.setValueFrom(this._rgbaString);
       this.component.mixed = wasMixed;
     }
     this.cdr.markForCheck();
   }
 
+  /**
+   * @inheritdoc
+   */
   ngOnDestroy(): void {
     this.sub.unsubscribe();
-  }
-
-  get rgbaString(): string {
-    return this._rgbaString;
   }
 
 }

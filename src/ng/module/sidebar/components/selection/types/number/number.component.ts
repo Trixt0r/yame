@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ViewChild, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import { AbstractTypeComponent } from '../abstract';
-import { NumberSceneComponent } from 'common/scene';
+import { NumberSceneComponent, SceneComponent } from 'common/scene';
 import { MatInput } from '@angular/material/input';
 
 @Component({
@@ -15,22 +15,38 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
 
   static readonly type: string = 'number';
 
+  /**
+   * The input reference.
+   */
   @ViewChild(MatInput) input: MatInput;
 
-  decimal = 2;
+  /**
+   * The value for rounding values.
+   */
+  decimal = 3;
 
+  /**
+   * THe current number value.
+   */
   get number(): number | string {
-    return typeof this.component.number === 'number' ? this.transform(this.component.number) : 0;
+    return typeof this.component.number === 'number' ? this.transform(this.component.number) as number : 0;
   }
 
   /**
    * @inheritdoc
    */
-  update(event: any) {
+  onUpdate(event: any): void {
     const val: string | number = event.currentTarget.value;
-    this.component.number = this.reverse(typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val);
+    this.component.number = this.reverse(typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val) as number;
     this.component.mixed = false;
-    return super.update(event);
+    return super.onUpdate(event);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  onExternalUpdate(): void {
+    if (this.input) this.input.stateChanges.next();
   }
 
   /**

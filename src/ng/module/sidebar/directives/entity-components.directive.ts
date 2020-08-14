@@ -96,6 +96,9 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    */
   @Output() yameSceneComponentsRemove: EventEmitter<AbstractRemoveEvent> = new EventEmitter();
 
+  /**
+   * The components update event, which should be triggered, as soon as the data model got updated.
+   */
   @Output() componentsUpdate = new EventEmitter<SceneComponent[]>();
 
   /**
@@ -192,44 +195,44 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   render(): SceneComponentRef[] {
     const comps: SceneComponentRef[] = [];
     if (this.components) {
-        let insertCnt = 0;
-        this.components.forEach((component) => {
-          let identifier = component.id ? component.id : component.type;
-          let compType = this.service.getTypeComponent(identifier);
-          if (component.id && !compType) {
-            compType = this.service.getTypeComponent(component.type);
-            identifier = component.type;
-          }
-          if (!compType) return;
-          const cacheKey = `${this.cachePrefix}-${component.type}-${component.id}`;
-          let componentRef: SceneComponentRef;
-          let cached = EntityComponentsDirective.componentRefCache[cacheKey];
-          if (cached) {
-            componentRef = cached.ref;
-            this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
+      let insertCnt = 0;
+      this.components.forEach((component) => {
+        let identifier = component.id ? component.id : component.type;
+        let compType = this.service.getTypeComponent(identifier);
+        if (component.id && !compType) {
+          compType = this.service.getTypeComponent(component.type);
+          identifier = component.type;
+        }
+        if (!compType) return;
+        const cacheKey = `${this.cachePrefix}-${component.type}-${component.id}`;
+        let componentRef: SceneComponentRef;
+        let cached = EntityComponentsDirective.componentRefCache[cacheKey];
+        if (cached) {
+          componentRef = cached.ref;
+          this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
+        } else {
+          componentRef = this.obtainComponentRef(identifier);
+          if (!componentRef) {
+            componentRef = this.createComponent(this.componentFactoryResolver.resolveComponentFactory(compType), void 0, insertCnt++);
           } else {
-            componentRef = this.obtainComponentRef(identifier);
-            if (!componentRef) {
-              componentRef = this.createComponent(this.componentFactoryResolver.resolveComponentFactory(compType), void 0, insertCnt++);
-            } else {
-              this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
-            }
-            cached = EntityComponentsDirective.componentRefCache[cacheKey] = {
-              ref: componentRef,
-              index: this.viewContainerRef.indexOf(componentRef.hostView),
-            };
+            this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
           }
-          if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = uuid();
-          const previous = componentRef.instance.component;
-          componentRef.instance.component = component;
-          componentRef.instance.entities = this.entities;
-          componentRef.instance.selectState = this.selectState;
-          if (typeof (componentRef.instance as any).ngOnChanges === 'function' && !isEqual(component, previous))
-            (componentRef.instance as any).ngOnChanges({ component: new SimpleChange(previous, component, previous === void 0) });
-          componentRef.changeDetectorRef.detectChanges();
-          this.setUpSubs(componentRef);
-          comps.push(componentRef);
-        });
+          cached = EntityComponentsDirective.componentRefCache[cacheKey] = {
+            ref: componentRef,
+            index: this.viewContainerRef.indexOf(componentRef.hostView),
+          };
+        }
+        if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = uuid();
+        const previous = componentRef.instance.component;
+        componentRef.instance.component = component;
+        componentRef.instance.entities = this.entities;
+        componentRef.instance.selectState = this.selectState;
+        if (typeof (componentRef.instance as any).ngOnChanges === 'function' /*&& !isEqual(component, previous)*/)
+          (componentRef.instance as any).ngOnChanges({ component: new SimpleChange(previous, component, previous === void 0) });
+        componentRef.changeDetectorRef.detectChanges();
+        this.setUpSubs(componentRef);
+        comps.push(componentRef);
+      });
       this.detachCachedComponentRefs(comps);
     }
     return comps;

@@ -28,8 +28,8 @@ class SelectionRendererSystem extends System {
   /**
    * @inheritdoc
    */
-  process(): void {
-    this.service.update();
+  process(options?: any): void {
+    this.service.update(options && options.textureLoaded);
   }
 
 }

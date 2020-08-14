@@ -1,5 +1,5 @@
 import { AbstractTypeComponent } from '../abstract';
-import { Component, ChangeDetectionStrategy, OnChanges, ViewChild, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnChanges, ViewChild, SimpleChanges, SimpleChange } from '@angular/core';
 import { SceneComponent, StringSceneComponent } from 'common/scene';
 import { MatInput } from '@angular/material/input';
 
@@ -15,15 +15,25 @@ export class InputTypeComponent<T extends SceneComponent = SceneComponent> exten
 
   static readonly type: string = 'string';
 
+  /**
+   * The input reference.
+   */
   @ViewChild(MatInput) input: MatInput;
 
   /**
    * @inheritdoc
    */
-  update(event: any) {
-    (this.component as unknown as StringSceneComponent).string = this.reverse(event.currentTarget.value);
+  onUpdate(event: any): void {
+    (this.component as unknown as StringSceneComponent).string = this.reverse(event.currentTarget.value) as string;
     this.component.mixed = false;
-    return super.update(event);
+    return super.onUpdate(event);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  onExternalUpdate(): void {
+    if (this.input) this.input.stateChanges.next();
   }
 
   /**

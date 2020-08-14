@@ -2,7 +2,8 @@ import { Component, ViewChild, ChangeDetectionStrategy, OnChanges, ViewEncapsula
 import { AbstractTypeComponent, AbstractInputEvent } from '../abstract';
 import { PointSceneComponent } from 'common/scene/component/point';
 import { PointInputComponent } from 'ng/module/utils';
-import { IPoint } from 'pixi.js';
+import { SceneComponent } from 'common/scene';
+import { IPoint } from 'common/math';
 
 @Component({
   templateUrl: './point.component.html',
@@ -16,26 +17,24 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
 
   static readonly type: string = 'point';
 
+  /**
+   * The input reference.
+   */
   @ViewChild('input', { static: true }) input: PointInputComponent;
 
+  /**
+   * The current value.
+   */
   get value() {
     return this.component.mixed ? { x: '', y: '' } : this.transform(this.component) || { x: 0, y: 0 };
-  }
-
-  constructor() {
-    super();
-    this.externalEvent.subscribe(() => {
-      this.input.value = this.value;
-      this.ngOnChanges();
-    });
   }
 
   /**
    * @inheritdoc
    */
-  update(event: any): void {
+  onUpdate(event: any): void {
     if (!this.input.value) return;
-    const reversed = this.reverse(this.input.value);
+    const reversed = this.reverse(this.input.value) as IPoint;
     this.component.x = reversed.x;
     this.component.y = reversed.y;
     this.component.mixed = false;
@@ -44,6 +43,14 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
       component: this.component
     };
     this.updateEvent.emit(data);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  onExternalUpdate(): void {
+    this.input.value = this.value as IPoint;
+    this.ngOnChanges();
   }
 
   /**

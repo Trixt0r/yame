@@ -19,6 +19,7 @@ import { ISelectState } from 'ng/module/scene/states/select.state';
 import { UpdateEntity } from 'ng/module/scene/states/actions/entity.action';
 import { UpdateComponents } from 'ng/module/scene';
 import { EntityComponentsDirective } from '../../directives/entity-components.directive';
+import { cloneDeep } from 'lodash';
 
 /**
  * The selection component is responsible for rendering the assigned property array.
@@ -105,11 +106,22 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    *
    * @param event
    */
-  dispatch(event: AbstractInputEvent<any>): void {
+  onInput(event: AbstractInputEvent<any>): void {
     const data = this.entities
       .filter((entity) => entity.components.byId(event.component.id))
-      .map((it) => ({ id: it.id, parent: it.parent, components: [event.component] }));
+      .map((it) => ({ id: it.id, parent: it.parent, components: [ cloneDeep(event.component) ] }));
     this.store.dispatch(new UpdateEntity(data, 'Component update'));
+  }
+
+  /**
+   * Handles the removal of an component.
+   */
+  onRemove(event: AbstractRemoveEvent) {
+    this.sceneComponents.removeSceneComponent(this.entities, event.component);
+  }
+
+  updateDirective(components: SceneComponent[]) {
+    if (this.entityComponentsDirective) this.entityComponentsDirective.componentsUpdate.next(components);
   }
 
   /**
@@ -127,13 +139,5 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     } else {
       this.components = [];
     }
-  }
-
-  removed(event: AbstractRemoveEvent) {
-    this.sceneComponents.removeSceneComponent(this.entities, event.component);
-  }
-
-  updateDirective(components: SceneComponent[]) {
-    if (this.entityComponentsDirective) this.entityComponentsDirective.componentsUpdate.next(components);
   }
 }

@@ -35,6 +35,12 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
     engineService.engine.systems.add(new PixiRenderingSystem(renderer, 4));
     engineService.engine.systems.add(new PixiForegroundSystem(renderer, 999));
     engineService.engine.systems.add(new PixiDebugSystem(renderer, 9999));
+
+    engineService.engine.addListener({
+      onErrorBySystem: (error, system) => {
+        console.error(error, system);
+      }
+    })
   };
 }
 

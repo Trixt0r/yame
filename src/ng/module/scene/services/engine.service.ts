@@ -4,6 +4,11 @@ import { ofActionSuccessful, Actions } from '@ngxs/store';
 import { CreateEntity, DeleteEntity, SortEntity, UpdateEntity } from '../states/actions';
 import { SceneEntity } from 'common/scene';
 
+interface EngineOptions {
+  delta?: number;
+  [key: string]: unknown;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EngineService {
 
@@ -12,8 +17,9 @@ export class EngineService {
   public readonly diagnostics: { [label: string]: number | string | boolean } = { };
 
   protected lastRun: number = Date.now();
-  protected engineOpts = { delta: 0 };
   protected requestId: number;
+  public engineOpts: EngineOptions = { delta: 0 };
+  protected tmpEngineOpts: EngineOptions = null;
 
   constructor(actions: Actions) {
     this.engine = new Engine();
@@ -31,16 +37,26 @@ export class EngineService {
       });
   }
 
-  run(): void {
+  run(options?: EngineOptions): void {
+    if (options) {
+      if (!this.tmpEngineOpts) this.tmpEngineOpts = { };
+      Object.assign(this.tmpEngineOpts, options);
+    }
     if (this.requestId) return;
     this.requestId = requestAnimationFrame(() => {
       this.diagnostics.entities = this.engine.entities.length;
       const now = Date.now();
       this.engineOpts.delta = now - this.lastRun;
       this.diagnostics.startTime = performance.now();
-      this.engine.run(this.engineOpts);
+      if (this.tmpEngineOpts) {
+        Object.assign(this.tmpEngineOpts, this.engineOpts);
+        this.engine.run(this.tmpEngineOpts);
+      } else {
+        this.engine.run(this.engineOpts);
+      }
       this.lastRun = now;
       this.requestId = 0;
+      this.tmpEngineOpts = null;
     });
   }
 

@@ -157,7 +157,11 @@ export class PixiSelectionService {
       containerService.selected$.subscribe(() => {
         if (updateSub) updateSub.unsubscribe();
         updateSub = actions.pipe(ofActionSuccessful(UpdateEntity)).subscribe((action: UpdateEntity) => {
-          const components = Array.isArray(action.data) ? action.data[0].components : action.data.components;
+          const components = Array.isArray(action.data)
+            ? action.data.length > 0
+              ? action.data[0].components
+              : null
+            : action.data.components;
           if (!components) return;
           containerService.components.set.apply(containerService.components, components);
           containerService.applyComponents();

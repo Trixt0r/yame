@@ -30,7 +30,7 @@ export class SelectState {
       if (!entity) return console.warn('[SelectState] Could not find an entity for id', id);
       if (entities.indexOf(entity.id) < 0) entities.push(entity.id);
     });
-    ctx.setState({ entities, components });
+    ctx.patchState({ entities, components });
   }
 
   @Action(UpdateComponents)

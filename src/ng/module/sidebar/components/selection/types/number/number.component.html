@@ -8,11 +8,11 @@
     [placeholder]="placeholder"
     [value]="component.mixed ? '' : (number | round: decimal)"
     yameNumber
-    (yameNumberInput)="update({ currentTarget: { value: $event.value } });"
-    (input)="update($event)"
+    (yameNumberInput)="onUpdate({ currentTarget: { value: $event.value } });"
+    (input)="onUpdate($event)"
   />
 </mat-form-field>
 <yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
-<button *ngIf="component.removable" mat-icon-button class="remove" (click)="remove($event)">
+<button *ngIf="component.removable" mat-icon-button class="remove" (click)="onRemove($event)">
   <mat-icon>delete</mat-icon>
 </button>

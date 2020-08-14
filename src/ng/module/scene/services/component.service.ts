@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { UpdateEntity } from '../states/actions/entity.action';
 import { EntityNotFoundException } from '../exceptions/scene/entity-not-found.exception';
 import { Select, UpdateComponents } from '../states/actions/select.action';
+import { ISelectState } from '../states';
 
 @Injectable({ providedIn: 'root' })
 export class SceneComponentService {
@@ -132,7 +133,6 @@ export class SceneComponentService {
         throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     });
-
     // Custom components can always be removed and edited
     component.removable = true;
     component.editable = true;
@@ -172,20 +172,21 @@ export class SceneComponentService {
       return entityObj;
     });
     component.markedForDelete = true;
-    const selected = this.store.selectSnapshot(data => data.select);
+    const selected = this.store.selectSnapshot(data => data.select) as ISelectState;
     const data = entityObjects.map(it => ({ id: it.id, components: [component] }));
     const components = selected.components.slice();
-    const idx = components.indexOf(component);
+    const idx = components.findIndex(it => it.id === component.id);
     if (idx >= 0) {
       components.splice(idx, 1);
       selected.components = components;
     }
+    console.log(idx, selected, selected.entities, selected.components);
     return this.store.dispatch([
       new UpdateEntity(
         data,
         `Component ${component.id} removed in entity ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components, true) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components as SceneComponent[], true) : void 0
     ]);
   }
 

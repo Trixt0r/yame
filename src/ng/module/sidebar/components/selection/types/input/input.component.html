@@ -7,10 +7,10 @@
     [disabled]="disabled"
     [placeholder]="placeholder"
     [value]="component.string && !component.mixed ? transform(component.string) : ''"
-    (input)="update($event)"
+    (input)="onUpdate($event)"
   />
 </mat-form-field>
 <yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
-<button *ngIf="component.removable" mat-icon-button class="remove" (click)="remove($event)">
+<button *ngIf="component.removable" mat-icon-button class="remove" (click)="onRemove($event)">
   <mat-icon>delete</mat-icon>
 </button>

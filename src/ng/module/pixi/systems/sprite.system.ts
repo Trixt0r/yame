@@ -53,7 +53,7 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
       container.removeChild(sprite);
       sprite = null;
     }
-    if (!sprite) {
+    if (spriteTexture.asset && !sprite) {
       const tex = Texture.from(spriteTexture.asset);
       sprite = new Sprite(tex);
       sprite.name = 'sprite';
@@ -61,7 +61,7 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
       const animate = entity.components.byId('sprite.animate');
       if (!tex.baseTexture.valid) {
         tex.baseTexture.on('update', () => {
-          this.service.engineService.run();
+          this.service.engineService.run({ textureLoaded: true });
           if (animate && animate.boolean === true) this.animate(sprite);
         });
       } else {
@@ -69,8 +69,10 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
       }
       container.addChild(sprite);
     }
-    const spriteColor = entity.components.byId('sprite.color') as ColorSceneComponent;
-    sprite.tint = utils.rgb2hex([spriteColor.red / 255, spriteColor.green / 255, spriteColor.blue / 255]);
-    sprite.alpha = spriteColor.alpha;
+    if (sprite) {
+      const spriteColor = entity.components.byId('sprite.color') as ColorSceneComponent;
+      sprite.tint = utils.rgb2hex([spriteColor.red / 255, spriteColor.green / 255, spriteColor.blue / 255]);
+      sprite.alpha = spriteColor.alpha;
+    }
   }
 }

@@ -1,15 +1,12 @@
 <mat-form-field class="full" [class.editable]="component.editable" [class.removable]="component.removable">
   <mat-label>{{ component.mixed ? component.id + ' ' + placeholder : component.id }}</mat-label>
   <mat-select
-    (opened)="open($event)"
+    (opened)="onOpened()"
     [(ngModel)]="selected"
     [compareWith]="compare"
     dnd-droppable
     [allowDrop]="allowDrop"
     (onDropSuccess)="onDrop($event)"
-    (onDragOver)="onDragOver($event)"
-    (onDragEnter)="onDragEnter($event)"
-    (onDragLeave)="onDragLeave($event)"
     >
     <mat-select-trigger *ngIf="currentAsset">
       <img class="preview" [src]="sanitized[currentAsset.id]" />
@@ -25,6 +22,6 @@
   </mat-select>
 </mat-form-field>
 <yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
-<button *ngIf="component.removable" mat-icon-button class="remove" (click)="remove($event)">
+<button *ngIf="component.removable" mat-icon-button class="remove" (click)="onRemove($event)">
   <mat-icon>delete</mat-icon>
 </button>
