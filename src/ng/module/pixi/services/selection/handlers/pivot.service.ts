@@ -4,7 +4,7 @@ import { PixiRendererService } from '../..';
 import { PixiSelectionContainerService } from '..';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
-import { SceneEntity, PointSceneComponent } from 'common/scene';
+import { PointSceneComponent } from 'common/scene';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
 
@@ -20,7 +20,7 @@ export class PixiSelectionHandlerPivotService {
   /**
    * Bound mouse up function.
    */
-  protected mouseupFn: EventListenerObject;
+  protected onPointerUpFn: EventListenerObject;
 
   /**
    * Whether the mouse left.
@@ -31,6 +31,16 @@ export class PixiSelectionHandlerPivotService {
    * The update entity subscription, for updates via sidebar.
    */
   protected updateSub: Subscription;
+
+  /**
+   * The clicked pivot position.
+   */
+  protected clickedPivot = new Point();
+
+  /**
+   * The clicked local mouse position.
+   */
+  protected clickedMouse = new Point();
 
   /**
    * The handler area
@@ -64,13 +74,13 @@ export class PixiSelectionHandlerPivotService {
     this.area.lineTo(hitArea.radius, 0);
     this.area.endFill();
 
-    this.mouseupFn = this.mouseup.bind(this);
-    this.area.on('pointerdown', this.mousedown, this);
+    this.onPointerUpFn = this.onPointerUp.bind(this);
+    this.area.on('pointerdown', this.onPointerDown, this);
     this.area.on('pointerover', this.updateCursor, this);
     this.area.on('pointerout', this.resetCursor, this);
 
-    selectionRenderer.attached$.subscribe(() => this.attached());
-    selectionRenderer.detached$.subscribe(() => this.detached());
+    selectionRenderer.attached$.subscribe(() => this.attach());
+    selectionRenderer.detached$.subscribe(() => this.detach());
     selectionRenderer.update$.subscribe(() => this.updateArea());
   }
 
@@ -97,7 +107,7 @@ export class PixiSelectionHandlerPivotService {
   /**
    * Resets the cursor of the pixi view.
    *
-   * @param event Optional event
+   * @param event Optional event.
    */
   resetCursor(event?: any): void {
     if (event !== void 0) this.mouseLeft = true;
@@ -105,21 +115,32 @@ export class PixiSelectionHandlerPivotService {
     this.rendererService.view.style.cursor = '';
   }
 
-  mousedown(event: InteractionEvent): void {
+  /**
+   * Handles the pointer down event.
+   *
+   * @param event The triggered interaction event.
+   */
+  onPointerDown(event: InteractionEvent): void {
     if (event.data.originalEvent.which !== 1) return;
     if (this.containerService.isHandling) return;
     this.containerService.beginHandling(this, event);
-    this.area.on('pointermove', this.mousemove, this);
+    this.clickedPivot.copyFrom(this.container.pivot);
+    this.container.toLocal(event.data.global, null, tmp2);
+    this.clickedMouse.copyFrom(tmp2);
+    this.area.on('pointermove', this.onPointerMove, this);
     this.area.off('pointerover', this.updateCursor, this);
     this.area.off('pointerout', this.resetCursor, this);
     this.rendererService.view.style.cursor = 'grabbing';
-    window.addEventListener('pointerup', this.mouseupFn);
+    window.addEventListener('pointerup', this.onPointerUpFn);
   }
 
-  mouseup(): void {
+  /**
+   * Handles the point up event.
+   */
+  onPointerUp(): void {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
-    this.area.off('pointermove', this.mousemove, this);
-    window.removeEventListener('pointerup', this.mouseupFn);
+    this.area.off('pointermove', this.onPointerMove, this);
+    window.removeEventListener('pointerup', this.onPointerUpFn);
     this.area.on('pointerover', this.updateCursor, this);
     this.area.on('pointerout', this.resetCursor, this);
     this.containerService.endHandling(this);
@@ -129,12 +150,20 @@ export class PixiSelectionHandlerPivotService {
     else this.rendererService.view.style.cursor = 'grab';
   }
 
-  mousemove(event: InteractionEvent): void {
+  /**
+   * Handles the pointer move event.
+   *
+   * @param event The triggered interaction event.
+   */
+  onPointerMove(event: InteractionEvent): void {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
     this.rendererService.view.style.cursor = 'grabbing';
 
-    this.container.parent.toLocal(event.data.global, null, tmp1);
     this.container.toLocal(event.data.global, null, tmp2);
+    tmp2.x = this.clickedPivot.x + (tmp2.x - this.clickedMouse.x);
+    tmp2.y = this.clickedPivot.y + (tmp2.y - this.clickedMouse.y);
+    this.container.parent.toLocal(tmp2, this.container, tmp1);
+
     this.container.position.copyFrom(tmp1);
     this.container.pivot.copyFrom(tmp2);
 
@@ -145,17 +174,18 @@ export class PixiSelectionHandlerPivotService {
     );
   }
 
+  /**
+   * Updates the pivot interaction area.
+   */
   updateArea(): void {
     this.area.position.copyFrom(this.container.pivot);
     this.rendererService.stage.toLocal(this.area.position, this.container, this.area.position);
-    window.removeEventListener('mouseup', this.mouseupFn);
   }
 
   /**
-   * Handles the attachment to the scene.
-   * Adds all clickable areas to the stage.
+   * Adds the interaction area to the stage.
    */
-  attached(): void {
+  attach(): void {
     (this.rendererService.stage.getChildByName('foreground') as Container).addChild(this.area);
     this.updateArea();
     this.clearSub();
@@ -186,10 +216,9 @@ export class PixiSelectionHandlerPivotService {
   }
 
   /**
-   * Handles detachment from the scene.
-   * Removes all clickable areas to the stage.
+   * Removes the interaction area from the stage.
    */
-  detached(): void {
+  detach(): void {
     (this.rendererService.stage.getChildByName('foreground') as Container).removeChild(this.area);
     this.clearSub();
   }
