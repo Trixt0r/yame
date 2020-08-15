@@ -28,7 +28,7 @@ export class SelectState {
     action.entities.forEach(id => {
       const entity = sceneEntities.find(it => it.id === id);
       if (!entity) return console.warn('[SelectState] Could not find an entity for id', id);
-      if (entities.indexOf(entity.id) < 0) entities.push(entity.id);
+      if (entities.indexOf(id) < 0) entities.push(id);
     });
     ctx.patchState({ entities, components });
   }
@@ -43,7 +43,7 @@ export class SelectState {
   unselect(ctx: StateContext<ISelectState>, action: Unselect) {
     if (!action.entities || action.entities.length === 0) return ctx.setState({ entities: [], components: [] });
     const entities: string[] = ctx.getState().entities.slice();
-    const components: SceneComponent[] = action.components || [];
+    const components: SceneComponent[] = action.components || ctx.getState().components.slice() || [];
     action.entities.forEach(id => {
       const idx = entities.indexOf(id);
       if (idx >= 0) entities.splice(idx, 1);
