@@ -1,12 +1,13 @@
 import * as _ from 'lodash';
 import { State, StateContext, Action, Store, Actions } from '@ngxs/store';
-import { Select, Unselect, UpdateComponents } from './actions/select.action';
-import { SceneComponent } from 'common/scene';
+import { Select, Unselect, UpdateComponents, Isolate } from './actions/select.action';
+import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISceneState } from './scene.state';
 
 export interface ISelectState {
   entities: string[];
   components: readonly SceneComponent[];
+  isolated: SceneEntity;
 }
 
 @State<ISelectState>({
@@ -14,6 +15,7 @@ export interface ISelectState {
   defaults: {
     entities: [],
     components: [],
+    isolated: null,
   },
 })
 export class SelectState {
@@ -41,7 +43,7 @@ export class SelectState {
 
   @Action(Unselect)
   unselect(ctx: StateContext<ISelectState>, action: Unselect) {
-    if (!action.entities || action.entities.length === 0) return ctx.setState({ entities: [], components: [] });
+    if (!action.entities || action.entities.length === 0) return ctx.patchState({ entities: [], components: [] });
     const entities: string[] = ctx.getState().entities.slice();
     const components: SceneComponent[] = action.components || ctx.getState().components.slice() || [];
     action.entities.forEach(id => {
@@ -49,5 +51,10 @@ export class SelectState {
       if (idx >= 0) entities.splice(idx, 1);
     });
     ctx.patchState({ entities, components });
+  }
+
+  @Action(Isolate)
+  isolate(ctx: StateContext<ISelectState>, action: Isolate) {
+    ctx.patchState({ isolated: action.entity });
   }
 }

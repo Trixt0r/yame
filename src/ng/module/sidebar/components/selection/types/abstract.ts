@@ -31,7 +31,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   /**
    * The select state.
    */
-  selectState: ISelectState = { entities: [], components: [] };
+  selectState: ISelectState = { entities: [], components: [], isolated: null };
 
   /**
    * The parent this view belongs to.

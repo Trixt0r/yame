@@ -84,7 +84,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   /**
    * The selected state.
    */
-  @Input('yameSelectState') selectState: ISelectState = { entities: [], components: [] };
+  @Input('yameSelectState') selectState: ISelectState = { entities: [], components: [], isolated: null };
 
   /**
    * The input event, which should be triggered by the rendered component.

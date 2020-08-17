@@ -75,6 +75,7 @@ export class PixiSelectionService {
   constructor(
     scene: SceneService,
     @Inject(YAME_RENDERER) public service: PixiRendererService,
+    protected store: Store,
     actions: Actions,
     zone: NgZone,
     selectionTool: SelectionToolService,
@@ -120,9 +121,13 @@ export class PixiSelectionService {
       selectionTool.end$.subscribe(() => {
         if (containerService.isHandling) return;
         const entities = scene.entities.filter((it) => {
+          const isolated = store.selectSnapshot(state => state.select).isolated;
           const parent = it.parent ? scene.getEntity(it.parent) : null;
           const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
-          return (!it.parent || isOnLayer) && this.contains(it);
+          if (isolated)
+            return it.parent === isolated.id && this.contains(it);
+          else
+            return (!it.parent || isOnLayer) && this.contains(it);
         });
         if (entities.length === 0) {
           (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
@@ -141,6 +146,8 @@ export class PixiSelectionService {
             scene.entities.filter((it) => {
               const parent = it.parent ? scene.getEntity(it.parent) : null;
               const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
+              const isolated = this.store.snapshot().select.isolated;
+              if (isolated && isolated.id === it.id) return false;
               return (it.type !== SceneEntityType.Layer || isOnLayer) && action.entities.indexOf(it.id) >= 0;
             })
           );

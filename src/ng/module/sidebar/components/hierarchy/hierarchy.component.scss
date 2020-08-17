@@ -128,3 +128,12 @@ h5.node-name, .inline-actions {
 mat-icon {
   font-size: $tree-icon-font-size;
 }
+
+.isolated {
+  position: absolute;
+  left: -100%;
+  bottom: 0;
+  width: 200%;
+  height: 4px;
+  background-color: #3388cc;
+}

@@ -1,4 +1,4 @@
-import { SceneComponent } from 'common/scene';
+import { SceneComponent, SceneEntity } from 'common/scene';
 
 export class Select {
   static readonly type = '[Selection] Select';
@@ -15,4 +15,9 @@ export class Unselect {
   constructor(public entities?: string[], public components: SceneComponent[] = []) {}
 }
 
-export type SelectActions = Select | Unselect;
+export class Isolate {
+  static readonly type = '[Selection] Isolate';
+  constructor(public entity: SceneEntity | null) { }
+}
+
+export type SelectActions = Select | Unselect | UpdateComponents | Isolate;

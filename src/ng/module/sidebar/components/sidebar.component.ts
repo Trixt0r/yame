@@ -59,7 +59,7 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
   /**
    * The selected entities.
    */
-  selected: ISelectState = { entities: [], components: [] };
+  selected: ISelectState = { entities: [], components: [], isolated: null };
 
   /**
    * The ids of the selected entities.

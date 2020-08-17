@@ -124,16 +124,7 @@ export class PixiSelectionContainerService {
    * Applies the scene components to the actual pixi transformation values.
    */
   applyComponents(): void {
-    const position = this.components.byId('transformation.position') as PointSceneComponent;
-    const scale = this.components.byId('transformation.scale') as PointSceneComponent;
-    const rotation = this.components.byId('transformation.rotation') as RangeSceneComponent;
-    const skew = this.components.byId('transformation.skew') as PointSceneComponent;
-    const pivot = this.components.byId('transformation.pivot') as PointSceneComponent;
-    if (rotation) this.container.rotation = rotation.value;
-    if (position) this.container.position.copyFrom(position);
-    if (scale) this.container.scale.copyFrom(scale);
-    if (skew) this.container.skew.copyFrom(skew);
-    if (pivot) this.container.pivot.copyFrom(pivot);
+    this.pixi.applyComponents(this.components, this.container);
   }
 
   /**
@@ -148,6 +139,9 @@ export class PixiSelectionContainerService {
     return this.store.dispatch(this.updateAction);
   }
 
+  /**
+   * Updates the container, based on the current selection.
+   */
   updateContainer(): void {
     this.container.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
     if (this.entities.length > 0) {

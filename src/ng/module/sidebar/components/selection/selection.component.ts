@@ -42,7 +42,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
   /**
    * The selected state.
    */
-  @Input() selected: ISelectState = { entities: [], components: [] };
+  @Input() selected: ISelectState = { entities: [], components: [], isolated: null };
 
   @ViewChild(EntityComponentsDirective) entityComponentsDirective: EntityComponentsDirective;
 

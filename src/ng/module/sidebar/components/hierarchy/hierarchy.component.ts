@@ -18,7 +18,7 @@ import {
   SortEntity,
   CloneEntity,
 } from 'ng/module/scene/states/actions/entity.action';
-import { Unselect, Select } from 'ng/module/scene/states/actions/select.action';
+import { Unselect, Select, Isolate } from 'ng/module/scene/states/actions/select.action';
 import { SceneService } from 'ng/module/scene';
 import { ITreeNode, ITreeOptions } from 'angular-tree-component/dist/defs/api';
 import {
@@ -104,6 +104,21 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
             : EntitySelectionMode.TOGGLE;
           this.selectTreeNode(node, mode, $event);
         },
+        dblClick: (tree: TreeModel, node: TreeNodeModel, $event: MouseEvent) => {
+          const entity = this.scene.getEntity(node.id);
+          if (entity.type !== SceneEntityType.Layer && entity.type !== SceneEntityType.Group) return;
+          const isolated = this.store.snapshot().select.isolated as SceneEntity;
+          if (isolated) {
+            const isolatedNode = tree.getNodeById(isolated.id);
+            if (node.id !== isolated.id && node.isDescendantOf(isolatedNode)) {
+              this.store.dispatch(new Isolate(this.scene.getEntity(node.id)));
+            } else {
+              this.store.dispatch(new Isolate(null));
+            }
+          } else {
+            this.store.dispatch(new Isolate(this.scene.getEntity(node.id)));
+          }
+        },
       },
     },
   };
@@ -117,6 +132,11 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
   @ViewChild('tree', { read: TreeComponent }) protected treeComponent: TreeComponent;
 
   @ViewChild('header') protected headerElement: ElementRef;
+
+  get isolated(): string {
+    const isolated = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
+    return isolated ? isolated.id : null;
+  }
 
   protected subs: Subscription[] = [];
 
@@ -182,6 +202,14 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
           const activeNodeIds = {};
           this.store.selectSnapshot((store) => store.select).entities.forEach((id) => (activeNodeIds[id] = true));
           this.treeComponent.treeModel.setState({ ...state, activeNodeIds });
+        })
+      );
+      this.subs.push(
+        this.actions.pipe(ofActionSuccessful(Isolate)).subscribe((action: Isolate) => {
+          if (action.entity) {
+            TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, this.treeComponent.treeModel.getNodeById(action.entity.id), { });
+          }
+          this.cdr.detectChanges();
         })
       );
     });
@@ -457,6 +485,16 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     );
   }
 
+  canSelectTreeNode(node: TreeNodeModel): boolean {
+    const isolated = this.store.snapshot().select.isolated as SceneEntity;
+    if (isolated) {
+      if (isolated.id === node.id) return false;
+      const isolatedNode = this.treeComponent.treeModel.getNodeById(isolated.id);
+      if (!node.isDescendantOf(isolatedNode)) return false;
+    }
+    return true;
+  }
+
   /**
    * Selects the given tree node with the given selection mode.
    *
@@ -465,6 +503,15 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    * @param originalEvent The originally triggered event.
    */
   selectTreeNode(node: TreeNodeModel, mode: EntitySelectionMode, originalEvent: unknown): void {
+    const isolated = this.store.snapshot().select.isolated as SceneEntity;
+    if (isolated) {
+      if (isolated.id === node.id) return;
+      const isolatedNode = this.treeComponent.treeModel.getNodeById(isolated.id);
+      if (!node.isDescendantOf(isolatedNode)) {
+        this.store.dispatch(new Isolate(null));
+        return;
+      }
+    }
     const shiftSelect = mode === EntitySelectionMode.MULTI_SHIFT;
     const multiSelect = shiftSelect || mode === EntitySelectionMode.MULTI;
     const tree = this.treeComponent.treeModel;

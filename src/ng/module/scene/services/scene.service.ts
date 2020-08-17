@@ -228,9 +228,14 @@ export class SceneService {
   createEntity(x: number, y: number, asset?: Asset): Observable<SceneEntity> {
     const hasAsset = asset instanceof Asset;
     const obs = hasAsset ? from(this.converter.get(asset)) : of([]);
+    const parent = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
     const re = obs.pipe(
       flatMap(data => {
         const entity = new SceneEntity();
+        if (parent) {
+          entity.parent = parent.id;
+          parent.children.push(entity.id);
+        }
         const comps = createTransformationComponents();
         const point = this.renderer.projectToScene(x, y);
         comps[1].x = point.x;
