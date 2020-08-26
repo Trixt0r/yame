@@ -88,6 +88,7 @@ export class Grid extends EventEmitter {
     this.lastUpdateSize = new Point();
     this.lastUpdatePosition = new Point();
     this.gridContainer = new ParticleContainer();
+    this.gridContainer.zIndex = -999999;
     this.pWidth = width;
     this.pHeight = height;
     this.container = container;

@@ -1,4 +1,11 @@
-import { ISceneRenderer, SceneComponent as SceneComponentView, EngineService, SortEntity, SceneService, Isolate } from '../../scene';
+import {
+  ISceneRenderer,
+  SceneComponent as SceneComponentView,
+  EngineService,
+  SortEntity,
+  SceneService,
+  Isolate,
+} from '../../scene';
 import { Asset } from 'common/asset';
 import {
   Application,
@@ -12,6 +19,8 @@ import {
   IPointData,
   Renderer,
   Ticker,
+  Graphics,
+  filters,
 } from 'pixi.js';
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -19,6 +28,7 @@ import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent, 
 import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { SceneComponentCollection } from 'common/scene/component.collection';
+import { maxBy } from 'lodash';
 
 const tempPoint = new Point();
 
@@ -53,8 +63,6 @@ export class PixiRendererService implements ISceneRenderer {
    * The scene container reference.
    */
   public readonly scene: Container = new Container();
-
-  protected isolationContainer = new Container();
 
   get diagnostics(): { [label: string]: number | string | boolean } {
     return this.engineService.diagnostics;
@@ -109,94 +117,98 @@ export class PixiRendererService implements ISceneRenderer {
     return this._app.renderer.plugins.interaction.mouse.global;
   }
 
-  constructor(public readonly engineService: EngineService,
-              public readonly store: Store,
-              public readonly actions: Actions,
-              public readonly zone: NgZone) {
+  constructor(
+    public readonly engineService: EngineService,
+    public readonly store: Store,
+    public readonly actions: Actions,
+    public readonly zone: NgZone
+  ) {
+    this.scene.sortableChildren = true;
     const engine = engineService.engine;
 
     this.zone.runOutsideAngular(() => {
-      actions.pipe(ofActionSuccessful(SortEntity))
-              .subscribe((action: SortEntity) => {
-                const data = Array.isArray(action.data) ? action.data : [action.data];
-                const parents: string[] = [];
-                const restoreParent = { };
-                data.forEach(it => {
-                  if (it.parent === it.oldParent) return
-                  const container = this.getContainer(it.id);
-                  const oldParent = this.getContainer(it.oldParent) || this.scene;
-                  const newParent = this.getContainer(it.parent) || this.scene;
-                  const entity = this.sceneService.getEntity(it.id);
+      actions.pipe(ofActionSuccessful(SortEntity)).subscribe((action: SortEntity) => {
+        const data = Array.isArray(action.data) ? action.data : [action.data];
+        const parents: string[] = [];
+        const restoreParent = {};
+        data.forEach((it) => {
+          if (it.parent === it.oldParent) return;
+          const container = this.getContainer(it.id);
+          const oldParent = this.getContainer(it.oldParent) || this.scene;
+          const newParent = this.getContainer(it.parent) || this.scene;
+          const entity = this.sceneService.getEntity(it.id);
 
-                  if (it.parent && parents.indexOf(it.parent) < 0) parents.push(it.parent);
-                  if (it.oldParent && parents.indexOf(it.oldParent) < 0) parents.push(it.oldParent);
+          if (it.parent && parents.indexOf(it.parent) < 0) parents.push(it.parent);
+          if (it.oldParent && parents.indexOf(it.oldParent) < 0) parents.push(it.oldParent);
 
-                  const enabled = oldParent === container.parent;
-                  if (!enabled) return;
-                  newParent.addChild(container);
-                  transformTo(container, newParent);
-                  this.updateComponents(entity.components, container);
-                });
+          const enabled = oldParent === container.parent;
+          if (!enabled) return;
+          newParent.addChild(container);
+          transformTo(container, newParent);
+          this.updateComponents(entity.components, container);
+        });
 
-                const pushParents = (source: string[]) => {
-                  if (source.length === 0) return;
-                  const pushed = [];
-                  source.forEach(id => {
-                    const entity = this.sceneService.getEntity(id);
-                    if (!entity) return;
-                    const parent = entity.parent;
-                    if (!parent || parents.indexOf(parent) >= 0) return;
-                    parents.push(parent);
-                    pushed.push(parent);
-                  });
-                  pushParents(pushed);
-                };
+        const pushParents = (source: string[]) => {
+          if (source.length === 0) return;
+          const pushed = [];
+          source.forEach((id) => {
+            const entity = this.sceneService.getEntity(id);
+            if (!entity) return;
+            const parent = entity.parent;
+            if (!parent || parents.indexOf(parent) >= 0) return;
+            parents.push(parent);
+            pushed.push(parent);
+          });
+          pushParents(pushed);
+        };
 
-                pushParents(parents);
+        pushParents(parents);
 
-                parents.forEach(id => {
-                  const container = this.getContainer(id);
-                  if (!container) return;
-                  const entity = this.sceneService.getEntity(id);
-                  if (entity.type === SceneEntityType.Layer) return;
-                  const parentContainer = this.getContainer(entity.parent) || this.scene;
-                  const enabled = container.parent === parentContainer;
-                  if (!enabled) return;
-                  const bounds: Rectangle = container.getLocalBounds();
-                  tempPoint.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-                  if (container.parent) {
-                    container.parent.toLocal(tempPoint, container, container.position);
-                    const parentPosition = entity.components.byId('transformation.position') as PointSceneComponent;
-                    if (parentPosition) {
-                      parentPosition.x = container.position.x;
-                      parentPosition.y = container.position.y;
-                    }
-                  }
-                  const parentPivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
-                  if (parentPivot) {
-                    parentPivot.x = tempPoint.x
-                    parentPivot.y = tempPoint.y;
-                    container.pivot.copyFrom(tempPoint);
-                  }
-                });
-              });
+        parents.forEach((id) => {
+          const container = this.getContainer(id);
+          if (!container) return;
+          const entity = this.sceneService.getEntity(id);
+          if (entity.type === SceneEntityType.Layer) return;
+          const parentContainer = this.getContainer(entity.parent) || this.scene;
+          const enabled = container.parent === parentContainer;
+          if (!enabled) return;
+          const bounds: Rectangle = container.getLocalBounds();
+          tempPoint.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+          if (container.parent) {
+            container.parent.toLocal(tempPoint, container, container.position);
+            const parentPosition = entity.components.byId('transformation.position') as PointSceneComponent;
+            if (parentPosition) {
+              parentPosition.x = container.position.x;
+              parentPosition.y = container.position.y;
+            }
+          }
+          const parentPivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
+          if (parentPivot) {
+            parentPivot.x = tempPoint.x;
+            parentPivot.y = tempPoint.y;
+            container.pivot.copyFrom(tempPoint);
+          }
+        });
+      });
 
       const self = this;
       engine.addListener({
         onAddedEntities(...entities: SceneEntity[]) {
           entities.forEach((entity) => {
             const child = new Container();
+            child.name = entity.id;
+            child.sortableChildren = true;
             self.pixiContainers[entity.id] = child;
             self.applyComponents(entity.components, child);
             self.scene.addChild(child);
             child.transform.updateTransform(self.scene.transform);
             self.updateComponents(entity.components, child);
             const parentContainer = self.pixiContainers[entity.parent];
-            if (parentContainer && parentContainer !== self.scene) {
-              parentContainer.addChild(child);
-              transformTo(child, parentContainer);
-              self.updateComponents(entity.components, child);
-            }
+            if (!parentContainer || parentContainer === self.scene) return;
+
+            parentContainer.addChild(child);
+            transformTo(child, parentContainer);
+            self.updateComponents(entity.components, child);
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
@@ -241,12 +253,17 @@ export class PixiRendererService implements ISceneRenderer {
 
   createPreview(x: number, y: number, asset: Asset) {
     this.zone.runOutsideAngular(() => {
-      this.sceneService.createEntity(x, y, asset).subscribe(entity => {
+      this.sceneService.createEntity(x, y, asset).subscribe((entity) => {
         const isolated = this.store.snapshot().select.isolated as SceneEntity;
         entity.parent = isolated ? isolated.id : null;
         this._previewEntity = entity;
         this._previewEntity.components.add({ id: 'sprite.animate', type: 'boolean', boolean: true, group: 'sprite' });
         this.engineService.engine.entities.add(this._previewEntity);
+        this._previewEntity.components.add({
+          id: 'index',
+          type: 'index',
+          index: maxBy(this.scene.children, (child) => child.zIndex).zIndex + 1,
+        });
         this.engineService.run();
       });
     });
@@ -258,8 +275,7 @@ export class PixiRendererService implements ISceneRenderer {
     if (!container) return;
     container.position.copyFrom(this.projectToScene(x, y));
     const isolated = this.store.snapshot().select.isolated as SceneEntity;
-    if (isolated)
-      this.getContainer(isolated.id).toLocal(container.position, this.scene, container.position);
+    if (isolated) this.getContainer(isolated.id).toLocal(container.position, this.scene, container.position);
     const position = this._previewEntity.components.byId('transformation.position') as PointSceneComponent;
     position.x = container.position.x;
     position.y = container.position.y;

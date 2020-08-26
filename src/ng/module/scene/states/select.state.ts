@@ -55,6 +55,11 @@ export class SelectState {
 
   @Action(Isolate)
   isolate(ctx: StateContext<ISelectState>, action: Isolate) {
-    ctx.patchState({ isolated: action.entity });
+    if (ctx.getState().isolated === action.entity) return;
+    // if (action.entity && ctx.getState().isolated)
+    //   return ctx.dispatch(new Isolate(null))
+    //               .pipe(() => ctx.patchState({ isolated: action.entity }));
+    // else
+      ctx.patchState({ isolated: action.entity });
   }
 }

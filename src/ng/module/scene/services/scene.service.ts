@@ -103,6 +103,7 @@ export class SceneService {
   protected childFlatMapping: { [key: string]: SceneEntity[] } = { };
   protected subs: Subscription[] = [];
 
+
   constructor(
     @Inject(YAME_RENDERER) public readonly renderer: ISceneRenderer,
     @Inject(YAME_RENDERER_COMPONENT) public readonly rendererComponent: Type<ISceneRendererComponent<HTMLElement>>,
@@ -110,57 +111,53 @@ export class SceneService {
     protected actions: Actions,
     protected converter: SceneAssetConverterService) {
       renderer.sceneService = this;
+      const collectUpdates = (entity: SceneEntity, target: string[]) => {
+        let parent = this.getEntity(entity.parent);
+        while (parent) {
+          if (target.indexOf(parent.id) < 0) target.push(parent.id);
+          parent = parent.parent ? this.getEntity(parent.parent) : null;
+        }
+      };
+
+      const updateEntities = (ids: string[]) => {
+        ids.forEach(id => {
+          this.childDeepMapping[id] = this._getChildren(id, true);
+          this.childFlatMapping[id] = this._getChildren(id, false);
+        });
+      };
+
       this.subs.push(actions.pipe(ofActionSuccessful(CreateEntity, DeleteEntity))
         .subscribe((action: CreateEntity | DeleteEntity) => {
           this._entities = this.store.snapshot().scene.entities.slice() as SceneEntity[];
-          const parentsToUpdate = [];
+          const updates: string[] = [];
           if (action instanceof CreateEntity) {
             const newEntities = Array.isArray(action.data) ? action.data : [action.data];
             newEntities.forEach(entity => {
-              this.idMapping[entity.id] = entity
+              this.idMapping[entity.id] = entity;
               this.childDeepMapping[entity.id] = this._getChildren(entity.id, true);
               this.childFlatMapping[entity.id] = this._getChildren(entity.id, false);
-              if (entity.parent && parentsToUpdate.indexOf(entity.parent) < 0)
-                parentsToUpdate.push(entity.parent);
+              collectUpdates(entity, updates);
             });
           } else {
             const removed = Array.isArray(action.id) ? action.id : [action.id];
             removed.forEach(id => {
               const entity = this.idMapping[id];
-              if (entity.parent && parentsToUpdate.indexOf(entity.parent) < 0)
-                parentsToUpdate.push(entity.parent);
+              collectUpdates(entity, updates);
               delete this.idMapping[id];
               delete this.childDeepMapping[id];
               delete this.childFlatMapping[id];
             });
           }
-          parentsToUpdate.forEach(parent => {
-            this.childDeepMapping[parent] = this._getChildren(parent, true);
-            this.childFlatMapping[parent] = this._getChildren(parent, false);
-          });
+          updateEntities(updates);
         }));
     this.subs.push(
       actions.pipe(ofActionSuccessful(SortEntity))
         .subscribe((action: SortEntity) => {
           const data = Array.isArray(action.data) ? action.data : [action.data];
           this._entities = this.store.snapshot().scene.entities.slice();
-          data.forEach(it => {
+          this.entities.forEach(it => {
             this.childDeepMapping[it.id] = this._getChildren(it.id, true);
             this.childFlatMapping[it.id] = this._getChildren(it.id, false);
-            if (it.parent !== it.oldParent) {
-              if (it.parent) {
-                this.childDeepMapping[it.parent] = this._getChildren(it.parent, true);
-                this.childFlatMapping[it.parent] = this._getChildren(it.parent, false);
-              }
-              if (it.oldParent) {
-                this.childDeepMapping[it.oldParent] = this._getChildren(it.oldParent, true);
-                this.childFlatMapping[it.oldParent] = this._getChildren(it.oldParent, false);
-              }
-            }
-          });
-          this._entities.forEach(entity => {
-            this.childDeepMapping[entity.id] = this._getChildren(entity.id, true);
-            this.childFlatMapping[entity.id] = this._getChildren(entity.id, false);
           });
         })
     );

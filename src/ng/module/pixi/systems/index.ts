@@ -5,3 +5,4 @@ export * from './grid.system';
 export * from './rendering.system';
 export * from './sprite.system';
 export * from './transformation.system';
+export * from './backdrop.system';

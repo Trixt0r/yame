@@ -18,6 +18,7 @@ import {
   PixiDebugSystem,
   PixiSpriteSystem,
   PixiForegroundSystem,
+  PixiBackdropSystem,
 } from './systems';
 
 /**
@@ -32,6 +33,7 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
     engineService.engine.systems.add(new PixiCameraSystem(renderer, 1));
     engineService.engine.systems.add(new PixiTransformationSystem(renderer, 2));
     engineService.engine.systems.add(new PixiSpriteSystem(renderer, 3));
+    engineService.engine.systems.add(new PixiBackdropSystem(renderer, 4));
     engineService.engine.systems.add(new PixiRenderingSystem(renderer, 4));
     engineService.engine.systems.add(new PixiForegroundSystem(renderer, 999));
     engineService.engine.systems.add(new PixiDebugSystem(renderer, 9999));

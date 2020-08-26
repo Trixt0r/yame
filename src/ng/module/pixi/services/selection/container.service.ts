@@ -7,7 +7,7 @@ import { SceneEntity, SceneComponent, PointSceneComponent, RangeSceneComponent, 
 import { YAME_RENDERER, UpdateComponents } from 'ng/module/scene';
 import { SceneComponentCollection } from 'common/scene/component.collection';
 import { Store } from '@ngxs/store';
-import { merge, isEqual } from 'lodash';
+import { merge, isEqual, maxBy } from 'lodash';
 import { transformTo } from '../../utils/transform.utils';
 
 @Injectable({ providedIn: 'root' })
@@ -191,6 +191,7 @@ export class PixiSelectionContainerService {
       parentContainer.addChild(child);
       transformTo(child, parentContainer);
     });
+    this.container.zIndex = maxBy(this.pixi.scene.children, (child) => child.zIndex).zIndex + 1;
     this.pixi.scene.addChild(this.container);
 
     entities.forEach((entity) => {
@@ -200,8 +201,9 @@ export class PixiSelectionContainerService {
       added.push(entity);
     });
 
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity, i) => {
       entity.components.add(this.comp);
+      this.pixi.getContainer(entity.id).zIndex = i;
       this.container.addChild(this.pixi.getContainer(entity.id));
     });
 

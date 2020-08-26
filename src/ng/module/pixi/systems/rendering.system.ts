@@ -15,6 +15,8 @@ export class PixiRenderingSystem extends System {
     this.engine.entities.forEach((entity: SceneEntity) => {
       const container = this.service.getContainer(entity.id);
       container.visible = entity.components.getValue('visible', 'bool', true);
+      if (!entity.components.byId('transform-off'))
+        container.zIndex = entity.components.getValue('index', 'index', 1);
     });
     this.service.diagnostics.startRenderingTime = performance.now();
     this.service.renderer.render(this.service.scene);
