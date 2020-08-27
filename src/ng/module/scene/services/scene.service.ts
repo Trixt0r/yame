@@ -229,10 +229,7 @@ export class SceneService {
     const re = obs.pipe(
       flatMap(data => {
         const entity = new SceneEntity();
-        if (parent) {
-          entity.parent = parent.id;
-          parent.children.push(entity.id);
-        }
+        if (parent) entity.parent = parent.id;
         const comps = createTransformationComponents();
         const point = this.renderer.projectToScene(x, y);
         comps[1].x = point.x;

@@ -76,6 +76,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
 
   previousShiftSelect: string[] = [];
 
+  lastMouseEvent: MouseEvent;
+
   options: ITreeOptions = {
     allowDrop: (element: ITreeNode, to: any) => {
       const node = element.data as TreeNode;
@@ -105,6 +107,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
           this.selectTreeNode(node, mode, $event);
         },
         dblClick: (tree: TreeModel, node: TreeNodeModel, $event: MouseEvent) => {
+          this.lastMouseEvent = $event;
           const entity = this.scene.getEntity(node.id);
           if (entity.type !== SceneEntityType.Layer && entity.type !== SceneEntityType.Group) return;
           const isolated = this.store.snapshot().select.isolated as SceneEntity;
@@ -171,23 +174,23 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
           const expandedIds = this.treeComponent.treeModel.expandedNodeIds;
           const expanded = this.treeComponent.treeModel.expandedNodes;
           const notExpanded = entities
-            .filter((it) => !expandedIds[it.id])
-            .map((it) => this.treeComponent.treeModel.getNodeById(it.id))
-            .filter((it) => !!it);
+            .filter(it => !expandedIds[it.id])
+            .map(it => this.treeComponent.treeModel.getNodeById(it.id))
+            .filter(it => !!it);
 
-          this.nodes = entities.filter((it) => !it.parent).map(mapFn);
+          this.nodes = entities.filter(it => !it.parent).map(mapFn);
 
           this.cdr.detectChanges();
 
           // Collapse those, which have no children left.
-          expanded.forEach((it) => {
+          expanded.forEach(it => {
             const found = this.scene.getEntity(it.id);
             if (!found || found.children.length > 0) return;
             this.treeComponent.treeModel.setExpandedNode(it, false);
           });
 
           // Expand those, which got a child added
-          notExpanded.forEach((it) => {
+          notExpanded.forEach(it => {
             const found = this.scene.getEntity(it.id);
             if (!found || it.data.children.length === found.children.length) return;
             this.treeComponent.treeModel.setExpandedNode(it, true);
@@ -207,9 +210,10 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
       this.subs.push(
         this.actions.pipe(ofActionSuccessful(Isolate)).subscribe((action: Isolate) => {
           if (action.entity) {
-            TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, this.treeComponent.treeModel.getNodeById(action.entity.id), { });
+            const node = this.treeComponent.treeModel.getNodeById(action.entity.id);
+            TREE_ACTIONS.EXPAND(this.treeComponent.treeModel, node, this.lastMouseEvent);
+            TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, node, this.lastMouseEvent);
           }
-          this.cdr.detectChanges();
         })
       );
     });

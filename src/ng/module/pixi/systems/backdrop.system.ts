@@ -75,9 +75,8 @@ export class PixiBackdropSystem extends System {
     }
 
     const children = service.sceneService.getChildren(isolated, true);
-    console.log(children);
     service.sceneService.entities.forEach(it => {
-      if (it.id === isolated.id || children.indexOf(it) >= 0) return;
+      if (it.id === isolated.id || children.indexOf(it) >= 0 || it.parent) return;
       const child = service.getContainer(it.id);
       if (!child) return;
       this.container.addChild(child);
