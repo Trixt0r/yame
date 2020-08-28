@@ -238,5 +238,27 @@ tree-node-wrapper {
     box-sizing: border-box;
   }
   background: rgba(255, 255, 255, 0.04);
-  // height: calc(#{$tree-node-height} - 2px);
+}
+
+tree-node > div.disabled {
+  color: #666666;
+  tree-node-wrapper {
+    &:hover, &.changed {
+      .inline-actions {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+  }
+}
+tree-node > div.isolated {
+  color: white;
+  tree-node-wrapper {
+    &:hover, &.changed {
+      .inline-actions {
+        opacity: inherit;
+        transform: none;
+      }
+    }
+  }
 }

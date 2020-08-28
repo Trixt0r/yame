@@ -16,14 +16,6 @@ h5 {
   white-space: nowrap;
 }
 
-tree-node-wrapper > .node-wrapper {
-  overflow: hidden;
-  transition: all ease-in 200ms;
-  margin-top: 0;
-  margin-bottom: 0;
-  list-style-type: none;
-  width: 100%;
-}
 .invisible {
   display: none;
 }
@@ -42,63 +34,6 @@ tree-root {
   max-height: 100%;
   overflow-y: auto;
   background: none;
-}
-
-tree-node-wrapper {
-  cursor: pointer;
-
-  display: block;
-  &> .node-wrapper {
-    position: relative;
-    padding-left: $tree-node-toggle-size;
-    width: calc(100% - #{$tree-node-toggle-size});
-    .toggle-btn {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      line-height: inherit;
-      width: $tree-node-toggle-size;
-      height: $tree-node-toggle-size;
-      transform: translateY(-50%);
-
-      mat-icon {
-        width: $tree-node-toggle-size;
-        height: $tree-node-toggle-size;
-      }
-    }
-  }
-
-  .node-name { float: left; }
-  .inline-actions {
-    float: right;
-    transform: translateX(100%);
-    opacity: 0;
-    transition: all ease-in-out 100ms;
-    margin-top: 4px;
-    .mat-icon-button {
-      line-height: inherit;
-      height: 100%;
-    }
-  }
-  &:hover {
-    background: rgba(255, 255, 255, .04);
-  }
-  &:hover, &.changed {
-    .inline-actions {
-      opacity: inherit;
-      transform: none;
-    }
-  }
-  &.selected {
-    background: #5a5a5a;
-  }
-
-  button {
-    width: $tree-inline-btn-size;
-  }
-}
-.mat-tree-node {
-  min-height: 32px;
 }
 
 

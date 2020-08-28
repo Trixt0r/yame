@@ -79,9 +79,23 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
   lastMouseEvent: MouseEvent;
 
   options: ITreeOptions = {
+    nodeClass: (node: ITreeNode) => {
+      const isolated = this.isolated;
+      if (!isolated) return '';
+      if (isolated === node.id) return 'isolated';
+      const children = this.scene.getChildren(isolated, true);
+      const found = children.find(it => it.id === node.id);
+      return found ? 'isolated' : 'disabled';
+    },
     allowDrop: (element: ITreeNode, to: any) => {
       const node = element.data as TreeNode;
       const target = to.parent.data as TreeNode;
+      const isolated = this.isolated;
+      if (isolated && isolated !== target.id) {
+        const children = this.scene.getChildren(isolated, true);
+        const found = children.find(it => it.id === target.id);
+        if (!found) return false;
+      }
       if (target.virtual) return true;
       if (target.id === element.id) return false;
       if (this.isLocked(target)) return false;
@@ -94,6 +108,12 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
       }
     },
     allowDrag: (node: ITreeNode) => {
+      const isolated = this.isolated;
+      if (isolated) {
+        const children = this.scene.getChildren(isolated, true);
+        const found = children.find(it => it.id === node.id);
+        if (!found) return false;
+      }
       return this.scene.entities.length > 1 && !this.isLocked(node.data as TreeNode);
     },
     actionMapping: {
@@ -354,47 +374,21 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Toggles the selection state of the given node.
-   *
-   * If the node is selected, it will be removed from the selection and added otherwise.
-   *
-   * @param {NodeData} node
-   */
-  toggleSelected(event: MouseEvent, node: TreeNode): void {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    const isSelected = this.isSelected(node);
-    const otherSelected = !isSelected && this.selected.length > 0;
-    const element = this.treeElement.nativeElement as HTMLElement;
-    const scroll = element.scrollTop;
-    const entity = this.scene.getEntity(node.id);
-    const components = cloneDeep(entity.components.elements) as SceneComponent[];
-    console.log(components);
-    if (isSelected || otherSelected) {
-      this.store.dispatch(new Unselect()).pipe(() => {
-        if (!otherSelected) return;
-        const re = this.store.dispatch(new Select([node.id], components));
-        re.subscribe(() => element.scroll(0, scroll));
-        return re;
-      });
-    } else {
-      this.store.dispatch(new Select([node.id], components)).subscribe(() => {
-        const target = event.currentTarget as HTMLElement;
-        setImmediate(() => target.scrollIntoView());
-      });
-    }
-  }
-
-  /**
    * Handles the selection of a tree node.
    *
    * @param event The triggered event.
    */
   onActivate(event: any): void {
     const data = event.node.data as TreeNode;
-    const entity = this.scene.getEntity(data.id);
-    const components = cloneDeep(entity.components.elements) as SceneComponent[];
-    this.store.dispatch(new TreeSelect([data.id], components));
+    const isolated = this.isolated;
+    if (isolated && !this.scene.getChildren(isolated, true).find(it => data.id === it.id)) {
+      TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, event.node, { });
+      this.store.dispatch(new Isolate(null));
+    } else {
+      const entity = this.scene.getEntity(data.id);
+      const components = cloneDeep(entity.components.elements) as SceneComponent[];
+      this.store.dispatch(new TreeSelect([data.id], components));
+    }
   }
 
   /**
