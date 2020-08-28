@@ -67,8 +67,8 @@ export class PixiBackdropSystem extends System {
     this.container.transform.updateTransform(this.scene.transform);
     const container = service.getContainer(isolated.id);
     if (container.parent !== this.scene) {
+      container.transform.updateTransform(container.parent.transform);
       this.scene.addChild(container);
-      container.transform.updateTransform(this.scene.transform);
       transformTo(container, this.scene);
       service.updateComponents(isolated.components, container);
     }
@@ -78,9 +78,9 @@ export class PixiBackdropSystem extends System {
       if (it.id === isolated.id || children.indexOf(it) >= 0 || it.parent) return;
       const child = service.getContainer(it.id);
       if (!child) return;
+      child.transform.updateTransform(child.parent.transform);
       this.container.addChild(child);
       transformTo(child, this.container);
-      child.transform.updateTransform(this.container.transform);
       it.components.add(this.transformOff);
     });
     if (this.container.children.length > 0)
@@ -101,6 +101,15 @@ export class PixiBackdropSystem extends System {
     this.tweenDirection = -1;
     const service = this.service;
     this.active = true;
+
+    if (this.isolated) {
+      const child = service.getContainer(this.isolated.id);
+      const parent = service.getContainer(this.isolated.parent) || this.scene;
+      parent.addChild(child);
+      transformTo(child, parent);
+      child.transform.updateTransform(parent.transform);
+      this.isolated.components.remove(this.transformOff);
+    }
 
     this.container.children.slice().forEach(child => {
       if (!child.name) return;
