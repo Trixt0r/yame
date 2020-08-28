@@ -214,6 +214,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
             TREE_ACTIONS.EXPAND(this.treeComponent.treeModel, node, this.lastMouseEvent);
             TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, node, this.lastMouseEvent);
           }
+          this.cdr.detectChanges();
         })
       );
     });

@@ -1,8 +1,7 @@
 import { Container, filters, Graphics, Point } from 'pixi.js';
 import { PixiRendererService } from '../services/renderer.service';
 import { System } from '@trixt0r/ecs';
-import { ofActionSuccessful, Select } from '@ngxs/store';
-import { Isolate, ISelectState } from 'ng/module/scene';
+import { Select } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { maxBy } from 'lodash';
 import { SceneEntity } from 'common/scene';
@@ -16,7 +15,7 @@ export class PixiBackdropSystem extends System {
   protected blur = new filters.BlurFilter(0);
   protected alpha = 0;
   protected tween = 0;
-  protected tweenDuration = 10;
+  protected tweenDuration = 5;
   protected tweenDirection = 1;
 
   protected topLeft = new Point();

@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiRendererService } from '../renderer.service';
-import { Container, Rectangle, Point, Transform, Matrix } from 'pixi.js';
+import { Container, Rectangle, Point, Matrix } from 'pixi.js';
 import { Subject, Observable } from 'rxjs';
-import { SceneEntity, SceneComponent, PointSceneComponent, RangeSceneComponent, createTransformationComponents } from 'common/scene';
+import { SceneEntity, SceneComponent } from 'common/scene';
 import { YAME_RENDERER, UpdateComponents } from 'ng/module/scene';
 import { SceneComponentCollection } from 'common/scene/component.collection';
 import { Store } from '@ngxs/store';

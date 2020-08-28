@@ -2,7 +2,7 @@ import { Point, Rectangle, Container, RoundedRectangle, Graphics } from 'pixi.js
 import { SceneEntity, SceneComponent, SceneEntityType } from 'common/scene';
 import { Injectable, Inject, NgZone } from '@angular/core';
 import { PixiRendererService } from '../services/renderer.service';
-import { YAME_RENDERER, SceneService, Select, Unselect, UpdateEntity, UpdateComponents } from 'ng/module/scene';
+import { YAME_RENDERER, SceneService, Select, Unselect, UpdateEntity, UpdateComponents, Isolate } from 'ng/module/scene';
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiSelectionContainerService } from './selection/container.service';
 import { System } from '@trixt0r/ecs';
@@ -49,6 +49,16 @@ export class PixiSelectionService {
   protected tmp: Point = new Point();
 
   /**
+   * Bound double click event handler for focusing
+   */
+  protected onDblClickBound: (event: MouseEvent) => void;
+
+  /**
+   * The currently bound view.
+   */
+  protected boundView: HTMLCanvasElement;
+
+  /**
    * The rectangle object.
    */
   public readonly rectangle: Rectangle = new Rectangle();
@@ -73,14 +83,21 @@ export class PixiSelectionService {
   }
 
   constructor(
-    scene: SceneService,
+    protected scene: SceneService,
     @Inject(YAME_RENDERER) public service: PixiRendererService,
     protected store: Store,
-    actions: Actions,
-    zone: NgZone,
-    selectionTool: SelectionToolService,
-    containerService: PixiSelectionContainerService
+    protected actions: Actions,
+    protected zone: NgZone,
+    protected selectionTool: SelectionToolService,
+    protected containerService: PixiSelectionContainerService
   ) {
+    this.onDblClickBound = this.onDoubleClick.bind(this);
+    service.init$.subscribe(() => {
+      if (this.boundView === service.view) return;
+      service.view.addEventListener('dblclick', this.onDblClickBound);
+      this.boundView = service.view;
+    });
+
     zone.runOutsideAngular(() => {
       this.reset();
       service.engineService.engine.systems.add(new SelectInteractionSystem(service, containerService, 99999));
@@ -236,5 +253,14 @@ export class PixiSelectionService {
       if (rect.contains(bottomRight.x, bottomRight.y)) return true;
     }
     return false;
+  }
+
+  /**
+   * Handles the double click event, i.e. focuses the double clicked group.
+   */
+  onDoubleClick(): void {
+    const found = this.containerService.entities.find(it => this.service.containsPoint(it.id, this.service.mouse));
+    if (found && found.children.length > 0) this.store.dispatch(new Isolate(found));
+    else if (!found) this.store.dispatch(new Isolate(null));
   }
 }

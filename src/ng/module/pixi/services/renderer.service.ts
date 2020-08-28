@@ -309,7 +309,7 @@ export class PixiRendererService implements ISceneRenderer {
     else return null;
   }
 
-  containsPoint(id: string, point: Point): boolean {
+  containsPoint(id: string, point: IPointData): boolean {
     const bounds = this.getShape(id);
     if (!bounds) return false;
     if (typeof bounds.contains !== 'function') {
