@@ -198,7 +198,6 @@ export class PixiSelectionHandlerRotationService {
       points[i + 1] = tmp.y;
     }
 
-    // this.areas.forEach((it) => it.updateTransform());
     this.debugDraw();
   }
 

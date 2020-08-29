@@ -143,6 +143,7 @@ export class PixiRendererService implements ISceneRenderer {
 
           const enabled = oldParent === container.parent;
           if (!enabled) return;
+          container.transform.updateTransform(container.parent.transform);
           newParent.addChild(container);
           transformTo(container, newParent);
           this.updateComponents(entity.components, container);
