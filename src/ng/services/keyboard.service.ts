@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 
 import * as keyboardJS from 'keyboardjs';
-import { KeyEvent as KeyboardJSKeyEvent } from 'keyboardjs';
 import * as _ from 'lodash';
 
 interface ComponentHash {
@@ -9,51 +8,30 @@ interface ComponentHash {
   handler: (eventObject?: Event) => any;
 }
 
-interface KeyEvent extends KeyboardJSKeyEvent, KeyboardEvent {}
-
-interface Callback { (e?: KeyEvent): void; }
-
 /**
  * The keyboard service is meant to define keyboard short cuts for different components.
- * A component can register itself to the keyboad service and define keyboard combinations.
+ * A component can register itself to the keyboard service and define keyboard combinations.
  * The component will receive the keyboard events if it is focused, i.e. if the user clicked or tabbed (focused) the
  * component.
  *
  * Usage should be as follows
- * <code>
+ * ```ts
  *  keyboardService.register('myId', myComponent)
  *                  .begin('myId')
  *                  .bind('ctrl + c', myCopyFn)
  *                  .bind('ctrl + v', myPasteFn) // ... more bindings
  *                  .end();
- * </code>
+ * ```
  *
  * Notice, that the whole service is basically a wrapper around keyboardjs.
  * This means, if you want to bind keyboard events regardless of the component context, use the 'global' id
  * when beginning your binding.
- *
- * @export
- * @class KeyboardService
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class KeyboardService {
-
   private inBindingMode = false;
   private context: string = 'global';
-  private components: { [id: string] : ComponentHash } = { };
-
-  constructor() {
-    // window.addEventListener('', )
-    // $(window).on('click focus', e => {
-    //   let found = _.findKey(this.components, (component: ComponentHash, id) =>
-    //     e.target == component.component.elementRef.nativeElement || component.component.$el.has(e.target).length);
-    //   let ctx = 'global'
-    //   if (found)
-    //     ctx = found;
-    //   this.context = ctx;
-    //   keyboardJS.setContext(ctx);
-    // });
-  }
+  private components: { [id: string]: ComponentHash } = {};
 
   /**
    * Registers keyboard handling for the given component.
@@ -63,17 +41,16 @@ export class KeyboardService {
    * @returns {KeyboardService}
    */
   register(id: string, component: Object): KeyboardService {
-    if (id == 'global') throw 'The "global" id is reserved!';
-    if (this.components[id]) throw `A component with the id "${id}" is already registered!`;
+    if (id === 'global') throw new Error('The "global" id is reserved!');
+    if (this.components[id]) throw new Error(`A component with the id "${id}" is already registered!`);
     this.components[id] = {
       component: component,
-      handler: e => {
+      handler: (e) => {
         this.context = id;
         keyboardJS.setContext(id);
         e.stopPropagation();
-      }
+      },
     };
-    // component.$el.on(<any>'click focus', this.components[id].handler);
     return this;
   }
 
@@ -85,9 +62,8 @@ export class KeyboardService {
    * @returns {KeyboardService}
    */
   unregister(component: Object): KeyboardService {
-    let found = this.findId(component);
+    const found = this.findId(component);
     if (found) {
-      // component.$el.off(<any>'click focus', <any>this.components[found].handler);
       delete this.components[found];
       if (found === this.context) {
         this.context = 'global';
@@ -102,7 +78,7 @@ export class KeyboardService {
    * @returns {string} The id for the given component.
    */
   findId(component: Object): string {
-    return _.findKey(this.components, (el: any) => el.component == component);
+    return _.findKey(this.components, (el: any) => el.component === component);
   }
 
   /**
@@ -113,13 +89,11 @@ export class KeyboardService {
    * @returns {KeyboardService}
    */
   begin(context: string | Object): KeyboardService {
-    if (this.inBindingMode)
-      throw 'Call end() before beginning a new binding session!';
+    if (this.inBindingMode) throw new Error('Call end() before beginning a new binding session!');
     let ctx: string = <any>context;
     if (context instanceof Object) {
       ctx = this.findId(context);
-      if (!ctx)
-        throw 'The given component is not registered yet';
+      if (!ctx) throw new Error('The given component is not registered yet');
     }
     keyboardJS.setContext(ctx);
     this.inBindingMode = true;
@@ -145,11 +119,13 @@ export class KeyboardService {
    * @param preventRepeatByDefault Whether or not to prevent repeat by default. Defaults to false.
    * @returns {KeyboardService}
    */
-  bind(keyCombo: string | string[],
-        pressed: Callback,
-        released?: Callback,
-        preventRepeatByDefault?: boolean): KeyboardService {
-    if (!this.inBindingMode) throw 'Call begin() before binding any combination!';
+  bind(
+    keyCombo: string | string[],
+    pressed: keyboardJS.Callback,
+    released?: keyboardJS.Callback,
+    preventRepeatByDefault?: boolean
+  ): KeyboardService {
+    if (!this.inBindingMode) throw new Error('Call begin() before binding any combination!');
     keyboardJS.bind(keyCombo, pressed, released, preventRepeatByDefault);
     return this;
   }
@@ -161,10 +137,9 @@ export class KeyboardService {
    * @param released Callback that gets executed when the keyComboState is 'released', can be null.
    * @returns {KeyboardService}
    */
-  unbind(keyCombo: string | string[], pressed?: Callback, released?: Callback): KeyboardService {
-    if (!this.inBindingMode) throw 'Call begin() before binding any combination!';
+  unbind(keyCombo: string | string[], pressed?: keyboardJS.Callback, released?: keyboardJS.Callback): KeyboardService {
+    if (!this.inBindingMode) throw new Error('Call begin() before binding any combination!');
     keyboardJS.unbind(keyCombo, pressed, released);
     return this;
   }
-
 }
