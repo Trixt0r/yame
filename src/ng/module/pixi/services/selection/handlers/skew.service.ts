@@ -8,6 +8,7 @@ import { SceneEntity, PointSceneComponent } from 'common/scene';
 import { distanceToSegment, angleBetween } from 'common/math';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
+import { CursorService } from 'ng/services/cursor.service';
 
 const tempPoint = new Point();
 
@@ -166,7 +167,8 @@ export class PixiSelectionHandlerSkewService {
   constructor(
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
-    protected selectionRenderer: PixiSelectionRendererService
+    protected selectionRenderer: PixiSelectionRendererService,
+    protected cursorService: CursorService
   ) {
     this.mouseupFn = this.mouseup.bind(this);
     this.keyDownFn = this.keydown.bind(this);
@@ -233,7 +235,7 @@ export class PixiSelectionHandlerSkewService {
     if (this.active) {
       this.updateAreaPositions();
       if (this.mouseOverArea) {
-        this.prevCursor = this.rendererService.view.style.cursor;
+        this.prevCursor = this.cursorService.image.src;
         this.updateCursor();
       }
     }
@@ -249,7 +251,7 @@ export class PixiSelectionHandlerSkewService {
     if (event.keyCode === this.keyCode && this.active) {
       this.area.interactive = false;
       // Restore the old cursor
-      if (this.prevCursor) this.rendererService.view.style.cursor = this.prevCursor;
+      if (this.prevCursor) this.cursorService.image.src = this.prevCursor;
       else this.resetCursor(true);
     }
   }
@@ -377,7 +379,25 @@ export class PixiSelectionHandlerSkewService {
   updateCursor(event?: InteractionEvent): void {
     this.mouseLeft = event === void 0;
     if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
-    this.rendererService.view.style.cursor = 'url("assets/skew-icon.svg"), auto';
+    this.cursorService.begin(this.rendererService.view);
+    this.cursorService.image.src = 'assets/skew-icon.svg';
+
+    this.container.toLocal(this.rendererService.mouse, null, tempPoint);
+    const bounds = this.container.getLocalBounds();
+    if (tempPoint.y <= bounds.y) {
+      this.xDirection = 1;
+    } else if (tempPoint.y >= bounds.y + bounds.height) {
+      this.xDirection = 1;
+    } else this.xDirection = 0;
+
+    if (this.xDirection === 0 && tempPoint.x <= bounds.x) {
+      this.yDirection = 1;
+    } else if (this.xDirection === 0 && tempPoint.x >= bounds.x + bounds.width) {
+      this.yDirection = 1;
+    } else this.yDirection = 0;
+
+    const rotOff = this.yDirection !== 0 && this.xDirection === 0 ? Math.PI / 2 : 0;
+    this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation + rotOff}rad)`;
   }
 
   /**
@@ -388,7 +408,7 @@ export class PixiSelectionHandlerSkewService {
   resetCursor(event?: unknown): void {
     if (event !== void 0) this.mouseLeft = true;
     if ((this.containerService.isHandling && this.containerService.currentHandler === this) || !this.mouseLeft) return;
-    this.rendererService.view.style.cursor = '';
+    this.cursorService.end();
   }
 
   /**

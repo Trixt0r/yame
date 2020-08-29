@@ -16,6 +16,7 @@ import { NgxsModule } from '@ngxs/store';
 import { SceneModule } from './scene';
 import { PixiModule } from './pixi/pixi.module';
 import { ToolbarModule } from './toolbar/toolbar.module';
+import { CursorService } from 'ng/services/cursor.service';
 
 @NgModule({
   imports: [
@@ -33,7 +34,7 @@ import { ToolbarModule } from './toolbar/toolbar.module';
     ToolbarModule,
   ],
   declarations: [AppComponent, MainComponent],
-  providers: [],
+  providers: [CursorService],
   bootstrap: [AppComponent],
 })
 export class AppModule {

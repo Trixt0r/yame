@@ -3,6 +3,7 @@ import { Graphics, Point, DisplayObject, Rectangle, Container, InteractionEvent,
 import { PixiRendererService } from '../../../renderer.service';
 import { PixiSelectionContainerService } from '../../container.service';
 import { SceneEntity } from 'common/scene';
+import { CursorService } from 'ng/services/cursor.service';
 
 /**
  * The config interface for the rendering.
@@ -113,7 +114,7 @@ export class ResizeAnchor extends Graphics {
    * @see LEFT
    * @see UP
    */
-  constructor(public type: number, public service: PixiRendererService) {
+  constructor(public type: number, public service: PixiRendererService, public cursorService: CursorService) {
     super();
     if (this.matches(LEFT) && this.matches(RIGHT)) {
       throw new Error('LEFT and RIGHT can not be set at the same time');
@@ -183,19 +184,17 @@ export class ResizeAnchor extends Graphics {
   updateCursor(event?: InteractionEvent): void {
     if (event) event.stopPropagation();
     this.mouseLeft = event === void 0;
-    let style = '';
     const angleThresh = Math.PI / cursorOrder.length;
+    let rotOff = 0;
     if (this.matches(VERT) && this.matches(HOR)) {
-      style = this.xDirection * this.yDirection === -1 ? 'nesw-resize' : 'nwse-resize';
-    } else if (this.matches(VERT)) {
-      style = 'ns-resize';
-    } else {
-      style = 'ew-resize';
+      rotOff = this.xDirection * this.yDirection === -1 ? Math.PI * 0.25 : Math.PI * 0.75;
+      rotOff *= Math.sign(this.target.scale.x) * Math.sign(this.target.scale.y);
+    } else if (this.matches(HOR)) {
+      rotOff = Math.PI * 0.5;
     }
-    const offset = cursorOrder.indexOf(style);
-    const closest = Math.round((this.rotation + offset * angleThresh) / angleThresh) % cursorOrder.length;
-    style = cursorOrder[closest];
-    this.service.app.view.style.cursor = style;
+    this.cursorService.begin(this.service.view);
+    this.cursorService.image.src = 'assets/resize-icon.svg';
+    this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation + rotOff}rad)`;
   }
 
   /**
@@ -204,7 +203,7 @@ export class ResizeAnchor extends Graphics {
   resetCursor(event?: InteractionEvent): void {
     if (event !== void 0) this.mouseLeft = true;
     if (this.clickedPos || (!this.clickedPos && !this.mouseLeft)) return;
-    this.service.app.view.style.cursor = '';
+    this.cursorService.end();
   }
 
   /**
@@ -227,8 +226,8 @@ export class ResizeAnchor extends Graphics {
 
     this.tmpLocalBounds = this.target.getLocalBounds().clone();
     const bnds = this.tmpLocalBounds;
-    this.tmpXDirection = this.xDirection * Math.sign(this.clickedScale.x);
-    this.tmpYDirection = this.yDirection * Math.sign(this.clickedScale.y);
+    this.tmpXDirection = this.xDirection;
+    this.tmpYDirection = this.yDirection;
     this.tmpXSignBounds = Math.sign(this.tmpXDirection + 1);
     this.tmpYSignBounds = Math.sign(this.tmpYDirection + 1);
     this.clickedBound.set(

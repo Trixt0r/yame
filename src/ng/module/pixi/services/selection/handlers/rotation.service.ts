@@ -4,10 +4,11 @@ import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
 import { PixiRendererService } from '../..';
 import { PixiSelectionContainerService } from '..';
 import { PixiSelectionRendererService } from '../renderer.service';
-import { SceneEntity, RangeSceneComponent } from 'common/scene';
 import { angleBetween } from 'common/math';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
+import { CursorService } from 'ng/services/cursor.service';
+import { RangeSceneComponent } from 'common/scene';
 
 const tempPoint = new Point();
 
@@ -48,7 +49,8 @@ export class PixiSelectionHandlerRotationService {
   constructor(
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
-    protected selectionRenderer: PixiSelectionRendererService
+    protected selectionRenderer: PixiSelectionRendererService,
+    protected cursorService: CursorService
   ) {
     this.mouseupFn = this.mouseup.bind(this);
 
@@ -82,7 +84,9 @@ export class PixiSelectionHandlerRotationService {
   updateCursor(event?: InteractionEvent): void {
     this.mouseLeft = event === void 0;
     if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
-    this.rendererService.view.style.cursor = 'url("assets/rotate-icon.svg"), auto';
+    this.cursorService.begin(this.rendererService.view);
+    this.cursorService.image.src = 'assets/rotate-icon.svg';
+    this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
   }
 
   /**
@@ -93,7 +97,7 @@ export class PixiSelectionHandlerRotationService {
   resetCursor(event?: any): void {
     if (event !== void 0) this.mouseLeft = true;
     if ((this.containerService.isHandling && this.containerService.currentHandler === this) || !this.mouseLeft) return;
-    this.rendererService.view.style.cursor = '';
+    this.cursorService.end();
   }
 
   /**
@@ -144,6 +148,7 @@ export class PixiSelectionHandlerRotationService {
     this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
     this.containerService.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
     this.containerService.container.rotation = this.initRot + angleBetween(this.clickedPos, this.mouseCurrentPos) - this.clickedRot;
+    this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
     this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation'));
   }
 

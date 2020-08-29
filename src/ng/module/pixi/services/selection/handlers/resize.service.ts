@@ -8,6 +8,7 @@ import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
 import { SceneEntity, PointSceneComponent } from 'common/scene';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
+import { CursorService } from 'ng/services/cursor.service';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -30,16 +31,17 @@ export class PixiSelectionHandlerResizeService {
    */
   constructor(private containerService: PixiSelectionContainerService,
               protected renderer: PixiSelectionRendererService,
-              @Inject(YAME_RENDERER) protected service: PixiRendererService) {
+              @Inject(YAME_RENDERER) protected service: PixiRendererService,
+              protected cursorService: CursorService) {
     this.anchors = [
-      new ResizeAnchor(HOR | VERT | LEFT | UP, service), // top left
-      new ResizeAnchor(VERT | UP, service), // top mid
-      new ResizeAnchor(HOR | VERT | RIGHT | UP, service), // top right
-      new ResizeAnchor(HOR | RIGHT, service), // right mid
-      new ResizeAnchor(HOR | VERT | RIGHT | DOWN, service), // bot right
-      new ResizeAnchor(VERT | DOWN, service), // bot mid
-      new ResizeAnchor(HOR | VERT | LEFT | DOWN, service), // bot left
-      new ResizeAnchor(HOR | LEFT, service) // left mid
+      new ResizeAnchor(HOR | VERT | LEFT | UP, service, cursorService), // top left
+      new ResizeAnchor(VERT | UP, service, cursorService), // top mid
+      new ResizeAnchor(HOR | VERT | RIGHT | UP, service, cursorService), // top right
+      new ResizeAnchor(HOR | RIGHT, service, cursorService), // right mid
+      new ResizeAnchor(HOR | VERT | RIGHT | DOWN, service, cursorService), // bot right
+      new ResizeAnchor(VERT | DOWN, service, cursorService), // bot mid
+      new ResizeAnchor(HOR | VERT | LEFT | DOWN, service, cursorService), // bot left
+      new ResizeAnchor(HOR | LEFT, service, cursorService) // left mid
     ];
 
     renderer.attached$.subscribe(() => this.attached());

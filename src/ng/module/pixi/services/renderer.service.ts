@@ -231,6 +231,7 @@ export class PixiRendererService implements ISceneRenderer {
       transparent: true,
       view: this.comp.ref.nativeElement.querySelector('canvas'),
     });
+    this._app.stage.sortableChildren = true;
     this._app.stage.addChild(this.scene);
     this._app.stop();
     this.setSize(this.comp.width, this.comp.height);
