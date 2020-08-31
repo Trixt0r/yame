@@ -33,18 +33,38 @@ export interface ISceneRenderer {
   /**
    * Projects the given global coordinates to scene space.
    *
-   * @param x The x coordinate
-   * @param y The y coordinate
+   * @param x The x coordinate.
+   * @param y The y coordinate.
    * @return { { x: number, y: number } } The coordinates in scene space.
    */
   projectToScene(x: number, y: number): { x: number, y: number };
 
+  /**
+   * Creates a preview at the given coordinates from the given asset.
+   *
+   * @param x The x coordinate.
+   * @param y The y coordinate.
+   * @param asset The asset to create the preview for.
+   */
   createPreview(x: number, y: number, asset: Asset);
 
+  /**
+   * Updates the current preview at the given coordinates.
+   *
+   * @param x The x coordinate.
+   * @param y The y coordinate.
+   */
   updatePreview(x: number, y: number): void;
 
+  /**
+   * Removes the current preview.
+   */
   removePreview(): void;
 
+  /**
+   * Disposes the renderer.
+   * Does cleanup work for the render.
+   */
   dispose(): void;
 }
 

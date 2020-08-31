@@ -56,7 +56,6 @@ const cursorOrder = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
 export class ResizeAnchor extends Graphics {
   private clickedPos: Point = null;
   private containerPos = new Point();
-  private clickedScale = new Point();
   private clickedSize = new Point();
   private clickedBound = new Point();
   private tmp = new Point();
@@ -76,7 +75,7 @@ export class ResizeAnchor extends Graphics {
   /**
    * The target pixi container.
    */
-  target: DisplayObject = null;
+  target: Container = null;
 
   /**
    * The container which the target is part of.
@@ -182,13 +181,13 @@ export class ResizeAnchor extends Graphics {
    * Updates the cursor based on the current rotation.
    */
   updateCursor(event?: InteractionEvent): void {
+    if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
     if (event) event.stopPropagation();
     this.mouseLeft = event === void 0;
-    const angleThresh = Math.PI / cursorOrder.length;
     let rotOff = 0;
     if (this.matches(VERT) && this.matches(HOR)) {
       rotOff = this.xDirection * this.yDirection === -1 ? Math.PI * 0.25 : Math.PI * 0.75;
-      rotOff *= Math.sign(this.target.scale.x) * Math.sign(this.target.scale.y);
+      rotOff *= Math.sign(this.target.width) * Math.sign(this.target.height);
     } else if (this.matches(HOR)) {
       rotOff = Math.PI * 0.5;
     }
@@ -218,13 +217,18 @@ export class ResizeAnchor extends Graphics {
     this.off('mouseover', this.updateCursor, this);
     this.off('mouseout', this.resetCursor, this);
     window.addEventListener('mouseup', this.mouseupFn);
-    this.clickedScale.copyFrom(this.target.scale);
-    this.target.scale.set(1);
+    this.tmpLocalBounds = this.target.getLocalBounds().clone();
+
+    this.tmp.set(this.target.width, this.target.height);
+    this.target.width = this.tmpLocalBounds.width;
+    this.target.height = this.tmpLocalBounds.height;
+
     this.clickedPos = this.target.toLocal(event.data.global, null, null, false);
     this.containerPos.copyFrom(this.containerService.container.position);
-    this.target.scale.copyFrom(this.clickedScale);
 
-    this.tmpLocalBounds = this.target.getLocalBounds().clone();
+    this.target.width = this.tmp.x;
+    this.target.height = this.tmp.y;
+
     const bnds = this.tmpLocalBounds;
     this.tmpXDirection = this.xDirection;
     this.tmpYDirection = this.yDirection;
@@ -234,7 +238,7 @@ export class ResizeAnchor extends Graphics {
       bnds.x + ( bnds.width - bnds.width * this.tmpXSignBounds),
       bnds.y + (bnds.height - bnds.height * this.tmpYSignBounds)
     );
-    this.clickedSize.set(bnds.width, bnds.height);
+    this.clickedSize.set(this.target.width, this.target.height);
     this.containerService.container.parent.toLocal(this.clickedBound, this.target, this.clickedBound);
     this.emit('handle:start');
   }
@@ -249,23 +253,25 @@ export class ResizeAnchor extends Graphics {
   mousemove(event: InteractionEvent): void {
     if (!this.clickedPos) return;
     this.containerService.container.position.copyFrom(this.containerPos);
-    const tmpScale = this.tmp;
-    tmpScale.copyFrom(this.target.scale);
-    this.target.scale.set(1);
+    this.tmp.set(this.target.width, this.target.height);
+    this.target.width = this.tmpLocalBounds.width;
+    this.target.height = this.tmpLocalBounds.height;
+
     const currentPos = this.target.toLocal(event.data.global);
-    this.target.scale.copyFrom(tmpScale);
+
+    this.target.width = this.tmp.x;
+    this.target.height = this.tmp.y;
+
     const diff = this.tmp;
     diff.set(currentPos.x - this.clickedPos.x, currentPos.y - this.clickedPos.y);
     diff.x *= this.tmpXDirection;
     diff.y *= this.tmpYDirection;
-    const scaleX = diff.x / this.clickedSize.x;
-    const scaleY = diff.y / this.clickedSize.y;
 
     if (this.matches(HOR)) {
-      this.target.scale.x = this.clickedScale.x + scaleX;
+      this.target.width = this.clickedSize.x + diff.x;
     }
     if (this.matches(VERT)) {
-      this.target.scale.y = this.clickedScale.y + scaleY;
+      this.target.height = this.clickedSize.y + diff.y;
     }
     const bnds = this.tmpLocalBounds;
     const bound = this.tmp;

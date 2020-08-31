@@ -168,6 +168,14 @@ export class PixiSelectionContainerService {
         bounds = this.container.getLocalBounds();
       }
       this.container.hitArea = bounds;
+      this.entities.forEach(entity => {
+        let parentEntity = this.pixi.sceneService.getEntity(entity.parent);
+        while (parentEntity) {
+          const container = this.pixi.getContainer(parentEntity.id);
+          this.pixi.updateComponents(parentEntity.components, container);
+          parentEntity = this.pixi.sceneService.getEntity(parentEntity.parent);
+        }
+      });
     }
     this.container.transform.updateTransform(this.container.parent.transform);
 
@@ -246,6 +254,12 @@ export class PixiSelectionContainerService {
       if (hadOnlyOne && entity === first) child.pivot.copyFrom(this.container.pivot);
       transformTo(child, parentContainer);
       this.pixi.updateComponents(entity.components, child);
+      let parentEntity = this.pixi.sceneService.getEntity(entity.parent);
+      while (parentEntity) {
+        const container = this.pixi.getContainer(parentEntity.id);
+        this.pixi.updateComponents(parentEntity.components, container);
+        parentEntity = this.pixi.sceneService.getEntity(parentEntity.parent);
+      }
     });
     if (this.entities.length === 0) this.container.interactive = false;
     if (toRemove.length > 0 && !silent) this.unselected$.next(toRemove);

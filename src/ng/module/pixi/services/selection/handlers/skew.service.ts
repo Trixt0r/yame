@@ -55,7 +55,7 @@ export class PixiSelectionHandlerSkewService {
   /**
    * The initial container scale.
    */
-  protected containerScale = new Point();
+  protected containerSize = new Point();
 
   /**
    * The sign direction on x-axis.
@@ -275,7 +275,7 @@ export class PixiSelectionHandlerSkewService {
 
     // Store initial values
     this.containerPos.copyFrom(this.container.position);
-    this.containerScale.copyFrom(this.container.scale);
+    this.containerSize.set(this.container.width, this.container.height);
     this.clickedSkew.copyFrom(this.container.skew);
     this.clickedPos.copyFrom(event.data.global);
     this.container.toLocal(this.clickedPos, null, this.clickedPos);
@@ -336,7 +336,8 @@ export class PixiSelectionHandlerSkewService {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
     this.currentPos.copyFrom(event.data.global);
     this.container.position.copyFrom(this.containerPos);
-    this.container.scale.copyFrom(this.containerScale);
+    this.container.width = this.containerSize.x;
+    this.container.height = this.containerSize.y;
     this.container.skew.copyFrom(this.clickedSkew);
     this.container.toLocal(this.currentPos, null, this.currentPos);
 
@@ -356,8 +357,8 @@ export class PixiSelectionHandlerSkewService {
     const points = this.getBoundPoints();
     const width = distanceToSegment(points[0], { v: points[1], w: points[3] });
     const height = distanceToSegment(points[0], { v: points[2], w: points[3] });
-    if (this.yDirection !== 0) this.container.scale.x = this.containerScale.x * (this.clickedSize.x / width);
-    if (this.xDirection !== 0) this.container.scale.y = this.containerScale.y * (this.clickedSize.y / height);
+    if (this.yDirection !== 0) this.container.width = this.containerSize.x * (this.clickedSize.x / width);
+    if (this.xDirection !== 0) this.container.height = this.containerSize.y * (this.clickedSize.y / height);
 
     this.currentRefPos.copyFrom(this.clickRefPos);
     this.container.parent.toLocal(this.currentRefPos, this.container, this.currentRefPos);
@@ -366,7 +367,7 @@ export class PixiSelectionHandlerSkewService {
 
     this.containerService.dispatchUpdate(
       this.containerService.components.byId('transformation.position'),
-      this.containerService.components.byId('transformation.scale'),
+      this.containerService.components.byId('transformation.size'),
       this.containerService.components.byId('transformation.skew')
     );
   }
@@ -384,19 +385,21 @@ export class PixiSelectionHandlerSkewService {
 
     this.container.toLocal(this.rendererService.mouse, null, tempPoint);
     const bounds = this.container.getLocalBounds();
+    let xDirection = 0;
+    let yDirection = 0;
     if (tempPoint.y <= bounds.y) {
-      this.xDirection = 1;
+      xDirection = 1;
     } else if (tempPoint.y >= bounds.y + bounds.height) {
-      this.xDirection = 1;
-    } else this.xDirection = 0;
+      xDirection = 1;
+    } else xDirection = 0;
 
-    if (this.xDirection === 0 && tempPoint.x <= bounds.x) {
-      this.yDirection = 1;
-    } else if (this.xDirection === 0 && tempPoint.x >= bounds.x + bounds.width) {
-      this.yDirection = 1;
-    } else this.yDirection = 0;
+    if (xDirection === 0 && tempPoint.x <= bounds.x) {
+      yDirection = 1;
+    } else if (xDirection === 0 && tempPoint.x >= bounds.x + bounds.width) {
+      yDirection = 1;
+    } else yDirection = 0;
 
-    const rotOff = this.yDirection !== 0 && this.xDirection === 0 ? Math.PI / 2 : 0;
+    const rotOff = yDirection !== 0 && xDirection === 0 ? Math.PI / 2 : 0;
     this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation + rotOff}rad)`;
   }
 
@@ -418,8 +421,8 @@ export class PixiSelectionHandlerSkewService {
     if (!this.active) return;
     const bnds = this.container.getLocalBounds();
 
-    const horRatio = Math.abs(this.rendererService.scene.scale.x * this.container.scale.x);
-    const verRatio = Math.abs(this.rendererService.scene.scale.y * this.container.scale.y);
+    const horRatio = Math.abs(this.rendererService.scene.scale.x * (this.container.width / bnds.width));
+    const verRatio = Math.abs(this.rendererService.scene.scale.y * (this.container.height / bnds.height));
     const thickness = 50;
     const offset = 15;
     const thicknessHor = thickness / horRatio;

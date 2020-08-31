@@ -158,8 +158,8 @@ export class PixiSelectionHandlerRotationService {
   updateAreaPositions(): void {
     const bnds = this.containerService.container.getLocalBounds();
 
-    const horRatio = Math.abs(this.rendererService.scene.scale.x * this.containerService.container.scale.x);
-    const verRatio = Math.abs(this.rendererService.scene.scale.y * this.containerService.container.scale.y);
+    const horRatio = Math.abs(this.rendererService.scene.scale.x * (this.containerService.container.width / bnds.width));
+    const verRatio = Math.abs(this.rendererService.scene.scale.y * (this.containerService.container.height / bnds.height));
     const thickness = 50;
     const offset = 15;
     const thicknessHor = thickness / horRatio;

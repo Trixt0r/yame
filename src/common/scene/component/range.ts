@@ -31,21 +31,6 @@ export interface RangeSceneComponent extends SceneComponent {
   ticks?: number;
 }
 
-// /**
-//  * Creates a new black non-transparent color component with the given parameters.
-//  *
-//  * @param id
-//  * @param group
-//  */
-// export function createRangeComponent(id: string, value: number, group?: string): RangeSceneComponent {
-//   return {
-//     id,
-//     value,
-//     type: 'range',
-//     group,
-//   };
-// }
-
 export function createRangeComponent(id: string, value: number, group?: string): RangeSceneComponent {
   return {
     id,

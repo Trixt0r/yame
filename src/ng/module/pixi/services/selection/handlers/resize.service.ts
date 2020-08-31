@@ -9,6 +9,7 @@ import { SceneEntity, PointSceneComponent } from 'common/scene';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
+import { SizeSceneComponent } from 'common/scene/component/size';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -71,7 +72,7 @@ export class PixiSelectionHandlerResizeService {
         .on('updated', () => {
           this.containerService.dispatchUpdate(
             this.containerService.components.byId('transformation.position'),
-            this.containerService.components.byId('transformation.scale')
+            this.containerService.components.byId('transformation.size')
           );
         })
         .on('handle:start', () => this.containerService.beginHandling(anchor))
@@ -83,9 +84,10 @@ export class PixiSelectionHandlerResizeService {
                           .subscribe((action: UpdateEntity) => {
                             const data = Array.isArray(action.data) ? action.data : [action.data];
                             if (data.length <= 0) return;
-                            const scale = data[0].components.find(comp => comp.id === 'transformation.scale') as PointSceneComponent;
-                            if (!scale) return;
-                            this.containerService.container.scale.copyFrom(scale);
+                            const size = data[0].components.find(comp => comp.id === 'transformation.size') as SizeSceneComponent;
+                            if (!size) return;
+                            this.containerService.container.width = size.width;
+                            this.containerService.container.height = size.height;
                           });
   }
 

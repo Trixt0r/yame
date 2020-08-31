@@ -38,6 +38,8 @@ import { SceneComponentService } from '../scene/services/component.service';
 import { AddEntityComponent } from './components/hierarchy/add/add.component';
 import { EntityTypeService } from './services/entity-type.service';
 import { TreeModule } from 'angular-tree-component';
+import { createSizeComponent } from 'common/scene/component/size';
+import { SizeTypeComponent } from './components/selection/types/size/size.component';
 
 @NgModule({
   imports: [
@@ -61,6 +63,7 @@ import { TreeModule } from 'angular-tree-component';
     ColorTypeComponent,
     RangeTypeComponent,
     PointTypeComponent,
+    SizeTypeComponent,
     GroupTypeComponent,
     AssetTypeComponent,
     EditComponentComponent,
@@ -76,6 +79,7 @@ import { TreeModule } from 'angular-tree-component';
     ColorTypeComponent,
     RangeTypeComponent,
     PointTypeComponent,
+    SizeTypeComponent,
     GroupTypeComponent,
     AssetTypeComponent,
     AddSceneComponentButtonComponent,
@@ -93,6 +97,7 @@ import { TreeModule } from 'angular-tree-component';
     ColorTypeComponent,
     RangeTypeComponent,
     PointTypeComponent,
+    SizeTypeComponent,
     GroupTypeComponent,
     AssetTypeComponent,
   ],
@@ -101,7 +106,7 @@ export class SidebarModule {
   constructor(components: SceneComponentsService, entityTypes: EntityTypeService, compService: SceneComponentService) {
     components.registerCategory({
       id: 'general',
-      items: ['general.string', 'general.number', 'general.point', 'general.color', 'general.range'],
+      items: ['general.string', 'general.number', 'general.point', 'general.size', 'general.color', 'general.range'],
       label: 'General',
       icon: 'adjust',
     });
@@ -122,6 +127,12 @@ export class SidebarModule {
       type: 'point',
       icon: 'location_on',
       factory: (entities, type, group) => createPointComponent(compService.generateComponentId(entities, type), 0, 0),
+    });
+    components.registerItem({
+      id: 'general.size',
+      type: 'size',
+      icon: 'open_in_full',
+      factory: (entities, type, group) => createSizeComponent(compService.generateComponentId(entities, type), 0, 0),
     });
 
     components.registerItem({
@@ -154,6 +165,7 @@ export class SidebarModule {
     components.registerTypeComponent(ColorTypeComponent);
     components.registerTypeComponent(RangeTypeComponent);
     components.registerTypeComponent(PointTypeComponent);
+    components.registerTypeComponent(SizeTypeComponent);
     components.registerTypeComponent(GroupTypeComponent);
 
     entityTypes.registerItem({

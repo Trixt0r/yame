@@ -1,6 +1,7 @@
 import { createGroupComponent } from './group';
 import { createRangeComponent, RangeSceneComponent } from './range';
 import { createPointComponent, PointSceneComponent } from './point';
+import { createSizeComponent } from './size';
 import { SceneComponent, SceneComponentTransform } from '..';
 import { IPoint } from 'common/interface/point';
 const RAD2DEG = 180 / Math.PI;
@@ -119,7 +120,7 @@ export function createTransformationComponents(id = 'transformation', group?: st
     id,
     [
       'transformation.position',
-      'transformation.scale',
+      'transformation.size',
       'transformation.rotation',
       'transformation.skew',
       'transformation.pivot',
@@ -132,7 +133,7 @@ export function createTransformationComponents(id = 'transformation', group?: st
 
   const position = createPointComponent('transformation.position');
   const pivot = createPointComponent('transformation.pivot');
-  const scale = createScaleComponent();
+  const size = createSizeComponent('transformation.size');
   const rotation = createRotationComponent();
   const skew = createSkewComponent();
 
@@ -141,9 +142,9 @@ export function createTransformationComponents(id = 'transformation', group?: st
 
   position.group = transform.id;
   pivot.group = transform.id;
-  scale.group = transform.id;
+  size.group = transform.id;
   rotation.group = transform.id;
   skew.group = transform.id;
 
-  return [transform, position, scale, rotation, skew, pivot];
+  return [transform, position, size, rotation, skew, pivot];
 }

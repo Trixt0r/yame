@@ -4,7 +4,6 @@ import {
   EngineService,
   SortEntity,
   SceneService,
-  Isolate,
 } from '../../scene';
 import { Asset } from 'common/asset';
 import {
@@ -19,8 +18,6 @@ import {
   IPointData,
   Renderer,
   Ticker,
-  Graphics,
-  filters,
 } from 'pixi.js';
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -29,6 +26,7 @@ import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { SceneComponentCollection } from 'common/scene/component.collection';
 import { maxBy } from 'lodash';
+import { SizeSceneComponent } from 'common/scene/component/size';
 
 const tempPoint = new Point();
 
@@ -175,27 +173,16 @@ export class PixiRendererService implements ISceneRenderer {
           if (!enabled) return;
           const bounds: Rectangle = container.getLocalBounds();
           tempPoint.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-          if (container.parent) {
-            container.parent.toLocal(tempPoint, container, container.position);
-            const parentPosition = entity.components.byId('transformation.position') as PointSceneComponent;
-            if (parentPosition) {
-              parentPosition.x = container.position.x;
-              parentPosition.y = container.position.y;
-            }
-          }
-          const parentPivot = entity.components.byId('transformation.pivot') as PointSceneComponent;
-          if (parentPivot) {
-            parentPivot.x = tempPoint.x;
-            parentPivot.y = tempPoint.y;
-            container.pivot.copyFrom(tempPoint);
-          }
+          if (container.parent) container.parent.toLocal(tempPoint, container, container.position);
+          container.pivot.copyFrom(tempPoint);
+          this.updateComponents(entity.components, container);
         });
       });
 
       const self = this;
       engine.addListener({
         onAddedEntities(...entities: SceneEntity[]) {
-          entities.forEach((entity) => {
+          entities.forEach(entity => {
             const child = new Container();
             child.name = entity.id;
             child.sortableChildren = true;
@@ -205,17 +192,47 @@ export class PixiRendererService implements ISceneRenderer {
             child.transform.updateTransform(self.scene.transform);
             self.updateComponents(entity.components, child);
             const parentContainer = self.pixiContainers[entity.parent];
-            if (!parentContainer || parentContainer === self.scene) return;
 
+            let parentEntity = entity;
+            while (parentEntity) {
+              const size = parentEntity.components.byId('transformation.size');
+              if (size) size.id = 'transformation.size.tmp';
+              parentEntity = self.sceneService.getEntity(parentEntity.parent);
+            }
+
+            if (!parentContainer || parentContainer === self.scene) return;
             parentContainer.addChild(child);
             transformTo(child, parentContainer);
             self.updateComponents(entity.components, child);
           });
+          requestAnimationFrame(() => {
+            engine.run();
+            entities.forEach(entity => {
+              let parentEntity = entity;
+              while (parentEntity) {
+                const size = parentEntity.components.byId('transformation.size.tmp') as SizeSceneComponent;
+                if (size) size.id = 'transformation.size';
+                if (self.pixiContainers[parentEntity.id])
+                  self.updateComponents(parentEntity.components, self.pixiContainers[parentEntity.id]);
+                parentEntity = self.sceneService.getEntity(parentEntity.parent);
+              }
+            });
+          });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
-          entities.forEach((entity) => {
+          entities.forEach(entity => {
+            const children = self.sceneService.getChildren(entity.id, true);
+            if (children.length > 0) engine.entities.remove.apply(engine.entities, children);
             const container = self.pixiContainers[entity.id];
-            if (container.parent) container.parent.removeChild(self.pixiContainers[entity.id]);
+            if (container.parent) {
+              container.parent.removeChild(self.pixiContainers[entity.id]);
+              let parentEntity = self.sceneService.getEntity(entity.parent);
+              while (parentEntity) {
+                self.updateComponents(parentEntity.components, self.pixiContainers[parentEntity.id]);
+                parentEntity = self.sceneService.getEntity(parentEntity.parent);
+              }
+            }
+            delete self.pixiContainers[entity.id];
           });
         },
       });
@@ -238,10 +255,16 @@ export class PixiRendererService implements ISceneRenderer {
     this.init$.next();
   }
 
+  /**
+   * @inheritdoc
+   */
   get component(): SceneComponentView {
     return this.comp;
   }
 
+  /**
+   * @inheritdoc
+   */
   setSize(width: number, height: number): void {
     if (!this._app) return;
     this.renderer.resize(width, height);
@@ -249,6 +272,9 @@ export class PixiRendererService implements ISceneRenderer {
     this.engineService.run();
   }
 
+  /**
+   * @inheritdoc
+   */
   projectToScene(x: number, y: number) {
     return this.scene.toLocal(new Point(x, y));
   }
@@ -256,9 +282,8 @@ export class PixiRendererService implements ISceneRenderer {
   createPreview(x: number, y: number, asset: Asset) {
     this.zone.runOutsideAngular(() => {
       this.sceneService.createEntity(x, y, asset).subscribe((entity) => {
-        const isolated = this.store.snapshot().select.isolated as SceneEntity;
-        entity.parent = isolated ? isolated.id : null;
         this._previewEntity = entity;
+        delete this._previewEntity.parent;
         this._previewEntity.components.add({ id: 'sprite.animate', type: 'boolean', boolean: true, group: 'sprite' });
         this.engineService.engine.entities.add(this._previewEntity);
         this._previewEntity.components.add({
@@ -276,8 +301,6 @@ export class PixiRendererService implements ISceneRenderer {
     const container = this.getContainer(this._previewEntity.id);
     if (!container) return;
     container.position.copyFrom(this.projectToScene(x, y));
-    const isolated = this.store.snapshot().select.isolated as SceneEntity;
-    if (isolated) this.getContainer(isolated.id).toLocal(container.position, this.scene, container.position);
     const position = this._previewEntity.components.byId('transformation.position') as PointSceneComponent;
     position.x = container.position.x;
     position.y = container.position.y;
@@ -333,7 +356,7 @@ export class PixiRendererService implements ISceneRenderer {
     if (!container) return;
 
     const position = components.byId('transformation.position') as PointSceneComponent;
-    const scale = components.byId('transformation.scale') as PointSceneComponent;
+    const size = components.byId('transformation.size') as SizeSceneComponent;
     const skew = components.byId('transformation.skew') as PointSceneComponent;
     const pivot = components.byId('transformation.pivot') as PointSceneComponent;
     const rotation = components.byId('transformation.rotation') as RangeSceneComponent;
@@ -342,9 +365,9 @@ export class PixiRendererService implements ISceneRenderer {
       rotation.value = container.rotation;
     }
 
-    if (scale) {
-      scale.x = container.scale.x;
-      scale.y = container.scale.y;
+    if (size) {
+      size.width = container.width;
+      size.height = container.height;
     }
 
     if (skew) {
@@ -371,13 +394,16 @@ export class PixiRendererService implements ISceneRenderer {
    */
   applyComponents(components: SceneComponentCollection<SceneComponent>, container: Container): void {
     const position = components.byId('transformation.position') as PointSceneComponent;
-    const scale = components.byId('transformation.scale') as PointSceneComponent;
+    const size = components.byId('transformation.size') as SizeSceneComponent;
     const rotation = components.byId('transformation.rotation') as RangeSceneComponent;
     const skew = components.byId('transformation.skew') as PointSceneComponent;
     const pivot = components.byId('transformation.pivot') as PointSceneComponent;
     if (rotation) container.rotation = rotation.value;
     if (position) container.position.copyFrom(position);
-    if (scale) container.scale.copyFrom(scale);
+    if (size) {
+      container.width = size.width;
+      container.height = size.height;
+    }
     if (skew) container.skew.copyFrom(skew);
     if (pivot) container.pivot.copyFrom(pivot);
   }

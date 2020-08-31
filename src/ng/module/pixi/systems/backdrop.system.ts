@@ -71,6 +71,11 @@ export class PixiBackdropSystem extends System {
       this.scene.addChild(container);
       transformTo(container, this.scene);
       service.updateComponents(isolated.components, container);
+      let parentEntity = service.sceneService.getEntity(isolated.parent);
+      while (parentEntity) {
+        service.updateComponents(parentEntity.components, service.getContainer(parentEntity.id));
+        parentEntity = service.sceneService.getEntity(parentEntity.parent);
+      }
     }
 
     const children = service.sceneService.getChildren(isolated, true);
@@ -82,6 +87,7 @@ export class PixiBackdropSystem extends System {
       this.container.addChild(child);
       transformTo(child, this.container);
       it.components.add(this.transformOff);
+      service.updateComponents(it.components, child);
     });
     if (this.container.children.length > 0)
       this.graphics.zIndex = maxBy(this.container.children, it => it.zIndex).zIndex + 1;
@@ -102,7 +108,7 @@ export class PixiBackdropSystem extends System {
     const service = this.service;
     this.active = true;
 
-    this.container.children.slice().forEach(child => {
+    this.container.children.slice().forEach((child: Container) => {
       if (!child.name) return;
       const entity = service.sceneService.getEntity(child.name);
       if (!entity) return;
@@ -110,6 +116,7 @@ export class PixiBackdropSystem extends System {
       const parent = service.getContainer(entity.parent) || this.scene;
       parent.addChild(child);
       transformTo(child, parent);
+      service.updateComponents(entity.components, child);
       entity.components.remove(this.transformOff);
     });
     this.scene.updateTransform();
@@ -120,8 +127,12 @@ export class PixiBackdropSystem extends System {
       const parent = service.getContainer(this.isolated.parent) || this.scene;
       parent.addChild(child);
       transformTo(child, parent);
-      this.service.updateComponents(this.isolated.components, child);
-      this.isolated.components.remove(this.transformOff);
+      let parentEntity = this.isolated;
+      while (parentEntity) {
+        const container = service.getContainer(parentEntity.id);
+        service.updateComponents(parentEntity.components, container);
+        parentEntity = service.sceneService.getEntity(parentEntity.parent);
+      }
     }
 
     return new Promise(resolve => {
