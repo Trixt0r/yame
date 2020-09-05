@@ -1,13 +1,12 @@
 import { Injectable, Inject } from '@angular/core';
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiRendererService } from '../renderer.service';
-import { Container, Rectangle, Point, Matrix } from 'pixi.js';
+import { Container, Rectangle, Point, Matrix, Transform } from 'pixi.js';
 import { Subject, Observable } from 'rxjs';
-import { SceneEntity, SceneComponent } from 'common/scene';
-import { YAME_RENDERER, UpdateComponents } from 'ng/module/scene';
-import { SceneComponentCollection } from 'common/scene/component.collection';
+import { SceneEntity, SceneComponent, SceneComponentCollection, SceneEntityData } from 'common/scene';
+import { YAME_RENDERER, UpdateComponents, UpdateEntity } from 'ng/module/scene';
 import { Store } from '@ngxs/store';
-import { merge, isEqual, maxBy } from 'lodash';
+import { merge, isEqual, maxBy, cloneDeep } from 'lodash';
 import { transformTo } from '../../utils/transform.utils';
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +24,11 @@ export class PixiSelectionContainerService {
 
   protected comp: SceneComponent = { id: 'transform-off', type: 'selection-container' };
 
-  protected updateAction = new UpdateComponents([]);
+  protected updateComponentsAction = new UpdateComponents([]);
+
+  protected cachedComponentValues: { [key: string]: SceneComponent[] } = { };
+
+  protected tmpTransform = new Transform();
 
   readonly entities: SceneEntity[] = [];
 
@@ -37,6 +40,7 @@ export class PixiSelectionContainerService {
   readonly unselected$ = new Subject<SceneEntity[]>();
   readonly update$ = new Subject();
   readonly components = new SceneComponentCollection();
+  readonly updateEntityAction = new UpdateEntity([], 'Container update');
 
   /**
    * Whether user events handled via this container.
@@ -69,6 +73,10 @@ export class PixiSelectionContainerService {
    */
   beginHandling(ref: unknown, ...args: unknown[]): void {
     if (this.handling) throw new Error('beginHandling has already been called. endHandling has to be called before!');
+    this.cachedComponentValues = { };
+    this.entities.forEach(entity => {
+      this.cachedComponentValues[entity.id] = entity.components.map(it => cloneDeep(it));
+    });
     this.handlerRef = ref;
     this.handling = true;
     this.handleBegin$.next(args);
@@ -91,6 +99,7 @@ export class PixiSelectionContainerService {
     this.handlerRef = null;
     this.handling = false;
     this.handleEnd$.next(args);
+    this.updateEntities();
   }
 
   /**
@@ -135,8 +144,8 @@ export class PixiSelectionContainerService {
    */
   dispatchUpdate(...components: SceneComponent[]): Observable<any> {
     this.update$.next();
-    this.updateAction.components = components;
-    return this.store.dispatch(this.updateAction);
+    this.updateComponentsAction.components = components;
+    return this.store.dispatch(this.updateComponentsAction);
   }
 
   /**
@@ -144,10 +153,10 @@ export class PixiSelectionContainerService {
    */
   updateContainer(): void {
     this.container.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
-    if (this.entities.length > 0) {
+    if (this.entities.length > 0 && this.container.parent) {
       this.container.interactive = true;
       let bounds: Rectangle;
-      if (this.container.parent && this.entities.length > 1) {
+      if (this.entities.length > 1) {
         this.entities.forEach(entity => {
           transformTo(this.pixi.getContainer(entity.id), this.container.parent);
         });
@@ -266,5 +275,47 @@ export class PixiSelectionContainerService {
     if (!this.container.interactive) this.pixi.scene.removeChild(this.container);
     else this.updateContainer();
     return toRemove;
+  }
+
+  updateEntities(): void {
+    this.tmpTransform.rotation = this.container.transform.rotation;
+    this.tmpTransform.position.copyFrom(this.container.transform.position);
+    this.tmpTransform.scale.copyFrom(this.container.transform.scale);
+    this.tmpTransform.skew.copyFrom(this.container.transform.skew);
+    this.tmpTransform.pivot.copyFrom(this.container.transform.pivot);
+    const hadOnlyOne = this.entities.length === 1;
+    const first = this.entities[0];
+    const data: Partial<SceneEntityData>[] = [];
+    const componentsBefore: { [id: string]: SceneComponentCollection<SceneComponent> } = { };
+    this.entities.forEach(entity => {
+      const child = this.pixi.getContainer(entity.id);
+      child.transform.updateTransform(this.container.transform);
+      componentsBefore[entity.id] = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
+      this.pixi.updateComponents(componentsBefore[entity.id], child);
+      // Restore the internal relation
+      const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
+      parentContainer.addChild(child);
+      // And apply the proper transformation values
+      if (hadOnlyOne && entity === first) child.pivot.copyFrom(this.container.pivot);
+      transformTo(child, parentContainer);
+      const comps = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
+      this.pixi.updateComponents(comps, child);
+      data.push({ id: entity.id, components: comps.elements.slice() });
+      entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
+    });
+    this.updateEntityAction.data = data;
+    this.store.dispatch(this.updateEntityAction);
+
+    this.entities.forEach((entity) => {
+      const container = this.pixi.getContainer(entity.id);
+      this.container.addChild(container);
+      this.pixi.applyComponents(componentsBefore[entity.id], container);
+    });
+    this.container.transform.rotation = this.tmpTransform.rotation;
+    this.container.transform.position.copyFrom(this.tmpTransform.position);
+    this.container.transform.scale.copyFrom(this.tmpTransform.scale);
+    this.container.transform.skew.copyFrom(this.tmpTransform.skew);
+    this.container.transform.pivot.copyFrom(this.tmpTransform.pivot);
+    this.pixi.updateComponents(this.components, this.container);
   }
 }

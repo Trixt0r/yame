@@ -1,10 +1,11 @@
-import * as _ from 'lodash';
-import { State, Action, StateContext } from '@ngxs/store';
+import { cloneDeep, flattenDeep, flatten } from 'lodash';
+import { State, Action, StateContext, Store } from '@ngxs/store';
 import { CreateEntity, DeleteEntity, UpdateEntity, SortEntity, CloneEntity } from './actions/entity.action';
 import { SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
 import { Dispatcher, Component, Collection } from '@trixt0r/ecs';
 import { SceneService } from '../services/scene.service';
+import { PushHistory } from './actions';
 
 /**
  * Interface representing the scene state.
@@ -52,7 +53,7 @@ function move<T>(array: T[], index: number, newIndex: number) {
 })
 export class SceneState {
 
-  constructor(public service: SceneService) {
+  constructor(public store: Store, public service: SceneService) {
   }
 
   /**
@@ -62,11 +63,11 @@ export class SceneState {
    * @return The cloned entities.
    */
   protected getCloneEntities(cloneData: { id: string, index: number, parent?: string }[]): SceneEntity[] {
-    return _.flattenDeep(cloneData.map(it => {
+    return flattenDeep(cloneData.map(it => {
       const source = this.service.getEntity(it.id);
       if (!source) return null;
       const entity = new SceneEntity();
-      entity.components.add.apply(entity.components, _.cloneDeep(source.components.elements));
+      entity.components.add.apply(entity.components, cloneDeep(source.components.elements));
       entity.components.byId('index').index = it.index;
       entity.components.byId('name').string += ' clone';
       entity.type = source.type;
@@ -195,6 +196,8 @@ export class SceneState {
     });
     action.created = newEntities;
     ctx.patchState({ entities });
+    if (action.persist)
+      this.store.dispatch(new PushHistory([ new DeleteEntity(action.created.map(it => it.id), [], false) ]));
   }
 
   /**
@@ -227,6 +230,8 @@ export class SceneState {
     });
     action.deleted = entitiesToRemove;
     ctx.patchState({ entities });
+    if (action.persist)
+      this.store.dispatch(new PushHistory([ new CreateEntity(action.deleted, [], false) ]));
   }
 
   /**
@@ -237,26 +242,50 @@ export class SceneState {
    */
   @Action(UpdateEntity)
   updateEntity(ctx: StateContext<ISceneState>, action: UpdateEntity) {
-    const state = ctx.getState();
     const data = Array.isArray(action.data) ? action.data : [action.data];
+    if (data.length === 0) return;
+    const state = ctx.getState();
     let hasChanges = false;
     let resort = false;
 
-    const listener = {
-      onAdded: () => hasChanges = true,
-      onRemoved: () => hasChanges = true,
-      onUpdated: (...update: Component[]) => {
-        if (!resort) resort = !!update.find(it => it.id === 'index');
-        hasChanges = true;
-      }
-    };
+    const dataBefore: Partial<SceneEntityData>[] = action.persist ? [] : null;
 
     data.forEach(newData => {
       const entity = this.service.getEntity(newData.id);
       if (!entity) return console.warn(`[SceneState] No entity found for id ${newData.id}`);
       if (!newData.components) return;
+      const comps = dataBefore ? entity.components.map(it => cloneDeep(it)) : null;
+      const oldData = dataBefore ? { id: entity.id,  parent: entity.parent,  components: [] } : null;
+      if (dataBefore) dataBefore.push(oldData);
       const listenerIdx = entity.components.listeners.length;
-      (entity.components as Dispatcher<SceneComponentCollectionListener>).addListener(listener);
+      (entity.components as Dispatcher<SceneComponentCollectionListener>).addListener({
+        onAdded: (...added: Component[]) => {
+          hasChanges = true;
+          if (!dataBefore) return;
+          added.forEach(addedComp => {
+            const comp = cloneDeep(addedComp);
+            comp.markedForDelete = true;
+            oldData.components.push(comp);
+          });
+        },
+        onRemoved: (...removed: Component[]) => {
+          hasChanges = true;
+          if (!dataBefore) return;
+          removed.forEach(comp => {
+            const found = comps.find(it => it.id === comp.id);
+            if (found) oldData.components.push(found);
+          });
+        },
+        onUpdated: (...update: Component[]) => {
+          hasChanges = true;
+          if (!resort) resort = !!update.find(it => it.id === 'index');
+          if (!dataBefore) return;
+          update.forEach(comp => {
+            const found = comps.find(it => it.id === comp.id);
+            if (found) oldData.components.push(found);
+          });
+        }
+      });
       entity.components.set.apply(entity.components, newData.components);
       entity.components.removeListener(listenerIdx);
 
@@ -284,6 +313,8 @@ export class SceneState {
         this.sortByIndex(entities);
         ctx.patchState({ entities });
       }
+      if (action.persist)
+        this.store.dispatch(new PushHistory([new UpdateEntity(dataBefore, 'Reverse update', false)]));
     }
   }
 
@@ -318,7 +349,7 @@ export class SceneState {
   @Action(SortEntity)
   sortEntity(ctx: StateContext<ISceneState>, action: SortEntity) {
     const actions = Array.isArray(action.data) ? action.data : [action.data];
-    const data = _.flatten(actions.map(it => {
+    const data = flatten(actions.map(it => {
       return this.updateIndices(it.id, it.index, it.parent);
     }));
     return ctx.dispatch(

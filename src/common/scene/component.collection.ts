@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { merge, isEqual, cloneDeep } from 'lodash';
 import { ComponentCollection, CollectionListener } from '@trixt0r/ecs';
 import { SceneComponent } from './component';
 import { GroupSceneComponent, getMemberComponents } from './component/group';
@@ -67,7 +67,7 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
     for (let i = 0, l = components.length; i < l; i++) {
       const comp = components[i];
       const found = comp.id ? this.find(it => it.id === comp.id) : this.find(it => it.type === comp.type);
-      if (!found && comp.markedForDelete !== true) toAdd.push(_.cloneDeep(comp));
+      if (!found && comp.markedForDelete !== true) toAdd.push(cloneDeep(comp));
       else if (found && comp.markedForDelete === true) {
         if (found.type === 'group') {
           this.getChildren(found as unknown as GroupSceneComponent).forEach(it => toRemove.push(it));
@@ -83,8 +83,8 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
           }
         }
         toRemove.push(found);
-      } else if (found && !_.isEqual(found, comp)) {
-        _.merge(found, comp);
+      } else if (found && !isEqual(found, comp)) {
+        merge(found, comp);
         toUpdate.push(found);
       }
     }

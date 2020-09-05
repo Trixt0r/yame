@@ -4,7 +4,7 @@ import { PixiRendererService } from '../..';
 import { PixiSelectionContainerService } from '..';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
-import { SceneEntity, PointSceneComponent } from 'common/scene';
+import { PointSceneComponent } from 'common/scene';
 import { distanceToSegment, angleBetween } from 'common/math';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
@@ -498,14 +498,6 @@ export class PixiSelectionHandlerSkewService {
     }
     this.updateAreaPositions();
     this.clearSub();
-    this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
-                          .subscribe((action: UpdateEntity) => {
-                            const data = Array.isArray(action.data) ? action.data : [action.data];
-                            if (data.length <= 0) return;
-                            const skew = data[0].components.find(comp => comp.id === 'transformation.skew') as PointSceneComponent;
-                            if (!skew) return;
-                            this.container.skew.copyFrom(skew);
-                          });
   }
 
   /**

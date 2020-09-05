@@ -239,14 +239,6 @@ export class PixiSelectionHandlerRotationService {
     }
     this.updateAreaPositions();
     this.clearSub();
-    this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
-                          .subscribe((action: UpdateEntity) => {
-                            const data = Array.isArray(action.data) ? action.data : [action.data];
-                            if (data.length <= 0) return;
-                            const rotation = data[0].components.find(comp => comp.id === 'transformation.rotation') as RangeSceneComponent;
-                            if (!rotation) return;
-                            this.containerService.container.rotation = rotation.value;
-                          });
   }
 
   /**

@@ -110,7 +110,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     const data = this.entities
       .filter((entity) => entity.components.byId(event.component.id))
       .map((it) => ({ id: it.id, parent: it.parent, components: [ cloneDeep(event.component) ] }));
-    this.store.dispatch(new UpdateEntity(data, 'Component update'));
+    if (data.length > 0) this.store.dispatch(new UpdateEntity(data, 'Component update'));
   }
 
   /**

@@ -11,6 +11,7 @@ import { ImageAsset } from 'common/asset/image';
 import { SelectState } from './states/select.state';
 import { createAssetComponent, createColorComponent } from 'common/scene';
 import { SceneComponentService } from './services/component.service';
+import { HistoryState } from './states';
 
 
 
@@ -38,7 +39,7 @@ export class ImageAssetConverter implements ISceneAssetConverter<ImageAsset> {
 
   imports: [
     DndModule.forRoot(),
-    NgxsModule.forFeature([SceneState, SelectState])
+    NgxsModule.forFeature([SceneState, HistoryState, SelectState])
   ],
 
   declarations: [

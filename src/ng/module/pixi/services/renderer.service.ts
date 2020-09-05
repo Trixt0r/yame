@@ -128,7 +128,6 @@ export class PixiRendererService implements ISceneRenderer {
       actions.pipe(ofActionSuccessful(SortEntity)).subscribe((action: SortEntity) => {
         const data = Array.isArray(action.data) ? action.data : [action.data];
         const parents: string[] = [];
-        const restoreParent = {};
         data.forEach((it) => {
           if (it.parent === it.oldParent) return;
           const container = this.getContainer(it.id);
@@ -279,6 +278,9 @@ export class PixiRendererService implements ISceneRenderer {
     return this.scene.toLocal(new Point(x, y));
   }
 
+  /**
+   * @inheritdoc
+   */
   createPreview(x: number, y: number, asset: Asset) {
     this.zone.runOutsideAngular(() => {
       this.sceneService.createEntity(x, y, asset).subscribe((entity) => {
@@ -296,6 +298,9 @@ export class PixiRendererService implements ISceneRenderer {
     });
   }
 
+  /**
+   * @inheritdoc
+   */
   updatePreview(x: number, y: number): void {
     if (!this._previewEntity) return;
     const container = this.getContainer(this._previewEntity.id);
@@ -308,6 +313,9 @@ export class PixiRendererService implements ISceneRenderer {
     this.engineService.run();
   }
 
+  /**
+   * @inheritdoc
+   */
   removePreview(): void {
     if (!this._previewEntity) return;
     this.scene.removeChild(this.pixiContainers[this._previewEntity.id]);
@@ -317,6 +325,9 @@ export class PixiRendererService implements ISceneRenderer {
     this.engineService.run();
   }
 
+  /**
+   * @inheritdoc
+   */
   dispose(): void {
     if (!this._app) return;
     this._app.destroy();
@@ -324,16 +335,34 @@ export class PixiRendererService implements ISceneRenderer {
     this.resize$.complete();
   }
 
+  /**
+   * Returns the pixi container for the given entity id.
+   *
+   * @param id The entity id.
+   * @returns The pixi container.
+   */
   getContainer(id: string): Container {
     return this.pixiContainers[id];
   }
 
+  /**
+   * Returns the shape object for the given entity id.
+   *
+   * @param id The entity id.
+   * @returns The shape object
+   */
   getShape(id: string): Rectangle | RoundedRectangle | Circle | Ellipse | Polygon {
     const container = this.getContainer(id);
     if (container) return container.getLocalBounds();
     else return null;
   }
 
+  /**
+   * Returns whether the given point lies in the entity of the given id.
+   *
+   * @param id The entity id.
+   * @param point The point data.
+   */
   containsPoint(id: string, point: IPointData): boolean {
     const bounds = this.getShape(id);
     if (!bounds) return false;

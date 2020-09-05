@@ -5,7 +5,7 @@ import { SceneEntityData, SceneEntity } from 'common/scene';
  */
 export class CreateEntity {
   static readonly type = '[Scene] Create entity';
-  constructor(public data: SceneEntity | SceneEntity[], public created: SceneEntity[] = []) {}
+  constructor(public data: SceneEntity | SceneEntity[], public created: SceneEntity[] = [], public persist = true) {}
 }
 
 interface CloneData {
@@ -31,7 +31,7 @@ interface SortData extends CloneData {
  */
 export class UpdateEntity {
   static readonly type = '[Scene] Update entity';
-  constructor(public data: Partial<SceneEntityData> | Partial<SceneEntityData>[], public message: string) {}
+  constructor(public data: Partial<SceneEntityData> | Partial<SceneEntityData>[], public message: string, public persist = true) {}
 }
 /**
  * Sorts the given entity and updates the hierarchy accordingly.
@@ -46,7 +46,7 @@ export class SortEntity {
  */
 export class DeleteEntity {
   static readonly type = '[Scene] Remove entity';
-  constructor(public id: string | string[], public deleted: SceneEntity[] = []) {}
+  constructor(public id: string | string[], public deleted: SceneEntity[] = [], public persist = true) {}
 }
 
 export type EntityAction = CreateEntity | UpdateEntity | CloneEntity | SortEntity | DeleteEntity;

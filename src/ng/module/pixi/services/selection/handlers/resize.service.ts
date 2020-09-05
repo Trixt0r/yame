@@ -5,7 +5,6 @@ import { PixiSelectionContainerService } from '../container.service';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { PixiRendererService } from '../../renderer.service';
 import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
-import { SceneEntity, PointSceneComponent } from 'common/scene';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
@@ -80,15 +79,6 @@ export class PixiSelectionHandlerResizeService {
       (this.service.stage.getChildByName('foreground') as Container).addChild(anchor);
     });
     this.clearSub();
-    this.updateSub = this.service.actions.pipe(ofActionDispatched(UpdateEntity))
-                          .subscribe((action: UpdateEntity) => {
-                            const data = Array.isArray(action.data) ? action.data : [action.data];
-                            if (data.length <= 0) return;
-                            const size = data[0].components.find(comp => comp.id === 'transformation.size') as SizeSceneComponent;
-                            if (!size) return;
-                            this.containerService.container.width = size.width;
-                            this.containerService.container.height = size.height;
-                          });
   }
 
   /**

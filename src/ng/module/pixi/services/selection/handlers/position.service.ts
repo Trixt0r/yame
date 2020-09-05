@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@angular/core';
 import { PixiSelectionContainerService } from '../container.service';
 import { PixiRendererService } from '../../renderer.service';
 import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
-import { SceneEntity, PointSceneComponent } from 'common/scene';
+import { PointSceneComponent } from 'common/scene';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
@@ -100,14 +100,6 @@ export class PixiSelectionHandlerPositionService {
 
   attached(): void {
     this.clearSub();
-    this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
-                          .subscribe((action: UpdateEntity) => {
-                            const data = Array.isArray(action.data) ? action.data : [action.data];
-                            if (data.length <= 0) return;
-                            const position = data[0].components.find(comp => comp.id === 'transformation.position') as PointSceneComponent;
-                            if (!position) return;
-                            this.container.position.copyFrom(position);
-                          });
   }
 
   detached(): void {

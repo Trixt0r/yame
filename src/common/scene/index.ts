@@ -9,3 +9,4 @@ export * from './component/range';
 export * from './component/color';
 export * from './component/asset';
 export * from './component/transformation';
+export * from './component.collection';

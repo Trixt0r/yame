@@ -4,6 +4,7 @@ import { SceneEntityException } from '../exception/scene/entity';
 import { AbstractEntity } from '@trixt0r/ecs';
 import { SceneComponent, cloneComponent } from './component';
 import { SceneComponentCollection } from './component.collection';
+import { cloneDeep } from 'lodash';
 
 /**
  * Data which has to be exported for an entity.
@@ -137,7 +138,7 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
   async export(): Promise<SceneEntityData> {
     const data: SceneEntityData = {
       id: <string>this.id,
-      components: this.components.map(comp => comp),
+      components: this.components.map(comp => cloneDeep(comp)),
       parent: this.parent,
       type: this.type,
     };
