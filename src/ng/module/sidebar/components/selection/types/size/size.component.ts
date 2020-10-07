@@ -4,6 +4,8 @@ import { PointInputComponent } from 'ng/module/utils';
 import { IPoint } from 'common/math';
 import { SizeSceneComponent } from 'common/scene/component/size';
 import { IPointData } from 'pixi.js';
+import { PointSceneComponent } from 'common/scene';
+import { cloneDeep } from 'lodash';
 
 @Component({
   templateUrl: './size.component.html',
@@ -42,12 +44,19 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
     const reversed = this.reverse(this.input.value) as IPoint;
     this.component.width = reversed.x;
     this.component.height = reversed.y;
+    let scale = this.selectState.components.find(comp => comp.type === 'scale') as PointSceneComponent;
+    if (!scale) return;
+    scale = cloneDeep(scale);
+    if (this.component.localWidth !== 0) scale.x = this.component.width / this.component.localWidth;
+    else scale.x = 0;
+    if (this.component.localHeight !== 0) scale.y = this.component.height / this.component.localHeight;
+    else scale.y = 0;
     this.component.mixed = false;
-    const data: AbstractInputEvent<SizeSceneComponent> = {
+    const data: AbstractInputEvent<PointSceneComponent> = {
       originalEvent: event,
-      component: this.component
+      component: scale
     };
-    this.updateEvent.emit(data);
+    this.updateEvent.emit(data as any);
   }
 
   /**

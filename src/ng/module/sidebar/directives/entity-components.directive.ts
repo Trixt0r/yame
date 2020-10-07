@@ -20,7 +20,6 @@ import { SceneComponent, SceneEntity } from 'common/scene';
 import { Subscription, Subject } from 'rxjs';
 import { ISelectState } from 'ng/module/scene/states/select.state';
 import * as _ from 'lodash';
-import { isEqual } from 'lodash';
 
 type SceneComponentRef = ComponentRef<AbstractTypeComponent>;
 
@@ -196,12 +195,18 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
     const comps: SceneComponentRef[] = [];
     if (this.components) {
       let insertCnt = 0;
-      this.components.forEach((component) => {
+      this.components.forEach(component => {
+        if (component.hidden) return;
         let identifier = component.id ? component.id : component.type;
         let compType = this.service.getTypeComponent(identifier);
         if (component.id && !compType) {
           compType = this.service.getTypeComponent(component.type);
-          identifier = component.type;
+          if (!compType && component.extends) {
+            compType = this.service.getTypeComponent(component.extends);
+            identifier = component.extends;
+          } else {
+            identifier = component.type;
+          }
         }
         if (!compType) return;
         const cacheKey = `${this.cachePrefix}-${component.type}-${component.id}`;
@@ -227,7 +232,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
         componentRef.instance.component = component;
         componentRef.instance.entities = this.entities;
         componentRef.instance.selectState = this.selectState;
-        if (typeof (componentRef.instance as any).ngOnChanges === 'function' /*&& !isEqual(component, previous)*/)
+        if (typeof (componentRef.instance as any).ngOnChanges === 'function')
           (componentRef.instance as any).ngOnChanges({ component: new SimpleChange(previous, component, previous === void 0) });
         componentRef.changeDetectorRef.detectChanges();
         this.setUpSubs(componentRef);

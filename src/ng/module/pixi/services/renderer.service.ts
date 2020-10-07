@@ -385,8 +385,9 @@ export class PixiRendererService implements ISceneRenderer {
     if (!container) return;
 
     const position = components.byId('transformation.position') as PointSceneComponent;
-    const size = components.byId('transformation.size') as SizeSceneComponent;
+    const scale = components.byId('transformation.scale') as PointSceneComponent;
     const skew = components.byId('transformation.skew') as PointSceneComponent;
+    const size = components.byId('transformation.size') as SizeSceneComponent;
     const pivot = components.byId('transformation.pivot') as PointSceneComponent;
     const rotation = components.byId('transformation.rotation') as RangeSceneComponent;
 
@@ -394,9 +395,16 @@ export class PixiRendererService implements ISceneRenderer {
       rotation.value = container.rotation;
     }
 
+    if (scale) {
+      scale.x = container.scale.x;
+      scale.y = container.scale.y;
+    }
+
     if (size) {
       size.width = container.width;
       size.height = container.height;
+      size.localWidth = container.getLocalBounds().width;
+      size.localHeight = container.getLocalBounds().height;
     }
 
     if (skew) {
@@ -423,16 +431,13 @@ export class PixiRendererService implements ISceneRenderer {
    */
   applyComponents(components: SceneComponentCollection<SceneComponent>, container: Container): void {
     const position = components.byId('transformation.position') as PointSceneComponent;
-    const size = components.byId('transformation.size') as SizeSceneComponent;
+    const scale = components.byId('transformation.scale') as PointSceneComponent;
     const rotation = components.byId('transformation.rotation') as RangeSceneComponent;
     const skew = components.byId('transformation.skew') as PointSceneComponent;
     const pivot = components.byId('transformation.pivot') as PointSceneComponent;
     if (rotation) container.rotation = rotation.value;
     if (position) container.position.copyFrom(position);
-    if (size) {
-      container.width = size.width;
-      container.height = size.height;
-    }
+    if (scale) container.scale.copyFrom(scale);
     if (skew) container.skew.copyFrom(skew);
     if (pivot) container.pivot.copyFrom(pivot);
   }

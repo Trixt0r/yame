@@ -4,11 +4,9 @@ import { Injectable, Inject } from '@angular/core';
 import { PixiSelectionContainerService } from '../container.service';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { PixiRendererService } from '../../renderer.service';
-import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
+import { YAME_RENDERER } from 'ng/module/scene';
 import { Subscription } from 'rxjs';
-import { ofActionDispatched } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
-import { SizeSceneComponent } from 'common/scene/component/size';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -71,6 +69,7 @@ export class PixiSelectionHandlerResizeService {
         .on('updated', () => {
           this.containerService.dispatchUpdate(
             this.containerService.components.byId('transformation.position'),
+            this.containerService.components.byId('transformation.scale'),
             this.containerService.components.byId('transformation.size')
           );
         })

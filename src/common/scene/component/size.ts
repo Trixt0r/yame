@@ -14,6 +14,16 @@ export interface SizeSceneComponent extends SceneComponent {
    * The height value.
    */
   height: number;
+
+  /**
+   * The local (internal) width.
+   */
+  localWidth: number;
+
+  /**
+   * The local (internal) height.
+   */
+  localHeight: number;
 }
 
 /**
@@ -30,6 +40,8 @@ export function createSizeComponent(id: string, width = 50, height = 50, group?:
     type: 'size',
     width,
     height,
+    localWidth: width,
+    localHeight: height,
     group
   };
 }

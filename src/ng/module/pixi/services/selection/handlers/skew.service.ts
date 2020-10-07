@@ -367,6 +367,7 @@ export class PixiSelectionHandlerSkewService {
 
     this.containerService.dispatchUpdate(
       this.containerService.components.byId('transformation.position'),
+      this.containerService.components.byId('transformation.scale'),
       this.containerService.components.byId('transformation.size'),
       this.containerService.components.byId('transformation.skew')
     );

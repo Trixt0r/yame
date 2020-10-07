@@ -86,6 +86,9 @@ export function createScaleComponent(
   const comp = createPointComponent(id, x, y, group);
   comp.label = 'Scale';
   comp.transform = getPointTransform(getScaleTransform());
+  comp.type = 'scale';
+  comp.extends = 'point';
+  comp.hidden = true;
   return comp;
 }
 
@@ -120,6 +123,7 @@ export function createTransformationComponents(id = 'transformation', group?: st
     id,
     [
       'transformation.position',
+      'transformation.scale',
       'transformation.size',
       'transformation.rotation',
       'transformation.skew',
@@ -132,6 +136,7 @@ export function createTransformationComponents(id = 'transformation', group?: st
   transform.allowedMemberItems = [];
 
   const position = createPointComponent('transformation.position');
+  const scale = createScaleComponent();
   const pivot = createPointComponent('transformation.pivot');
   const size = createSizeComponent('transformation.size');
   const rotation = createRotationComponent();
@@ -141,10 +146,11 @@ export function createTransformationComponents(id = 'transformation', group?: st
   pivot.label = 'Pivot';
 
   position.group = transform.id;
+  scale.group = transform.id;
   pivot.group = transform.id;
   size.group = transform.id;
   rotation.group = transform.id;
   skew.group = transform.id;
 
-  return [transform, position, size, rotation, skew, pivot];
+  return [transform, position, scale, size, rotation, skew, pivot];
 }

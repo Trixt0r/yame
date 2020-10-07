@@ -32,6 +32,16 @@ export interface SceneComponent extends Component {
   type: string;
 
   /**
+   * The component type, this component extends.
+   */
+  extends?: string;
+
+  /**
+   * Whether this component is hidden in the gui or not.
+   */
+  hidden?: boolean;
+
+  /**
    * Whether this component is enabled or not.
    */
   enabled?: boolean;

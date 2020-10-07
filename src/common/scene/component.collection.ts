@@ -30,8 +30,8 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
    * @param type The type to search for.
    * @return All components matching the given type.
    */
-  byType(type: string): SceneComponent[] {
-    return this.filter(comp => comp.type === type);
+  byType(type: string): readonly SceneComponent[] {
+    return this.getAll(type);
   }
 
   /**
