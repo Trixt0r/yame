@@ -1,13 +1,13 @@
-import { CreateEntity, UpdateEntity, DeleteEntity } from './entity.action';
+import { EntityAction } from './entity.action';
 
 export class PushHistory {
   static readonly type = '[History] Push';
-  constructor(public readonly actions: (CreateEntity | UpdateEntity | DeleteEntity)[]) { }
+  constructor(public readonly actions: (EntityAction)[]) { }
 }
 
 export class PopHistory {
   static readonly type = '[History] Pop';
-  constructor(public readonly actions: (CreateEntity | UpdateEntity | DeleteEntity)[]) { }
+  constructor(public readonly actions: (EntityAction)[]) { }
 }
 
 export type HistoryActions = PushHistory | PopHistory;

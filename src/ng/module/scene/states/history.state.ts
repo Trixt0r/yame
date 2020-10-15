@@ -1,9 +1,9 @@
-import { CreateEntity, UpdateEntity, DeleteEntity } from './actions/entity.action';
+import { EntityAction } from './actions/entity.action';
 import { State, StateContext, Action, Store } from '@ngxs/store';
 import { PopHistory, PushHistory } from './actions';
 
 interface Difference {
-  actions: (CreateEntity | UpdateEntity | DeleteEntity)[];
+  actions: EntityAction[];
   date: Date;
 }
 
@@ -41,7 +41,7 @@ export class HistoryState {
       console.log(ctx.getState());
     };
     if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(push, 250);
+    this.timeout = setTimeout(push, 150);
   }
 
   @Action(PopHistory)

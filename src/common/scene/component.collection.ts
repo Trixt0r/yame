@@ -60,7 +60,7 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
    *
    * @param components The data to set.
    */
-  async set(...components: SceneComponent[]) {
+  set(...components: SceneComponent[]) {
     const toAdd: SceneComponent[] = [];
     const toRemove: SceneComponent[] = [];
     const toUpdate: SceneComponent[] = [];

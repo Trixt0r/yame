@@ -189,9 +189,10 @@ export class PixiSelectionHandlerPivotService {
     (this.rendererService.stage.getChildByName('foreground') as Container).addChild(this.area);
     this.updateArea();
     this.clearSub();
-    this.updateSub = this.rendererService.actions.pipe(ofActionDispatched(UpdateEntity))
+    this.updateSub = this.containerService.updateDispatched$
                           .subscribe((action: UpdateEntity) => {
                             if (action === this.containerService.updateEntityAction) return;
+                            console.log('here');
                             const data = Array.isArray(action.data) ? action.data : [action.data];
                             if (data.length <= 0) return;
                             const pivot = data[0].components.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
@@ -210,9 +211,7 @@ export class PixiSelectionHandlerPivotService {
                             position.y = this.container.position.y;
 
                             this.container.pivot.copyFrom(pivot);
-                            this.containerService.dispatchUpdate(
-                              this.containerService.components.byId('transformation.position')
-                            );
+                            this.containerService.dispatchUpdate(position);
                           });
   }
 

@@ -39,6 +39,7 @@ export class PixiSelectionContainerService {
   readonly selected$ = new Subject<SceneEntity[]>();
   readonly unselected$ = new Subject<SceneEntity[]>();
   readonly update$ = new Subject();
+  readonly updateDispatched$ = new Subject<UpdateEntity>();
   readonly components = new SceneComponentCollection();
   readonly updateEntityAction = new UpdateEntity([], 'Container update');
 
@@ -277,7 +278,7 @@ export class PixiSelectionContainerService {
     return toRemove;
   }
 
-  updateEntities(): void {
+  updateEntities(dispatch = true): Partial<SceneEntityData>[] {
     this.tmpTransform.rotation = this.container.transform.rotation;
     this.tmpTransform.position.copyFrom(this.container.transform.position);
     this.tmpTransform.scale.copyFrom(this.container.transform.scale);
@@ -301,12 +302,15 @@ export class PixiSelectionContainerService {
       const comps = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
       this.pixi.updateComponents(comps, child);
       data.push({ id: entity.id, components: comps.elements.slice() });
-      entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
+      if (dispatch) entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
     });
-    this.updateEntityAction.data = data;
-    this.store.dispatch(this.updateEntityAction);
 
-    this.entities.forEach((entity) => {
+    if (dispatch) {
+      this.updateEntityAction.data = data;
+      this.store.dispatch(this.updateEntityAction);
+    }
+
+    this.entities.forEach(entity => {
       const container = this.pixi.getContainer(entity.id);
       this.container.addChild(container);
       this.pixi.applyComponents(componentsBefore[entity.id], container);
@@ -317,5 +321,6 @@ export class PixiSelectionContainerService {
     this.container.transform.skew.copyFrom(this.tmpTransform.skew);
     this.container.transform.pivot.copyFrom(this.tmpTransform.pivot);
     this.pixi.updateComponents(this.components, this.container);
+    return data;
   }
 }

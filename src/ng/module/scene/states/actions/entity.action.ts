@@ -19,7 +19,7 @@ interface CloneData {
  */
 export class CloneEntity {
   static readonly type = '[Scene] Clone entity';
-  constructor(public data: CloneData | CloneData[]) {}
+  constructor(public data: CloneData | CloneData[], public persist = true) {}
 }
 
 interface SortData extends CloneData {
@@ -38,7 +38,7 @@ export class UpdateEntity {
  */
 export class SortEntity {
   static readonly type = '[Scene] Sort entity';
-  constructor(public data: SortData | SortData[]) {}
+  constructor(public data: SortData | SortData[], public persist = true) {}
 }
 
 /**

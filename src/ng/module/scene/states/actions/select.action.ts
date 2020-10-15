@@ -1,4 +1,5 @@
 import { SceneComponent, SceneEntity } from 'common/scene';
+import { EntityAction } from './entity.action';
 
 export class Select {
   static readonly type = '[Selection] Select';
@@ -20,4 +21,9 @@ export class Isolate {
   constructor(public entity: SceneEntity | null) { }
 }
 
-export type SelectActions = Select | Unselect | UpdateComponents | Isolate;
+export class Input {
+  static readonly type = '[Selection] Input';
+  constructor(public action: EntityAction) { }
+}
+
+export type SelectActions = Select | Unselect | UpdateComponents | Isolate | Input;

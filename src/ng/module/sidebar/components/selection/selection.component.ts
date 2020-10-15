@@ -17,9 +17,9 @@ import { AbstractRemoveEvent, AbstractInputEvent } from './types';
 import { SceneEntity, SceneComponent } from 'common/scene';
 import { ISelectState } from 'ng/module/scene/states/select.state';
 import { UpdateEntity } from 'ng/module/scene/states/actions/entity.action';
-import { UpdateComponents } from 'ng/module/scene';
+import { UpdateComponents, Input as InputAction } from 'ng/module/scene';
 import { EntityComponentsDirective } from '../../directives/entity-components.directive';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 
 /**
  * The selection component is responsible for rendering the assigned property array.
@@ -40,6 +40,11 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
   static readonly HEIGHT_SUB: number = 100;
 
   /**
+   * The debounce delay before data is pushed to history.
+   */
+  static readonly INPUT_HISTORY_DEBOUNCE: number = 150;
+
+  /**
    * The selected state.
    */
   @Input() selected: ISelectState = { entities: [], components: [], isolated: null };
@@ -56,7 +61,32 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    */
   components: SceneComponent[] = [];
 
+  /**
+   * The current entities.
+   */
   entities: SceneEntity[] = [];
+
+  /**
+   * A map for previous entity component data.
+   * Needed for pushing history data.
+   */
+  protected previousData: { [key: string]: SceneComponent[] } = null;
+
+  /**
+   * The last input data emitted by a view component.
+   */
+  protected lastInputData = [];
+
+  /**
+   * Pushes the component data to the history stack as soon as the delay expires.
+   */
+  protected pushHistory = debounce(() => {
+    if (this.lastInputData.length > 0) {
+      this.entities.forEach(entity => entity.components.set.apply(entity.components, this.previousData[entity.id]));
+      this.store.dispatch(new InputAction(new UpdateEntity(this.lastInputData, 'Component update')));
+    }
+    this.previousData = null;
+  }, SelectionComponent.INPUT_HISTORY_DEBOUNCE);
 
   /**
    * The resize handler, which is bound to the scope of the component.
@@ -79,8 +109,14 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     this.actions
       .pipe(ofActionSuccessful(UpdateComponents))
       .subscribe((action: UpdateComponents) => this.updateDirective(action.components));
+    this.actions
+        .pipe(ofActionSuccessful(InputAction))
+        .subscribe((action: InputAction) => this.store.dispatch(action.action));
   }
 
+  /**
+   * Whether this component is visible or not.
+   */
   get visible(): boolean {
     return this.selected && this.selected.entities.length > 0;
   }
@@ -91,6 +127,19 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
   @HostBinding('style.display')
   get display(): string {
     return this.visible ? 'block' : 'none';
+  }
+
+  /**
+   * Initializes the previous data
+   *
+   * @param reset Whether to reset the current data.
+   */
+  protected initPreviousData(reset: boolean = false) {
+    if (reset) this.previousData = null;
+    if (!this.previousData) {
+      this.previousData = { };
+      this.entities.forEach(entity => this.previousData[entity.id] = entity.components.map(it => cloneDeep(it)));
+    }
   }
 
   /**
@@ -107,14 +156,17 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    * @param event
    */
   onInput(event: AbstractInputEvent<any>): void {
-    const data = this.entities
+    this.lastInputData = this.entities
       .filter(entity => entity.components.byId(event.component.id))
       .map(it => ({ id: it.id, parent: it.parent, components: [ cloneDeep(event.component) ] }));
-    if (data.length > 0) this.store.dispatch(new UpdateEntity(data, 'Component update'));
+    this.initPreviousData();
+    this.pushHistory();
+    if (this.lastInputData.length > 0)
+      this.store.dispatch(new InputAction(new UpdateEntity(this.lastInputData, 'Component update', false)));
   }
 
   /**
-   * Handles the removal of an component.
+   * Handles the removal of a component.
    */
   onRemove(event: AbstractRemoveEvent) {
     this.sceneComponents.removeSceneComponent(this.entities, event.component);
@@ -133,6 +185,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     const selected = this.selected;
     const ids = this.selected ? this.selected.entities : [];
     this.entities = this.store.selectSnapshot((state) => state.scene.entities).filter((it) => ids.indexOf(it.id) >= 0);
+    this.initPreviousData(true);
     if (selected && selected.components) {
       this.components = selected.components.filter((it) => !it.group);
       this.updateDirective(selected.components.slice());

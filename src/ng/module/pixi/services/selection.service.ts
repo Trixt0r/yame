@@ -2,7 +2,7 @@ import { Point, Rectangle, Container, RoundedRectangle, Graphics } from 'pixi.js
 import { SceneEntity, SceneComponent, SceneEntityType } from 'common/scene';
 import { Injectable, Inject, NgZone } from '@angular/core';
 import { PixiRendererService } from '../services/renderer.service';
-import { YAME_RENDERER, SceneService, Select, Unselect, UpdateEntity, UpdateComponents, Isolate } from 'ng/module/scene';
+import { YAME_RENDERER, SceneService, Select, Unselect, UpdateEntity, UpdateComponents, Isolate, Input } from 'ng/module/scene';
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiSelectionContainerService } from './selection/container.service';
 import { System } from '@trixt0r/ecs';
@@ -180,15 +180,19 @@ export class PixiSelectionService {
       let updateSub: Subscription;
       containerService.selected$.subscribe(() => {
         if (updateSub) updateSub.unsubscribe();
-        updateSub = actions.pipe(ofActionSuccessful(UpdateEntity)).subscribe((action: UpdateEntity) => {
+        updateSub = actions.pipe(ofActionDispatched(Input)).subscribe((input: Input) => {
+          if (!(input.action instanceof UpdateEntity)) return;
+          const action = input.action as UpdateEntity;
           const components = Array.isArray(action.data)
             ? action.data.length > 0
               ? action.data[0].components
               : null
             : action.data.components;
-          if (!components) return;
+          if (!components || !components.find(comp => comp.id.indexOf('transformation') >= 0)) return;
+          containerService.updateDispatched$.next(action);
           containerService.components.set.apply(containerService.components, components);
           containerService.applyComponents();
+          action.data = containerService.updateEntities(false);
           containerService.update$.next();
         });
       });
