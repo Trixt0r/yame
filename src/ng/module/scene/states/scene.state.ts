@@ -198,7 +198,12 @@ export class SceneState {
     action.created = newEntities;
     ctx.patchState({ entities });
     if (action.persist)
-      this.store.dispatch(new PushHistory([ new DeleteEntity(action.created.map(it => it.id), [], false) ]));
+      this.store.dispatch(
+        new PushHistory(
+          [ new DeleteEntity(action.created.map(it => it.id), [], false) ],
+          [ new CreateEntity(newEntities.map(it => cloneDeep(it)), [], false) ]
+        )
+      );
   }
 
   /**
@@ -232,7 +237,12 @@ export class SceneState {
     action.deleted = entitiesToRemove;
     ctx.patchState({ entities });
     if (action.persist)
-      this.store.dispatch(new PushHistory([ new CreateEntity(action.deleted, [], false) ]));
+      this.store.dispatch(
+        new PushHistory(
+          [ new CreateEntity(action.deleted, [], false) ],
+          [ new DeleteEntity(toRemove, [], false) ]
+        )
+      );
   }
 
   /**
@@ -314,7 +324,13 @@ export class SceneState {
         this.sortByIndex(entities);
         ctx.patchState({ entities });
       }
-      if (action.persist) this.store.dispatch(new PushHistory([new UpdateEntity(dataBefore, 'Reverse update', false)]));
+      if (action.persist)
+        this.store.dispatch(
+          new PushHistory(
+            [ new UpdateEntity(dataBefore, 'Reverse update', false) ],
+            [ new UpdateEntity(data.map(it => cloneDeep(it)), action.message, false) ]
+          )
+        );
     }
   }
 
@@ -356,7 +372,12 @@ export class SceneState {
     });
     const data = flatten(actionData.map(it => this.updateIndices(it.id, it.index, it.parent)));
     if (action.persist)
-      this.store.dispatch(new PushHistory([new SortEntity(oldData, false)]));
+      this.store.dispatch(
+        new PushHistory(
+          [ new SortEntity(oldData, false) ],
+          [ new SortEntity(actionData.map(it => cloneDeep(it)), false) ]
+        )
+      );
     return ctx.dispatch(
       new UpdateEntity(data, `Sorted entities`, false)
     );

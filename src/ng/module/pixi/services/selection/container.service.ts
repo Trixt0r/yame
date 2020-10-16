@@ -301,7 +301,7 @@ export class PixiSelectionContainerService {
       transformTo(child, parentContainer);
       const comps = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
       this.pixi.updateComponents(comps, child);
-      data.push({ id: entity.id, components: comps.elements.slice() });
+      data.push({ id: entity.id, components: comps.elements.filter(comp => comp.id !== this.comp.id) });
       if (dispatch) entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
     });
 

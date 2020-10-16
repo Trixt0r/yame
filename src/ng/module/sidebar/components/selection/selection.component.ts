@@ -19,7 +19,7 @@ import { ISelectState } from 'ng/module/scene/states/select.state';
 import { UpdateEntity } from 'ng/module/scene/states/actions/entity.action';
 import { UpdateComponents, Input as InputAction } from 'ng/module/scene';
 import { EntityComponentsDirective } from '../../directives/entity-components.directive';
-import { cloneDeep, debounce } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 /**
  * The selection component is responsible for rendering the assigned property array.
@@ -78,17 +78,6 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
   protected lastInputData = [];
 
   /**
-   * Pushes the component data to the history stack as soon as the delay expires.
-   */
-  protected pushHistory = debounce(() => {
-    if (this.lastInputData.length > 0) {
-      this.entities.forEach(entity => entity.components.set.apply(entity.components, this.previousData[entity.id]));
-      this.store.dispatch(new InputAction(new UpdateEntity(this.lastInputData, 'Component update')));
-    }
-    this.previousData = null;
-  }, SelectionComponent.INPUT_HISTORY_DEBOUNCE);
-
-  /**
    * The resize handler, which is bound to the scope of the component.
    */
   protected onResizeBound: EventListenerObject;
@@ -111,7 +100,13 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
       .subscribe((action: UpdateComponents) => this.updateDirective(action.components));
     this.actions
         .pipe(ofActionSuccessful(InputAction))
-        .subscribe((action: InputAction) => this.store.dispatch(action.action));
+        .debounceTime(SelectionComponent.INPUT_HISTORY_DEBOUNCE)
+        .subscribe((action: InputAction) => {
+          if (!(action.action instanceof UpdateEntity)) return;
+          this.entities.forEach(entity => entity.components.set.apply(entity.components, this.previousData[entity.id]));
+          this.store.dispatch(new UpdateEntity(action.action.data, 'Component update'));
+          this.previousData = null;
+        });
   }
 
   /**
@@ -160,7 +155,6 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
       .filter(entity => entity.components.byId(event.component.id))
       .map(it => ({ id: it.id, parent: it.parent, components: [ cloneDeep(event.component) ] }));
     this.initPreviousData();
-    this.pushHistory();
     if (this.lastInputData.length > 0)
       this.store.dispatch(new InputAction(new UpdateEntity(this.lastInputData, 'Component update', false)));
   }
