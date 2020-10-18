@@ -38,7 +38,7 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
   onUpdate(event: any): void {
     const val: string | number = event.currentTarget.value;
     this.component.number = this.reverse(typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val) as number;
-    this.component.mixed = false;
+    delete this.component.mixed;
     return super.onUpdate(event);
   }
 

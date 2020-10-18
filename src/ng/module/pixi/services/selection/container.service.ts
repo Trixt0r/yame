@@ -123,7 +123,9 @@ export class PixiSelectionContainerService {
       if (data.entities.length !== this.entities.length) return;
       const notEqual = !!data.entities.find(it => !isEqual(it.components.byId(key), data.comp));
       const mixed = key.indexOf('transformation') < 0 && notEqual;
-      comps.push(merge({}, data.comp, { mixed }));
+      const comp = merge({}, data.comp, { mixed });
+      if (!comp.mixed) delete comp.mixed;
+      comps.push(comp);
     });
 
     this.components.set.apply(this.components, comps);
@@ -301,7 +303,7 @@ export class PixiSelectionContainerService {
       transformTo(child, parentContainer);
       const comps = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
       this.pixi.updateComponents(comps, child);
-      data.push({ id: entity.id, components: comps.elements.filter(comp => comp.id !== this.comp.id) });
+      data.push({ id: entity.id, components: comps.elements.filter(comp => comp.id !== this.comp.id && comp.mixed === void 0) });
       if (dispatch) entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
     });
 

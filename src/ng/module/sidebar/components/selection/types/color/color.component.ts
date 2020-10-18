@@ -48,7 +48,7 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
         blue: value.blue,
         alpha: value.alpha,
       });
-      this.component.mixed = false;
+      delete this.component.mixed;
       this.updateEvent.emit({
         originalEvent: val,
         component: this.component
@@ -84,6 +84,7 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
       const wasMixed = this.component.mixed;
       this.control.setValueFrom(this._rgbaString);
       this.component.mixed = wasMixed;
+      if (!this.component.mixed) delete this.component.mixed;
     }
     this.cdr.markForCheck();
   }

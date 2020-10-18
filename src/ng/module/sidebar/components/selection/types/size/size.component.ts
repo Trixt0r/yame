@@ -51,7 +51,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
     else scale.x = 0;
     if (this.component.localHeight !== 0) scale.y = this.component.height / this.component.localHeight;
     else scale.y = 0;
-    this.component.mixed = false;
+    delete this.component.mixed;
     const data: AbstractInputEvent<PointSceneComponent> = {
       originalEvent: event,
       component: scale

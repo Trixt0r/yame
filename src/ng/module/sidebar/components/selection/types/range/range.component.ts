@@ -64,7 +64,7 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
    */
   onUpdate(event: any): void {
     this.component.value = this.reverse(event.value) as number;
-    this.component.mixed = false;
+    delete this.component.mixed;
     return super.onUpdate(event);
   }
 

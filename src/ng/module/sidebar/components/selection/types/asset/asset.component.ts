@@ -82,7 +82,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this.currentIndex = id ? this._allAssets.findIndex(it => it.id === id) : -1;
     const asset = this._allAssets[this.currentIndex];
     this.component.asset = asset ? id : null;
-    this.component.mixed = false;
+    delete this.component.mixed;
     this.cdr.detectChanges();
     this.updateEvent.emit(data);
   }

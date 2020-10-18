@@ -36,7 +36,7 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
     const reversed = this.reverse(this.input.value) as IPoint;
     this.component.x = reversed.x;
     this.component.y = reversed.y;
-    this.component.mixed = false;
+    delete this.component.mixed;
     const data: AbstractInputEvent<PointSceneComponent> = {
       originalEvent: event,
       component: this.component

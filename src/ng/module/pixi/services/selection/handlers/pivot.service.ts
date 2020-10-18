@@ -192,7 +192,6 @@ export class PixiSelectionHandlerPivotService {
     this.updateSub = this.containerService.updateDispatched$
                           .subscribe((action: UpdateEntity) => {
                             if (action === this.containerService.updateEntityAction) return;
-                            console.log('here');
                             const data = Array.isArray(action.data) ? action.data : [action.data];
                             if (data.length <= 0) return;
                             const pivot = data[0].components.find(it => it.id === 'transformation.pivot') as PointSceneComponent;

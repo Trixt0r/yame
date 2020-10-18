@@ -190,32 +190,12 @@ export class PixiRendererService implements ISceneRenderer {
             self.scene.addChild(child);
             child.transform.updateTransform(self.scene.transform);
             self.updateComponents(entity.components, child);
+            // Make sure the new display object gets added to the correct parent
             const parentContainer = self.pixiContainers[entity.parent];
-
-            let parentEntity = entity;
-            while (parentEntity) {
-              const size = parentEntity.components.byId('transformation.size');
-              if (size) size.id = 'transformation.size.tmp';
-              parentEntity = self.sceneService.getEntity(parentEntity.parent);
-            }
-
             if (!parentContainer || parentContainer === self.scene) return;
             parentContainer.addChild(child);
             transformTo(child, parentContainer);
             self.updateComponents(entity.components, child);
-          });
-          requestAnimationFrame(() => {
-            engine.run();
-            entities.forEach(entity => {
-              let parentEntity = entity;
-              while (parentEntity) {
-                const size = parentEntity.components.byId('transformation.size.tmp') as SizeSceneComponent;
-                if (size) size.id = 'transformation.size';
-                if (self.pixiContainers[parentEntity.id])
-                  self.updateComponents(parentEntity.components, self.pixiContainers[parentEntity.id]);
-                parentEntity = self.sceneService.getEntity(parentEntity.parent);
-              }
-            });
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
