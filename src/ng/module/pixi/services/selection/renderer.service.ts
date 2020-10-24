@@ -133,7 +133,7 @@ export class PixiSelectionRendererService {
 
     if (this.container.entities.length > 1) {
       this.graphics.lineStyle(lineWidth, lineColor, lineAlpha * 0.25);
-      this.container.entities.forEach((entity) => this.drawBounds(entity));
+      this.container.entities.forEach(entity => this.drawBounds(entity));
       this.graphics.drawShape(this.container.container.getBounds());
     }
 
@@ -203,12 +203,14 @@ export class PixiSelectionRendererService {
   drawBounds(entity?: SceneEntity, points: Point[] = PixiSelectionRendererService.points) {
     if (points === PixiSelectionRendererService.points && entity instanceof SceneEntity) {
       const container = this.service.getContainer(entity.id);
-      const bnds = container.getLocalBounds();
-      points[0].set(bnds.x, bnds.y);
-      points[1].set(bnds.x + bnds.width, bnds.y);
-      points[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
-      points[3].set(bnds.x, bnds.y + bnds.height);
-      points.forEach((point) => this.graphics.toLocal(point, container, point));
+      if (container) {
+        const bnds = container.getLocalBounds();
+        points[0].set(bnds.x, bnds.y);
+        points[1].set(bnds.x + bnds.width, bnds.y);
+        points[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
+        points[3].set(bnds.x, bnds.y + bnds.height);
+        points.forEach((point) => this.graphics.toLocal(point, container, point));
+      }
     }
     this.graphics.moveTo(points[0].x, points[0].y);
     points.push(points.shift());

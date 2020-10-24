@@ -2,7 +2,7 @@ import { Injectable, InjectionToken, Inject, Component, ElementRef, Type } from 
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { SceneAssetConverterService } from './converter.service';
-import { CreateEntity, SortEntity, DeleteEntity, UpdateEntity } from '../states/actions/entity.action';
+import { CreateEntity, SortEntity, DeleteEntity } from '../states/actions/entity.action';
 import { SceneEntity, createTransformationComponents } from 'common/scene';
 import { Observable, from, of, Subscription } from 'rxjs';
 import { SceneState } from '../states/scene.state';

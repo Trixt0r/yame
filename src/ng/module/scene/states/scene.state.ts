@@ -5,13 +5,12 @@ import { SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
 import { Dispatcher, Component, Collection } from '@trixt0r/ecs';
 import { SceneService } from '../services/scene.service';
-import { PushHistory } from './actions';
+import { PushHistory, Select } from './actions';
 
 /**
  * Interface representing the scene state.
  */
 export interface ISceneState {
-
   /**
    * All entities in the scene.
    */
@@ -42,7 +41,7 @@ function move<T>(array: T[], index: number, newIndex: number) {
     while (k--) array.push(undefined);
   }
   array.splice(newIndex, 0, array.splice(index, 1)[0]);
-};
+}
 
 @State<ISceneState>({
   name: 'scene',
@@ -52,9 +51,7 @@ function move<T>(array: T[], index: number, newIndex: number) {
   },
 })
 export class SceneState {
-
-  constructor(public store: Store, public service: SceneService) {
-  }
+  constructor(public store: Store, public service: SceneService) {}
 
   /**
    * Returns cloned entities for the given data.
@@ -62,24 +59,29 @@ export class SceneState {
    * @param cloneData The data to clone from.
    * @return The cloned entities.
    */
-  protected getCloneEntities(cloneData: { id: string, index: number, parent?: string }[]): SceneEntity[] {
-    return flattenDeep(cloneData.map(it => {
-      const source = this.service.getEntity(it.id);
-      if (!source) return null;
-      const entity = new SceneEntity();
-      entity.components.set.apply(entity.components, source.components.map(comp => cloneDeep(comp)));
-      entity.components.byId('index').index = it.index;
-      entity.components.byId('name').string += ' clone';
-      entity.type = source.type;
-      entity.parent = it.parent;
-      if (source.children) {
-        const re = this.getCloneEntities(source.children.map((id, index) => ({ id, index, parent: entity.id }) ));
-        entity.children = re.map(child => child.id);
-        return [entity, ...re];
-      } else {
-        return entity;
-      }
-    })).filter(it => it instanceof SceneEntity);
+  protected getCloneEntities(cloneData: { id: string; index: number; parent?: string }[]): SceneEntity[] {
+    return flattenDeep(
+      cloneData.map((it) => {
+        const source = this.service.getEntity(it.id);
+        if (!source) return null;
+        const entity = new SceneEntity();
+        entity.components.set.apply(
+          entity.components,
+          source.components.map((comp) => cloneDeep(comp))
+        );
+        entity.components.byId('index').index = it.index;
+        entity.components.byId('name').string += ' clone';
+        entity.type = source.type;
+        entity.parent = it.parent;
+        if (source.children) {
+          const re = this.getCloneEntities(source.children.map((id, index) => ({ id, index, parent: entity.id })));
+          entity.children = re.map((child) => child.id);
+          return [entity, ...re];
+        } else {
+          return entity;
+        }
+      })
+    ).filter((it) => it instanceof SceneEntity);
   }
 
   /**
@@ -98,29 +100,32 @@ export class SceneState {
     const data = [] as Partial<SceneEntityData>[];
     data.push({
       id: id,
-      components: [{
-        id: 'index',
-        type: 'index',
-        index: currentIndex
-      }],
+      components: [
+        {
+          id: 'index',
+          type: 'index',
+          index: currentIndex,
+        },
+      ],
       parent: parent,
     });
 
     // If the parents differ
     if (parent !== entity.parent) {
       // ... remove from the old parent
-      const oldSiblings = this.service.getChildren(entity.parent, false).filter(it => it.id !== id);
+      const oldSiblings = this.service.getChildren(entity.parent, false).filter((it) => it.id !== id);
       oldSiblings.forEach((it, i) => {
         data.push({
           id: it.id,
-          components: [{
-            id: 'index',
-            type: 'index',
-            index: i,
-          }],
+          components: [
+            {
+              id: 'index',
+              type: 'index',
+              index: i,
+            },
+          ],
         });
       });
-
 
       // ... and insert into the new one
       const newSiblings = this.service.getChildren(parent, false);
@@ -129,15 +134,17 @@ export class SceneState {
         if (it.id === id) return;
         data.push({
           id: it.id,
-          components: [{
-            id: 'index',
-            type: 'index',
-            index: i,
-          }]
+          components: [
+            {
+              id: 'index',
+              type: 'index',
+              index: i,
+            },
+          ],
         });
       });
-
-    } else { // ... otherwise just move the entity in the children list
+    } else {
+      // ... otherwise just move the entity in the children list
       const siblings = this.service.getChildren(parent, false);
       const prevIndex = siblings.indexOf(entity);
       const offset = 1;
@@ -153,11 +160,13 @@ export class SceneState {
         if (!it) continue;
         data.push({
           id: it.id,
-          components: [{
-            id: 'index',
-            type: 'index',
-            index: i + dir * offset,
-          }]
+          components: [
+            {
+              id: 'index',
+              type: 'index',
+              index: i + dir * offset,
+            },
+          ],
         });
       }
     }
@@ -175,8 +184,8 @@ export class SceneState {
     const newEntities = Array.isArray(action.data) ? action.data : [action.data];
     const state = ctx.getState();
     const entities = state.entities.slice();
-    const siblings: { [parent: string]: SceneEntity[] } = { };
-    newEntities.forEach(entity => {
+    const siblings: { [parent: string]: SceneEntity[] } = {};
+    newEntities.forEach((entity) => {
       if (!siblings[entity.parent]) {
         siblings[entity.parent] = this.service.getChildren(entity.parent, false);
       }
@@ -187,11 +196,11 @@ export class SceneState {
 
       // If no name is set, set one, based on the type and sibling count
       if (!entity.components.byId('name')) {
-        const sameTypeCount = siblings[entity.parent].filter(it => it.type === entity.type).length;
+        const sameTypeCount = siblings[entity.parent].filter((it) => it.type === entity.type).length;
         entity.components.add({ id: 'name', type: 'name', string: `${entity.type} ${sameTypeCount + 1}` });
       }
 
-      const parentEntity = entities.find(it => it.id === entity.parent);
+      const parentEntity = entities.find((it) => it.id === entity.parent);
       if (parentEntity && parentEntity.children.indexOf(entity.id) < 0) parentEntity.children.push(entity.id);
       entities.push(entity);
     });
@@ -200,8 +209,20 @@ export class SceneState {
     if (action.persist)
       this.store.dispatch(
         new PushHistory(
-          [ new DeleteEntity(action.created.map(it => it.id), [], false) ],
-          [ new CreateEntity(newEntities.map(it => cloneDeep(it)), [], false) ]
+          [
+            new DeleteEntity(
+              action.created.map((it) => it.id),
+              [],
+              false
+            ),
+          ],
+          [
+            new CreateEntity(
+              newEntities.map((it) => cloneDeep(it)),
+              [],
+              false
+            ),
+          ]
         )
       );
   }
@@ -218,15 +239,15 @@ export class SceneState {
     const toRemove = Array.isArray(action.id) ? action.id : [action.id];
     const entities = state.entities.slice();
     const entitiesToRemove = [];
-    toRemove.slice().forEach(id => {
-      this.service.getChildren(id).forEach(it => toRemove.push(it.id));
+    toRemove.slice().forEach((id) => {
+      this.service.getChildren(id).forEach((it) => toRemove.push(it.id));
     });
-    toRemove.forEach(id => {
-      const idx = entities.findIndex(entity => entity.id === id);
+    toRemove.forEach((id) => {
+      const idx = entities.findIndex((entity) => entity.id === id);
       if (idx < 0) return console.warn(`[SceneState] No entity found for id ${id}`);
       const entity = state.entities[idx];
 
-      const parentEntity = state.entities.find(it => it.id === entity.parent);
+      const parentEntity = state.entities.find((it) => it.id === entity.parent);
       if (parentEntity) {
         const childIdx = parentEntity.children.indexOf(id);
         if (childIdx >= 0) parentEntity.children.splice(childIdx, 1);
@@ -235,12 +256,14 @@ export class SceneState {
       entitiesToRemove.push(entity);
     });
     action.deleted = entitiesToRemove;
+    const select = this.store.snapshot().select;
+    console.log(select.entities.slice());
     ctx.patchState({ entities });
     if (action.persist)
       this.store.dispatch(
         new PushHistory(
-          [ new CreateEntity(action.deleted, [], false) ],
-          [ new DeleteEntity(toRemove, [], false) ]
+          [new CreateEntity(action.deleted, [], false)],
+          [new DeleteEntity(toRemove, [], false)]
         )
       );
   }
@@ -261,11 +284,11 @@ export class SceneState {
 
     const dataBefore: Partial<SceneEntityData>[] = action.persist ? [] : null;
 
-    data.forEach(newData => {
+    data.forEach((newData) => {
       const entity = this.service.getEntity(newData.id);
       if (!entity) return console.warn(`[SceneState] No entity found for id ${newData.id}`);
       if (!newData.components) return;
-      const comps = dataBefore ? entity.components.map(it => cloneDeep(it)) : null;
+      const comps = dataBefore ? entity.components.map((it) => cloneDeep(it)) : null;
       const oldData = dataBefore ? { id: entity.id, parent: entity.parent, components: [] } : null;
       if (dataBefore) dataBefore.push(oldData);
       const listenerIdx = entity.components.listeners.length;
@@ -273,7 +296,7 @@ export class SceneState {
         onAdded: (...added: Component[]) => {
           hasChanges = true;
           if (!dataBefore) return;
-          added.forEach(addedComp => {
+          added.forEach((addedComp) => {
             const comp = cloneDeep(addedComp);
             comp.markedForDelete = true;
             oldData.components.push(comp);
@@ -282,20 +305,20 @@ export class SceneState {
         onRemoved: (...removed: Component[]) => {
           hasChanges = true;
           if (!dataBefore) return;
-          removed.forEach(comp => {
-            const found = comps.find(it => it.id === comp.id);
+          removed.forEach((comp) => {
+            const found = comps.find((it) => it.id === comp.id);
             if (found) oldData.components.push(found);
           });
         },
         onUpdated: (...update: Component[]) => {
           hasChanges = true;
-          if (!resort) resort = !!update.find(it => it.id === 'index');
+          if (!resort) resort = !!update.find((it) => it.id === 'index');
           if (!dataBefore) return;
-          update.forEach(comp => {
-            const found = comps.find(it => it.id === comp.id);
+          update.forEach((comp) => {
+            const found = comps.find((it) => it.id === comp.id);
             if (found) oldData.components.push(found);
           });
-        }
+        },
       });
       entity.components.set.apply(entity.components, newData.components);
       entity.components.removeListener(listenerIdx);
@@ -324,13 +347,22 @@ export class SceneState {
         this.sortByIndex(entities);
         ctx.patchState({ entities });
       }
-      if (action.persist)
+      if (action.persist) {
+        const select = this.store.snapshot().select;
+        if (select.entities && select.entities.length > 0 && !dataBefore.find((it) => it.id === 'select')) {
+          dataBefore.unshift({ id: 'select', components: cloneDeep(select.components) });
+        }
         this.store.dispatch(
           new PushHistory(
-            [ new UpdateEntity(dataBefore, 'Reverse update', false) ],
-            [ new UpdateEntity(data.map(it => cloneDeep(it)), action.message, false) ]
+            [
+              new UpdateEntity(dataBefore, 'Reverse update', false),
+            ],
+            [
+              new UpdateEntity(cloneDeep(data), action.message, false),
+            ]
           )
         );
+      }
     }
   }
 
@@ -345,15 +377,14 @@ export class SceneState {
     const entitiesToClone = Array.isArray(action.data) ? action.data : [action.data];
     const entitiesToCreate = this.getCloneEntities(entitiesToClone);
 
-    return ctx.dispatch(new CreateEntity(entitiesToCreate))
-              .subscribe(() => {
-                const data = entitiesToCreate.map(it => {
-                  const old = it.components.byId('index').index as number;
-                  it.components.byId('index').index = -1;
-                  return { id: it.id, index: old, parent: it.parent };
-                });
-                this.sortEntity(ctx, new SortEntity(data, false));
-              });
+    return ctx.dispatch(new CreateEntity(entitiesToCreate)).subscribe(() => {
+      const data = entitiesToCreate.map((it) => {
+        const old = it.components.byId('index').index as number;
+        it.components.byId('index').index = -1;
+        return { id: it.id, index: old, parent: it.parent };
+      });
+      this.sortEntity(ctx, new SortEntity(data, false));
+    });
   }
 
   /**
@@ -365,22 +396,30 @@ export class SceneState {
   @Action(SortEntity)
   sortEntity(ctx: StateContext<ISceneState>, action: SortEntity) {
     const actionData = Array.isArray(action.data) ? action.data : [action.data];
-    const oldData = actionData.map(it => {
+    const oldData = actionData.map((it) => {
       const entity = this.service.getEntity(it.id);
       if (!entity) return it;
-      return { id: entity.id, index: entity.components.byId('index').index as number, parent: entity.parent, oldParent: it.parent };
+      return {
+        id: entity.id,
+        index: entity.components.byId('index').index as number,
+        parent: entity.parent,
+        oldParent: it.parent,
+      };
     });
-    const data = flatten(actionData.map(it => this.updateIndices(it.id, it.index, it.parent)));
+    const data = flatten(actionData.map((it) => this.updateIndices(it.id, it.index, it.parent)));
     if (action.persist)
       this.store.dispatch(
         new PushHistory(
-          [ new SortEntity(oldData, false) ],
-          [ new SortEntity(actionData.map(it => cloneDeep(it)), false) ]
+          [new SortEntity(oldData, false)],
+          [
+            new SortEntity(
+              actionData.map((it) => cloneDeep(it)),
+              false
+            ),
+          ]
         )
       );
-    return ctx.dispatch(
-      new UpdateEntity(data, `Sorted entities`, false)
-    );
+    return ctx.dispatch(new UpdateEntity(data, `Sorted entities`, false));
   }
 
   /**

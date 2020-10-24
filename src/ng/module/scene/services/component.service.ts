@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { GroupSceneComponent, SceneEntity, SceneComponent } from 'common/scene';
-import * as _ from 'lodash';
 import { SceneService } from './scene.service';
 import { Observable } from 'rxjs';
 import { UpdateEntity } from '../states/actions/entity.action';
 import { EntityNotFoundException } from '../exceptions/scene/entity-not-found.exception';
-import { Select, UpdateComponents } from '../states/actions/select.action';
+import { UpdateComponents } from '../states/actions/select.action';
 import { ISelectState } from '../states';
+import { isNil, maxBy, cloneDeep } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
 export class SceneComponentService {
@@ -32,7 +32,7 @@ export class SceneComponentService {
    * @return Whether the type can be added.
    */
   canTypeBeAddedToGroup(type: string, group: GroupSceneComponent): boolean {
-    if (_.isNil(group.allowedMemberItems) && _.isNil(group.allowedMemberTypes)) return true;
+    if (isNil(group.allowedMemberItems) && isNil(group.allowedMemberTypes)) return true;
     if (group.allowedMemberTypes) {
       if (group.allowedMemberTypes.length === 0) return false;
       if (!group.allowedMemberTypes.find(it => it === type)) return false;
@@ -48,7 +48,7 @@ export class SceneComponentService {
    * @return Whether the id can be added.
    */
   canIdBeAddedToGroup(id: string, group: GroupSceneComponent): boolean {
-    if (_.isNil(group.allowedMemberItems) && _.isNil(group.allowedMemberTypes)) return true;
+    if (isNil(group.allowedMemberItems) && isNil(group.allowedMemberTypes)) return true;
     if (group.allowedMemberItems) {
       if (group.allowedMemberItems.length === 0) return false;
       if (!group.allowedMemberItems.find(it => it === id)) return false;
@@ -109,7 +109,7 @@ export class SceneComponentService {
         throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     });
-    const max = _.maxBy(entityObjects, it => it.components.byType(type).length);
+    const max = maxBy(entityObjects, it => it.components.byType(type).length);
     const components = max.components.byType(type);
     return `${type} ${components.length + 1}`;
   }
@@ -146,14 +146,14 @@ export class SceneComponentService {
     }
 
     const selected = this.store.selectSnapshot(data => data.select);
-    const data = entityObjects.map(it => ({ id: it.id, components: [_.cloneDeep(component)] }));
-    selected.components = selected.components.concat([component]);
+    const data = entityObjects.map(it => ({ id: it.id, components: [cloneDeep(component)] }));
+    const components = [ ...selected.components, component ];
     return this.store.dispatch([
       new UpdateEntity(
         data,
         `Component added in entities ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components, true) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(components, true) : void 0
     ]);
   }
 
@@ -176,17 +176,13 @@ export class SceneComponentService {
     const data = entityObjects.map(it => ({ id: it.id, components: [component] }));
     const components = selected.components.slice();
     const idx = components.findIndex(it => it.id === component.id);
-    if (idx >= 0) {
-      components.splice(idx, 1);
-      selected.components = components;
-    }
-    console.log(idx, selected, selected.entities, selected.components);
+    if (idx >= 0) components.splice(idx, 1);
     return this.store.dispatch([
       new UpdateEntity(
         data,
         `Component ${component.id} removed in entity ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components as SceneComponent[], true) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(components, true) : void 0
     ]);
   }
 
@@ -205,17 +201,18 @@ export class SceneComponentService {
         throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     }).filter(entity => !!entity.components.byId(old.id));
-    const selected = this.store.selectSnapshot(data => data.select);
+    const selected = this.store.selectSnapshot(data => data.select) as ISelectState;
     old.markedForDelete = true;
-    const data = entityObjects.map(it => ({ id: it.id, components: [_.cloneDeep(component), _.cloneDeep(old)] }));
-    const idx = selected.components.indexOf(old);
-    if (idx >= 0) selected.components[idx] = component;
+    const data = entityObjects.map(it => ({ id: it.id, components: [cloneDeep(component), cloneDeep(old)] }));
+    const components = selected.components.slice();
+    const idx = components.indexOf(old);
+    if (idx >= 0) components[idx] = component;
     return this.store.dispatch([
       new UpdateEntity(
         data,
         `Component ${component.id} update in entity ${data.map(it => it.id).join(',')}`
       ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(selected.components, true) : void 0
+      selected && selected.entities.length > 0 ? new UpdateComponents(components, true) : void 0
     ]);
   }
 }

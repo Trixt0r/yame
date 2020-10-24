@@ -1,14 +1,23 @@
 import { Point, Rectangle, Container, RoundedRectangle, Graphics } from 'pixi.js';
-import { SceneEntity, SceneComponent, SceneEntityType } from 'common/scene';
+import { SceneEntity, SceneComponent, SceneEntityType, SceneComponentCollection } from 'common/scene';
 import { Injectable, Inject, NgZone } from '@angular/core';
 import { PixiRendererService } from '../services/renderer.service';
-import { YAME_RENDERER, SceneService, Select, Unselect, UpdateEntity, UpdateComponents, Isolate, Input } from 'ng/module/scene';
+import {
+  YAME_RENDERER,
+  SceneService,
+  Select,
+  Unselect,
+  UpdateEntity,
+  Isolate,
+  Input,
+  DeleteEntity,
+} from 'ng/module/scene';
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiSelectionContainerService } from './selection/container.service';
 import { System } from '@trixt0r/ecs';
-import { Actions, ofActionSuccessful, ofActionDispatched, Store } from '@ngxs/store';
+import { Actions, ofActionDispatched, Store, ofActionSuccessful } from '@ngxs/store';
 import { Subscription } from 'rxjs';
-import { isNullOrUndefined } from 'util';
+import { cloneDeep } from 'lodash';
 
 const globalTopLeft = new Point();
 const globalBottomRight = new Point();
@@ -138,13 +147,11 @@ export class PixiSelectionService {
       selectionTool.end$.subscribe(() => {
         if (containerService.isHandling) return;
         const entities = scene.entities.filter((it) => {
-          const isolated = store.selectSnapshot(state => state.select).isolated;
+          const isolated = store.selectSnapshot((state) => state.select).isolated;
           const parent = it.parent ? scene.getEntity(it.parent) : null;
           const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
-          if (isolated)
-            return it.parent === isolated.id && this.contains(it);
-          else
-            return (!it.parent || isOnLayer) && this.contains(it);
+          if (isolated) return it.parent === isolated.id && this.contains(it);
+          else return (!it.parent || isOnLayer) && this.contains(it);
         });
         if (entities.length === 0) {
           (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
@@ -157,8 +164,21 @@ export class PixiSelectionService {
         );
       });
 
+      actions.pipe(ofActionDispatched(DeleteEntity)).subscribe((action: DeleteEntity) => {
+        this.store.dispatch(
+          new Unselect(
+            Array.isArray(action.id) ? action.id : [action.id],
+            this.store.snapshot().select.components,
+            false
+          )
+        );
+      });
+
       actions.pipe(ofActionDispatched(Select, Unselect)).subscribe((action: Select | Unselect) => {
         if (action instanceof Select) {
+          const collection = new SceneComponentCollection(action.components.slice());
+          const reset = collection.length === 0;
+          service.applyComponents(collection, containerService.container);
           containerService.select(
             scene.entities.filter((it) => {
               const parent = it.parent ? scene.getEntity(it.parent) : null;
@@ -166,34 +186,47 @@ export class PixiSelectionService {
               const isolated = this.store.snapshot().select.isolated;
               if (isolated && isolated.id === it.id) return false;
               return (it.type !== SceneEntityType.Layer || isOnLayer) && action.entities.indexOf(it.id) >= 0;
-            })
+            }),
+            false,
+            reset
           );
+          service.applyComponents(collection, containerService.container);
         } else {
           if (!action.entities || action.entities.length === 0) containerService.unselect();
           else containerService.unselect(scene.entities.filter((it) => action.entities.indexOf(it.id) >= 0));
         }
         (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
-        action.components = containerService.components.elements.slice() as SceneComponent[];
+        // action.components = containerService.components.elements.slice() as SceneComponent[];
+        containerService.components.forEach(comp => {
+          const found = action.components.find(it => comp.id === it.id);
+          if (found) return;
+          action.components.push(comp);
+        });
         containerService.update$.next();
       });
 
       let updateSub: Subscription;
       containerService.selected$.subscribe(() => {
         if (updateSub) updateSub.unsubscribe();
-        updateSub = actions.pipe(ofActionDispatched(Input)).subscribe((input: Input) => {
-          if (!(input.action instanceof UpdateEntity)) return;
-          const action = input.action as UpdateEntity;
-          const components = Array.isArray(action.data)
-            ? action.data.length > 0
-              ? action.data[0].components
-              : null
-            : action.data.components;
-          if (!components || !components.find(comp => comp.id.indexOf('transformation') >= 0)) return;
-          containerService.updateDispatched$.next(action);
-          containerService.components.set.apply(containerService.components, components);
-          containerService.applyComponents();
-          action.data = containerService.updateEntities(false);
-          containerService.update$.next();
+        updateSub = actions.pipe(ofActionDispatched(Input, UpdateEntity)).subscribe((action: Input | UpdateEntity) => {
+          if (action instanceof Input && action.source === this.containerService) return;
+          const acts = action instanceof Input ? action.actions : [action];
+          let changed = false;
+          acts.forEach((act) => {
+            if (!(act instanceof UpdateEntity)) return;
+            const data = Array.isArray(act.data) ? act.data : [act.data];
+            const found = data.find(it => it.id === 'select');
+            const components = found ? found.components : null;
+            if (!components || !components.find(comp => comp.id.indexOf('transformation') >= 0)) return;
+            containerService.updateDispatched$.next(act);
+            containerService.components.set.apply(containerService.components, components);
+            containerService.applyComponents();
+            if (action instanceof Input) act.data = containerService.updateEntities(false);
+            else containerService.dispatchUpdate.apply(containerService, containerService.components.elements);
+            this.store.snapshot().select.components = cloneDeep(containerService.components.elements.slice());
+            changed = true;
+          });
+          if (changed) containerService.update$.next();
         });
       });
       containerService.unselected$.subscribe(() => {
@@ -263,7 +296,7 @@ export class PixiSelectionService {
    * Handles the double click event, i.e. focuses the double clicked group.
    */
   onDoubleClick(): void {
-    const found = this.containerService.entities.find(it => this.service.containsPoint(it.id, this.service.mouse));
+    const found = this.containerService.entities.find((it) => this.service.containsPoint(it.id, this.service.mouse));
     if (found && found.children.length > 0) this.store.dispatch(new Isolate(found));
     else if (!found) this.store.dispatch(new Isolate(null));
   }

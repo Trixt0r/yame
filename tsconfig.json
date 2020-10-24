@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "outDir": "./out",
     "allowJs": true,
-    "target": "esnext",
+    "target": "ESNext",
     "module": "commonjs",
     "types": [
       "node",

@@ -420,5 +420,7 @@ export class PixiRendererService implements ISceneRenderer {
     if (scale) container.scale.copyFrom(scale);
     if (skew) container.skew.copyFrom(skew);
     if (pivot) container.pivot.copyFrom(pivot);
+    container.transform.updateLocalTransform();
+    if (container.parent) container.transform.updateTransform(container.parent.transform);
   }
 }

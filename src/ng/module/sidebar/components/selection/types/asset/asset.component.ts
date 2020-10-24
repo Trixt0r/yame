@@ -74,6 +74,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   }
 
   set selected(id: string) {
+    if (this.component && this.component.asset === id) return;
     const data = {
       originalEvent: null,
       value: id,

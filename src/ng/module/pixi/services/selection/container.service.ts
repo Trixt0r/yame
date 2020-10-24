@@ -29,6 +29,7 @@ export class PixiSelectionContainerService {
   protected cachedComponentValues: { [key: string]: SceneComponent[] } = { };
 
   protected tmpTransform = new Transform();
+  protected tmpContainer = new Container();
 
   readonly entities: SceneEntity[] = [];
 
@@ -75,8 +76,9 @@ export class PixiSelectionContainerService {
   beginHandling(ref: unknown, ...args: unknown[]): void {
     if (this.handling) throw new Error('beginHandling has already been called. endHandling has to be called before!');
     this.cachedComponentValues = { };
+    this.cachedComponentValues.select = cloneDeep(this.components.elements.slice());
     this.entities.forEach(entity => {
-      this.cachedComponentValues[entity.id] = entity.components.map(it => cloneDeep(it));
+      this.cachedComponentValues[entity.id] = cloneDeep(entity.components.elements.slice());
     });
     this.handlerRef = ref;
     this.handling = true;
@@ -119,6 +121,7 @@ export class PixiSelectionContainerService {
     });
 
     Object.keys(ids).forEach(key => {
+      if (key === this.comp.id) return;
       const data = ids[key];
       if (data.entities.length !== this.entities.length) return;
       const notEqual = !!data.entities.find(it => !isEqual(it.components.byId(key), data.comp));
@@ -154,40 +157,52 @@ export class PixiSelectionContainerService {
   /**
    * Updates the container, based on the current selection.
    */
-  updateContainer(): void {
-    this.container.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
+  updateContainer(reset = true): void {
+    this.tmpContainer.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
+    if (reset) this.container.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
     if (this.entities.length > 0 && this.container.parent) {
       this.container.interactive = true;
-      let bounds: Rectangle;
+      this.container.parent.addChild(this.tmpContainer);
+      this.tmpContainer.transform.updateTransform(this.container.parent.transform);
+      this.entities.forEach(entity => {
+        const container = this.pixi.getContainer(entity.id);
+        if (!container) return;
+        const parent = this.pixi.getContainer(entity.parent) || this.pixi.scene;
+        parent.addChild(container);
+        this.pixi.applyComponents(entity.components, container);
+        this.tmpContainer.addChild(container);
+        transformTo(container, this.tmpContainer);
+        container.transform.updateTransform(this.tmpContainer.transform);
+      });
       if (this.entities.length > 1) {
-        this.entities.forEach(entity => {
-          transformTo(this.pixi.getContainer(entity.id), this.container.parent);
-        });
-        bounds = this.container.getLocalBounds();
+        const bounds = this.tmpContainer.getLocalBounds();
         const pivotX = bounds.x + bounds.width / 2;
         const pivotY = bounds.y + bounds.height / 2;
         this.container.parent.toLocal(new Point(pivotX, pivotY), this.container, this.container.position);
         this.container.pivot.set(pivotX, pivotY);
+        this.entities.forEach(entity => {
+          const container = this.pixi.getContainer(entity.id);
+          if (!container) return;
+          const parent = this.pixi.getContainer(entity.parent) || this.pixi.scene;
+          parent.addChild(container);
+          this.pixi.applyComponents(entity.components, container);
+          this.container.addChild(container);
+          transformTo(container, this.container);
+          container.transform.updateTransform(this.container.transform);
+        });
       } else {
         // Apply the transformation of the child directly to the container
         const child = this.pixi.getContainer(this.entities[0].id);
-        transformTo(child, this.container.parent);
+        this.container.addChild(child);
         this.container.transform.setFromMatrix(child.localTransform);
         this.container.pivot.copyFrom(child.pivot);
         // The child has to have no transformation, i.e. identity matrix
         child.transform.setFromMatrix(Matrix.IDENTITY);
-        child.pivot.set(0, 0); // Needed, since above line is not resetting the pivot coordinates
-        bounds = this.container.getLocalBounds();
+        child.pivot.set(0, 0); // Needed, since line above is not resetting the pivot coordinates
       }
+      const bounds = this.container.getLocalBounds();
       this.container.hitArea = bounds;
-      this.entities.forEach(entity => {
-        let parentEntity = this.pixi.sceneService.getEntity(entity.parent);
-        while (parentEntity) {
-          const container = this.pixi.getContainer(parentEntity.id);
-          this.pixi.updateComponents(parentEntity.components, container);
-          parentEntity = this.pixi.sceneService.getEntity(parentEntity.parent);
-        }
-      });
+      this.container.parent.removeChild(this.tmpContainer);
     }
     this.container.transform.updateTransform(this.container.parent.transform);
 
@@ -202,7 +217,7 @@ export class PixiSelectionContainerService {
    * @param silent Whether to skip the subject notification.
    * @returns The added entities.
    */
-  select(entities: SceneEntity[], silent = false) {
+  select(entities: SceneEntity[], silent = false, reset = true) {
     const added: SceneEntity[] = [];
 
     this.entities.forEach(entity => {
@@ -210,6 +225,7 @@ export class PixiSelectionContainerService {
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
       parentContainer.addChild(child);
       transformTo(child, parentContainer);
+      this.pixi.updateComponents(entity.components, child);
     });
     this.container.zIndex = maxBy(this.pixi.scene.children, (child) => child.zIndex).zIndex + 1;
     this.pixi.scene.addChild(this.container);
@@ -222,12 +238,14 @@ export class PixiSelectionContainerService {
     });
 
     this.entities.forEach((entity, i) => {
+      const container = this.pixi.getContainer(entity.id);
+      if (!container) return;
       entity.components.add(this.comp);
-      this.pixi.getContainer(entity.id).zIndex = i;
-      this.container.addChild(this.pixi.getContainer(entity.id));
+      container.zIndex = i;
+      this.container.addChild(container);
     });
 
-    this.updateContainer();
+    this.updateContainer(reset);
 
     if (added.length > 0 && !silent) this.selected$.next(added);
 
@@ -258,6 +276,7 @@ export class PixiSelectionContainerService {
         entity.components.remove(this.comp);
       }
       const child = this.pixi.getContainer(entity.id);
+      if (!child) return;
       child.transform.updateTransform(this.container.transform);
       // Restore the internal relation
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
@@ -276,7 +295,7 @@ export class PixiSelectionContainerService {
     if (this.entities.length === 0) this.container.interactive = false;
     if (toRemove.length > 0 && !silent) this.unselected$.next(toRemove);
     if (!this.container.interactive) this.pixi.scene.removeChild(this.container);
-    else this.updateContainer();
+    else this.updateContainer(false);
     return toRemove;
   }
 
@@ -290,6 +309,7 @@ export class PixiSelectionContainerService {
     const first = this.entities[0];
     const data: Partial<SceneEntityData>[] = [];
     const componentsBefore: { [id: string]: SceneComponentCollection<SceneComponent> } = { };
+    data.push({ id: 'select', components: cloneDeep(this.components.elements) as SceneComponent[] });
     this.entities.forEach(entity => {
       const child = this.pixi.getContainer(entity.id);
       child.transform.updateTransform(this.container.transform);
@@ -303,13 +323,18 @@ export class PixiSelectionContainerService {
       transformTo(child, parentContainer);
       const comps = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
       this.pixi.updateComponents(comps, child);
-      data.push({ id: entity.id, components: comps.elements.filter(comp => comp.id !== this.comp.id && comp.mixed === void 0) });
+      data.push({ id: entity.id, components: comps.filter(comp => comp.id !== this.comp.id && comp.mixed === void 0) });
       if (dispatch) entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
     });
 
     if (dispatch) {
       this.updateEntityAction.data = data;
-      this.store.dispatch(this.updateEntityAction);
+      if (this.cachedComponentValues.select) {
+        this.store.snapshot().select.components = this.cachedComponentValues.select;
+      }
+      this.store.dispatch(this.updateEntityAction).subscribe(() => {
+        this.store.snapshot().select.components = cloneDeep(this.components.elements.slice());
+      });
     }
 
     this.entities.forEach(entity => {

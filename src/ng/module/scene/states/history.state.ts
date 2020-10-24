@@ -1,10 +1,10 @@
-import { EntityAction } from './actions/entity.action';
 import { State, StateContext, Action, Store } from '@ngxs/store';
 import { UndoHistory, PushHistory, RedoHistory } from './actions';
+import { cloneDeep } from 'lodash';
 
 interface Difference {
-  last: EntityAction[];
-  actions: EntityAction[];
+  last: unknown[];
+  actions: unknown[];
   date: Date;
 }
 
@@ -45,9 +45,10 @@ export class HistoryState {
     const previous = state.previous.slice();
     const next = state.next.slice();
     const difference = previous.pop();
-    next.push({ actions: difference.last, last: difference.actions, date: new Date() });
+    next.push({ actions: cloneDeep(difference.last), last: cloneDeep(difference.actions), date: new Date() });
     ctx.patchState({ previous, next });
-    this.store.dispatch.apply(this.store, difference.actions);
+    this.store.dispatch(difference.actions);
+    // this.store.dispatch.apply(this.store, difference.actions);
   }
 
   @Action(RedoHistory)
@@ -57,9 +58,9 @@ export class HistoryState {
     const previous = state.previous.slice();
     const next = state.next.slice();
     const difference = next.pop();
-    previous.push({ actions: difference.last, last: difference.actions, date: new Date() });
+    previous.push({ actions: cloneDeep(difference.last), last: cloneDeep(difference.actions), date: new Date() });
     ctx.patchState({ previous, next });
-    this.store.dispatch.apply(this.store, difference.actions);
+    this.store.dispatch(difference.actions);
   }
 
 }

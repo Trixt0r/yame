@@ -355,11 +355,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
   removeEntity(event: MouseEvent, node: TreeNode): void {
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (this.isSelected(node)) {
-      this.store.dispatch(new Unselect()).pipe(() => this.store.dispatch(new DeleteEntity(node.id)));
-    } else {
-      this.store.dispatch(new DeleteEntity(node.id));
-    }
+    this.store.dispatch(new DeleteEntity(node.id));
   }
 
   /**
