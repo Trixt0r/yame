@@ -177,10 +177,10 @@ export class PixiSelectionService {
       actions.pipe(ofActionDispatched(Select, Unselect)).subscribe((action: Select | Unselect) => {
         if (action instanceof Select) {
           const collection = new SceneComponentCollection(action.components.slice());
-          const reset = collection.length === 0;
-          service.applyComponents(collection, containerService.container);
+          const reset = action.persist || (collection.length === 0 && !action.persist);
+          if (!reset) service.applyComponents(collection, containerService.container);
           containerService.select(
-            scene.entities.filter((it) => {
+            scene.entities.filter(it => {
               const parent = it.parent ? scene.getEntity(it.parent) : null;
               const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
               const isolated = this.store.snapshot().select.isolated;
@@ -190,10 +190,10 @@ export class PixiSelectionService {
             false,
             reset
           );
-          service.applyComponents(collection, containerService.container);
+          if (!reset) service.applyComponents(collection, containerService.container);
         } else {
           if (!action.entities || action.entities.length === 0) containerService.unselect();
-          else containerService.unselect(scene.entities.filter((it) => action.entities.indexOf(it.id) >= 0));
+          else containerService.unselect(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
         }
         (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
         // action.components = containerService.components.elements.slice() as SceneComponent[];

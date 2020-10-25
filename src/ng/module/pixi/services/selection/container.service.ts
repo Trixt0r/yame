@@ -193,12 +193,17 @@ export class PixiSelectionContainerService {
       } else {
         // Apply the transformation of the child directly to the container
         const child = this.pixi.getContainer(this.entities[0].id);
+        const parent = this.pixi.getContainer(this.entities[0].parent) || this.pixi.scene;
+        parent.addChild(child);
+        this.pixi.applyComponents(this.entities[0].components, child);
+        this.container.parent.addChild(child);
+        transformTo(child, this.container.parent);
         this.container.addChild(child);
         this.container.transform.setFromMatrix(child.localTransform);
         this.container.pivot.copyFrom(child.pivot);
         // The child has to have no transformation, i.e. identity matrix
-        child.transform.setFromMatrix(Matrix.IDENTITY);
-        child.pivot.set(0, 0); // Needed, since line above is not resetting the pivot coordinates
+        child.setTransform(0, 0, 1, 1, 0, 0, 0, 0, 0);
+        child.transform.updateTransform(this.container.transform);
       }
       const bounds = this.container.getLocalBounds();
       this.container.hitArea = bounds;
