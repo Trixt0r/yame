@@ -63,6 +63,7 @@ export class PixiSelectionContainerService {
     protected selection: SelectionToolService,
     protected store: Store,
   ) {
+    this.container.name = 'selection-container';
     this.update$.subscribe(() => this.updateComponents());
   }
 

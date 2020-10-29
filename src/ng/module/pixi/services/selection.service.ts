@@ -17,7 +17,7 @@ import { PixiSelectionContainerService } from './selection/container.service';
 import { System } from '@trixt0r/ecs';
 import { Actions, ofActionDispatched, Store, ofActionSuccessful } from '@ngxs/store';
 import { Subscription } from 'rxjs';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 
 const globalTopLeft = new Point();
 const globalBottomRight = new Point();
@@ -176,7 +176,8 @@ export class PixiSelectionService {
 
       actions.pipe(ofActionDispatched(Select, Unselect)).subscribe((action: Select | Unselect) => {
         if (action instanceof Select) {
-          const collection = new SceneComponentCollection(action.components.slice());
+          const comps = cloneDeep(action.components.slice());
+          const collection = new SceneComponentCollection(comps);
           const reset = action.persist || (collection.length === 0 && !action.persist);
           if (!reset) service.applyComponents(collection, containerService.container);
           containerService.select(
@@ -196,11 +197,10 @@ export class PixiSelectionService {
           else containerService.unselect(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
         }
         (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
-        // action.components = containerService.components.elements.slice() as SceneComponent[];
         containerService.components.forEach(comp => {
           const found = action.components.find(it => comp.id === it.id);
-          if (found) return;
-          action.components.push(comp);
+          if (found) merge(found, comp);
+          else action.components.push(comp);
         });
         containerService.update$.next();
       });

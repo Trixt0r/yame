@@ -48,7 +48,6 @@ export class HistoryState {
     next.push({ actions: cloneDeep(difference.last), last: cloneDeep(difference.actions), date: new Date() });
     ctx.patchState({ previous, next });
     this.store.dispatch(difference.actions);
-    // this.store.dispatch.apply(this.store, difference.actions);
   }
 
   @Action(RedoHistory)

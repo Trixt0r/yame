@@ -163,6 +163,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
 
   protected subs: Subscription[] = [];
 
+  private isolating = false;
+
   constructor(
     protected scene: SceneService,
     protected store: Store,
@@ -229,12 +231,14 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
       );
       this.subs.push(
         this.actions.pipe(ofActionSuccessful(Isolate)).subscribe((action: Isolate) => {
+          this.isolating = true;
           if (action.entity) {
             const node = this.treeComponent.treeModel.getNodeById(action.entity.id);
             TREE_ACTIONS.EXPAND(this.treeComponent.treeModel, node, this.lastMouseEvent);
             TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, node, this.lastMouseEvent);
           }
           this.cdr.detectChanges();
+          this.isolating = false;
         })
       );
     });
@@ -394,7 +398,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    */
   onDeactivate(event: any) {
     const data = event.node.data as TreeNode;
-    this.store.dispatch(new TreeUnselect([data.id]));
+    this.store.dispatch(new TreeUnselect([data.id], [], !this.isolating));
   }
 
   /**
@@ -555,7 +559,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
         tree.setFocusedNode(node);
       }
       this.store
-        .dispatch(new Select(toSelect, this.store.selectSnapshot((state) => state.select).components))
+        .dispatch(new Select(toSelect, []))
         .subscribe(() => {
           if (toUnselect.length > 0) this.store.dispatch(new Unselect(toUnselect));
         });
