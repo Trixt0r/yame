@@ -2,16 +2,16 @@ import { State, StateContext, Action, Store } from '@ngxs/store';
 import { UndoHistory, PushHistory, RedoHistory } from './actions';
 import { cloneDeep } from 'lodash';
 
-interface Difference {
-  last: unknown[];
-  actions: unknown[];
+export interface IHistorySnapshot<T> {
+  last: T[];
+  actions: T[];
   date: Date;
 }
 
 
 export interface IHistoryState {
-  previous: Difference[];
-  next: Difference[];
+  previous: IHistorySnapshot<unknown>[];
+  next: IHistorySnapshot<unknown>[];
 }
 
 
@@ -33,9 +33,12 @@ export class HistoryState {
   @Action(PushHistory)
   push(ctx: StateContext<IHistoryState>, action: PushHistory) {
     const previous = ctx.getState().previous.slice();
-    previous.push({ actions: action.actions, last: action.last, date: new Date() });
+    const date = new Date();
+    if (previous.length > 0 && action.override)
+      previous[previous.length - 1] = { actions: action.actions, last: action.last, date };
+    else
+      previous.push({ actions: action.actions, last: action.last, date });
     ctx.patchState({ previous, next: [] });
-    console.log(ctx.getState());
   }
 
   @Action(UndoHistory)

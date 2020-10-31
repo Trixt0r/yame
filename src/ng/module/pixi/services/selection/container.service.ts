@@ -268,7 +268,7 @@ export class PixiSelectionContainerService {
    */
   unselect(entities: SceneEntity[] = this.entities.slice(), silent = false): SceneEntity[] {
     if (this.handling) this.endHandling(this.currentHandler);
-    const toRemove = entities.filter((child) => this.entities.indexOf(child) >= 0);
+    const toRemove = entities.filter(child => this.entities.indexOf(child) >= 0);
     const hadOnlyOne = this.entities.length === 1;
     const first = this.entities[0];
     entities.forEach(entity => {

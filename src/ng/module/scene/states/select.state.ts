@@ -4,7 +4,8 @@ import { Select, Unselect, UpdateComponents, Isolate } from './actions/select.ac
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISceneState } from './scene.state';
 import { PushHistory } from './actions';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, difference, xor } from 'lodash';
+import { IHistorySnapshot, IHistoryState } from './history.state';
 
 export interface ISelectState {
   entities: string[];
@@ -21,7 +22,6 @@ export interface ISelectState {
   },
 })
 export class SelectState {
-
   private beforeSelect = {
     entities: [],
     components: [],
@@ -33,42 +33,46 @@ export class SelectState {
   };
 
   constructor(private store: Store, actions: Actions) {
-    actions.pipe(ofActionSuccessful(Select))
-            .subscribe((action: Select) => {
-              if (!action.persist) return;
-              this.store.dispatch(
-                new PushHistory(
-                  [ new Unselect(this.beforeSelect.entities, this.beforeSelect.components, false) ],
-                  [ new Select(action.entities, cloneDeep(action.components), false) ]
-                )
-              );
-            });
-    actions.pipe(ofActionSuccessful(Unselect))
-            .subscribe((action: Unselect) => {
-              if (!action.persist) return;
-              this.store.dispatch(
-                new PushHistory(
-                  [ new Select(this.beforeUnselect.entities, this.beforeUnselect.components, false) ],
-                  [ new Unselect(action.entities, cloneDeep(action.components), false) ]
-                )
-              );
-            });
+    actions.pipe(ofActionSuccessful(Select, Unselect)).subscribe((action: Select | Unselect) => {
+      if (!action.persist) return;
+      const history = store.snapshot().history as IHistoryState;
+      const previous = history.previous;
+      const next = history.next;
+      const previousLast = previous.length > 0 ? (previous[previous.length - 1] as IHistorySnapshot<Select | Unselect>) : null;
+      const previousState = next.length === 0 && previousLast && previousLast.last.length === 1 ? previousLast.last[0] : null;
+      if (action instanceof Select) {
+        this.store.dispatch(
+          new PushHistory(
+            [new Unselect(this.beforeSelect.entities, this.beforeSelect.components, false)],
+            [new Select(action.entities, cloneDeep(action.components), false, true)],
+            previousState instanceof Unselect
+          )
+        );
+      } else {
+        this.store.dispatch(
+          new PushHistory(
+            [new Select(this.beforeUnselect.entities, this.beforeUnselect.components, false, true)],
+            [new Unselect(action.entities, cloneDeep(action.components), false)],
+            previousState instanceof Select
+          )
+        );
+      }
+    });
   }
 
   @Action(Select)
   select(ctx: StateContext<ISelectState>, action: Select) {
     const sceneEntities = (this.store.snapshot().scene as ISceneState).entities;
-    const entities: string[] = ctx.getState().entities.slice();
+    const entities: string[] = action.unselectCurrent ? [] : ctx.getState().entities.slice();
     const comps = cloneDeep(ctx.getState().components.slice());
     const components: SceneComponent[] = action.components;
     const added = [];
-    action.entities.forEach(id => {
+    action.entities.forEach((id) => {
       const entity = sceneEntities.find(it => it.id === id);
       if (!entity) return console.warn('[SelectState] Could not find an entity for id', id);
-      if (entities.indexOf(id) < 0) {
-        entities.push(id);
-        added.push(id);
-      }
+      if (entities.indexOf(id) >= 0) return;
+      entities.push(id);
+      added.push(id);
     });
     this.beforeSelect.entities = added;
     this.beforeSelect.components = comps;
@@ -84,17 +88,21 @@ export class SelectState {
   @Action(Unselect)
   unselect(ctx: StateContext<ISelectState>, action: Unselect) {
     const comps = cloneDeep(ctx.getState().components.slice());
-    const removed = ctx.getState().entities.slice();
-    this.beforeUnselect.entities = removed;
     this.beforeUnselect.components = comps;
-    if (!action.entities || action.entities.length === 0)
+    if (!action.entities || action.entities.length === 0) {
+      this.beforeUnselect.entities = ctx.getState().entities.slice()
       return ctx.patchState({ entities: [], components: [] });
+    }
+    const removed = [];
     const entities: string[] = ctx.getState().entities.slice();
     const components: SceneComponent[] = action.components || ctx.getState().components.slice() || [];
     action.entities.forEach(id => {
       const idx = entities.indexOf(id);
-      if (idx >= 0) entities.splice(idx, 1);
+      if (idx < 0) return;
+      entities.splice(idx, 1);
+      removed.push(id);
     });
+    this.beforeUnselect.entities = removed;
     ctx.patchState({ entities, components });
   }
 
@@ -104,12 +112,7 @@ export class SelectState {
     const previous = ctx.getState().isolated;
     ctx.patchState({ isolated: action.entity });
     if (action.persist) {
-      this.store.dispatch(
-        new PushHistory(
-          [ new Isolate(previous, false) ],
-          [ new Isolate(action.entity, false) ]
-        )
-      );
+      this.store.dispatch(new PushHistory([new Isolate(previous, false)], [new Isolate(action.entity, false)]));
     }
   }
 }

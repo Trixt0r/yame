@@ -382,12 +382,14 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     const data = event.node.data as TreeNode;
     const isolated = this.isolated;
     if (isolated && !this.scene.getChildren(isolated, true).find(it => data.id === it.id)) {
+      this.isolating = true;
       TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, event.node, { });
       this.store.dispatch(new Isolate(null));
+      this.isolating = false;
     } else {
       const entity = this.scene.getEntity(data.id);
       const components = cloneDeep(entity.components.elements) as SceneComponent[];
-      this.store.dispatch(new TreeSelect([data.id], components));
+      this.store.dispatch(new TreeSelect([data.id], components, !this.isolating));
     }
   }
 

@@ -5,7 +5,7 @@ import { SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
 import { Dispatcher, Component, Collection } from '@trixt0r/ecs';
 import { SceneService } from '../services/scene.service';
-import { PushHistory, Select } from './actions';
+import { PushHistory, Select, Unselect } from './actions';
 
 /**
  * Interface representing the scene state.
@@ -257,14 +257,10 @@ export class SceneState {
     });
     action.deleted = entitiesToRemove;
     const select = this.store.snapshot().select;
-    console.log(select.entities.slice());
     ctx.patchState({ entities });
     if (action.persist)
       this.store.dispatch(
-        new PushHistory(
-          [new CreateEntity(action.deleted, [], false)],
-          [new DeleteEntity(toRemove, [], false)]
-        )
+        new PushHistory([new CreateEntity(action.deleted, [], false)], [new DeleteEntity(toRemove, [], false)])
       );
   }
 
@@ -341,29 +337,41 @@ export class SceneState {
         resort = true;
       }
     });
-    if (hasChanges) {
-      if (resort) {
-        const entities = state.entities;
-        this.sortByIndex(entities);
-        ctx.patchState({ entities });
-      }
-      if (action.persist) {
-        const select = this.store.snapshot().select;
-        if (select.entities && select.entities.length > 0 && !dataBefore.find((it) => it.id === 'select')) {
-          dataBefore.unshift({ id: 'select', components: cloneDeep(select.components) });
-        }
-        this.store.dispatch(
-          new PushHistory(
-            [
-              new UpdateEntity(dataBefore, 'Reverse update', false),
-            ],
-            [
-              new UpdateEntity(cloneDeep(data), action.message, false),
-            ]
-          )
-        );
-      }
+    if (!hasChanges) return;
+    if (resort) {
+      const entities = state.entities;
+      this.sortByIndex(entities);
+      ctx.patchState({ entities });
     }
+    if (!action.persist) return;
+    const select = this.store.snapshot().select;
+    if (select.entities && select.entities.length > 0 && !dataBefore.find(it => it.id === 'select')) {
+      dataBefore.unshift({ id: 'select', components: cloneDeep(select.components) });
+    }
+    this.store.dispatch(
+      new PushHistory(
+        [
+          new UpdateEntity(dataBefore, 'Reverse update', false),
+          // new Unselect([], [], false),
+          new Select(
+            dataBefore.map(it => it.id).filter(id => id !== 'select'),
+            dataBefore.find(it => it.id === 'select').components,
+            false,
+            true
+          ),
+        ],
+        [
+          new UpdateEntity(cloneDeep(data), action.message, false),
+          // new Unselect([], [], false),
+          new Select(
+            data.map(it => it.id).filter(id => id !== 'select'),
+            cloneDeep((data.find(it => it.id === 'select') || { components: [] }).components),
+            false,
+            true
+          ),
+        ]
+      )
+    );
   }
 
   /**

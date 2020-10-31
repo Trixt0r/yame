@@ -176,6 +176,7 @@ export class PixiSelectionService {
 
       actions.pipe(ofActionDispatched(Select, Unselect)).subscribe((action: Select | Unselect) => {
         if (action instanceof Select) {
+          if (action.unselectCurrent) containerService.unselect(containerService.entities.slice(), true);
           const comps = cloneDeep(action.components.slice());
           const collection = new SceneComponentCollection(comps);
           const reset = action.persist || (collection.length === 0 && !action.persist);

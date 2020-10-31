@@ -3,7 +3,12 @@ import { EntityAction } from './entity.action';
 
 export class Select {
   static readonly type = '[Selection] Select';
-  constructor(public entities: string[], public components: SceneComponent[] = [], public persist: boolean = true) {}
+  constructor(
+    public entities: string[],
+    public components: SceneComponent[] = [],
+    public persist: boolean = true,
+    public unselectCurrent: boolean = false
+  ) {}
 }
 
 export class UpdateComponents {
@@ -18,12 +23,12 @@ export class Unselect {
 
 export class Isolate {
   static readonly type = '[Selection] Isolate';
-  constructor(public entity: SceneEntity | null, public persist: boolean = true) { }
+  constructor(public entity: SceneEntity | null, public persist: boolean = true) {}
 }
 
 export class Input {
   static readonly type = '[Selection] Input';
-  constructor(public actions: unknown[], public source?: unknown) { }
+  constructor(public actions: unknown[], public source?: unknown) {}
 }
 
 export type SelectActions = Select | Unselect | UpdateComponents | Isolate | Input;
