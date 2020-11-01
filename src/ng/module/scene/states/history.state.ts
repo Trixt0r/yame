@@ -8,12 +8,10 @@ export interface IHistorySnapshot<T> {
   date: Date;
 }
 
-
 export interface IHistoryState {
   previous: IHistorySnapshot<unknown>[];
   next: IHistorySnapshot<unknown>[];
 }
-
 
 @State<IHistoryState>({
   name: 'history',
@@ -25,9 +23,6 @@ export interface IHistoryState {
 export class HistoryState {
 
   constructor(protected store: Store) {
-    (window as any).UndoHistory = UndoHistory;
-    (window as any).RedoHistory = RedoHistory;
-    (window as any).store = store;
   }
 
   @Action(PushHistory)

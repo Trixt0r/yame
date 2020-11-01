@@ -35,17 +35,18 @@ export class SelectState {
   constructor(private store: Store, actions: Actions) {
     actions.pipe(ofActionSuccessful(Select, Unselect)).subscribe((action: Select | Unselect) => {
       if (!action.persist) return;
-      const history = store.snapshot().history as IHistoryState;
-      const previous = history.previous;
-      const next = history.next;
-      const previousLast = previous.length > 0 ? (previous[previous.length - 1] as IHistorySnapshot<Select | Unselect>) : null;
-      const previousState = next.length === 0 && previousLast && previousLast.last.length === 1 ? previousLast.last[0] : null;
+      // TODO: check the implementation, since it still causes issues when jumping back and forth in history.
+      // const history = store.snapshot().history as IHistoryState;
+      // const previous = history.previous;
+      // const next = history.next;
+      // const previousLast = previous.length > 0 ? (previous[previous.length - 1] as IHistorySnapshot<Select | Unselect>) : null;
+      // const previousState = next.length === 0 && previousLast && previousLast.last.length === 1 ? previousLast.last[0] : null;
       if (action instanceof Select) {
         this.store.dispatch(
           new PushHistory(
             [new Unselect(this.beforeSelect.entities, this.beforeSelect.components, false)],
             [new Select(action.entities, cloneDeep(action.components), false, true)],
-            previousState instanceof Unselect
+            // previousState instanceof Unselect
           )
         );
       } else {
@@ -53,7 +54,7 @@ export class SelectState {
           new PushHistory(
             [new Select(this.beforeUnselect.entities, this.beforeUnselect.components, false, true)],
             [new Unselect(action.entities, cloneDeep(action.components), false)],
-            previousState instanceof Select
+            // previousState instanceof Select
           )
         );
       }

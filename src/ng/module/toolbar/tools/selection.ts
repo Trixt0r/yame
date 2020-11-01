@@ -6,7 +6,8 @@ import { Graphics, Container } from 'pixi.js';
 import { Store } from '@ngxs/store';
 import { Subject } from 'rxjs';
 import { Select, Unselect, SceneService } from 'ng/module/scene';
-import { SceneComponent } from 'common/scene';
+import { SceneComponent, SceneEntity, SceneEntityType } from 'common/scene';
+import { HotkeyService } from 'ng/services/hotkey.service';
 
 /**
  *
@@ -63,10 +64,15 @@ export class SelectionToolService extends Tool {
     return this.graphics;
   }
 
-  constructor(protected store: Store, protected scene: SceneService, service: ToolbarService) {
+  constructor(protected store: Store, protected scene: SceneService, service: ToolbarService, hotkeys: HotkeyService) {
     super('edit', 'edit');
     this.initFunctions();
     service.register(this);
+
+    hotkeys.register({ keys: ['control.a', 'meta.a'] })
+            .subscribe(() => {
+              this.store.dispatch(new Select(scene.entities.filter(it => this.isSelectable(it)).map(it => it.id), []));
+            });
   }
 
   /**
@@ -78,6 +84,13 @@ export class SelectionToolService extends Tool {
     if (!this.onMousedown) this.onMousedown = this.mousedown.bind(this);
     if (!this.onMouseup) this.onMouseup = this.mouseup.bind(this);
     if (!this.onMousemove) this.onMousemove = this.mousemove.bind(this);
+  }
+
+  isSelectable(entity: SceneEntity): boolean {
+    const isolated = this.store.selectSnapshot((state) => state.select).isolated;
+    const parent = entity.parent ? this.scene.getEntity(entity.parent) : null;
+    const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
+    return isolated ? entity.parent === isolated.id : !entity.parent || isOnLayer;
   }
 
   dispatchSelect(entities: string[], components: SceneComponent[]) {

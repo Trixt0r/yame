@@ -7,17 +7,14 @@ import { PointSceneComponent } from 'common/scene';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { Subscription } from 'rxjs';
 import { ofActionDispatched } from '@ngxs/store';
+import { HotkeyService } from 'ng/services/hotkey.service';
+import { takeUntil } from 'rxjs/operators';
 
 /**
  * The position handler is responsible to move the selection container in the scene.
  */
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionHandlerPositionService {
-
-  /**
-   * The update entity subscription, for updates via sidebar.
-   */
-  protected updateSub: Subscription;
 
   protected startPos: Point;
   protected mouseCurrentPos: Point;
@@ -31,7 +28,8 @@ export class PixiSelectionHandlerPositionService {
   constructor(
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
-    protected selectionRenderer: PixiSelectionRendererService
+    protected selectionRenderer: PixiSelectionRendererService,
+    protected hotkeys: HotkeyService
   ) {
     this.startPos = new Point();
     this.mouseCurrentPos = new Point();
@@ -39,17 +37,7 @@ export class PixiSelectionHandlerPositionService {
     this.mouseupFn = this.mouseup.bind(this);
     this.container = this.containerService.container;
     this.container.on('pointerdown', this.mousedown, this);
-    selectionRenderer.attached$.subscribe(() => this.attached());
-    selectionRenderer.detached$.subscribe(() => this.detached());
-  }
-
-  /**
-   * Clears the update sub.
-   */
-  protected clearSub(): void {
-    if (!this.updateSub) return;
-    this.updateSub.unsubscribe();
-    this.updateSub = null;
+    selectionRenderer.attached$.subscribe(() => this.onAttached());
   }
 
   /**
@@ -98,11 +86,51 @@ export class PixiSelectionHandlerPositionService {
     this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.position'));
   }
 
-  attached(): void {
-    this.clearSub();
+  /**
+   * Handles keyboard events `left`, `right`, `up` and `down`.`
+   *
+   * @param data Addition data information such as the triggered event and the position.
+   */
+  keydown(data: { event: KeyboardEvent, x?: number, y?: number }): void {
+    if (this.containerService.currentHandler !== this) {
+      if (this.containerService.isHandling) this.containerService.endHandling(this.containerService.currentHandler, data.event);
+      this.containerService.beginHandling(this, data.event);
+    }
+    if (typeof data.x === 'number') this.container.position.x = data.x;
+    if (typeof data.y === 'number') this.container.position.y = data.y;
+    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.position'));
   }
 
-  detached(): void {
-    this.clearSub();
+  /**
+   * Handles keyboard events `left`, `right`, `up` and `down`.`
+   *
+   * @param data Addition data information such as the triggered event and the position.
+   */
+  keyup(event) {
+    if (this.containerService.currentHandler !== this) return;
+    this.containerService.endHandling(this, event);
+  }
+
+  /**
+   * Handles the attachment event of the selection container.
+   * Registers keyboard hotkeys for moving the selection.
+   */
+  onAttached(): void {
+
+    this.hotkeys.register({ keys: 'arrowleft' }).pipe(takeUntil(this.selectionRenderer.detached$))
+                .subscribe(event => this.keydown({ event, x: this.container.position.x - 1 }));
+
+    this.hotkeys.register({ keys: 'arrowright' }).pipe(takeUntil(this.selectionRenderer.detached$))
+                .subscribe(event => this.keydown({ event, x: this.container.position.x + 1 }));
+
+    this.hotkeys.register({ keys: 'arrowup' }).pipe(takeUntil(this.selectionRenderer.detached$))
+                .subscribe(event => this.keydown({ event, y: this.container.position.y - 1 }));
+
+    this.hotkeys.register({ keys: 'arrowdown' }).pipe(takeUntil(this.selectionRenderer.detached$))
+                .subscribe(event => this.keydown({ event, y: this.container.position.y + 1 }));
+
+    this.hotkeys.register({ event: 'keyup', keys: ['arrowleft', 'arrowright', 'arrowup', 'arrowdown'] })
+                .pipe(takeUntil(this.selectionRenderer.detached$))
+                .subscribe(event => this.keyup(event));
   }
 }

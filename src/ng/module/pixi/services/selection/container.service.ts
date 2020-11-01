@@ -113,15 +113,19 @@ export class PixiSelectionContainerService {
     this.components.clear();
     const comps = [];
     const ids: { [ id: string ]: { comp: SceneComponent, entities: SceneEntity[] } } = { };
+    const idsOrder = [];
     this.entities.forEach(entity => {
       entity.components.forEach(comp => {
-        if (!ids[comp.id]) ids[comp.id] = { comp: comp, entities: [] };
+        if (!ids[comp.id]) {
+          ids[comp.id] = { comp: comp, entities: [] };
+          idsOrder.push(comp.id);
+        }
         if (ids[comp.id].comp.type !== comp.type) return;
         ids[comp.id].entities.push(entity);
       });
     });
 
-    Object.keys(ids).forEach(key => {
+    idsOrder.forEach(key => {
       if (key === this.comp.id) return;
       const data = ids[key];
       if (data.entities.length !== this.entities.length) return;

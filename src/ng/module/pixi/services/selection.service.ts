@@ -15,7 +15,7 @@ import {
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiSelectionContainerService } from './selection/container.service';
 import { System } from '@trixt0r/ecs';
-import { Actions, ofActionDispatched, Store, ofActionSuccessful } from '@ngxs/store';
+import { Actions, ofActionDispatched, Store } from '@ngxs/store';
 import { Subscription } from 'rxjs';
 import { cloneDeep, merge } from 'lodash';
 
@@ -25,7 +25,6 @@ const globalBottomRight = new Point();
 class SelectInteractionSystem extends System {
   constructor(
     private service: PixiRendererService,
-    private selectionContainerService: PixiSelectionContainerService,
     priority?: number
   ) {
     super(priority);
@@ -109,7 +108,7 @@ export class PixiSelectionService {
 
     zone.runOutsideAngular(() => {
       this.reset();
-      service.engineService.engine.systems.add(new SelectInteractionSystem(service, containerService, 99999));
+      service.engineService.engine.systems.add(new SelectInteractionSystem(service, 99999));
 
       const graphics = new Graphics();
       const config = { fill: { color: 0x0055ff, alpha: 0.25 }, line: { width: 1, color: 0x0055ff, alpha: 1 } };
@@ -146,22 +145,13 @@ export class PixiSelectionService {
 
       selectionTool.end$.subscribe(() => {
         if (containerService.isHandling) return;
-        const entities = scene.entities.filter((it) => {
-          const isolated = store.selectSnapshot((state) => state.select).isolated;
-          const parent = it.parent ? scene.getEntity(it.parent) : null;
-          const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
-          if (isolated) return it.parent === isolated.id && this.contains(it);
-          else return (!it.parent || isOnLayer) && this.contains(it);
-        });
+        const entities = scene.entities.filter(it => selectionTool.isSelectable(it) && this.contains(it));
         if (entities.length === 0) {
           (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
           this.service.engineService.run();
           return;
         }
-        selectionTool.dispatchSelect(
-          entities.map((it) => it.id),
-          []
-        );
+        selectionTool.dispatchSelect(entities.map(it => it.id), []);
       });
 
       actions.pipe(ofActionDispatched(DeleteEntity)).subscribe((action: DeleteEntity) => {
@@ -183,11 +173,7 @@ export class PixiSelectionService {
           if (!reset) service.applyComponents(collection, containerService.container);
           containerService.select(
             scene.entities.filter(it => {
-              const parent = it.parent ? scene.getEntity(it.parent) : null;
-              const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
-              const isolated = this.store.snapshot().select.isolated;
-              if (isolated && isolated.id === it.id) return false;
-              return (it.type !== SceneEntityType.Layer || isOnLayer) && action.entities.indexOf(it.id) >= 0;
+              return selectionTool.isSelectable(it) && it.type !== SceneEntityType.Layer && action.entities.indexOf(it.id) >= 0;
             }),
             false,
             reset
@@ -268,11 +254,7 @@ export class PixiSelectionService {
     stage.toGlobal(this.topLeft, globalTopLeft);
     stage.toGlobal(this.bottomRight, globalBottomRight);
     const bounds = this.service.getShape(entity.id);
-    if (
-      this.service.containsPoint(entity.id, globalTopLeft) ||
-      this.service.containsPoint(entity.id, globalBottomRight)
-    )
-      return true;
+    if (this.service.containsPoint(entity.id, globalTopLeft) || this.service.containsPoint(entity.id, globalBottomRight)) return true;
     if (!bounds) return false;
     const rect = this.rectangle;
     const container = this.service.getContainer(entity.id);

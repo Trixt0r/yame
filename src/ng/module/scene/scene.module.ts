@@ -5,13 +5,14 @@ import { SceneRendererComponentDirective } from './directives/renderer.directive
 import { NoopSceneRendererComponent } from './services/scene.service';
 import { ISceneAssetConverter, SceneAssetConverter } from './services/converter.service';
 import { SceneComponent as SceneComp, createGroupComponent } from 'common/scene';
-import { NgxsModule } from '@ngxs/store';
+import { NgxsModule, Store } from '@ngxs/store';
 import { SceneState } from './states/scene.state';
 import { ImageAsset } from 'common/asset/image';
 import { SelectState } from './states/select.state';
 import { createAssetComponent, createColorComponent } from 'common/scene';
 import { SceneComponentService } from './services/component.service';
-import { HistoryState } from './states';
+import { HistoryState, UndoHistory, RedoHistory } from './states';
+import { HotkeyService } from 'ng/services/hotkey.service';
 
 
 
@@ -56,7 +57,7 @@ export class ImageAssetConverter implements ISceneAssetConverter<ImageAsset> {
 })
 export class SceneModule {
 
-  constructor(components: SceneComponentService) {
+  constructor(components: SceneComponentService, store: Store, hotkeys: HotkeyService) {
     // Reserve specific component ids
     components.reserveId('transformation');
     components.reserveId('transformation.position');
@@ -65,6 +66,11 @@ export class SceneModule {
     components.reserveId('sprite');
     components.reserveId('sprite.texture');
     components.reserveId('sprite.color');
+
+    hotkeys.register({ keys: ['control.z', 'meta.z'] })
+            .subscribe(() => store.dispatch(new UndoHistory()));
+    hotkeys.register({ keys: ['control.y', 'meta.y', 'meta.shift.z'] })
+            .subscribe(() => store.dispatch(new RedoHistory()));
   }
 
 }
