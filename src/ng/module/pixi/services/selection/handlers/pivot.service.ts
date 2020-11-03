@@ -5,8 +5,9 @@ import { PixiSelectionContainerService } from '..';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
 import { PointSceneComponent } from 'common/scene';
-import { Subscription } from 'rxjs';
-import { ofActionDispatched } from '@ngxs/store';
+import { Actions, ofActionSuccessful } from '@ngxs/store';
+import { takeUntil } from 'rxjs/operators';
+import { Keydown, Keyup } from 'ng/states/hotkey.state';
 
 const tmp1 = new Point();
 const tmp2 = new Point();
@@ -26,11 +27,6 @@ export class PixiSelectionHandlerPivotService {
    * Whether the mouse left.
    */
   protected mouseLeft = false;
-
-  /**
-   * The update entity subscription, for updates via sidebar.
-   */
-  protected updateSub: Subscription;
 
   /**
    * The clicked pivot position.
@@ -57,7 +53,8 @@ export class PixiSelectionHandlerPivotService {
   constructor(
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
-    protected selectionRenderer: PixiSelectionRendererService
+    protected selectionRenderer: PixiSelectionRendererService,
+    protected actions: Actions
   ) {
 
     this.area.interactive = true;
@@ -82,15 +79,6 @@ export class PixiSelectionHandlerPivotService {
     selectionRenderer.attached$.subscribe(() => this.attach());
     selectionRenderer.detached$.subscribe(() => this.detach());
     selectionRenderer.update$.subscribe(() => this.updateArea());
-  }
-
-  /**
-   * Clears the update sub.
-   */
-  protected clearSub(): void {
-    if (!this.updateSub) return;
-    this.updateSub.unsubscribe();
-    this.updateSub = null;
   }
 
   /**
@@ -183,35 +171,89 @@ export class PixiSelectionHandlerPivotService {
   }
 
   /**
+   * Handles keydown events `left`, `right`, `up` and `down`.`
+   *
+   * @param data Additional data information such as the triggered event and the pivot values.
+   */
+  keydown(data: { event: KeyboardEvent; x?: number; y?: number }): void {
+    if (this.containerService.currentHandler !== this) {
+      if (this.containerService.isHandling)
+        this.containerService.endHandling(this.containerService.currentHandler, data.event);
+      this.containerService.beginHandling(this, data.event);
+    }
+    tmp2.copyFrom(this.container.pivot);
+    if (typeof data.x === 'number') tmp2.x = data.x;
+    if (typeof data.y === 'number') tmp2.y = data.y;
+
+    this.container.parent.toLocal(tmp2, this.container, tmp1);
+
+    this.container.position.copyFrom(tmp1);
+    this.container.pivot.copyFrom(tmp2);
+
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.pivot'),
+      this.containerService.components.byId('transformation.position')
+    );
+  }
+
+  /**
+   * Handles keyup events `left`, `right`, `up` and `down`.`
+   *
+   * @param event The triggered event.
+   */
+  keyup(event) {
+    if (this.containerService.currentHandler !== this) return;
+    this.containerService.endHandling(this, event);
+  }
+
+  /**
    * Adds the interaction area to the stage.
    */
   attach(): void {
     (this.rendererService.stage.getChildByName('foreground') as Container).addChild(this.area);
     this.updateArea();
-    this.clearSub();
-    this.updateSub = this.containerService.updateDispatched$
-                          .subscribe((action: UpdateEntity) => {
-                            if (action === this.containerService.updateEntityAction) return;
-                            const data = Array.isArray(action.data) ? action.data : [action.data];
-                            if (data.length <= 0) return;
-                            const pivot = data[0].components.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
-                            if (!pivot) return;
+    this.containerService
+        .updateDispatched$
+        .pipe(takeUntil(this.selectionRenderer.detached$))
+        .subscribe((action: UpdateEntity) => {
+          if (action === this.containerService.updateEntityAction) return;
+          const data = Array.isArray(action.data) ? action.data : [action.data];
+          if (data.length <= 0) return;
+          const pivot = data[0].components.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
+          if (!pivot) return;
 
-                            const oldPos = tmp2.copyFrom(this.container.position);
-                            this.container.parent.toLocal(pivot, this.container, this.container.position);
+          const oldPos = tmp2.copyFrom(this.container.position);
+          this.container.parent.toLocal(pivot, this.container, this.container.position);
 
-                            const diffX = oldPos.x - this.container.position.x;
-                            const diffY = oldPos.y - this.container.position.y;
+          const diffX = oldPos.x - this.container.position.x;
+          const diffY = oldPos.y - this.container.position.y;
 
-                            this.container.position.set(oldPos.x - diffX, oldPos.y - diffY);
+          this.container.position.set(oldPos.x - diffX, oldPos.y - diffY);
 
-                            const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
-                            position.x = this.container.position.x;
-                            position.y = this.container.position.y;
+          const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
+          position.x = this.container.position.x;
+          position.y = this.container.position.y;
 
-                            this.container.pivot.copyFrom(pivot);
-                            this.containerService.dispatchUpdate(position);
-                          });
+          this.container.pivot.copyFrom(pivot);
+          this.containerService.dispatchUpdate(position);
+        });
+
+    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+    .subscribe((action: Keydown) => {
+      if (action.shortcut.id !== 'selection.pivot') return;
+      switch (action.event.key.toLowerCase()) {
+        case 'arrowleft': this.keydown({ event: action.event, x: this.container.pivot.x - 1 }); break;
+        case 'arrowright': this.keydown({ event: action.event, x: this.container.pivot.x + 1 }); break;
+        case 'arrowup': this.keydown({ event: action.event, y: this.container.pivot.y - 1 }); break;
+        case 'arrowdown': this.keydown({ event: action.event, y: this.container.pivot.y + 1 }); break;
+      }
+    });
+
+    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+        .subscribe((action: Keyup) => {
+          if (action.shortcut.id !== 'selection.pivot') return;
+          this.keyup(action.event);
+        });
   }
 
   /**
@@ -219,7 +261,6 @@ export class PixiSelectionHandlerPivotService {
    */
   detach(): void {
     (this.rendererService.stage.getChildByName('foreground') as Container).removeChild(this.area);
-    this.clearSub();
   }
 
 }

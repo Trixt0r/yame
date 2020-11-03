@@ -1,6 +1,7 @@
-import { State, StateContext, Action, Store } from '@ngxs/store';
+import { State, StateContext, Action, Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { UndoHistory, PushHistory, RedoHistory } from './actions';
 import { cloneDeep } from 'lodash';
+import { Keydown } from 'ng/states/hotkey.state';
 
 export interface IHistorySnapshot<T> {
   last: T[];
@@ -22,7 +23,14 @@ export interface IHistoryState {
 })
 export class HistoryState {
 
-  constructor(protected store: Store) {
+  constructor(protected store: Store, actions: Actions) {
+    actions.pipe(ofActionSuccessful(Keydown))
+            .subscribe((action: Keydown) => {
+              switch (action.shortcut.id) {
+                case 'undo': store.dispatch(new UndoHistory()); break;
+                case 'redo': store.dispatch(new RedoHistory()); break;
+              }
+            });
   }
 
   @Action(PushHistory)

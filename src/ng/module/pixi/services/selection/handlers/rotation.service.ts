@@ -1,14 +1,14 @@
-import { Point, DisplayObject, Container, Graphics, InteractionEvent, Polygon } from 'pixi.js';
+import { Point, DisplayObject, Container, Graphics, InteractionEvent, Polygon, DEG_TO_RAD } from 'pixi.js';
 import { Injectable, Inject } from '@angular/core';
-import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
+import { YAME_RENDERER } from 'ng/module/scene';
 import { PixiRendererService } from '../..';
 import { PixiSelectionContainerService } from '..';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { angleBetween } from 'common/math';
-import { Subscription } from 'rxjs';
-import { ofActionDispatched } from '@ngxs/store';
+import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
-import { RangeSceneComponent } from 'common/scene';
+import { takeUntil } from 'rxjs/operators';
+import { Keydown, Keyup } from 'ng/states/hotkey.state';
 
 const tempPoint = new Point();
 
@@ -39,18 +39,14 @@ export class PixiSelectionHandlerRotationService {
   protected tmp = new Point();
 
   /**
-   * The update entity subscription, for updates via sidebar.
-   */
-  protected updateSub: Subscription;
-
-  /**
    * Creates an instance of SelectionRotateHandler.
    */
   constructor(
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
     protected selectionRenderer: PixiSelectionRendererService,
-    protected cursorService: CursorService
+    protected cursorService: CursorService,
+    protected actions: Actions
   ) {
     this.mouseupFn = this.mouseup.bind(this);
 
@@ -65,15 +61,6 @@ export class PixiSelectionHandlerRotationService {
     this.area.on('pointerdown', this.mousedown, this);
     this.area.on('pointerover', this.updateCursor, this);
     this.area.on('pointerout', this.resetCursor, this);
-  }
-
-  /**
-   * Clears the update sub.
-   */
-  protected clearSub(): void {
-    if (!this.updateSub) return;
-    this.updateSub.unsubscribe();
-    this.updateSub = null;
   }
 
   /**
@@ -223,6 +210,32 @@ export class PixiSelectionHandlerRotationService {
   }
 
   /**
+   * Handles keydown events `left`, `right`, `up` and `down`.
+   *
+   * @param data Additional data information such as the triggered event and the rotation.
+   */
+  keydown(data: { event: KeyboardEvent; rotation: number }): void {
+    if (this.containerService.currentHandler !== this) {
+      if (this.containerService.isHandling)
+        this.containerService.endHandling(this.containerService.currentHandler, data.event);
+      this.containerService.beginHandling(this, data.event);
+    }
+    this.containerService.container.rotation = data.rotation;
+    this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
+    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation'));
+  }
+
+  /**
+   * Handles keyup events `left`, `right`, `up` and `down`.`
+   *
+   * @param event The triggered event.
+   */
+  keyup(event) {
+    if (this.containerService.currentHandler !== this) return;
+    this.containerService.endHandling(this, event);
+  }
+
+  /**
    * The attached handler.
    * Adds all clickable areas to the stage.
    */
@@ -238,7 +251,28 @@ export class PixiSelectionHandlerRotationService {
       (this.rendererService.stage.getChildByName('debug') as Container).addChild(this.debugGraphics);
     }
     this.updateAreaPositions();
-    this.clearSub();
+
+    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+                .subscribe((action: Keydown) => {
+                  if (action.shortcut.id !== 'selection.rotate') return;
+                  const step = 1 * DEG_TO_RAD;
+                  switch (action.event.key.toLowerCase()) {
+                    case 'arrowleft':
+                    case 'arrowup':
+                      this.keydown({ event: action.event, rotation: this.containerService.container.rotation - step });
+                      break;
+                    case 'arrowright':
+                    case 'arrowdown':
+                      this.keydown({ event: action.event, rotation: this.containerService.container.rotation + step });
+                      break;
+                  }
+                });
+
+    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+                .subscribe((action: Keyup) => {
+                  if (action.shortcut.id !== 'selection.rotate') return;
+                  this.keyup(action.event);
+                });
   }
 
   /**
@@ -246,7 +280,6 @@ export class PixiSelectionHandlerRotationService {
    * Removes all clickable areas to the stage.
    */
   detached(): void {
-    this.clearSub();
     if (this.debugGraphics) (this.rendererService.stage.getChildByName('debug') as Container).removeChild(this.debugGraphics);
     this.rendererService.stage.removeChild(this.area);
   }

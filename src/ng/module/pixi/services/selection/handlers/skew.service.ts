@@ -3,12 +3,12 @@ import { Point, InteractionEvent, DisplayObject, Polygon, Graphics, Container } 
 import { PixiRendererService } from '../..';
 import { PixiSelectionContainerService } from '..';
 import { PixiSelectionRendererService } from '../renderer.service';
-import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
-import { PointSceneComponent } from 'common/scene';
+import { YAME_RENDERER } from 'ng/module/scene';
 import { distanceToSegment, angleBetween } from 'common/math';
-import { Subscription } from 'rxjs';
-import { ofActionDispatched } from '@ngxs/store';
+import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
+import { Keydown, Keyup } from 'ng/states/hotkey.state';
+import { takeUntil } from 'rxjs/operators';
 
 const tempPoint = new Point();
 
@@ -123,11 +123,6 @@ export class PixiSelectionHandlerSkewService {
   protected boundPoints = [ new Point(), new Point(), new Point(), new Point() ];
 
   /**
-   * The update entity subscription, for updates via sidebar.
-   */
-  protected updateSub: Subscription;
-
-  /**
    * The key code for activating the handling.
    */
   keyCode = 16;
@@ -168,7 +163,8 @@ export class PixiSelectionHandlerSkewService {
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
     protected selectionRenderer: PixiSelectionRendererService,
-    protected cursorService: CursorService
+    protected cursorService: CursorService,
+    protected actions: Actions
   ) {
     this.mouseupFn = this.mouseup.bind(this);
     this.keyDownFn = this.keydown.bind(this);
@@ -185,15 +181,6 @@ export class PixiSelectionHandlerSkewService {
     selectionRenderer.attached$.subscribe(() => this.attached());
     selectionRenderer.detached$.subscribe(() => this.detached());
     selectionRenderer.update$.subscribe(() => this.updateAreaPositions());
-  }
-
-  /**
-   * Clears the update sub.
-   */
-  protected clearSub(): void {
-    if (!this.updateSub) return;
-    this.updateSub.unsubscribe();
-    this.updateSub = null;
   }
 
   /**
@@ -481,6 +468,32 @@ export class PixiSelectionHandlerSkewService {
   }
 
   /**
+   * Handles keydown events `left`, `right`, `up` and `down`.
+   *
+   * @param data Additional data information such as the triggered event and the skew values.
+   */
+  hotkeyDown(data: { event: KeyboardEvent; x?: number; y?: number }): void {
+    if (this.containerService.currentHandler !== this) {
+      if (this.containerService.isHandling)
+        this.containerService.endHandling(this.containerService.currentHandler, data.event);
+      this.containerService.beginHandling(this, data.event);
+    }
+    if (typeof data.x === 'number') this.container.skew.x = data.x;
+    if (typeof data.y === 'number') this.container.skew.y = data.y;
+    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.skew'));
+  }
+
+  /**
+   * Handles keyup events `left`, `right`, `up` and `down`.`
+   *
+   * @param event The triggered event.
+   */
+  hotKeyup(event) {
+    if (this.containerService.currentHandler !== this) return;
+    this.containerService.endHandling(this, event);
+  }
+
+  /**
    * Handles the attachment to the scene.
    * Adds all clickable areas to the stage.
    */
@@ -498,7 +511,22 @@ export class PixiSelectionHandlerSkewService {
       (this.rendererService.stage.getChildByName('debug') as Container).addChild(this.debugGraphics);
     }
     this.updateAreaPositions();
-    this.clearSub();
+    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+                .subscribe((action: Keydown) => {
+                  if (action.shortcut.id !== 'selection.skew') return;
+                  switch (action.event.key.toLowerCase()) {
+                    case 'arrowleft': this.hotkeyDown({ event: action.event, x: this.container.skew.x - 0.01 }); break;
+                    case 'arrowright': this.hotkeyDown({ event: action.event, x: this.container.skew.x + 0.01 }); break;
+                    case 'arrowup': this.hotkeyDown({ event: action.event, y: this.container.skew.y - 0.01 }); break;
+                    case 'arrowdown': this.hotkeyDown({ event: action.event, y: this.container.skew.y + 0.01 }); break;
+                  }
+                });
+
+    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+                .subscribe((action: Keyup) => {
+                  if (action.shortcut.id !== 'selection.skew') return;
+                  this.hotKeyup(action.event);
+                });
   }
 
   /**
@@ -507,7 +535,6 @@ export class PixiSelectionHandlerSkewService {
    */
   detached(): void {
     this.area.interactive = false;
-    this.clearSub();
     window.removeEventListener('keydown', this.keyDownFn);
     window.removeEventListener('keyup', this.keyUpFn);
     this.area.interactive = false;

@@ -20,6 +20,8 @@ import {
   PixiForegroundSystem,
   PixiBackdropSystem,
 } from './systems';
+import { Store } from '@ngxs/store';
+import { AddShortcut } from 'ng/states/hotkey.state';
 
 /**
  * Sets up all necessary systems for rendering entities in the scene.
@@ -27,7 +29,7 @@ import {
  * @param renderer The pixi renderer service.
  * @param engineService The engine service.
  */
-export function setupSystems(renderer: PixiRendererService, engineService: EngineService): () => void {
+export function setupSystems(renderer: PixiRendererService, engineService: EngineService, store: Store): () => void {
   return () => {
     engineService.engine.systems.add(new PixiGridSystem(renderer, 0));
     engineService.engine.systems.add(new PixiCameraSystem(renderer, 1));
@@ -42,7 +44,36 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
       onErrorBySystem: (error, system) => {
         console.error(error, system);
       }
-    })
+    });
+
+
+    store.dispatch([
+      new AddShortcut({
+        id: 'selection.move',
+        label: 'Move selection',
+        keys: ['arrowleft', 'arrowright', 'arrowup', 'arrowdown'],
+      }),
+      new AddShortcut({
+        id: 'selection.resize',
+        label: 'Resize selection',
+        keys: ['control.arrowleft', 'control.arrowright', 'control.arrowup', 'control.arrowdown'],
+      }),
+      new AddShortcut({
+        id: 'selection.rotate',
+        label: 'Rotate selection',
+        keys: ['shift.arrowleft', 'shift.arrowright', 'shift.arrowup', 'shift.arrowdown'],
+      }),
+      new AddShortcut({
+        id: 'selection.skew',
+        label: 'Skew selection',
+        keys: ['control.shift.arrowleft', 'control.shift.arrowright', 'control.shift.arrowup', 'control.shift.arrowdown'],
+      }),
+      new AddShortcut({
+        id: 'selection.pivot',
+        label: 'Pivot selection',
+        keys: ['alt.arrowleft', 'alt.arrowright', 'alt.arrowup', 'alt.arrowdown'],
+      })
+    ]);
   };
 }
 
@@ -68,6 +99,7 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
       deps: [
         YAME_RENDERER,
         EngineService,
+        Store,
         PixiSelectionService,
         PixiSelectionContainerService,
         PixiSelectionRendererService,

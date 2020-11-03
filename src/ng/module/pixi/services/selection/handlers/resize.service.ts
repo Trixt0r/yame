@@ -7,6 +7,9 @@ import { PixiRendererService } from '../../renderer.service';
 import { YAME_RENDERER } from 'ng/module/scene';
 import { Subscription } from 'rxjs';
 import { CursorService } from 'ng/services/cursor.service';
+import { Actions, ofActionSuccessful } from '@ngxs/store';
+import { takeUntil } from 'rxjs/operators';
+import { Keydown, Keyup } from 'ng/states/hotkey.state';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -20,17 +23,13 @@ export class PixiSelectionHandlerResizeService {
   public readonly anchors: readonly ResizeAnchor[] = [];
 
   /**
-   * The update entity subscription, for updates via sidebar.
-   */
-  protected updateSub: Subscription;
-
-  /**
    * Creates an instance of SelectionResizeHandler.
    */
   constructor(private containerService: PixiSelectionContainerService,
               protected renderer: PixiSelectionRendererService,
               @Inject(YAME_RENDERER) protected service: PixiRendererService,
-              protected cursorService: CursorService) {
+              protected cursorService: CursorService,
+              protected actions: Actions) {
     this.anchors = [
       new ResizeAnchor(HOR | VERT | LEFT | UP, service, cursorService), // top left
       new ResizeAnchor(VERT | UP, service, cursorService), // top mid
@@ -48,12 +47,32 @@ export class PixiSelectionHandlerResizeService {
   }
 
   /**
-   * Clears the update sub.
+   * Handles keydown events `left`, `right`, `up` and `down`.
+   *
+   * @param data Additional data information such as the triggered event and the size values.
    */
-  protected clearSub(): void {
-    if (!this.updateSub) return;
-    this.updateSub.unsubscribe();
-    this.updateSub = null;
+  keydown(data: { event: KeyboardEvent; width?: number; height?: number }): void {
+    if (this.containerService.currentHandler !== this) {
+      if (this.containerService.isHandling)
+        this.containerService.endHandling(this.containerService.currentHandler, data.event);
+      this.containerService.beginHandling(this, data.event);
+    }
+    if (typeof data.width === 'number') this.containerService.container.width = data.width;
+    if (typeof data.height === 'number') this.containerService.container.height = data.height;
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.scale'),
+      this.containerService.components.byId('transformation.size')
+    );
+  }
+
+  /**
+   * Handles keyup events `left`, `right`, `up` and `down`.`
+   *
+   * @param event The triggered event.
+   */
+  keyup(event) {
+    if (this.containerService.currentHandler !== this) return;
+    this.containerService.endHandling(this, event);
   }
 
   /**
@@ -77,7 +96,25 @@ export class PixiSelectionHandlerResizeService {
         .on('handle:end', () => this.containerService.endHandling(anchor));
       (this.service.stage.getChildByName('foreground') as Container).addChild(anchor);
     });
-    this.clearSub();
+
+    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.renderer.detached$))
+                .subscribe((action: Keydown) => {
+                  if (action.shortcut.id !== 'selection.resize') return;
+                  const width = this.containerService.container.width;
+                  const height = this.containerService.container.height;
+                  switch (action.event.key.toLowerCase()) {
+                    case 'arrowleft': this.keydown({ event: action.event, width: width - 1 }); break;
+                    case 'arrowright': this.keydown({ event: action.event, width: width + 1 }); break;
+                    case 'arrowup': this.keydown({ event: action.event, height: height + 1 }); break;
+                    case 'arrowdown': this.keydown({ event: action.event, height: height - 1 }); break;
+                  }
+                });
+
+    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.renderer.detached$))
+                .subscribe((action: Keyup) => {
+                  if (action.shortcut.id !== 'selection.resize') return;
+                  this.keyup(action.event);
+                });
   }
 
   /**
@@ -85,7 +122,6 @@ export class PixiSelectionHandlerResizeService {
    * Executed when the selection renderer gets removed from the stage.
    */
   detached(): void {
-    this.clearSub();
     this.anchors.forEach(anchor => {
       anchor.containerService = null;
       anchor.target = null;

@@ -2,20 +2,17 @@ import { Container, Point, InteractionEvent } from 'pixi.js';
 import { Injectable, Inject } from '@angular/core';
 import { PixiSelectionContainerService } from '../container.service';
 import { PixiRendererService } from '../../renderer.service';
-import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
-import { PointSceneComponent } from 'common/scene';
+import { YAME_RENDERER } from 'ng/module/scene';
 import { PixiSelectionRendererService } from '../renderer.service';
-import { Subscription } from 'rxjs';
-import { ofActionDispatched } from '@ngxs/store';
-import { HotkeyService } from 'ng/services/hotkey.service';
+import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
+import { Keydown, Keyup } from 'ng/states/hotkey.state';
 
 /**
  * The position handler is responsible to move the selection container in the scene.
  */
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionHandlerPositionService {
-
   protected startPos: Point;
   protected mouseCurrentPos: Point;
   protected mouseStartPos: Point;
@@ -29,7 +26,7 @@ export class PixiSelectionHandlerPositionService {
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
     protected selectionRenderer: PixiSelectionRendererService,
-    protected hotkeys: HotkeyService
+    protected actions: Actions,
   ) {
     this.startPos = new Point();
     this.mouseCurrentPos = new Point();
@@ -87,13 +84,14 @@ export class PixiSelectionHandlerPositionService {
   }
 
   /**
-   * Handles keyboard events `left`, `right`, `up` and `down`.`
+   * Handles keydown events `left`, `right`, `up` and `down`.`
    *
-   * @param data Addition data information such as the triggered event and the position.
+   * @param data Additional data information such as the triggered event and the position values.
    */
-  keydown(data: { event: KeyboardEvent, x?: number, y?: number }): void {
+  keydown(data: { event: KeyboardEvent; x?: number; y?: number }): void {
     if (this.containerService.currentHandler !== this) {
-      if (this.containerService.isHandling) this.containerService.endHandling(this.containerService.currentHandler, data.event);
+      if (this.containerService.isHandling)
+        this.containerService.endHandling(this.containerService.currentHandler, data.event);
       this.containerService.beginHandling(this, data.event);
     }
     if (typeof data.x === 'number') this.container.position.x = data.x;
@@ -102,9 +100,9 @@ export class PixiSelectionHandlerPositionService {
   }
 
   /**
-   * Handles keyboard events `left`, `right`, `up` and `down`.`
+   * Handles keyup events `left`, `right`, `up` and `down`.`
    *
-   * @param data Addition data information such as the triggered event and the position.
+   * @param event The triggered event.
    */
   keyup(event) {
     if (this.containerService.currentHandler !== this) return;
@@ -116,21 +114,21 @@ export class PixiSelectionHandlerPositionService {
    * Registers keyboard hotkeys for moving the selection.
    */
   onAttached(): void {
+    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+                .subscribe((action: Keydown) => {
+                  if (action.shortcut.id !== 'selection.move') return;
+                  switch (action.event.key.toLowerCase()) {
+                    case 'arrowleft': this.keydown({ event: action.event, x: this.container.position.x - 1 }); break;
+                    case 'arrowright': this.keydown({ event: action.event, x: this.container.position.x + 1 }); break;
+                    case 'arrowup': this.keydown({ event: action.event, y: this.container.position.y - 1 }); break;
+                    case 'arrowdown': this.keydown({ event: action.event, y: this.container.position.y + 1 }); break;
+                  }
+                });
 
-    this.hotkeys.register({ keys: 'arrowleft' }).pipe(takeUntil(this.selectionRenderer.detached$))
-                .subscribe(event => this.keydown({ event, x: this.container.position.x - 1 }));
-
-    this.hotkeys.register({ keys: 'arrowright' }).pipe(takeUntil(this.selectionRenderer.detached$))
-                .subscribe(event => this.keydown({ event, x: this.container.position.x + 1 }));
-
-    this.hotkeys.register({ keys: 'arrowup' }).pipe(takeUntil(this.selectionRenderer.detached$))
-                .subscribe(event => this.keydown({ event, y: this.container.position.y - 1 }));
-
-    this.hotkeys.register({ keys: 'arrowdown' }).pipe(takeUntil(this.selectionRenderer.detached$))
-                .subscribe(event => this.keydown({ event, y: this.container.position.y + 1 }));
-
-    this.hotkeys.register({ event: 'keyup', keys: ['arrowleft', 'arrowright', 'arrowup', 'arrowdown'] })
-                .pipe(takeUntil(this.selectionRenderer.detached$))
-                .subscribe(event => this.keyup(event));
+    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+                .subscribe((action: Keyup) => {
+                  if (action.shortcut.id !== 'selection.move') return;
+                  this.keyup(action.event);
+                });
   }
 }
