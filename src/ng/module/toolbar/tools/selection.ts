@@ -25,7 +25,7 @@ export interface SelectionToolConfig {
  * The selection tool service registers itself as a tool in the toolbar and
  * allows the renderer to handle user input.
  */
-@Injectable({ providedIn: 'root', })
+@Injectable({ providedIn: 'root' })
 export class SelectionToolService extends Tool {
   /**
    * @type {SelectionToolConfig} The configuration for this tool.
@@ -69,10 +69,14 @@ export class SelectionToolService extends Tool {
     this.initFunctions();
     service.register(this);
 
-    hotkeys.register({ keys: ['control.a', 'meta.a'] })
-            .subscribe(() => {
-              this.store.dispatch(new Select(scene.entities.filter(it => this.isSelectable(it)).map(it => it.id), []));
-            });
+    hotkeys.register({ keys: ['control.a', 'meta.a'] }).subscribe(() => {
+      this.store.dispatch(
+        new Select(
+          scene.entities.filter((it) => this.isSelectable(it)).map((it) => it.id),
+          []
+        )
+      );
+    });
   }
 
   /**
@@ -86,11 +90,20 @@ export class SelectionToolService extends Tool {
     if (!this.onMousemove) this.onMousemove = this.mousemove.bind(this);
   }
 
-  isSelectable(entity: SceneEntity): boolean {
+  /**
+   * Returns whether the given entity is selectable or not.
+   *
+   * @param entity The entity to check.
+   * @param fromHierarchy Whether comes from the hierarchy component or not.
+   * @return `true` if selectable.
+   */
+  isSelectable(entity: SceneEntity, fromHierarchy = false): boolean {
     const isolated = this.store.selectSnapshot((state) => state.select).isolated;
     const parent = entity.parent ? this.scene.getEntity(entity.parent) : null;
     const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
-    return isolated ? entity.parent === isolated.id : !entity.parent || isOnLayer || entity.type !== SceneEntityType.Layer;
+    return isolated
+      ? entity.parent === isolated.id
+      : !entity.parent || isOnLayer || (fromHierarchy && entity.type !== SceneEntityType.Layer);
   }
 
   dispatchSelect(entities: string[], components: SceneComponent[]) {
@@ -130,9 +143,8 @@ export class SelectionToolService extends Tool {
     this.down = true;
     window.addEventListener('mouseup', this.onMouseup);
     window.addEventListener('mousemove', this.onMousemove);
-    this.unselectAction.entities = this.store.selectSnapshot(state => state.select).entities;
-    if (this.unselectAction.entities.length > 0)
-      this.store.dispatch(this.unselectAction);
+    this.unselectAction.entities = this.store.selectSnapshot((state) => state.select).entities;
+    if (this.unselectAction.entities.length > 0) this.store.dispatch(this.unselectAction);
     this.begin$.next(event);
   }
 

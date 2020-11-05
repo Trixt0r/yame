@@ -173,7 +173,7 @@ export class PixiSelectionService {
           if (!reset) service.applyComponents(collection, containerService.container);
           containerService.select(
             scene.entities.filter(it => {
-              return selectionTool.isSelectable(it) && it.type !== SceneEntityType.Layer && action.entities.indexOf(it.id) >= 0;
+              return selectionTool.isSelectable(it, true) && it.type !== SceneEntityType.Layer && action.entities.indexOf(it.id) >= 0;
             }),
             false,
             reset

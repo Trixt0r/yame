@@ -71,6 +71,7 @@ export class SceneState {
         );
         entity.components.byId('index').index = it.index;
         entity.components.byId('name').string += ' clone';
+        entity.components.add({ id: 'copy-descriptor', type: 'copy-data', ref: entity.id });
         entity.type = source.type;
         entity.parent = it.parent;
         if (source.children) {

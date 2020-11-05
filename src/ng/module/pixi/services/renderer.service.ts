@@ -188,14 +188,21 @@ export class PixiRendererService implements ISceneRenderer {
             self.pixiContainers[entity.id] = child;
             self.applyComponents(entity.components, child);
             self.scene.addChild(child);
-            child.transform.updateTransform(self.scene.transform);
-            self.updateComponents(entity.components, child);
+
+            const isClone = entity.components.byId('copy-descriptor');
+
+            if (!isClone) {
+              child.transform.updateTransform(self.scene.transform);
+              self.updateComponents(entity.components, child);
+            }
             // Make sure the new display object gets added to the correct parent
             const parentContainer = self.pixiContainers[entity.parent];
             if (!parentContainer || parentContainer === self.scene) return;
             parentContainer.addChild(child);
-            transformTo(child, parentContainer);
-            self.updateComponents(entity.components, child);
+            if (!isClone) {
+              transformTo(child, parentContainer);
+              self.updateComponents(entity.components, child);
+            }
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {

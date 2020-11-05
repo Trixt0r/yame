@@ -137,7 +137,7 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
    */
   async export(): Promise<SceneEntityData> {
     const data: SceneEntityData = {
-      id: <string>this.id,
+      id: this.id,
       components: this.components.map(comp => cloneDeep(comp)),
       parent: this.parent,
       type: this.type,

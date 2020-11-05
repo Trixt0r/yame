@@ -151,21 +151,20 @@ export class SceneService {
           this._entities = this.store.snapshot().scene.entities.slice() as SceneEntity[];
           const updates: string[] = [];
           if (action instanceof CreateEntity) {
-            const newEntities = Array.isArray(action.data) ? action.data : [action.data];
-            newEntities.forEach(entity => {
+            action.created.forEach(entity => {
               this.idMapping[entity.id] = entity;
               this.childDeepMapping[entity.id] = this._getChildren(entity.id, true);
               this.childFlatMapping[entity.id] = this._getChildren(entity.id, false);
               collectUpdates(entity, updates);
             });
           } else {
-            const removed = Array.isArray(action.id) ? action.id : [action.id];
-            removed.forEach(id => {
-              const entity = this.idMapping[id];
+            action.deleted.forEach(it => {
+              const entity = this.idMapping[it.id];
+              if (!entity) return;
               collectUpdates(entity, updates);
-              delete this.idMapping[id];
-              delete this.childDeepMapping[id];
-              delete this.childFlatMapping[id];
+              delete this.idMapping[it.id];
+              delete this.childDeepMapping[it.id];
+              delete this.childFlatMapping[it.id];
             });
           }
           updateEntities(updates);
