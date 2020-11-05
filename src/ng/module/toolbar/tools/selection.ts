@@ -90,7 +90,7 @@ export class SelectionToolService extends Tool {
     const isolated = this.store.selectSnapshot((state) => state.select).isolated;
     const parent = entity.parent ? this.scene.getEntity(entity.parent) : null;
     const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
-    return isolated ? entity.parent === isolated.id : !entity.parent || isOnLayer;
+    return isolated ? entity.parent === isolated.id : !entity.parent || isOnLayer || entity.type !== SceneEntityType.Layer;
   }
 
   dispatchSelect(entities: string[], components: SceneComponent[]) {
