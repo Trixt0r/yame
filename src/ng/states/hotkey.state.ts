@@ -1,5 +1,6 @@
 import { State, NgxsOnInit, StateContext, Store, Action } from '@ngxs/store';
 import { HotkeyService } from 'ng/services/hotkey.service';
+import { NgZone } from '@angular/core';
 
 export interface Shortcut {
 
@@ -62,7 +63,7 @@ export interface IHotkeyState {
 })
 export class HotkeyState implements NgxsOnInit {
 
-  constructor(protected hotkeys: HotkeyService, protected store: Store) { }
+  constructor(protected hotkeys: HotkeyService, protected store: Store, protected zone: NgZone) { }
 
   /**
    * Registers the given shortcut via the hotkey service.
@@ -70,10 +71,12 @@ export class HotkeyState implements NgxsOnInit {
    * @param shortcut The shortcut to register.
    */
   protected registerShortcut(shortcut: Shortcut): void {
-    this.hotkeys.register({ keys: shortcut.keys, event: 'keydown' })
-                .subscribe(event => this.store.dispatch(new Keydown(shortcut, event)));
-    this.hotkeys.register({ keys: shortcut.keys, event: 'keyup' })
-                .subscribe(event => this.store.dispatch(new Keyup(shortcut, event)));
+    this.zone.runOutsideAngular(() => {
+      this.hotkeys.register({ keys: shortcut.keys, event: 'keydown' })
+                  .subscribe(event => this.store.dispatch(new Keydown(shortcut, event)));
+      this.hotkeys.register({ keys: shortcut.keys, event: 'keyup' })
+                  .subscribe(event => this.store.dispatch(new Keyup(shortcut, event)));
+    });
   }
 
   /**
@@ -82,10 +85,7 @@ export class HotkeyState implements NgxsOnInit {
   ngxsOnInit(ctx?: StateContext<IHotkeyState>) {
     ctx.getState().shortcuts.forEach(it => {
       if (!it.keys) return;
-      this.hotkeys.register({ keys: it.keys, event: 'keydown' })
-                  .subscribe(event => this.store.dispatch(new Keydown(it, event)));
-      this.hotkeys.register({ keys: it.keys, event: 'keyup' })
-                  .subscribe(event => this.store.dispatch(new Keyup(it, event)));
+      this.registerShortcut(it);
     });
   }
 

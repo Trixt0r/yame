@@ -77,7 +77,7 @@ export class PixiRendererService implements ISceneRenderer {
    * The pixi renderer instance.
    */
   get renderer(): Renderer {
-    return this._app.renderer;
+    return this._app ? this._app.renderer : null;
   }
 
   /**
