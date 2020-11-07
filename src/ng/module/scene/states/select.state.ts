@@ -4,8 +4,7 @@ import { Select, Unselect, UpdateComponents, Isolate } from './actions/select.ac
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISceneState } from './scene.state';
 import { PushHistory } from './actions';
-import { cloneDeep, difference, xor } from 'lodash';
-import { IHistorySnapshot, IHistoryState } from './history.state';
+import { cloneDeep } from 'lodash';
 
 export interface ISelectState {
   entities: string[];

@@ -184,11 +184,13 @@ export class PixiSelectionService {
           else containerService.unselect(scene.entities.filter(it => action.entities.indexOf(it.id) >= 0));
         }
         (this.service.stage.getChildByName('foreground') as Container).removeChild(graphics);
+        const actionComponents = []
         containerService.components.forEach(comp => {
           const found = action.components.find(it => comp.id === it.id);
-          if (found) merge(found, comp);
-          else action.components.push(comp);
+          if (found) actionComponents.push(merge(found, comp));
+          else actionComponents.push(comp);
         });
+        action.components = actionComponents;
         containerService.update$.next();
       });
 
