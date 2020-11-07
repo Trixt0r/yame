@@ -235,7 +235,6 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
           if (action.entity) {
             const node = this.treeComponent.treeModel.getNodeById(action.entity.id);
             TREE_ACTIONS.EXPAND(this.treeComponent.treeModel, node, this.lastMouseEvent);
-            TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, node, this.lastMouseEvent);
           }
           this.cdr.detectChanges();
           this.isolating = false;
@@ -382,10 +381,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     const data = event.node.data as TreeNode;
     const isolated = this.isolated;
     if (isolated && !this.scene.getChildren(isolated, true).find(it => data.id === it.id)) {
-      this.isolating = true;
-      TREE_ACTIONS.DEACTIVATE(this.treeComponent.treeModel, event.node, { });
       this.store.dispatch(new Isolate(null));
-      this.isolating = false;
     } else {
       const entity = this.scene.getEntity(data.id);
       const components = cloneDeep(entity.components.elements) as SceneComponent[];

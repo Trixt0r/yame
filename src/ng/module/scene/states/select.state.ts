@@ -110,10 +110,13 @@ export class SelectState {
   @Action(Isolate)
   isolate(ctx: StateContext<ISelectState>, action: Isolate) {
     if (ctx.getState().isolated === action.entity) return;
-    const previous = ctx.getState().isolated;
-    ctx.patchState({ isolated: action.entity });
-    if (action.persist) {
-      this.store.dispatch(new PushHistory([new Isolate(previous, false)], [new Isolate(action.entity, false)]));
-    }
+    ctx.dispatch(new Unselect([], [], false))
+      .subscribe(() => {
+        const previous = ctx.getState().isolated;
+        ctx.patchState({ isolated: action.entity });
+        if (action.persist) {
+          this.store.dispatch(new PushHistory([new Isolate(previous, false)], [new Isolate(action.entity, false)]));
+        }
+      });
   }
 }

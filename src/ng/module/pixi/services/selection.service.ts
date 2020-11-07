@@ -15,7 +15,7 @@ import {
 import { SelectionToolService } from 'ng/module/toolbar/tools/selection';
 import { PixiSelectionContainerService } from './selection/container.service';
 import { System } from '@trixt0r/ecs';
-import { Actions, ofActionDispatched, Store } from '@ngxs/store';
+import { Actions, ofActionDispatched, Store, ofActionSuccessful } from '@ngxs/store';
 import { Subscription } from 'rxjs';
 import { cloneDeep, merge } from 'lodash';
 
@@ -279,7 +279,7 @@ export class PixiSelectionService {
    * Handles the double click event, i.e. focuses the double clicked group.
    */
   onDoubleClick(): void {
-    const found = this.containerService.entities.find((it) => this.service.containsPoint(it.id, this.service.mouse));
+    const found = this.containerService.entities.find(it => this.service.containsPoint(it.id, this.service.mouse));
     if (found && found.children.length > 0) this.store.dispatch(new Isolate(found));
     else if (!found) this.store.dispatch(new Isolate(null));
   }
