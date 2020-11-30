@@ -17,12 +17,8 @@ import { DirectoryAsset } from 'common/asset/directory';
  * The workspace component represents the workspace.
  *
  * It holds the groups component and the assets component.
- * The workspace component is meant to linke the groups and assets component.
+ * The workspace component is meant to link the groups and assets component.
  * The assets component renders always the content of the currently selected asset group.
- *
- * @export
- * @class WorkspaceComponent
- * @extends {ResizableComponent}
  */
 @Component({
   moduleId: module.id.toString(),
@@ -33,37 +29,37 @@ import { DirectoryAsset } from 'common/asset/directory';
 })
 export class WorkspaceComponent extends ResizableComponent {
   /**
-   * @type {((DirectoryContent | FileContent)[])} All currently loaded content.
+   * All currently loaded content.
    */
   content: (DirectoryContent | FileContent)[] = null;
 
   /**
-   * @type {number} The minimum width for each column.
+   * The minimum width for each column.
    */
   minWidth = 300;
 
   /**
-   * @type {AssetGroup<Asset>} The currently selected asset group.
+   * The currently selected asset group.
    */
   assetGroup: AssetGroup<Asset>;
 
   /**
-   * @type {ResizableComponent} The resizer between both inner components.
+   * The resizer between both inner components.
    */
   @ViewChild('resizer', { static: false }) resizer: ResizableComponent;
 
   /**
-   * @type {GroupsComponent} The groups component, on the left.
+   * The groups component, on the left.
    */
   @ViewChild('groupsComponent', { static: false }) groupsComponent: GroupsComponent;
 
   /**
-   * @type {AssetsComponent} The assets component, on the right.
+   * The assets component, on the right.
    */
   @ViewChild('assetsComponent', { static: false }) assetsComponent: AssetsComponent;
 
   /**
-   * @type {ElementRef} The row, which is wrapped around all inner components.
+   * The row, which is wrapped around all inner components.
    */
   @ViewChild('row', { static: false }) row: ElementRef;
 
@@ -82,7 +78,9 @@ export class WorkspaceComponent extends ResizableComponent {
     this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBind));
   }
 
-  /** @override */
+  /**
+   * @inheritdoc
+   */
   onResize() {
     this.maxVal = window.innerHeight - 100;
     if (this.row) {
@@ -90,48 +88,44 @@ export class WorkspaceComponent extends ResizableComponent {
       this.resizer.maxVal = Math.max(200, fullWidth - (this.minWidth + 15));
     }
     super.onResize();
-    if (this.resizer) {
-      this.resizer.onResize();
-      this.updateColumns(this.resizer.propertyValue);
-    }
+    if (!this.resizer) return;
+    this.resizer.onResize();
+    this.updateColumns(this.resizer.propertyValue);
   }
 
   /**
    * Opens a dialog for opening a folder.
    *
-   * @returns {Promise<boolean>} Resolves `true` if a folder has been opened. `false otherwise`.
+   * @return `true` if a folder has been opened, `false` otherwise.
    */
-  openFolder() {
+  async openFolder(): Promise<boolean> {
     const provider = this.electron.getProvider(DialogProvider);
-    return provider
-      .open({ properties: ['openDirectory'] })
-      .then(files => {
-        return this.service.init(files[0]).then(json => {
-          this.content = <any>[
-            {
-              name: 'Assets',
-              path: json.path,
-              isExpanded: true,
-              children: this.service.directories,
-            },
-          ];
-          return this.assets
-            .fromFs(json)
-            .then(group => {
-              this.assets.root = <DirectoryAsset>group;
-              this.onGroupSelect(<AssetGroup<Asset>>group)
-            })
-            .then(() => setTimeout(() => this.onResize()))
-            .then(() => true);
-        });
-      })
-      .catch(e => false);
+    try {
+      const files = await provider.open({ properties: ['openDirectory'] });
+      const json = await this.service.init(files[0]);
+      this.content = [
+        {
+          name: 'Assets',
+          path: json.path,
+          type: 'directory',
+          children: this.service.directories,
+        },
+      ];
+      const group = await this.assets.fromFs(json) as DirectoryAsset;
+      this.assets.root = group;
+      this.onGroupSelect(group);
+      setTimeout(() => this.onResize());
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /**
    * Update the size of the columns.
-   * @param {number} size
-   * @returns {boolean} `true` if the size has been applied, `false` otherwise.
+   *
+   * @param size The new column size of the groups container.
+   * @return `true` if the size has been applied, `false` otherwise.
    */
   updateColumns(size: number) {
     if (!this.row) return false;
@@ -147,7 +141,7 @@ export class WorkspaceComponent extends ResizableComponent {
   /**
    * Handles the group selection by the user.
    *
-   * @param {AssetGroup<Asset>} group The selected group.
+   * @param group The selected group.
    */
   onGroupSelect(group: AssetGroup<Asset>) {
     this.assetGroup = group;

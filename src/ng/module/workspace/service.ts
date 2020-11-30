@@ -40,29 +40,27 @@ export class WorkspaceService {
    * Initializes the given directory as the workspace directory.
    * The loaded json representation gets resolved on success.
    *
-   * @param {string} rootDir The full path of the workspace.
-   * @returns {Promise}
+   * @param rootDir The full path of the workspace.
+   * @return The content of the loaded path.
    */
-  init(rootDir: string): Promise<DirectoryContent> {
-    if (this.internalState !== 'init')
-      return Promise.resolve(this.internalFiles);
+  async init(rootDir: string): Promise<DirectoryContent> {
+    if (this.internalState !== 'init') return this.internalFiles;
     this.internalState = 'init';
     this.initSource.next();
     const provider = this.electron.getProvider(DirectoryProvider);
-    return provider.scan(rootDir)
-      .then(json => {
-        this.internalFiles = json;
-        this.internalFolders = this.getDirectories(this.internalFiles);
-        this.internalState = 'ready';
-        this.readySource.next();
-        return json;
-      })
-      .catch(e => {
-        this.internalState = 'fail';
-        this.internalError = e;
-        this.failSource.next();
-        throw e;
-      });
+    try {
+      const json = await provider.scan(rootDir)
+      this.internalFiles = json;
+      this.internalFolders = this.getDirectories(this.internalFiles);
+      this.internalState = 'ready';
+      this.readySource.next();
+      return json;
+    } catch (e) {
+      this.internalState = 'fail';
+      this.internalError = e;
+      this.failSource.next();
+      throw e;
+    }
   }
 
   /**

@@ -10,16 +10,13 @@ import * as _ from 'lodash';
 /**
  * Interface for a converter which is able to convert a fs resource to an asset.
  *
- * @interface FsConverter
- * @param {FileContent | DirectoryContent} source The content to convert to an asset.
- * @returns {FileAsset | DirectoryAsset} The converted asset.
+ * @param source The content to convert to an asset.
+ * @return The converted asset.
  */
 type FsConverter = (source: FileContent | DirectoryContent, service: AssetService) => Promise<FileAsset | DirectoryAsset>;
 
 /**
  * Definition for the internal converters.
- *
- * @interface Converters
  */
 interface Converters {
 
@@ -28,9 +25,7 @@ interface Converters {
 }
 
 /**
- * Definition of the internal cache
- *
- * @interface Cache
+ * Definition of the internal cache.
  */
 interface Cache {
 
@@ -62,11 +57,10 @@ export class AssetService {
   /**
    * Registers an new file system resource converter for a certain file type.
    *
-   * @param {string} type The type of the resource, e.g. `directory`, `png`, `ogg`, etc.
-   * @param {FsConverter} fn The converting routine
-   * @memberof AssetService
+   * @param type The type of the resource, e.g. `directory`, `png`, `ogg`, etc.
+   * @param fn The converter function.
    */
-  registerFsConverter(type: string, fn: FsConverter) {
+  registerFsConverter(type: string, fn: FsConverter): void {
     this.converters[type] = fn;
   }
 
@@ -85,9 +79,9 @@ export class AssetService {
    *
    * If no converter is registered for the content type, a plain file asset will be returned.
    *
-   * @param {(FileContent | DirectoryContent)} source The content source to convert.
-   * @param {boolean} [cache=true] Whether to use cached assets if available.
-   * @returns {(FileAsset | DirectoryAsset)} The converted result.
+   * @param source The content source to convert.
+   * @param [cache=true] Whether to use cached assets if available.
+   * @return The converted result.
    */
   fromFs(source: FileContent | DirectoryContent, cache: boolean = true): Promise<FileAsset | DirectoryAsset> {
     if (this.cache[source.path] && cache)
@@ -101,7 +95,7 @@ export class AssetService {
    * Creates a file asset from the given content.
    *
    * @param source The content to convert.
-   * @returns {FileAsset} The converted result
+   * @return The converted result.
    */
   toFileAsset(source: FileContent | DirectoryContent): Promise<FileAsset> {
     const file = <FileContent>source;
@@ -114,26 +108,26 @@ export class AssetService {
   /**
    * Filters out all asset groups in the given root group and returns them.
    *
-   * @param {AssetGroup<Asset>} root The root group
-   * @returns {AssetGroup<Asset>[]} All direct asset groups inside the given root.
+   * @param root The root group
+   * @return All direct asset groups inside the given root.
    */
   getGroups(root: AssetGroup<Asset>): AssetGroup<Asset>[] {
     if (!root.members) return [];
-    return <AssetGroup<Asset>[]>root.members.filter(
-      (member: any) => member instanceof AssetGroup || Array.isArray(member.members)
-    );
+    return root.members.filter(
+      member => member instanceof AssetGroup || Array.isArray((member as AssetGroup<Asset>).members)
+    ) as AssetGroup<Asset>[];
   }
 
   /**
    * Filters out all assets for the given root group, i.e. non-groups and returns them.
    *
-   * @param {AssetGroup<Asset>} root
-   * @returns {Asset[]} All direct assets (not groups) inside the given root.
+   * @param root
+   * @return All direct assets (not groups) inside the given root.
    */
   getAssets(root: AssetGroup<Asset>): Asset[] {
     if (!root.members) return [];
-    return <Asset[]>root.members.filter(
-      (member: any) => !(member instanceof AssetGroup) && !Array.isArray(member.members)
+    return root.members.filter(
+      member => !(member instanceof AssetGroup) && !Array.isArray((member as AssetGroup<Asset>).members)
     );
   }
 
@@ -148,8 +142,8 @@ export class AssetService {
   /**
    * Returns all parents of the given asset by climbing the hierarchy up.
    *
-   * @param {Asset} asset
-   * @returns {AssetGroup<Asset>[]} A list of all parents of the given asset.
+   * @param asset
+   * @return A list of all parents of the given asset.
    */
   getParents(asset: Asset): AssetGroup<Asset>[] {
     const parents = [];

@@ -1,20 +1,20 @@
 import { DirectoryProviderException } from '../exception/provider/directory';
 import { DirectoryContent } from '../../../../common/content/directory';
 import { ElectronProvider } from '../provider';
-import * as _ from 'lodash';
+import { uniqueId } from 'lodash';
 
 export class DirectoryProvider extends ElectronProvider {
 
   /**
    * Scans the given directory via electron.
    *
-   * @param {string} dir
-   * @param {boolean} [deep=true]
-   * @returns {Promise<DirectoryContent>}
+   * @param dir The directory to load.
+   * @param [deep = true] Whether to load all nested folders.
+   * @return The content of the given directory.
    */
-  scan(dir: string, deep = true): Promise<DirectoryContent> {
+  async scan(dir: string, deep = true): Promise<DirectoryContent> {
     return new Promise((resolve, reject) => {
-      let id = _.uniqueId('directory-');
+      const id = uniqueId('directory-');
       this.ipc.send('directory:scan', dir, id, deep);
       this.ipc.once(`directory:scan:${id}:done`, (event, json) => {
         this.ipc.removeAllListeners(`directory:scan:${id}:fail`);
