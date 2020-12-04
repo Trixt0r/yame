@@ -11,9 +11,9 @@ import { SelectionToolService } from './tools/selection';
     CommonModule,
     MaterialModule
   ],
-  entryComponents: [
-    DefaultToolComponent
-  ],
+  // entryComponents: [
+  //   DefaultToolComponent
+  // ],
   declarations: [
     ToolbarComponent,
     DefaultToolComponent,

@@ -47,9 +47,9 @@ export class ImageAssetConverter implements ISceneAssetConverter<ImageAsset> {
     SceneRendererComponentDirective,
     NoopSceneRendererComponent,
   ],
-  entryComponents: [
-    NoopSceneRendererComponent,
-  ],
+  // entryComponents: [
+  //   NoopSceneRendererComponent,
+  // ],
   exports: [
     SceneComponent
   ]

@@ -23,7 +23,7 @@ import { DndModule } from 'ng2-dnd';
 
 @NgModule({
   imports: [BrowserModule, UtilsModule, MaterialModule, DndModule.forRoot()],
-  entryComponents: [DirectoryGroupComponent, FileAssetPreviewComponent, ImageAssetPreviewComponent],
+  // entryComponents: [DirectoryGroupComponent, FileAssetPreviewComponent, ImageAssetPreviewComponent],
   exports: [WorkspaceComponent, GroupsComponent, AssetsComponent],
   declarations: [
     WorkspaceComponent,

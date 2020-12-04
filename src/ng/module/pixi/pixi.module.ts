@@ -79,7 +79,7 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
 
 @NgModule({
   declarations: [PixiRendererComponent],
-  entryComponents: [PixiRendererComponent],
+  // entryComponents: [PixiRendererComponent],
   providers: [
     {
       provide: YAME_RENDERER,
