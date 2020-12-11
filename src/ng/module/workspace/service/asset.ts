@@ -52,7 +52,7 @@ export class AssetService {
   // Internal cache for accessing assets directly without running any conversion
   private cache: Cache = { };
 
-  private rootGroup: AssetGroup<Asset>;
+  private rootGroup: AssetGroup<Asset> | null = null;
 
   /**
    * Registers an new file system resource converter for a certain file type.
@@ -131,7 +131,7 @@ export class AssetService {
     );
   }
 
-  getAssetsRecursive(root: AssetGroup<Asset> = this.rootGroup): Asset[] {
+  getAssetsRecursive(root: AssetGroup<Asset> | null = this.rootGroup): Asset[] {
     if (!root) throw new Error('No root set');
     let assets = this.getAssets(root);
     this.getGroups(root)
@@ -150,14 +150,14 @@ export class AssetService {
     let parent = asset;
     while (parent = parent.parent)
       parents.push(parent);
-    return parents;
+    return parents as AssetGroup<Asset>[];
   }
 
-  set root(root: AssetGroup<Asset>) {
+  set root(root: AssetGroup<Asset> | null) {
     this.rootGroup = root;
   }
 
-  get root(): AssetGroup<Asset> {
+  get root(): AssetGroup<Asset> |null {
     return this.rootGroup;
   }
 

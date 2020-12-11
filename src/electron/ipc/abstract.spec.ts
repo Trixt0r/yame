@@ -5,7 +5,7 @@ class CustomIpcAction extends IpcAction {
   /** @inheritdoc */
   init(): Promise<any> {
     return new Promise((resolve) => {
-      this.internalInitialized = true;
+      this._initialized = true;
       resolve();
     });
   }

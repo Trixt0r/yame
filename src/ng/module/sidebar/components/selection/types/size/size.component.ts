@@ -22,12 +22,12 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
   /**
    * The input reference.
    */
-  @ViewChild('input', { static: true }) input: PointInputComponent;
+  @ViewChild('input', { static: true }) input!: PointInputComponent;
 
   /**
    * Internal transformed value data.
    */
-  protected val: IPointData;
+  protected val?: IPointData;
 
   /**
    * The current value.
@@ -40,7 +40,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
    * @inheritdoc
    */
   onUpdate(event: any): void {
-    if (!this.input.value) return;
+    if (!this.input.value || !this.component) return;
     const reversed = this.reverse(this.input.value) as IPoint;
     this.component.width = reversed.x;
     this.component.height = reversed.y;
@@ -71,7 +71,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
    * @inheritdoc
    */
   ngOnChanges() {
-    if (this.component.mixed) {
+    if (this.component?.mixed) {
       this.val = { x: '', y: '' } as unknown as IPointData;
     } else {
       const transformed = this.transform(this.component) as SizeSceneComponent;

@@ -13,13 +13,12 @@ import {
 import { ResizableComponent } from 'ng/module/utils';
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { SceneComponentsService } from '../../services/scene-components.service';
-import { AbstractRemoveEvent, AbstractInputEvent } from './types';
+import { AbstractRemoveEvent, AbstractInputEvent } from './types/abstract';
 import { SceneEntity, SceneComponent, SceneEntityData } from 'common/scene';
-import { ISelectState } from 'ng/module/scene/states/select.state';
-import { UpdateEntity } from 'ng/module/scene/states/actions/entity.action';
-import { UpdateComponents, Input as InputAction } from 'ng/module/scene';
+import { ISelectState, UpdateEntity, UpdateComponents, Input as InputAction } from 'ng/module/scene';
 import { EntityComponentsDirective } from '../../directives/entity-components.directive';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { debounceTime } from 'rxjs/operators';
 
 /**
  * The selection component is responsible for rendering the assigned property array.
@@ -49,7 +48,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    */
   @Input() selected: ISelectState = { entities: [], components: [], isolated: null };
 
-  @ViewChild(EntityComponentsDirective) entityComponentsDirective: EntityComponentsDirective;
+  @ViewChild(EntityComponentsDirective) entityComponentsDirective!: EntityComponentsDirective;
 
   /**
    * The title of the component.
@@ -72,17 +71,17 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    * A map for previous entity component data.
    * Needed for pushing history data.
    */
-  protected previousData: { [key: string]: SceneComponent[] } = null;
+  protected previousData: { [key: string]: SceneComponent[] } | null = null;
 
   /**
    * The last input data emitted by a view component.
    */
-  protected lastInputData: SceneComponent[] = null;
+  protected lastInputData: SceneComponent[] | null = null;
 
   /**
    * The resize handler, which is bound to the scope of the component.
    */
-  protected onResizeBound: EventListenerObject;
+  protected onResizeBound: () => void;
 
   constructor(
     public ref: ElementRef,
@@ -101,21 +100,20 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
       .pipe(ofActionSuccessful(UpdateComponents))
       .subscribe((action: UpdateComponents) => this.updateDirective(action.components));
     this.actions
-        .pipe(ofActionSuccessful(InputAction))
-        .debounceTime(SelectionComponent.INPUT_HISTORY_DEBOUNCE)
-        .subscribe((action: InputAction) => {
-          this.store.dispatch(action.actions);
-          const selectComps = cloneDeep(this.store.snapshot().select.components) as SceneComponent[];
-          if (this.lastInputData)
-            this.lastInputData.forEach(comp => {
-              const idx = selectComps.findIndex(it => it.id === comp.id);
-              if (idx >= 0) selectComps[idx] = comp;
-            });
-          this.store.snapshot().select.components = selectComps;
-          this.initPreviousData(true);
-          this.previousData = null;
-          this.lastInputData = null;
-        });
+      .pipe(ofActionSuccessful(InputAction), debounceTime(SelectionComponent.INPUT_HISTORY_DEBOUNCE))
+      .subscribe((action: InputAction) => {
+        this.store.dispatch(action.actions);
+        const selectComps = cloneDeep(this.store.snapshot().select.components) as SceneComponent[];
+        if (this.lastInputData)
+          this.lastInputData.forEach((comp) => {
+            const idx = selectComps.findIndex((it) => it.id === comp.id);
+            if (idx >= 0) selectComps[idx] = comp;
+          });
+        this.store.snapshot().select.components = selectComps;
+        this.initPreviousData(true);
+        this.previousData = null;
+        this.lastInputData = null;
+      });
   }
 
   /**
@@ -144,9 +142,14 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
       this.lastInputData = null;
     }
     if (!this.previousData) {
-      this.previousData = { };
+      this.previousData = {};
       this.previousData.select = cloneDeep(this.store.snapshot().select.components);
-      this.entities.forEach(entity => this.previousData[entity.id] = cloneDeep(entity.components.elements.slice()));
+      this.entities.forEach(
+        (entity) =>
+          ((this.previousData as { [key: string]: SceneComponent[] })[entity.id] = cloneDeep(
+            entity.components.elements.slice()
+          ))
+      );
     }
     if (!this.lastInputData) this.lastInputData = [];
   }
@@ -167,18 +170,21 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
   onInput(event: AbstractInputEvent<SceneComponent>): void {
     this.initPreviousData();
     const inputData = this.entities
-      .filter(entity => entity.components.byId(event.component.id))
-      .map(it => ({ id: it.id, parent: it.parent, components: [ cloneDeep(event.component) ] }));
+      .filter((entity) => entity.components.byId(event.component?.id as string))
+      .map((it) => ({ id: it.id, parent: it.parent, components: [cloneDeep(event.component)] }));
 
-    const idx = this.lastInputData.findIndex(it => it.id === event.component.id);
-    if (idx >= 0) this.lastInputData[idx] = cloneDeep(event.component);
-    else this.lastInputData.push(cloneDeep(event.component));
+    const idx = this.lastInputData?.findIndex((it) => it.id === event.component?.id) as number;
+    if (idx >= 0) (this.lastInputData as SceneComponent[])[idx] = cloneDeep(event.component) as SceneComponent;
+    else this.lastInputData?.push(cloneDeep(event.component as SceneComponent));
 
-    inputData.unshift({ id: 'select', parent: null, components: this.lastInputData });
-    this.store.snapshot().select.components = this.previousData.select;
-    this.entities.forEach(entity => entity.components.set.apply(entity.components, this.previousData[entity.id]));
-    this.updateAction.data = inputData;
-    this.store.dispatch(new InputAction([ this.updateAction ], this));
+    inputData.unshift({ id: 'select', parent: null, components: this.lastInputData as SceneComponent[] });
+    this.store.snapshot().select.components = this.previousData?.select;
+    this.entities.forEach(entity => {
+      if (!this.previousData) return;
+      entity.components.set.apply(entity.components, this.previousData[entity.id])
+    });
+    this.updateAction.data = inputData as Partial<SceneEntityData>[];
+    this.store.dispatch(new InputAction([this.updateAction], this));
   }
 
   /**
@@ -187,7 +193,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    * @param event The triggered event.
    */
   onRemove(event: AbstractRemoveEvent): void {
-    this.sceneComponents.removeSceneComponent(this.entities, event.component);
+    this.sceneComponents.removeSceneComponent(this.entities, event.component as SceneComponent);
   }
 
   /**
@@ -207,10 +213,10 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     if (changes.selected) this.updateFromStyle();
     const selected = this.selected;
     const ids = this.selected ? this.selected.entities : [];
-    this.entities = this.store.selectSnapshot((state) => state.scene.entities).filter(it => ids.indexOf(it.id) >= 0);
+    this.entities = this.store.selectSnapshot((state) => state.scene.entities).filter((it: SceneEntity) => ids.indexOf(it.id) >= 0);
     this.initPreviousData(true);
     if (selected && selected.components) {
-      this.components = selected.components.filter(it => !it.group);
+      this.components = selected.components.filter((it) => !it.group);
       this.updateDirective(selected.components.slice());
     } else {
       this.components = [];

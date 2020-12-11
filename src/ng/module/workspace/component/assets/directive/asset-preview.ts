@@ -9,6 +9,7 @@ import {
   Input,
   ViewContainerRef,
   OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 
 /**
@@ -22,7 +23,7 @@ import {
 export class AssetPreviewDirective implements OnChanges {
 
   /** @type {Asset} The asset to render. */
-  @Input('assetPreview') asset: Asset;
+  @Input('assetPreview') asset!: Asset;
 
   constructor(
     private assets: AssetComponentService,
@@ -31,7 +32,7 @@ export class AssetPreviewDirective implements OnChanges {
   ) { }
 
   /** @inheritdoc */
-  ngOnChanges(changes) {
+  ngOnChanges(changes: SimpleChanges) {
     if (changes.asset)
       this.render();
   }
@@ -42,7 +43,7 @@ export class AssetPreviewDirective implements OnChanges {
    * @returns {ComponentRef<AssetPreviewComponent>} The created component reference or `null`
    *                                          if no component found for the current group.
    */
-  render(): ComponentRef<AssetPreviewComponent> {
+  render(): ComponentRef<AssetPreviewComponent> | null {
     const compType = this.assets.getPreview(this.asset);
     if (!compType) return null;
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);

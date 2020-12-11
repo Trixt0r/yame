@@ -1,4 +1,4 @@
-import EventEmitter from '../../../../common/event-emitter';
+import EventEmitter from 'common/event-emitter';
 
 import { DisplayObject, Point } from 'pixi.js';
 
@@ -21,7 +21,7 @@ export class Camera extends EventEmitter {
   /**
    * The current bound container.
    */
-  protected _container: DisplayObject;
+  protected _container: DisplayObject | null;
 
   /**
    * Internal zoom value.
@@ -94,7 +94,7 @@ export class Camera extends EventEmitter {
   /**
    * The container this camera is attached to.
    */
-  get container(): PIXI.DisplayObject {
+  get container(): PIXI.DisplayObject |null {
     return this._container;
   }
 
@@ -116,12 +116,12 @@ export class Camera extends EventEmitter {
    * @param target
    */
   set zoom(target: number) {
-    if (!this.isAttached()) return;
+    if (!this.isAttached() || !this._container) return;
     target = Math.max(Math.min(this._maxZoom, target), this._minZoom);
     const diff = target - this._zoom;
     const diffAbs = Math.abs(diff);
     if (diffAbs > 0) {
-      this._container.toLocal(this.targetPosition, null, this.localTargetPosition);
+      this._container.toLocal(this.targetPosition, void 0, this.localTargetPosition);
       this._zoom += Math.sign(diff) * Math.min(this.zoomStep, diffAbs);
       this._container.scale.set(this._zoom);
       this._container.position.x = -(this.localTargetPosition.x * this._zoom) + this.targetPosition.x;
@@ -185,16 +185,16 @@ export class Camera extends EventEmitter {
   /**
    * The container position.
    */
-  get position(): Point {
-    return this._container.position;
+  get position(): Point | undefined {
+    return this._container?.position;
   }
 
   /**
    * Sets the position of this camera, i.e. shifts the container this camera is attached to.
    */
-  set position(pos: Point) {
-    if (this.position.x !== pos.x || this.position.y !== pos.y) {
-      this._container.position.set(pos.x, pos.y);
+  set position(pos: Point | undefined) {
+    if (this.position?.x !== pos?.x || this.position?.y !== pos?.y) {
+      this._container?.position.set(pos?.x, pos?.y);
       this.emit('updated');
     }
   }

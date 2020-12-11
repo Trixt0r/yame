@@ -42,7 +42,7 @@ export class ToolbarComponent implements OnChanges {
   /** @type {boolean} Whether the toolbar is opened or closed. */
   @Input('open') open = false;
 
-  @Input('height') height;
+  @Input('height') height!: number;
 
   /** @type {EventEmitter} Event which gets emitted when the toolbar gets opened. */
   @Output('opening') opening = new EventEmitter();

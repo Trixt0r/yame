@@ -8,15 +8,21 @@
  */
 export abstract class IpcAction {
 
-  /** @inheritdoc */
-  protected internalInitialized = false;
+  /**
+   * @inheritdoc
+   */
+  protected _initialized = false;
 
-  /** @returns {Promise<any>} Initializes the message handling. Promise, in case initialization is asynchronous. */
-  abstract init(electron: Electron.AllElectron): Promise<any>;
+  /**
+   * Initializes the message handling. Promise, in case initialization is asynchronous.
+   */
+  abstract init(): Promise<void>;
 
-  /** @returns {boolean} Whether the action is initialized or not. */
+  /**
+   * Whether the action is initialized or not.
+   */
   get isInitialized(): boolean {
-    return this.internalInitialized;
+    return this._initialized;
   };
 
 }

@@ -2,6 +2,7 @@ import { DirectoryProviderException } from '../exception/provider/directory';
 import { DirectoryContent } from '../../../../common/content/directory';
 import { ElectronProvider } from '../provider';
 import { uniqueId } from 'lodash';
+import { IpcRendererEvent } from 'electron/main';
 
 export class DirectoryProvider extends ElectronProvider {
 
@@ -16,11 +17,11 @@ export class DirectoryProvider extends ElectronProvider {
     return new Promise((resolve, reject) => {
       const id = uniqueId('directory-');
       this.ipc.send('directory:scan', dir, id, deep);
-      this.ipc.once(`directory:scan:${id}:done`, (event, json) => {
+      this.ipc.once(`directory:scan:${id}:done`, (event: IpcRendererEvent, json: any) => {
         this.ipc.removeAllListeners(`directory:scan:${id}:fail`);
         resolve(json);
       });
-      this.ipc.once(`directory:scan:${id}:fail`, (event, e) => {
+      this.ipc.once(`directory:scan:${id}:fail`, (event: IpcRendererEvent, e: Error) => {
         this.ipc.removeAllListeners(`directory:scan:${id}:done`);
         reject(new DirectoryProviderException(e.message));
       });

@@ -4,10 +4,10 @@ import { PixiRendererService } from '../renderer.service';
 import { Container, Rectangle, Point, Matrix, Transform } from 'pixi.js';
 import { Subject, Observable } from 'rxjs';
 import { SceneEntity, SceneComponent, SceneComponentCollection, SceneEntityData } from 'common/scene';
-import { YAME_RENDERER, UpdateComponents, UpdateEntity } from 'ng/module/scene';
 import { Store } from '@ngxs/store';
 import { merge, isEqual, maxBy, cloneDeep } from 'lodash';
 import { transformTo } from '../../utils/transform.utils';
+import { UpdateComponents, UpdateEntity, YAME_RENDERER } from 'ng/module/scene';
 
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionContainerService {
@@ -111,9 +111,9 @@ export class PixiSelectionContainerService {
    */
   updateComponents(): void {
     this.components.clear();
-    const comps = [];
+    const comps = [] as SceneComponent[];
     const ids: { [ id: string ]: { comp: SceneComponent, entities: SceneEntity[] } } = { };
-    const idsOrder = [];
+    const idsOrder = [] as string[];
     this.entities.forEach(entity => {
       entity.components.forEach(comp => {
         if (!ids[comp.id]) {
@@ -131,7 +131,7 @@ export class PixiSelectionContainerService {
       if (data.entities.length !== this.entities.length) return;
       const notEqual = !!data.entities.find(it => !isEqual(it.components.byId(key), data.comp));
       const mixed = key.indexOf('transformation') < 0 && notEqual;
-      const comp = merge({}, data.comp, { mixed });
+      const comp = merge({}, data.comp, { mixed }) as SceneComponent;
       if (!comp.mixed) delete comp.mixed;
       comps.push(comp);
     });
@@ -235,11 +235,13 @@ export class PixiSelectionContainerService {
     this.entities.forEach(entity => {
       const child = this.pixi.getContainer(entity.id);
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
-      parentContainer.addChild(child);
-      transformTo(child, parentContainer);
-      this.pixi.updateComponents(entity.components, child);
+      if (child) {
+        parentContainer.addChild(child);
+        transformTo(child, parentContainer);
+        this.pixi.updateComponents(entity.components, child);
+      }
     });
-    this.container.zIndex = maxBy(this.pixi.scene.children, (child) => child.zIndex).zIndex + 1;
+    this.container.zIndex = (maxBy(this.pixi.scene.children, (child) => child.zIndex)?.zIndex || 0) + 1;
     this.pixi.scene.addChild(this.container);
 
     entities.forEach((entity) => {
@@ -300,7 +302,7 @@ export class PixiSelectionContainerService {
       let parentEntity = this.pixi.sceneService.getEntity(entity.parent);
       while (parentEntity) {
         const container = this.pixi.getContainer(parentEntity.id);
-        this.pixi.updateComponents(parentEntity.components, container);
+        if (container) this.pixi.updateComponents(parentEntity.components, container);
         parentEntity = this.pixi.sceneService.getEntity(parentEntity.parent);
       }
     });
@@ -324,6 +326,7 @@ export class PixiSelectionContainerService {
     data.push({ id: 'select', components: cloneDeep(this.components.elements) as SceneComponent[] });
     this.entities.forEach(entity => {
       const child = this.pixi.getContainer(entity.id);
+      if (!child) return;
       child.transform.updateTransform(this.container.transform);
       componentsBefore[entity.id] = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
       this.pixi.updateComponents(componentsBefore[entity.id], child);
@@ -351,6 +354,7 @@ export class PixiSelectionContainerService {
 
     this.entities.forEach(entity => {
       const container = this.pixi.getContainer(entity.id);
+      if (!container) return;
       this.container.addChild(container);
       this.pixi.applyComponents(componentsBefore[entity.id], container);
     });

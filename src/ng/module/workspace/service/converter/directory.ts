@@ -1,6 +1,7 @@
 import { AssetService } from '../asset';
 import { DirectoryContent } from 'common/content/directory';
 import { DirectoryAsset } from 'common/asset/directory';
+import { FileContent } from 'common/content/file';
 
 /**
  * Converts the given directory content into an directory asset instance.
@@ -9,7 +10,7 @@ import { DirectoryAsset } from 'common/asset/directory';
  * @param {DirectoryContent} directory
  * @returns {DirectoryAsset} The converted directory asset.
  */
-export default function(directory: DirectoryContent, service: AssetService): Promise<DirectoryAsset> {
+export default function(directory: FileContent | DirectoryContent, service: AssetService): Promise<DirectoryAsset> {
   const asset = new DirectoryAsset();
 
   asset.id = directory.path; // The asset id is the full path
@@ -17,8 +18,8 @@ export default function(directory: DirectoryContent, service: AssetService): Pro
   asset.content.name = directory.name;
 
   // Recursively iterate over all sub directories
-  const promises = [];
-  directory.children.forEach(child => {
+  const promises: Promise<void>[] = [];
+  (directory as DirectoryContent).children.forEach(child => {
     promises.push(
       service.fromFs(child)
         .then(childAsset => {

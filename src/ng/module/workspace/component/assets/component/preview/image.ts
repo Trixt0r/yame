@@ -15,7 +15,7 @@ import { AssetPreviewComponent } from './interface';
 })
 export class ImageAssetPreviewComponent implements AssetPreviewComponent {
 
-  asset: ImageAsset;
+  asset!: ImageAsset;
 
   constructor(private sanitizer: DomSanitizer ) { }
 

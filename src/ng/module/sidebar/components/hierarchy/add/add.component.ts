@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnChanges, AfterViewInit, Input } from '@angular/core';
 import { NavItem } from 'ng/module/utils/components/nested-menu-item/nested-menu-item.component';
 import * as _ from 'lodash';
-import { EntityTypeService } from 'ng/module/sidebar/services/entity-type.service';
+import { EntityTypeItem, EntityTypeService } from 'ng/module/sidebar/services/entity-type.service';
 
 /**
  * The add entity component handles the creation of new object.
@@ -17,7 +17,7 @@ export class AddEntityComponent implements AfterViewInit {
   /**
    * The items to display in the menu.
    */
-  items: NavItem[];
+  items: NavItem[] = [];
 
   /**
    * The parent reference.
@@ -26,18 +26,18 @@ export class AddEntityComponent implements AfterViewInit {
 
   constructor(protected entityTypes: EntityTypeService) { }
 
-  /**
-   * The items, which are not categorized.
-   */
-  get entityItems(): string[] {
-    const items = [];
-    this.entityTypes.items.forEach(item => {
-      const categories = this.entityTypes.getCategories(item);
-      if (categories.length > 0) return;
-      items.push(item);
-    });
-    return items;
-  }
+  // /**
+  //  * The items, which are not categorized.
+  //  */
+  // get entityItems(): string[] {
+  //   const items: EntityTypeItem[] = [];
+  //   this.entityTypes.items.forEach(item => {
+  //     const categories = this.entityTypes.getCategories(item);
+  //     if (categories.length > 0) return;
+  //     items.push(item);
+  //   });
+  //   return items;
+  // }
 
   /**
    * Initializes the items to render.
@@ -58,8 +58,9 @@ export class AddEntityComponent implements AfterViewInit {
 
     flatList.forEach(item => {
       const sceneCategory = entityTypeCategories.find(it => item.id === it.id);
+      if (!sceneCategory) return;
       if (sceneCategory.categories)
-        item.children = flatList.filter(it => sceneCategory.categories.indexOf(it.id) >= 0);
+        item.children = flatList.filter(it => (sceneCategory.categories?.indexOf(it.id) || -1) >= 0);
       if (!sceneCategory.parent)
         items.push(item);
     });
@@ -81,7 +82,7 @@ export class AddEntityComponent implements AfterViewInit {
           const child = Object.assign({}, entityTypeItem);
           if (!child.label)
             child.label = item.id.split(/\.|_|-/g).filter(str => it.id !== str).map(str => _.capitalize(str)).join(' ');
-          navItem.children.push(child);
+          navItem?.children?.push(child);
         });
       }
     });

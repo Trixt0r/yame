@@ -1,9 +1,10 @@
 import {Component, Input, ViewChild, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
+import { MatMenu } from '@angular/material/menu';
 
 export interface NavItem {
   id: string;
-  label: string;
-  icon: string;
+  label?: string;
+  icon?: string;
   children?: NavItem[];
 }
 
@@ -15,9 +16,9 @@ export interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NestedMenuItemComponent {
-  @Input() items: NavItem[];
+  @Input() items!: NavItem[];
   @Output() selected: EventEmitter<NavItem> = new EventEmitter();
-  @ViewChild('childMenu', { static: true }) public childMenu;
+  @ViewChild('childMenu', { static: true }) public childMenu!: MatMenu;
 
   select(item: NavItem) {
     this.selected.emit(item);

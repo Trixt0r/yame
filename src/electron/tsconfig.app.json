@@ -3,10 +3,13 @@
   "compilerOptions": {
     "outDir": "../../out",
     "module": "commonjs",
-    "target": "esnext",
+    "target": "es2020",
     "baseUrl": "../",
     "sourceRoot": "./",
-    "types": []
+    "types": [
+      "node",
+      "electron"
+    ]
   },
   "exclude": [
     "test.ts",

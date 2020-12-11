@@ -19,20 +19,20 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
   /**
    * The input reference.
    */
-  @ViewChild('input', { static: true }) input: PointInputComponent;
+  @ViewChild('input', { static: true }) input!: PointInputComponent;
 
   /**
    * The current value.
    */
   get value() {
-    return this.component.mixed ? { x: '', y: '' } : this.transform(this.component) || { x: 0, y: 0 };
+    return this.component?.mixed ? { x: '', y: '' } : this.transform(this.component) || { x: 0, y: 0 };
   }
 
   /**
    * @inheritdoc
    */
   onUpdate(event: any): void {
-    if (!this.input.value) return;
+    if (!this.input.value || !this.component) return;
     const reversed = this.reverse(this.input.value) as IPoint;
     this.component.x = reversed.x;
     this.component.y = reversed.y;

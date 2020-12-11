@@ -129,7 +129,7 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
   /**
    * Internal `placeholder` value.
    */
-  private _placeholder: string;
+  private _placeholder!: string;
 
   /**
    * @inheritdoc

@@ -12,13 +12,14 @@ import {
   OnInit,
   ComponentFactory,
   SimpleChange,
+  ViewRef,
 } from '@angular/core';
 import { SceneComponentsService } from '../services/scene-components.service';
 import { AbstractTypeComponent, AbstractInputEvent, AbstractRemoveEvent } from '../components/selection/types/abstract';
-import * as uuid from 'uuid/v4';
+import * as uuid from 'uuid';
 import { SceneComponent, SceneEntity } from 'common/scene';
-import { Subscription, Subject } from 'rxjs';
-import { ISelectState } from 'ng/module/scene/states/select.state';
+import { Subscription } from 'rxjs';
+import { ISelectState } from 'ng/module/scene';
 import * as _ from 'lodash';
 
 type SceneComponentRef = ComponentRef<AbstractTypeComponent>;
@@ -73,12 +74,12 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   /**
    * A list of scene components to attach to the host element.
    */
-  @Input('yameSceneComponents') components: SceneComponent[];
+  @Input('yameSceneComponents') components: SceneComponent[] = [];
 
   /**
    * The entity reference. This reference is independent from the parent reference
    */
-  @Input('yameSceneComponentsEntities') entities: SceneEntity[];
+  @Input('yameSceneComponentsEntities') entities: SceneEntity[] = [];
 
   /**
    * The selected state.
@@ -110,7 +111,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
     private viewContainerRef: ViewContainerRef,
     private componentFactoryResolver: ComponentFactoryResolver
   ) {
-    this.cachePrefix = uuid();
+    this.cachePrefix = uuid.v4();
   }
 
   /**
@@ -153,6 +154,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
       if (!EntityComponentsDirective.componentRefPool[type]) EntityComponentsDirective.componentRefPool[type] = [];
       const pool = EntityComponentsDirective.componentRefPool[type];
       const compType = this.service.getTypeComponent(type);
+      if (!compType) return;
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
       const count = EntityComponentsDirective.poolSizePerType - pool.length;
       for (let i = 0; i < count; i++) pool.push(this.createComponent(componentFactory, <any>{}));
@@ -166,7 +168,8 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
     const types = this.service.types;
     types.forEach(type => {
       EntityComponentsDirective.componentRefPool[type].forEach(ref => {
-        this.viewContainerRef.detach(this.viewContainerRef.indexOf(ref.hostView));
+        const idx = this.viewContainerRef.indexOf(ref.hostView);
+        if (idx >= 0) this.viewContainerRef.detach(idx);
       });
     });
   }
@@ -177,10 +180,10 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    * @param type
    * @return The component reference or `null`.
    */
-  obtainComponentRef(type: string): SceneComponentRef {
+  obtainComponentRef(type: string): SceneComponentRef | null {
     const pool = EntityComponentsDirective.componentRefPool[type];
     if (!pool || pool.length === 0) return null;
-    return pool.shift();
+    return pool.shift() as SceneComponentRef;
   }
 
   /**
@@ -216,7 +219,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
           componentRef = cached.ref;
           this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
         } else {
-          componentRef = this.obtainComponentRef(identifier);
+          componentRef = this.obtainComponentRef(identifier) as SceneComponentRef;
           if (!componentRef) {
             componentRef = this.createComponent(this.componentFactoryResolver.resolveComponentFactory(compType), void 0, insertCnt++);
           } else {
@@ -227,7 +230,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
             index: this.viewContainerRef.indexOf(componentRef.hostView),
           };
         }
-        if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = uuid();
+        if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = uuid.v4();
         const previous = componentRef.instance.component;
         componentRef.instance.component = component;
         componentRef.instance.entities = this.entities;
@@ -249,8 +252,8 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    * @param attached A list of component references.
    * @return The detached view references.
    */
-  detachCachedComponentRefs(attached: SceneComponentRef[]): SceneComponentRef[] {
-    const detached = [];
+  detachCachedComponentRefs(attached: SceneComponentRef[]): ViewRef[] {
+    const detached: ViewRef[] = [];
     const keys = Object.keys(EntityComponentsDirective.componentRefCache);
     keys.forEach(key => {
       if (key.indexOf(this.cachePrefix) < 0) return;
@@ -260,7 +263,8 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
       if (idx < 0 || attached.indexOf(cached.ref) >= 0) return;
       if (cached.ref) this.removeSubs(cached.ref);
       delete EntityComponentsDirective.componentRefCache[key];
-      detached.push(this.viewContainerRef.detach(idx));
+      const ref = this.viewContainerRef.detach(idx);
+      if (ref) detached.push(ref);
     });
     return detached;
   }
@@ -273,11 +277,11 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   setUpSubs(componentRef: SceneComponentRef): void {
     this.removeSubs(componentRef);
     EntityComponentsDirective.componentRefSubs.set(componentRef, [
-      componentRef.instance.updateEvent.subscribe(event => this.yameSceneComponentsInput.emit(event)),
-      componentRef.instance.removeEvent.subscribe(event => this.yameSceneComponentsRemove.emit(event)),
-      this.componentsUpdate.subscribe((components) => {
+      componentRef.instance.updateEvent.subscribe((event: AbstractInputEvent) => this.yameSceneComponentsInput.emit(event)),
+      componentRef.instance.removeEvent.subscribe((event: AbstractRemoveEvent) => this.yameSceneComponentsRemove.emit(event)),
+      this.componentsUpdate.subscribe((components: SceneComponent[]) => {
         if (! componentRef.instance.component) return;
-        const found = components.find(it => it.id === componentRef.instance.component.id);
+        const found = components.find(it => it.id === componentRef.instance?.component?.id);
         if (found) {
           _.merge(componentRef.instance.component, found);
           componentRef.changeDetectorRef.markForCheck();

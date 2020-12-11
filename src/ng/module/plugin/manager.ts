@@ -1,8 +1,9 @@
 import { CommonPluginManager } from 'common/plugin-manager';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, IpcRendererEvent } from 'electron';
 import * as _ from 'lodash';
-import { YameEnvironment } from '../../../common/interface/environment';
+import { YameEnvironment } from 'common/interface/environment';
 import { Environment } from '../../environment';
+import { YamePlugin } from 'electron/idx';
 
 /**
  * Plugin manager for the angular side of the editor.
@@ -17,6 +18,10 @@ export class PluginManager extends CommonPluginManager {
   /** @inheritdoc */
   protected type = 'ng';
 
+  protected persistConfig(plugin: YamePlugin): Promise<unknown> {
+    return Promise.resolve();
+  }
+
   /** @inheritdoc */
   require(path: string) {
     return (<any>global).require(path);
@@ -26,12 +31,12 @@ export class PluginManager extends CommonPluginManager {
   getFiles(): Promise<string[]> {
     return new Promise((resolve, reject) => {
       const id = _.uniqueId('plugins-');
-      let resolver, rejecter;
-      resolver = (event, files: string[]) => {
+      let resolver: (event: IpcRendererEvent, files: string[]) => void, rejecter: (event: IpcRendererEvent, message: string) => void;
+      resolver = (event: IpcRendererEvent, files: string[]) => {
         ipcRenderer.removeListener(`plugins:files:${id}:error`, rejecter);
         resolve(files);
       };
-      rejecter = (event, message: string) => {
+      rejecter = (event: IpcRendererEvent, message: string) => {
         ipcRenderer.removeListener(`plugins:files:${id}`, resolver);
         reject(new Error(message));
       };

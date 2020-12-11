@@ -6,6 +6,7 @@ import { transformTo } from '../utils/transform.utils';
 import { maxBy } from 'lodash';
 import { SceneEntity } from 'common/scene';
 import { Observable } from 'rxjs';
+import { ISelectState } from 'ng/module/scene';
 
 export class PixiBackdropSystem extends System {
 
@@ -16,11 +17,11 @@ export class PixiBackdropSystem extends System {
   protected topLeft = new Point();
   protected bottomRight = new Point();
 
-  protected isolated: SceneEntity;
+  protected isolated?: SceneEntity | null;
 
   protected transformOff = { id: 'transform-off', type: 'selection-container' };
 
-  @Select(state => state.select.isolated) isolated$: Observable<SceneEntity>;
+  @Select((state: { select: ISelectState }) => state.select.isolated) isolated$!: Observable<SceneEntity>;
 
   get scene(): Container {
     return this.service.scene;
@@ -57,14 +58,15 @@ export class PixiBackdropSystem extends System {
     service.scene.addChild(this.container);
     this.container.transform.updateTransform(this.scene.transform);
     const container = service.getContainer(isolated.id);
-    if (container.parent !== this.scene) {
+    if (container && container.parent !== this.scene) {
       container.transform.updateTransform(container.parent.transform);
       this.scene.addChild(container);
       transformTo(container, this.scene);
       service.updateComponents(isolated.components, container);
       let parentEntity = service.sceneService.getEntity(isolated.parent);
       while (parentEntity) {
-        service.updateComponents(parentEntity.components, service.getContainer(parentEntity.id));
+        const container = service.getContainer(parentEntity.id);
+        if (container) service.updateComponents(parentEntity.components, container);
         parentEntity = service.sceneService.getEntity(parentEntity.parent);
       }
     }
@@ -81,7 +83,7 @@ export class PixiBackdropSystem extends System {
       service.updateComponents(it.components, child);
     });
     if (this.container.children.length > 0)
-      this.graphics.zIndex = maxBy(this.container.children, it => it.zIndex).zIndex + 1;
+      this.graphics.zIndex = (maxBy(this.container.children, it => it.zIndex)?.zIndex || 0) + 1;
     service.engineService.engine.run();
   }
 
@@ -92,7 +94,7 @@ export class PixiBackdropSystem extends System {
     const service = this.service;
     this.active = true;
 
-    this.container.children.slice().forEach((child: Container) => {
+    (this.container.children as Container[]).slice().forEach((child: Container) => {
       if (!child.name) return;
       const entity = service.sceneService.getEntity(child.name);
       if (!entity) return;
@@ -107,15 +109,17 @@ export class PixiBackdropSystem extends System {
 
     if (this.isolated) {
       const child = service.getContainer(this.isolated.id);
-      child.transform.updateTransform(child.parent.transform);
-      const parent = service.getContainer(this.isolated.parent) || this.scene;
-      parent.addChild(child);
-      transformTo(child, parent);
-      let parentEntity = this.isolated;
-      while (parentEntity) {
-        const container = service.getContainer(parentEntity.id);
-        service.updateComponents(parentEntity.components, container);
-        parentEntity = service.sceneService.getEntity(parentEntity.parent);
+      if (child) {
+        child.transform.updateTransform(child.parent.transform);
+        const parent = service.getContainer(this.isolated.parent) || this.scene;
+        parent.addChild(child);
+        transformTo(child, parent);
+        let parentEntity = this.isolated;
+        while (parentEntity) {
+          const container = service.getContainer(parentEntity.id);
+          if (container) service.updateComponents(parentEntity.components, container);
+          parentEntity = service.sceneService.getEntity(parentEntity.parent) as SceneEntity;
+        }
       }
     }
     service.engineService.engine.run();
@@ -128,9 +132,9 @@ export class PixiBackdropSystem extends System {
     this.graphics.clear();
     this.graphics.beginFill(0x000000, 0.5);
     this.topLeft.set(0, 0);
-    this.bottomRight.set(this.service.renderer.width, this.service.renderer.height);
-    this.container.toLocal(this.topLeft, null, this.topLeft);
-    this.container.toLocal(this.bottomRight, null, this.bottomRight);
+    this.bottomRight.set(this.service.renderer?.width, this.service.renderer?.height);
+    this.container.toLocal(this.topLeft, void 0, this.topLeft);
+    this.container.toLocal(this.bottomRight, void 0, this.bottomRight);
     this.graphics.drawRect(this.topLeft.x, this.topLeft.y, this.bottomRight.x - this.topLeft.x, this.bottomRight.y - this.topLeft.y);
     this.graphics.endFill();
   }

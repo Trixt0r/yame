@@ -16,9 +16,8 @@ const mapping = {
 extend(mapping);
 
 import * as path from 'path';
-import * as electron from 'electron';
 import { BrowserWindow, app } from 'electron';
-import { File } from '../common/io/file';
+import { File } from './io/file';
 import initIpc from './ipc';
 import { Environment } from './environment';
 import { PluginManager } from './plugin/manager';
@@ -72,7 +71,7 @@ function init() {
 app.on('ready', () => {
   const file = new File(path.resolve(__dirname, '..', 'config.json'));
   file.read()
-    .then(data => {
+    .then(async data => {
       try {
         const json = JSON.parse(data.toString());
         Environment.config = json;
@@ -83,10 +82,8 @@ app.on('ready', () => {
       }
     })
     .catch(e => console.warn(e))
-    .then(() => {
-      initIpc(electron)
-        .finally(init);
-    });
+    .then(() => initIpc())
+    .finally(init);
 });
 
 app.on('window-all-closed', quit);

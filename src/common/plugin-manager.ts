@@ -1,9 +1,6 @@
-import * as _ from 'lodash';
 import { YamePlugin, PluginConfig } from './plugin';
-import * as Promise from 'bluebird';
 import { YameEnvironment } from './interface/environment';
-import { File } from './io/file';
-import * as path from 'path';
+import { uniqueId } from 'lodash';
 
 interface PluginPaths {
   [key: string]: string;
@@ -14,36 +11,22 @@ interface PluginPaths {
  *
  * In order to get initialized, the plugin has to be a node module.
  * This means that the entry point of the plugin is defined in the `package.json` unter `main`.
- *
- *
- * @class PluginManager
  */
 export abstract class CommonPluginManager {
 
   /**
    * Determines, which type of code this manager will load.
    * Either `electron` or `ng`.
-   *
-   * @protected
-   * @abstract
-   * @type {string}
    */
   protected abstract type: string;
 
   /**
    * Defines the yame environment of the manager.
-   *
-   * @protected
-   * @abstract
-   * @type {YameEnvironment}
    */
   protected abstract environment: YameEnvironment;
 
   /**
    * Mapping for plugin id to the package.json of the plugin.
-   *
-   * @protected
-   * @type {PluginPaths}
    */
   protected pluginPaths: PluginPaths = { };
 
@@ -51,14 +34,14 @@ export abstract class CommonPluginManager {
    * Attempts to initialize the given plugin files.
    *
    * @protected
-   * @param {string[]} files Files inside the plugin directories.
-   * @returns {Promise<any>}
+   * @param files Files inside the plugin directories.
+   * @return Resolves if done.
    */
-  protected initializeFromFiles(files: string[]): Promise<any> {
-    const promises = [];
+  protected initializeFromFiles(files: string[]): Promise<unknown> {
+    const promises: Promise<unknown>[] = [];
     files.forEach(file => {
       try {
-        const config: PluginConfig = this.require(path.resolve(`${file}`, 'package.json'));
+        const config: PluginConfig = this.require(this.require('path').resolve(`${file}`, 'package.json'));
         config.yame = config.yame || <any>{ };
         const yameConfig = config.yame;
         if (typeof yameConfig.active !== 'boolean')
@@ -71,7 +54,7 @@ export abstract class CommonPluginManager {
         plugin.isActive = plugin.config.yame.active;
         plugin.isInitialized = false;
         if (!plugin.id)
-          plugin.id = (config.name || _.uniqueId('yame-plugin-'));
+          plugin.id = (config.name || uniqueId('yame-plugin-'));
         this.pluginPaths[plugin.id] = file;
         plugin.environment = this.environment;
         plugin.config.file = file;
@@ -94,9 +77,9 @@ export abstract class CommonPluginManager {
   /**
    * Initializes all plugins.
    *
-   * @returns {Promise<any>} Resolves on success.
+   * @return Resolves on success.
    */
-  initialize(): Promise<any> {
+  initialize(): Promise<unknown> {
     return this.getFiles()
             .then(files => this.initializeFromFiles(files));
   }
@@ -104,9 +87,9 @@ export abstract class CommonPluginManager {
   /**
    * Finalizes all plugins.
    *
-   * @returns {Promise<any>}
+   * @return
    */
-  finalize(): Promise<any> {
+  finalize(): Promise<unknown> {
     const proms = this.environment.plugins.map(plugin => {
       return typeof plugin.finalize === 'function' ? plugin.finalize() : Promise.resolve();
     });
@@ -117,23 +100,19 @@ export abstract class CommonPluginManager {
   /**
    * Persists the config for the given plugin.
    *
-   * @protected
    * @todo Write to local user storage and not to the pacakge json.
-   * @param {YamePlugin} plugin
-   * @returns {Promise<any>}
+   * @param plugin
+   * @return
    */
-  protected persistConfig(plugin: YamePlugin): Promise<any> {
-    const file = new File(path.resolve(this.pluginPaths[plugin.id], 'package.json'));
-    return file.write(JSON.stringify(plugin.config, null, 2));
-  }
+  protected abstract persistConfig(plugin: YamePlugin): Promise<unknown>;
 
   /**
    * Activates the plugin with the given id.
    *
-   * @param {string} id
-   * @returns {Promise<any>} Resolves on success.
+   * @param id
+   * @return Resolves on success.
    */
-  activate(id: string): Promise<any> {
+  activate(id: string): Promise<unknown> {
     const plugin = this.environment.plugins.find(it => it.id === id);
     if (!plugin) return Promise.resolve();
     if (plugin.isActive) return Promise.resolve();
@@ -148,10 +127,10 @@ export abstract class CommonPluginManager {
   /**
    * Deactivates the plugin with the given id.
    *
-   * @param {string} id
-   * @returns {Promise<any>} Resolves on success.
+   * @param id
+   * @returns Resolves on success.
    */
-  deactivate(id: string): Promise<any> {
+  deactivate(id: string): Promise<unknown> {
     const plugin = this.environment.plugins.find(it => it.id === id);
     if (!plugin) return Promise.resolve();
     if (!plugin.isActive) return Promise.resolve();
@@ -165,11 +144,12 @@ export abstract class CommonPluginManager {
 
   /**
    * Reads all plugin files from the config and resolves them.
-   *
-   * @returns {Promise<string[]>}
    */
   abstract getFiles(): Promise<string []>;
 
+  /**
+   * Requires the module for the given file path.
+   */
   abstract require(path: string): any;
 
 }

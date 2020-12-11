@@ -1,5 +1,5 @@
-import EventEmitter from '../../../../common/event-emitter';
-import { SCALE_MODES, Texture, Point, Sprite, ParticleContainer, Container } from 'pixi.js';
+import EventEmitter from 'common/event-emitter';
+import { SCALE_MODES, Texture, Point, Sprite, ParticleContainer, Container, BaseTexture } from 'pixi.js';
 
 /**
  * Class for rendering a grid in a specific 2D container.
@@ -29,7 +29,7 @@ export class Grid extends EventEmitter {
   /**
    * The container this grid is attached to.
    */
-  private pContainer: Container;
+  private pContainer!: Container;
 
   /**
    * The last update size.
@@ -49,7 +49,7 @@ export class Grid extends EventEmitter {
   /**
    * Whether the cache is growing.
    */
-  private growingCache: boolean;
+  private growingCache!: boolean;
 
   /**
    * Internal cache of sprites.
@@ -70,7 +70,7 @@ export class Grid extends EventEmitter {
     if (Grid.spriteTexture) return Grid.spriteTexture;
     Grid.spriteTexture = Texture.from('assets/grid.png', { scaleMode: SCALE_MODES.NEAREST });
     // Listen for the texture update and assign the rectangle size
-    Grid.spriteTexture.baseTexture.on('update', tex => Grid.rectangleCount.set(tex.width / 16, tex.height / 16));
+    Grid.spriteTexture.baseTexture.on('update', (tex: BaseTexture) => Grid.rectangleCount.set(tex.width / 16, tex.height / 16));
     return Grid.spriteTexture;
   }
 
@@ -179,7 +179,7 @@ export class Grid extends EventEmitter {
    */
   update(width: number, height: number): Grid {
     if (this.container.position.x === this.lastUpdatePosition.x && this.container.position.y === this.lastUpdatePosition.y &&
-        this.lastUpdateSize.x === width && this.lastUpdateSize.y === height) return;
+        this.lastUpdateSize.x === width && this.lastUpdateSize.y === height) return this;
     this.lastUpdateSize.set(width, height);
     this.lastUpdatePosition.copyFrom(this.container.position);
     // If the cache is growing, wait until it is done and re-update

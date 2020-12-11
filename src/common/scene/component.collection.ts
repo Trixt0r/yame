@@ -12,7 +12,7 @@ export interface SceneComponentCollectionListener extends CollectionListener<Sce
   onUpdated(...elements: []): void;
 }
 
-export class SceneComponentCollection<T extends SceneComponent> extends ComponentCollection<T> {
+export class SceneComponentCollection<T extends SceneComponent = SceneComponent> extends ComponentCollection<T> {
 
   /**
    * Returns the component with the given id.
@@ -20,7 +20,7 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
    * @param id The id to search for.
    * @return The found component or `undefined`.
    */
-  byId(id: string): SceneComponent {
+  byId(id: string): SceneComponent | undefined {
     return this.find(comp => comp.id === id);
   }
 
@@ -41,7 +41,7 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
    * @param key The key to lookup in the found component.
    * @param dflt Optional default value if the component could not be found or the value is `undefined`.
    */
-  getValue<T>(id: string, key = 'value', dflt?: T): T {
+  getValue<T>(id: string, key = 'value', dflt?: T): T | undefined {
     const comp = this.byId(id);
     return comp ? comp[key] === void 0 ? dflt : comp[key] as T : dflt;
   }
@@ -60,17 +60,17 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
    *
    * @param components The data to set.
    */
-  set(...components: SceneComponent[]) {
-    const toAdd: SceneComponent[] = [];
-    const toRemove: SceneComponent[] = [];
-    const toUpdate: SceneComponent[] = [];
+  set(...components: T[]) {
+    const toAdd: T[] = [];
+    const toRemove: T[] = [];
+    const toUpdate: T[] = [];
     for (let i = 0, l = components.length; i < l; i++) {
       const comp = components[i];
       const found = comp.id ? this.find(it => it.id === comp.id) : this.find(it => it.type === comp.type);
       if (!found && comp.markedForDelete !== true) toAdd.push(cloneDeep(comp));
       else if (found && comp.markedForDelete === true) {
         if (found.type === 'group') {
-          this.getChildren(found as unknown as GroupSceneComponent).forEach(it => toRemove.push(it));
+          this.getChildren(found as unknown as GroupSceneComponent).forEach(it => toRemove.push(it as T));
         }
         if (found.group) {
           const group = this.find(g => g.id === found.group);
@@ -92,7 +92,7 @@ export class SceneComponentCollection<T extends SceneComponent> extends Componen
       this.add.apply(this, toAdd);
     if (toUpdate.length > 0) {
       this.updatedFrozenObjects();
-      this.dispatch.apply(this, ['onUpdated', ...toUpdate]);
+      (this as any).dispatch.apply(this, ['onUpdated', ...toUpdate]);
     }
     if (toRemove.length > 0)
       this.remove.apply(this, toRemove);

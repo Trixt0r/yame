@@ -1,4 +1,4 @@
-import { Directory } from '../../common/io/directory';
+import { Directory } from '../io/directory';
 import { IpcAction } from './abstract';
 import * as electron from 'electron';
 declare type Electron = typeof electron;
@@ -11,8 +11,10 @@ declare type Electron = typeof electron;
  */
 export class IpcDirectory extends IpcAction {
 
-  /** @inheritdoc */
-  public init(electron: Electron): Promise<any> {
+  /**
+   * @inheritdoc
+   */
+  async init(): Promise<void> {
     electron.ipcMain.on('directory:scan', (event, dirpath: string, id: string, deep = true) => {
         const directory = new Directory(dirpath);
         directory.on('scan:file', file => event.sender.send(`directory:scan:${id}:file`, file) );
@@ -22,7 +24,6 @@ export class IpcDirectory extends IpcAction {
         directory.on('scan:fail', e => event.sender.send(`directory:scan:${id}:fail`, e) );
         directory.scan(false, deep);
     });
-    this.internalInitialized = true;
-    return Promise.resolve();
+    this._initialized = true;
   }
 }

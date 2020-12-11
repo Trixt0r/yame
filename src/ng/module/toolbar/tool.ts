@@ -9,7 +9,7 @@ export class Tool {
   /**
    * The icon for this tool. Primarily used for the default tool component.
    */
-  icon: string;
+  icon?: string;
 
   readonly activated$ = new Subject();
   readonly deactivated$ = new Subject();

@@ -3,11 +3,10 @@ import { DirectoryProvider } from '../electron/provider/directory';
 import { ElectronService } from '../electron/service';
 import { FileContent } from 'common/content/file';
 import { DirectoryContent } from 'common/content/directory';
-import { Subject } from 'rxjs/Rx';
+import { Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import * as path from 'path';
 import * as _ from 'lodash';
-import * as Promise from 'bluebird';
 
 /**
  * The workspace service is holding a json representation of the workspace files.
@@ -21,10 +20,10 @@ import * as Promise from 'bluebird';
 @Injectable()
 export class WorkspaceService {
 
-  private internalFiles: DirectoryContent;
-  private internalFolders: DirectoryContent[];
+  private internalFiles: DirectoryContent | null = null;
+  private internalFolders: DirectoryContent[] = [];
   private internalState: 'init' | 'ready' | 'fail' = 'init';
-  private internalError;
+  private internalError: Error | null = null;
 
   private initSource = new Subject<void>();
   private readySource = new Subject<void>();
@@ -44,7 +43,7 @@ export class WorkspaceService {
    * @return The content of the loaded path.
    */
   async init(rootDir: string): Promise<DirectoryContent> {
-    if (this.internalState !== 'init') return this.internalFiles;
+    if (this.internalState !== 'init' && this.internalFiles) return this.internalFiles;
     this.internalState = 'init';
     this.initSource.next();
     const provider = this.electron.getProvider(DirectoryProvider);
@@ -69,11 +68,12 @@ export class WorkspaceService {
    * @param {string} path
    * @returns {(DirectoryContent | FileContent)} The found directory or file.
    */
-  find(path: string): DirectoryContent | FileContent {
-    if (path === this.internalFiles.path)
+  find(path: string): DirectoryContent | FileContent | null {
+    if (this.internalFiles && path === this.internalFiles.path)
       return this.internalFiles;
-    const searchChildren = (children: (DirectoryContent | FileContent)[]) => {
-      let f = null;
+    const searchChildren = (children: (DirectoryContent | FileContent)[] | undefined) => {
+      if (!children) return null;
+      let f: DirectoryContent | FileContent | null = null;
       children.some(child => {
         if (child.path === path)
           f = child;
@@ -83,7 +83,7 @@ export class WorkspaceService {
       });
       return f;
     };
-    return searchChildren(this.internalFiles.children);
+    return searchChildren(this.internalFiles?.children);
   }
 
   /**
@@ -106,8 +106,8 @@ export class WorkspaceService {
    * @param {string | DirectoryContent} path Should be a directory path.
    * @returns {(DirectoryContent | FileContent)[]} `null` will be returned if the path is not a directory.
    */
-  getFiles(path: string | DirectoryContent): (DirectoryContent | FileContent)[] {
-    const found: DirectoryContent | FileContent = this.find(typeof path === 'string' ? path : path.path);
+  getFiles(path: string | DirectoryContent): (DirectoryContent | FileContent)[] | null {
+    const found = this.find(typeof path === 'string' ? path : path.path);
     if (found && (<DirectoryContent>found).children !== void 0)
       return (<DirectoryContent>found).children;
     else
@@ -163,7 +163,7 @@ export class WorkspaceService {
    * @readonly
    * @type {DirectoryContent} directory The json representation of the workspace root folder.
    */
-  get directory(): DirectoryContent {
+  get directory(): DirectoryContent | null {
     return this.internalFiles;
   }
 
@@ -171,8 +171,8 @@ export class WorkspaceService {
    * @readonly
    * @type {((DirectoryContent | FileContent)[])} files The list of files and directories at the workspace root.
    */
-  get files(): (DirectoryContent | FileContent)[] {
-    return this.internalFiles.children;
+  get files(): (DirectoryContent | FileContent)[] | undefined {
+    return this.internalFiles?.children;
   }
 
   get error() {

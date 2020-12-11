@@ -5,11 +5,12 @@ import { PixiSelectionContainerService } from '../container.service';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { PixiRendererService } from '../../renderer.service';
 import { YAME_RENDERER } from 'ng/module/scene';
-import { Subscription } from 'rxjs';
 import { CursorService } from 'ng/services/cursor.service';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
+import { PointSceneComponent } from 'common/scene';
+import { SizeSceneComponent } from 'common/scene/component/size';
 
 /**
  * The resize handler delegates all tasks to @see {ResizeAnchor}
@@ -60,8 +61,8 @@ export class PixiSelectionHandlerResizeService {
     if (typeof data.width === 'number') this.containerService.container.width = data.width;
     if (typeof data.height === 'number') this.containerService.container.height = data.height;
     this.containerService.dispatchUpdate(
-      this.containerService.components.byId('transformation.scale'),
-      this.containerService.components.byId('transformation.size')
+      this.containerService.components.byId('transformation.scale') as PointSceneComponent,
+      this.containerService.components.byId('transformation.size') as SizeSceneComponent
     );
   }
 
@@ -70,7 +71,7 @@ export class PixiSelectionHandlerResizeService {
    *
    * @param event The triggered event.
    */
-  keyup(event) {
+  keyup(event: KeyboardEvent) {
     if (this.containerService.currentHandler !== this) return;
     this.containerService.endHandling(this, event);
   }
@@ -87,14 +88,14 @@ export class PixiSelectionHandlerResizeService {
       anchor
         .on('updated', () => {
           this.containerService.dispatchUpdate(
-            this.containerService.components.byId('transformation.position'),
-            this.containerService.components.byId('transformation.scale'),
-            this.containerService.components.byId('transformation.size')
+            this.containerService.components.byId('transformation.position') as PointSceneComponent,
+            this.containerService.components.byId('transformation.scale') as PointSceneComponent,
+            this.containerService.components.byId('transformation.size') as SizeSceneComponent
           );
         })
         .on('handle:start', () => this.containerService.beginHandling(anchor))
         .on('handle:end', () => this.containerService.endHandling(anchor));
-      (this.service.stage.getChildByName('foreground') as Container).addChild(anchor);
+      (this.service.stage?.getChildByName('foreground') as Container).addChild(anchor);
     });
 
     this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.renderer.detached$))
@@ -129,7 +130,7 @@ export class PixiSelectionHandlerResizeService {
         .off('updated')
         .off('handle:start')
         .off('handle:end');
-      (this.service.stage.getChildByName('foreground') as Container).removeChild(anchor);
+      (this.service.stage?.getChildByName('foreground') as Container).removeChild(anchor);
     });
   }
 

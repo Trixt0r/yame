@@ -26,35 +26,35 @@ export class AddSceneComponentButtonComponent implements OnChanges {
   /**
    * The entity to add new components to.
    */
-  @Input() entities: SceneEntity[];
+  @Input() entities: SceneEntity[] = [];
 
   /**
    * The items to display in the menu.
    */
-  items: NavItem[];
+  items: NavItem[] = [];
 
   constructor(protected sceneComponents: SceneComponentsService) {
   }
 
-  /**
-   * The items, which are not categorized.
-   */
-  get componentItems(): string[] {
-    const items = [];
-    this.sceneComponents.items.forEach(item => {
-      const categories = this.sceneComponents.getCategories(item);
-      if (categories.length > 0) return;
-      items.push(item);
-    });
-    return items;
-  }
+  // /**
+  //  * The items, which are not categorized.
+  //  */
+  // get componentItems(): string[] {
+  //   const items = [];
+  //   this.sceneComponents.items.forEach(item => {
+  //     const categories = this.sceneComponents.getCategories(item);
+  //     if (categories.length > 0) return;
+  //     items.push(item);
+  //   });
+  //   return items;
+  // }
 
   /**
    * Initializes the items to render.
    *
    * @inheritdoc
    */
-  ngOnChanges(changes): void {
+  ngOnChanges(): void {
     const items: NavItem[] = [];
     const sceneCategories = this.sceneComponents.categories;
     const flatList: NavItem[] = sceneCategories.map(category => {
@@ -68,8 +68,9 @@ export class AddSceneComponentButtonComponent implements OnChanges {
 
     flatList.forEach(item => {
       const sceneCategory = sceneCategories.find(it => item.id === it.id);
+      if (!sceneCategory) return;
       if (sceneCategory.categories)
-        item.children = flatList.filter(it => sceneCategory.categories.indexOf(it.id) >= 0);
+        item.children = flatList.filter(it => (sceneCategory.categories?.indexOf(it.id) || -1) >= 0);
       if (!sceneCategory.parent)
         items.push(item);
     });
@@ -92,7 +93,7 @@ export class AddSceneComponentButtonComponent implements OnChanges {
           const child = Object.assign({}, componentItem);
           if (!child.label)
             child.label = item.id.split(/\.|_|-/g).filter(str => it.id !== str).map(str => _.capitalize(str)).join(' ');
-          navItem.children.push(child);
+          navItem?.children?.push(child);
         });
       }
     });

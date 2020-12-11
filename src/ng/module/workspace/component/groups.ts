@@ -6,6 +6,7 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
 import { MatButton } from '@angular/material/button'
 
 import { WorkspaceService } from '../service';
+import { DirectoryContent } from 'common/content/directory';
 
 /**
  * Open event definition.
@@ -52,16 +53,16 @@ export class GroupsComponent implements OnInit {
   @Output('opened') opened: EventEmitter<OpenEvent> = new EventEmitter();
 
   /** @type {MatButton} The menu trigger button for the parent menu, which is not visible. */
-  @ViewChild('parentMenuTrigger', { static: false }) parentMenuTrigger: MatButton;
+  @ViewChild('parentMenuTrigger', { static: false }) parentMenuTrigger!: MatButton;
 
   // Internal vars which have not to be available to the public
-  groups: AssetGroup<Asset>[]; // Current files
-  openingGroups: AssetGroup<Asset>[]; // Preview of files which will be displayed on animation end
+  groups!: AssetGroup<Asset>[]; // Current files
+  openingGroups?: AssetGroup<Asset>[]; // Preview of files which will be displayed on animation end
   slide = 'none'; // slide state, either 'none', 'open', 'close'
-  private currentlyOpen: AssetGroup<Asset>; // Current directory
-  private previouslyOpen: AssetGroup<Asset>; // Previous directory
-  private currentParents: AssetGroup<Asset>[]; // List of parents of the current directory
-  private previousScrolls = []; // Scroll states for each directory
+  private currentlyOpen!: AssetGroup<Asset>; // Current directory
+  private previouslyOpen!: AssetGroup<Asset>; // Previous directory
+  private currentParents!: AssetGroup<Asset>[]; // List of parents of the current directory
+  private previousScrolls: number[] = []; // Scroll states for each directory
 
   constructor(
     public ref: ElementRef,
@@ -79,7 +80,7 @@ export class GroupsComponent implements OnInit {
   open(group: AssetGroup<Asset>): void {
     const close = this.parents.indexOf(group) >= 0; // We close, if we open a parent group
     // Store the scroll state for each group so we can restore it if the user moves back
-    if (!close) this.previousScrolls.push(this.ref.nativeElement.scrollTop);
+    if (!close) this.previousScrolls.push((this.ref.nativeElement as HTMLElement).scrollTop);
     this.slide = close ? 'close' : 'open';
     this.openingGroups = this.assets.getGroups(group);
     this.previouslyOpen = this.currentlyOpen;
@@ -104,7 +105,7 @@ export class GroupsComponent implements OnInit {
 
   /** @inheritdoc */
   ngOnInit(): Promise<void> {
-    return this.assets.fromFs(this.ws.directory)
+    return this.assets.fromFs(this.ws.directory as DirectoryContent)
             .then(group => {
               this.currentlyOpen = <AssetGroup<Asset>>group;
               this.previouslyOpen = this.currentlyOpen;
@@ -140,7 +141,7 @@ export class GroupsComponent implements OnInit {
     if (event.fromState !== 'none') return; // React only if we come from the 'none' state
     this.ref.nativeElement.classList.remove('no-overflow');
     this.fixScroll(event);
-    this.groups = this.openingGroups;
+    this.groups = this.openingGroups as AssetGroup<Asset>[];
     this.slide = 'none';
     this.opened.emit({
       previous: this.previous,
@@ -201,7 +202,7 @@ export class GroupsComponent implements OnInit {
    * @type {boolean}
    */
   public get displayBack(): boolean {
-    return (this.slide === 'none' && this.current && this.current.id !== this.ws.directory.path) ||
-            (this.slide !== 'none' && this.previous && this.previous.id !== this.ws.directory.path);
+    return (this.slide === 'none' && this.current && this.current.id !== this.ws.directory?.path) ||
+            (this.slide !== 'none' && this.previous && this.previous.id !== this.ws.directory?.path);
   }
 }

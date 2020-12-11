@@ -1,7 +1,6 @@
 import { IpcAction } from "./abstract";
 import * as electron from 'electron';
 import { PluginManager } from "../plugin/manager";
-declare type Electron = typeof electron;
 
 /**
  * Ipc action for reading plugin paths.
@@ -12,7 +11,7 @@ declare type Electron = typeof electron;
 export class IpcPlugins extends IpcAction {
 
 
-  init(electron: Electron): Promise<any> {
+  async init(): Promise<void> {
     electron.ipcMain.on('plugins:files', (event, id) => {
       PluginManager.getFiles()
         .then(files => {
@@ -25,7 +24,6 @@ export class IpcPlugins extends IpcAction {
         else event.sender.send('plugins:files:error', e.message);
       });
     });
-    this.internalInitialized = true;
-    return Promise.resolve();
+    this._initialized = true;
   }
 }

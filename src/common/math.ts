@@ -42,10 +42,10 @@ export function distanceSquared(p1: Point2D, p2: Point2D): number {
   const isP1Tuple = Array.isArray(p1);
   const isP2Tuple = Array.isArray(p2);
 
-  const x1 = isP1Tuple ? p1[0] : (p1 as IPoint).x;
-  const y1 = isP1Tuple ? p1[1] : (p1 as IPoint).y;
-  const x2 = isP2Tuple ? p2[0] : (p2 as IPoint).x;
-  const y2 = isP2Tuple ? p2[1] : (p2 as IPoint).y;
+  const x1 = isP1Tuple ? (p1 as [number, number])[0] : (p1 as IPoint).x;
+  const y1 = isP1Tuple ? (p1 as [number, number])[1] : (p1 as IPoint).y;
+  const x2 = isP2Tuple ? (p2 as [number, number])[0] : (p2 as IPoint).x;
+  const y2 = isP2Tuple ? (p2 as [number, number])[1] : (p2 as IPoint).y;
 
   return (x1 - x2) ** 2 + (y1 - y2) ** 2;
 }
@@ -77,12 +77,12 @@ export function distanceToSegmentSquared (point: Point2D, segment: Segment): num
   const isVTuple = Array.isArray(segment.v);
   const isWTuple = Array.isArray(segment.w);
 
-  const pX = isPTuple ? point[0] : (point as IPoint).x;
-  const pY = isPTuple ? point[1] : (point as IPoint).y;
-  const vX = isVTuple ? segment.v[0] : (segment.v as IPoint).x;
-  const vY = isVTuple ? segment.v[1] : (segment.v as IPoint).y;
-  const wX = isWTuple ? segment.w[0] : (segment.w as IPoint).x;
-  const wY = isWTuple ? segment.w[1] : (segment.w as IPoint).y;
+  const pX = isPTuple ? (point as [number, number])[0] : (point as IPoint).x;
+  const pY = isPTuple ? (point as [number, number])[1] : (point as IPoint).y;
+  const vX = isVTuple ? (segment.v as [number, number])[0] : (segment.v as IPoint).x;
+  const vY = isVTuple ? (segment.v as [number, number])[1] : (segment.v as IPoint).y;
+  const wX = isWTuple ? (segment.w as [number, number])[0] : (segment.w as IPoint).x;
+  const wY = isWTuple ? (segment.w as [number, number])[1] : (segment.w as IPoint).y;
 
   const t = ((pX - vX) * (wX - vX) + (pY - vY) * (wY - vY)) / length;
   // t = Math.max(-1, Math.min(1, t));
@@ -113,10 +113,10 @@ export function angleBetween(p1: Point2D, p2: Point2D): number {
   const isP1Tuple = Array.isArray(p1);
   const isP2Tuple = Array.isArray(p2);
 
-  const x1 = isP1Tuple ? p1[0] : (p1 as IPoint).x;
-  const y1 = isP1Tuple ? p1[1] : (p1 as IPoint).y;
-  const x2 = isP2Tuple ? p2[0] : (p2 as IPoint).x;
-  const y2 = isP2Tuple ? p2[1] : (p2 as IPoint).y;
+  const x1 = isP1Tuple ? (p1 as [number, number])[0] : (p1 as IPoint).x;
+  const y1 = isP1Tuple ? (p1 as [number, number])[1] : (p1 as IPoint).y;
+  const x2 = isP2Tuple ? (p2 as [number, number])[0] : (p2 as IPoint).x;
+  const y2 = isP2Tuple ? (p2 as [number, number])[1] : (p2 as IPoint).y;
 
   return Math.atan2(y2 - y1, x2 - x1);
 }

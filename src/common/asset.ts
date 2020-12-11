@@ -23,17 +23,17 @@ interface AssetContent {
  */
 export abstract class Asset {
 
-  /** @type {string} The unique identifier of the asset. */
-  id: string;
+  /** The unique identifier of the asset. */
+  id!: string;
 
-  /** @type {string} The type of the asset, e.g. file, directory, etc. */
-  type: string;
+  /** The type of the asset, e.g. file, directory, etc. */
+  type!: string;
 
-  /** @type {AssetContent} The content of the asset. */
+  /** The content of the asset. */
   content: AssetContent;
 
-  /** @type {AssetGroup<Asset>} The parent of this asset. Is `null` if it is the root group. */
-  parent: AssetGroup<Asset>;
+  /** The parent of this asset. Is `null` if it is the root group. */
+  parent!: AssetGroup<Asset>;
 
   constructor() {
     this.content = { };

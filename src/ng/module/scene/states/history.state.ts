@@ -1,7 +1,8 @@
 import { State, StateContext, Action, Store, Actions, ofActionSuccessful } from '@ngxs/store';
-import { UndoHistory, PushHistory, RedoHistory } from './actions';
+import { UndoHistory, PushHistory, RedoHistory } from './actions/history.action';
 import { cloneDeep } from 'lodash';
 import { Keydown } from 'ng/states/hotkey.state';
+import { Injectable } from '@angular/core';
 
 export interface IHistorySnapshot<T> {
   last: T[];
@@ -21,6 +22,7 @@ export interface IHistoryState {
     next: [],
   },
 })
+@Injectable()
 export class HistoryState {
 
   constructor(protected store: Store, actions: Actions) {
@@ -51,6 +53,7 @@ export class HistoryState {
     const previous = state.previous.slice();
     const next = state.next.slice();
     const difference = previous.pop();
+    if (!difference) return;
     next.push({ actions: cloneDeep(difference.last), last: cloneDeep(difference.actions), date: new Date() });
     ctx.patchState({ previous, next });
     this.store.dispatch(difference.actions);
@@ -63,6 +66,7 @@ export class HistoryState {
     const previous = state.previous.slice();
     const next = state.next.slice();
     const difference = next.pop();
+    if (!difference) return;
     previous.push({ actions: cloneDeep(difference.last), last: cloneDeep(difference.actions), date: new Date() });
     ctx.patchState({ previous, next });
     this.store.dispatch(difference.actions);

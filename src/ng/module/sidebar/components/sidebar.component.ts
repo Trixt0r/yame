@@ -12,8 +12,8 @@ import { ResizableComponent } from '../../utils/component/resizable';
 import { HierarchyComponent } from './hierarchy/hierarchy.component';
 import { SelectionComponent } from './selection/selection.component';
 import { Store, Select } from '@ngxs/store';
-import { Observable } from 'rxjs/Observable';
-import { ISelectState } from 'ng/module/scene/states/select.state';
+import { Observable } from 'rxjs';
+import { ISelectState } from 'ng/module/scene';
 import { Subscription } from 'rxjs';
 
 /**
@@ -44,17 +44,17 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
   /**
    * @type {HierarchyComponent} The hierarchy child component.
    */
-  @ViewChild('hierarchy', { static: true }) hierarchy: HierarchyComponent;
+  @ViewChild('hierarchy', { static: true }) hierarchy!: HierarchyComponent;
 
   /**
    * The selection child component.
    */
-  @ViewChild('selection', { static: true }) selection: SelectionComponent;
+  @ViewChild('selection', { static: true }) selection!: SelectionComponent;
 
   /**
    * The select query.
    */
-  @Select(state => state.select) selection$: Observable<ISelectState>;
+  @Select((state: { select: ISelectState }) => state.select) selection$!: Observable<ISelectState>;
 
   /**
    * The selected entities.
@@ -74,12 +74,12 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
   /**
    * The resize handler, which is bound to the scope of the component.
    */
-  protected onResizeBound: EventListenerObject;
+  protected onResizeBound: () => void;
 
   /**
    * Reference to the selection subscription.
    */
-  protected selectionSub: Subscription;
+  protected selectionSub!: Subscription;
 
   constructor(
     public ref: ElementRef,

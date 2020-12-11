@@ -1,16 +1,16 @@
 import { EventEmitter, HostBinding, OnDestroy } from '@angular/core';
 import { SceneComponent, SceneEntity } from 'common/scene';
-import { ISelectState } from 'ng/module/scene/states/select.state';
+import { ISelectState } from 'ng/module/scene';
 import { Subscription } from 'rxjs';
 
 export interface AbstractInputEvent<T extends SceneComponent = SceneComponent> {
   originalEvent: any;
-  component: T;
+  component?: T | null;
   index?: number;
 }
 
 export interface AbstractRemoveEvent<T extends SceneComponent = SceneComponent> {
-  component: T;
+  component?: T | null;
   index?: number;
 }
 
@@ -21,12 +21,12 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   /**
    * The property, this component should render.
    */
-  component: T;
+  component?: T | null;
 
   /**
    * The entities, this view belongs to.
    */
-  entities: SceneEntity[];
+  entities?: SceneEntity[];
 
   /**
    * The select state.
@@ -36,7 +36,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   /**
    * The parent this view belongs to.
    */
-  parent: SceneComponent;
+  parent?: SceneComponent;
 
   /**
    * The event, triggered when the scene component has been updated by the view component.
@@ -59,7 +59,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * Whether this component is disabled or not.
    */
   get disabled(): boolean {
-    return this.component.enabled === false;
+    return this.component?.enabled === false;
   }
 
   /**
@@ -73,12 +73,12 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
 
   @HostBinding('class.embedded')
   get embedded(): boolean {
-    return !!this.component.group;
+    return !!this.component?.group;
   }
 
   constructor() {
     this._externalEventSub = this.externalEvent.subscribe((comps: SceneComponent[]) => {
-      const found = comps.find(comp => comp.id === this.component.id);
+      const found = comps.find(comp => comp.id === this.component?.id);
       if (!found) return;
       this.onExternalUpdate(comps);
     });
@@ -127,8 +127,8 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * @return The transformed value or the original value.
    */
   transform(value: unknown): unknown {
-    if (!this.component.transform) return value;
-    return this.component.transform.apply(value);
+    if (!this.component?.transform) return value;
+    return this.component?.transform.apply(value);
   }
 
   /**
@@ -138,8 +138,8 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * @return The reversed value or the given value.
    */
   reverse(value: unknown): unknown {
-    if (!this.component.transform) return value;
-    return this.component.transform.reverse(value);
+    if (!this.component?.transform) return value;
+    return this.component?.transform.reverse(value);
   }
 
   /**

@@ -36,6 +36,7 @@ export class AssetState {
     const deletedAssets = toRemove.map(id => assets.find(it => it.id === id)).filter(it => !!it);
     if (deletedAssets.length === 0) return;
     deletedAssets.forEach(asset => {
+      if (!asset) return;
       const idx = assets.indexOf(asset);
       if (idx >= 0) assets.splice(idx, 1);
     });
@@ -48,7 +49,7 @@ export class AssetState {
     const toUpdate = Array.isArray(action.asset) ? action.asset : [action.asset];
     toUpdate.forEach(update => {
       const found = assets.find(it => update.id === it.id);
-      if (!found) return console.warn(`[Asset] Asset with ${found.id} does not exist`);
+      if (!found) return console.warn(`[Asset] Asset with ${update.id} does not exist`);
       merge(found, update);
     });
     return ctx.patchState({ assets });

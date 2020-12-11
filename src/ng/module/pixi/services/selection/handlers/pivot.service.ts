@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Graphics, Circle, Point, Container, InteractionEvent } from 'pixi.js';
-import { PixiRendererService } from '../..';
-import { PixiSelectionContainerService } from '..';
+import { PixiRendererService } from '../../renderer.service';
+import { PixiSelectionContainerService } from '../container.service';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { YAME_RENDERER, UpdateEntity } from 'ng/module/scene';
 import { PointSceneComponent } from 'common/scene';
@@ -21,7 +21,7 @@ export class PixiSelectionHandlerPivotService {
   /**
    * Bound mouse up function.
    */
-  protected onPointerUpFn: EventListenerObject;
+  protected onPointerUpFn: () => void;
 
   /**
    * Whether the mouse left.
@@ -89,7 +89,7 @@ export class PixiSelectionHandlerPivotService {
   updateCursor(event?: InteractionEvent): void {
     this.mouseLeft = event === void 0;
     if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
-    this.rendererService.view.style.cursor = 'grab';
+    if (this.rendererService.view) this.rendererService.view.style.cursor = 'grab';
   }
 
   /**
@@ -100,7 +100,7 @@ export class PixiSelectionHandlerPivotService {
   resetCursor(event?: any): void {
     if (event !== void 0) this.mouseLeft = true;
     if ((this.containerService.isHandling && this.containerService.currentHandler === this) || !this.mouseLeft) return;
-    this.rendererService.view.style.cursor = '';
+    if (this.rendererService.view) this.rendererService.view.style.cursor = '';
   }
 
   /**
@@ -113,12 +113,12 @@ export class PixiSelectionHandlerPivotService {
     if (this.containerService.isHandling) return;
     this.containerService.beginHandling(this, event);
     this.clickedPivot.copyFrom(this.container.pivot);
-    this.container.toLocal(event.data.global, null, tmp2);
+    this.container.toLocal(event.data.global, void 0, tmp2);
     this.clickedMouse.copyFrom(tmp2);
     this.area.on('pointermove', this.onPointerMove, this);
     this.area.off('pointerover', this.updateCursor, this);
     this.area.off('pointerout', this.resetCursor, this);
-    this.rendererService.view.style.cursor = 'grabbing';
+    if (this.rendererService.view) this.rendererService.view.style.cursor = 'grabbing';
     window.addEventListener('pointerup', this.onPointerUpFn);
   }
 
@@ -135,7 +135,7 @@ export class PixiSelectionHandlerPivotService {
     this.area.worldTransform.applyInverse(this.rendererService.mouse as Point, tmp1);
     const contains = this.area.hitArea.contains(tmp1.x, tmp1.y);
     if (!contains) this.resetCursor(true);
-    else this.rendererService.view.style.cursor = 'grab';
+    else if (this.rendererService.view) this.rendererService.view.style.cursor = 'grab';
   }
 
   /**
@@ -145,9 +145,9 @@ export class PixiSelectionHandlerPivotService {
    */
   onPointerMove(event: InteractionEvent): void {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
-    this.rendererService.view.style.cursor = 'grabbing';
+    if (this.rendererService.view) this.rendererService.view.style.cursor = 'grabbing';
 
-    this.container.toLocal(event.data.global, null, tmp2);
+    this.container.toLocal(event.data.global, void 0, tmp2);
     tmp2.x = this.clickedPivot.x + (tmp2.x - this.clickedMouse.x);
     tmp2.y = this.clickedPivot.y + (tmp2.y - this.clickedMouse.y);
     this.container.parent.toLocal(tmp2, this.container, tmp1);
@@ -157,8 +157,8 @@ export class PixiSelectionHandlerPivotService {
 
     this.updateArea();
     this.containerService.dispatchUpdate(
-      this.containerService.components.byId('transformation.pivot'),
-      this.containerService.components.byId('transformation.position')
+      this.containerService.components.byId('transformation.pivot') as PointSceneComponent,
+      this.containerService.components.byId('transformation.position') as PointSceneComponent
     );
   }
 
@@ -167,7 +167,7 @@ export class PixiSelectionHandlerPivotService {
    */
   updateArea(): void {
     this.area.position.copyFrom(this.container.pivot);
-    this.rendererService.stage.toLocal(this.area.position, this.container, this.area.position);
+    this.rendererService.stage?.toLocal(this.area.position, this.container, this.area.position);
   }
 
   /**
@@ -191,8 +191,8 @@ export class PixiSelectionHandlerPivotService {
     this.container.pivot.copyFrom(tmp2);
 
     this.containerService.dispatchUpdate(
-      this.containerService.components.byId('transformation.pivot'),
-      this.containerService.components.byId('transformation.position')
+      this.containerService.components.byId('transformation.pivot') as PointSceneComponent,
+      this.containerService.components.byId('transformation.position') as PointSceneComponent
     );
   }
 
@@ -201,7 +201,7 @@ export class PixiSelectionHandlerPivotService {
    *
    * @param event The triggered event.
    */
-  keyup(event) {
+  keyup(event: KeyboardEvent) {
     if (this.containerService.currentHandler !== this) return;
     this.containerService.endHandling(this, event);
   }
@@ -210,7 +210,7 @@ export class PixiSelectionHandlerPivotService {
    * Adds the interaction area to the stage.
    */
   attach(): void {
-    (this.rendererService.stage.getChildByName('foreground') as Container).addChild(this.area);
+    (this.rendererService.stage?.getChildByName('foreground') as Container).addChild(this.area);
     this.updateArea();
     this.containerService
         .updateDispatched$
@@ -219,7 +219,7 @@ export class PixiSelectionHandlerPivotService {
           if (action === this.containerService.updateEntityAction) return;
           const data = Array.isArray(action.data) ? action.data : [action.data];
           if (data.length <= 0) return;
-          const pivot = data[0].components.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
+          const pivot = data[0].components?.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
           if (!pivot) return;
 
           const oldPos = tmp2.copyFrom(this.container.position);
@@ -260,7 +260,7 @@ export class PixiSelectionHandlerPivotService {
    * Removes the interaction area from the stage.
    */
   detach(): void {
-    (this.rendererService.stage.getChildByName('foreground') as Container).removeChild(this.area);
+    (this.rendererService.stage?.getChildByName('foreground') as Container).removeChild(this.area);
   }
 
 }

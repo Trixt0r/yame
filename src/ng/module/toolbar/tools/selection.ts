@@ -1,13 +1,13 @@
 import * as _ from 'lodash';
 import { Tool } from '../tool';
 import { Injectable } from '@angular/core';
-import { ToolbarService } from 'ng/idx';
 import { Graphics, Container } from 'pixi.js';
 import { Store } from '@ngxs/store';
 import { Subject } from 'rxjs';
 import { Select, Unselect, SceneService } from 'ng/module/scene';
 import { SceneComponent, SceneEntity, SceneEntityType } from 'common/scene';
 import { HotkeyService } from 'ng/services/hotkey.service';
+import { ToolbarService } from '../service';
 
 /**
  *
@@ -38,14 +38,14 @@ export class SelectionToolService extends Tool {
   readonly handlers: any[] = [];
 
   // Protected fields, needed to render and handle mouse events
-  protected stage: Container;
+  protected stage!: Container;
   protected graphics = new Graphics();
   protected down = false;
 
   // Context bound mouse event handler.
-  protected onMousedown: EventListenerObject;
-  protected onMouseup: EventListenerObject;
-  protected onMousemove: EventListenerObject;
+  protected onMousedown!: (event: MouseEvent) => void;
+  protected onMouseup!: (event: MouseEvent) => void;
+  protected onMousemove!: (event: MouseEvent) => void;
 
   protected selectAction = new Select([], []);
   protected unselectAction = new Unselect();
@@ -144,7 +144,7 @@ export class SelectionToolService extends Tool {
     window.addEventListener('mouseup', this.onMouseup);
     window.addEventListener('mousemove', this.onMousemove);
     this.unselectAction.entities = this.store.selectSnapshot((state) => state.select).entities;
-    if (this.unselectAction.entities.length > 0) this.store.dispatch(this.unselectAction);
+    if ((this.unselectAction.entities?.length || 0) > 0) this.store.dispatch(this.unselectAction);
     this.begin$.next(event);
   }
 

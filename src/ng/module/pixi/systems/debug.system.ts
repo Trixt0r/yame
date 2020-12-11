@@ -5,7 +5,7 @@ import { PixiRendererService } from '../services/renderer.service';
 export class PixiDebugSystem extends System {
 
   private debugDisplay: Container;
-  private debugDuration: Text;
+  private debugDuration?: Text;
 
   constructor(protected service: PixiRendererService, priority?: number) {
     super(priority);
@@ -13,7 +13,7 @@ export class PixiDebugSystem extends System {
     this.debugDisplay.name = 'debug';
     this.debugDisplay.position.set(76, 8);
     this.service.init$.subscribe(() => {
-      this.service.stage.addChild(this.debugDisplay);
+      this.service.stage?.addChild(this.debugDisplay);
       this.debugDuration = new Text('0ms', { fill: 0xffffff, fontSize: 12, fontFamily: 'Courier New' });
       this.debugDuration.name = 'duration';
       this.debugDisplay.addChild(this.debugDuration);
@@ -25,6 +25,7 @@ export class PixiDebugSystem extends System {
    * @inheritdoc
    */
   process(): void {
+    if (!this.debugDuration) return;
     const now = performance.now();
     const diagnostics = this.service.diagnostics;
     const time = this.service.diagnostics.startTime as number;
@@ -35,7 +36,7 @@ export class PixiDebugSystem extends System {
 Iteration: ${iterationTime || 0} ms
 Rendering: ${renderingTime || 0} ms
 Overall: ${overAllTime || 0} ms`;
-    this.service.renderer.render(this.debugDisplay, void 0, false);
+    this.service.renderer?.render(this.debugDisplay, void 0, false);
   }
 
 }

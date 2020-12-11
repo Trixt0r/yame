@@ -113,6 +113,6 @@ export function createComponent(id: string, type: string, group?: string): Scene
  */
 export function cloneComponent(comp: SceneComponent): SceneComponent {
   const re = cloneDeep(comp);
-  delete re.id;
+  delete (re as any).id;
   return re;
 }

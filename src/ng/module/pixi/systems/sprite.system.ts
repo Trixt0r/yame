@@ -8,7 +8,7 @@ import { SizeSceneComponent } from 'common/scene/component/size';
 interface TweenSettings {
   fps: number;
   duration: number;
-  type: string;
+  type: keyof typeof tweenFunctions;
 }
 
 export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
@@ -26,7 +26,7 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
   }
 
   protected tween(start: number, end: number, t: number, duration: number, type = PixiSpriteSystem.settings.type): number {
-    const fn = tweenFunctions[type];
+    const fn = tweenFunctions[type] as (...args: number[]) => number;
     if (!fn) return end;
     else return fn(t, start, end, duration);
   }
@@ -35,6 +35,7 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
     let size = entity.components.byId('transformation.size') as SizeSceneComponent;
     if (!size) size = entity.components.byId('transformation.size.tmp') as SizeSceneComponent;
     const container = this.service.getContainer(entity.id);
+    if (!container) return;
     container.width = 0;
     container.height = 0;
     size.width = 0;
@@ -59,8 +60,9 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
    */
   processEntity(entity: SceneEntity) {
     const container = this.service.getContainer(entity.id);
+    if (!container) return;
     const spriteTexture = entity.components.byId('sprite.texture') as AssetSceneComponent;
-    let sprite = container.getChildByName('sprite') as Sprite;
+    let sprite = container.getChildByName('sprite') as Sprite | null;
     if (sprite && sprite.texture.baseTexture.cacheId !== spriteTexture.asset) {
       container.removeChild(sprite);
       sprite = null;
@@ -87,7 +89,7 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
       this.rgbArray[1] = spriteColor.green / 255;
       this.rgbArray[2] = spriteColor.blue / 255;
       sprite.tint = utils.rgb2hex(this.rgbArray);
-      sprite.alpha = spriteColor.alpha;
+      sprite.alpha = spriteColor.alpha as number;
     }
   }
 }

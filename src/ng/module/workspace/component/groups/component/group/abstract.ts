@@ -14,7 +14,7 @@ import { AssetGroup } from 'common/asset/group';
 export abstract class GroupComponent {
 
   /** @type {AssetGroup<Asset>} The group to display in the groups list. */
-  group: AssetGroup<Asset>;
+  group!: AssetGroup<Asset>;
 
   /** @type {EventEmitter<MouseEvent>} The event triggered if the group has been clicked. */
   clickEvent: EventEmitter<MouseEvent> = new EventEmitter();

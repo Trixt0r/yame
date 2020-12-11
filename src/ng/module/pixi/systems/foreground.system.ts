@@ -12,7 +12,7 @@ export class PixiForegroundSystem extends System {
     this.foreground.name = 'foreground';
     this.foreground.sortableChildren = true;
     this.service.init$.subscribe(() => {
-      this.service.app.stage.addChild(this.foreground);
+      this.service.app?.stage.addChild(this.foreground);
     });
   }
 
@@ -20,7 +20,7 @@ export class PixiForegroundSystem extends System {
    * @inheritdoc
    */
   process(): void {
-    this.service.renderer.render(this.foreground, void 0, false);
+    this.service.renderer?.render(this.foreground, void 0, false);
   }
 
 }

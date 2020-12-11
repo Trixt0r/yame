@@ -14,6 +14,7 @@ import {
   Output,
   ViewContainerRef,
   OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 
 /**
@@ -32,7 +33,7 @@ import {
 })
 export class GroupDirective implements OnChanges {
   /** @type {AssetGroup<Asset>} The asset group to render. */
-  @Input('groupHost') group: AssetGroup<Asset>;
+  @Input('groupHost') group!: AssetGroup<Asset>;
 
   /** @type {EventEmitter<MouseEvent>} The click event, which should be triggered by the rendered component. */
   @Output('click') click: EventEmitter<MouseEvent> = new EventEmitter();
@@ -44,7 +45,7 @@ export class GroupDirective implements OnChanges {
   ) {}
 
   /** @inheritdoc */
-  ngOnChanges(changes) {
+  ngOnChanges(changes: SimpleChanges) {
     if (changes.group) this.render();
   }
 
@@ -54,7 +55,7 @@ export class GroupDirective implements OnChanges {
    * @returns {ComponentRef<GroupComponent>} The created component reference or `null`
    *                                          if no component found for the current group.
    */
-  render(): ComponentRef<GroupComponent> {
+  render(): ComponentRef<GroupComponent> | null {
     const compType = this.groups.get(this.group);
     if (!compType) return null;
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
@@ -62,7 +63,7 @@ export class GroupDirective implements OnChanges {
     viewContainerRef.clear();
     const componentRef = viewContainerRef.createComponent(componentFactory);
     componentRef.instance.group = this.group;
-    componentRef.instance.clickEvent.subscribe(event => this.click.emit(event));
+    componentRef.instance.clickEvent.subscribe((event: MouseEvent) => this.click.emit(event));
     return componentRef;
   }
 }

@@ -35,19 +35,19 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * Internal scene component reference.
    */
-  protected comp: SceneComponentView;
+  protected comp?: SceneComponentView;
 
   /**
    * Internal application reference.
    */
-  protected _app: Application;
+  protected _app?: Application;
 
   /**
    * A map which maps an entity id to the corresponding pixi.js container.
    */
-  protected pixiContainers: { [key: string]: Container } = {};
+  protected pixiContainers: { [key: string]: Container | undefined } = {};
 
-  protected _previewEntity: SceneEntity;
+  protected _previewEntity?: SceneEntity;
 
   public readonly init$: Subject<void> = new Subject();
   public readonly resize$: Subject<{ width: number; height: number }> = new Subject();
@@ -55,7 +55,7 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * @inheritdoc
    */
-  sceneService: SceneService;
+  sceneService!: SceneService;
 
   /**
    * The scene container reference.
@@ -69,50 +69,50 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * The pixi application
    */
-  get app(): Application {
+  get app(): Application | undefined {
     return this._app;
   }
 
   /**
    * The pixi renderer instance.
    */
-  get renderer(): Renderer {
-    return this._app ? this._app.renderer : null;
+  get renderer(): Renderer | undefined {
+    return this._app?.renderer;
   }
 
   /**
    * The stage container. The root container.
    */
-  get stage(): Container {
-    return this._app.stage;
+  get stage(): Container | undefined {
+    return this._app?.stage;
   }
 
   /**
    * The canvas element.
    */
-  get view(): HTMLCanvasElement {
-    return this._app.view;
+  get view(): HTMLCanvasElement | undefined {
+    return this._app?.view;
   }
 
   /**
    * The pixi ticker, i.e. main loop.
    */
-  get ticker(): Ticker {
-    return this._app.ticker;
+  get ticker(): Ticker | undefined {
+    return this._app?.ticker;
   }
 
   /**
    * The pixi screen, i.e. current dimensions.
    */
-  get screen(): Rectangle {
-    return this._app.screen;
+  get screen(): Rectangle | undefined {
+    return this._app?.screen;
   }
 
   /**
    * The global mouse coordinates.
    */
   get mouse(): IPointData {
-    return this._app.renderer.plugins.interaction.mouse.global;
+    return this._app?.renderer.plugins.interaction.mouse.global;
   }
 
   constructor(
@@ -128,9 +128,10 @@ export class PixiRendererService implements ISceneRenderer {
       actions.pipe(ofActionSuccessful(SortEntity)).subscribe((action: SortEntity) => {
         const data = Array.isArray(action.data) ? action.data : [action.data];
         const parents: string[] = [];
-        data.forEach((it) => {
+        data.forEach(it => {
           if (it.parent === it.oldParent) return;
           const container = this.getContainer(it.id);
+          if (!container) return;
           const oldParent = this.getContainer(it.oldParent) || this.scene;
           const newParent = this.getContainer(it.parent) || this.scene;
           const entity = this.sceneService.getEntity(it.id);
@@ -138,17 +139,17 @@ export class PixiRendererService implements ISceneRenderer {
           if (it.parent && parents.indexOf(it.parent) < 0) parents.push(it.parent);
           if (it.oldParent && parents.indexOf(it.oldParent) < 0) parents.push(it.oldParent);
 
-          const enabled = oldParent === container.parent;
+          const enabled = oldParent === container?.parent;
           if (!enabled) return;
-          container.transform.updateTransform(container.parent.transform);
+          container?.transform.updateTransform(container.parent.transform);
           newParent.addChild(container);
           transformTo(container, newParent);
-          this.updateComponents(entity.components, container);
+          if (entity) this.updateComponents(entity.components, container);
         });
 
         const pushParents = (source: string[]) => {
           if (source.length === 0) return;
-          const pushed = [];
+          const pushed = [] as string[];
           source.forEach((id) => {
             const entity = this.sceneService.getEntity(id);
             if (!entity) return;
@@ -166,7 +167,7 @@ export class PixiRendererService implements ISceneRenderer {
           const container = this.getContainer(id);
           if (!container) return;
           const entity = this.sceneService.getEntity(id);
-          if (entity.type === SceneEntityType.Layer) return;
+          if (!entity || entity.type === SceneEntityType.Layer) return;
           const parentContainer = this.getContainer(entity.parent) || this.scene;
           const enabled = container.parent === parentContainer;
           if (!enabled) return;
@@ -196,7 +197,7 @@ export class PixiRendererService implements ISceneRenderer {
               self.updateComponents(entity.components, child);
             }
             // Make sure the new display object gets added to the correct parent
-            const parentContainer = self.pixiContainers[entity.parent];
+            const parentContainer = self.getContainer(entity.parent);
             if (!parentContainer || parentContainer === self.scene) return;
             parentContainer.addChild(child);
             if (!isClone) {
@@ -210,11 +211,12 @@ export class PixiRendererService implements ISceneRenderer {
             const children = self.sceneService.getChildren(entity.id, true);
             if (children.length > 0) engine.entities.remove.apply(engine.entities, children);
             const container = self.pixiContainers[entity.id];
-            if (container.parent) {
-              container.parent.removeChild(self.pixiContainers[entity.id]);
+            if (container?.parent) {
+              container.parent.removeChild(self.getContainer(entity.id) as Container);
               let parentEntity = self.sceneService.getEntity(entity.parent);
               while (parentEntity) {
-                self.updateComponents(parentEntity.components, self.pixiContainers[parentEntity.id]);
+                const cont = self.getContainer(parentEntity.id);
+                if (cont) self.updateComponents(parentEntity.components, cont);
                 parentEntity = self.sceneService.getEntity(parentEntity.parent);
               }
             }
@@ -227,12 +229,13 @@ export class PixiRendererService implements ISceneRenderer {
 
   set component(comp: SceneComponentView) {
     if (this._app) this._app.destroy();
-    this.comp = comp;
+    this.comp = comp as SceneComponentView;
+    if (!this.comp) return;
     this._app = new Application({
       antialias: true,
       autoDensity: true,
       transparent: true,
-      view: this.comp.ref.nativeElement.querySelector('canvas'),
+      view: this.comp.ref.nativeElement.querySelector('canvas') as HTMLCanvasElement,
     });
     this._app.stage.sortableChildren = true;
     this._app.stage.addChild(this.scene);
@@ -245,7 +248,7 @@ export class PixiRendererService implements ISceneRenderer {
    * @inheritdoc
    */
   get component(): SceneComponentView {
-    return this.comp;
+    return this.comp as SceneComponentView;
   }
 
   /**
@@ -253,7 +256,7 @@ export class PixiRendererService implements ISceneRenderer {
    */
   setSize(width: number, height: number): void {
     if (!this._app) return;
-    this.renderer.resize(width, height);
+    this.renderer?.resize(width, height);
     this.resize$.next({ width, height });
     this.engineService.run();
   }
@@ -268,17 +271,17 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * @inheritdoc
    */
-  createPreview(x: number, y: number, asset: Asset) {
+  createPreview(x: number, y: number, asset: Asset): void {
     this.zone.runOutsideAngular(() => {
       this.sceneService.createEntity(x, y, asset).subscribe((entity) => {
         this._previewEntity = entity;
-        delete this._previewEntity.parent;
+        this._previewEntity.parent = null;
         this._previewEntity.components.add({ id: 'sprite.animate', type: 'boolean', boolean: true, group: 'sprite' });
         this.engineService.engine.entities.add(this._previewEntity);
         this._previewEntity.components.add({
           id: 'index',
           type: 'index',
-          index: maxBy(this.scene.children, (child) => child.zIndex).zIndex + 1,
+          index: (maxBy(this.scene.children, (child) => child.zIndex)?.zIndex || 0) + 1,
         });
         this.engineService.run();
       });
@@ -305,7 +308,7 @@ export class PixiRendererService implements ISceneRenderer {
    */
   removePreview(): void {
     if (!this._previewEntity) return;
-    this.scene.removeChild(this.pixiContainers[this._previewEntity.id]);
+    this.scene.removeChild(this.getContainer(this._previewEntity?.id) as Container);
     this.engineService.engine.entities.remove(this._previewEntity);
     delete this.pixiContainers[this._previewEntity.id];
     delete this._previewEntity;
@@ -326,19 +329,19 @@ export class PixiRendererService implements ISceneRenderer {
    * Returns the pixi container for the given entity id.
    *
    * @param id The entity id.
-   * @returns The pixi container.
+   * @return The pixi container.
    */
-  getContainer(id: string): Container {
-    return this.pixiContainers[id];
+  getContainer(id: string | null | undefined): Container | undefined {
+    return id ? this.pixiContainers[id] : void 0;
   }
 
   /**
    * Returns the shape object for the given entity id.
    *
    * @param id The entity id.
-   * @returns The shape object
+   * @return The shape object
    */
-  getShape(id: string): Rectangle | RoundedRectangle | Circle | Ellipse | Polygon {
+  getShape(id: string): Rectangle | RoundedRectangle | Circle | Ellipse | Polygon | null {
     const container = this.getContainer(id);
     if (container) return container.getLocalBounds();
     else return null;
@@ -358,7 +361,7 @@ export class PixiRendererService implements ISceneRenderer {
       return false;
     }
     const container = this.getContainer(id);
-    container.worldTransform.applyInverse(point, tempPoint);
+    container?.worldTransform.applyInverse(point, tempPoint);
     return bounds.contains(tempPoint.x, tempPoint.y);
   }
 

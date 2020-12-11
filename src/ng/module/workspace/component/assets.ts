@@ -27,9 +27,9 @@ const dragImage = new Image(0, 0);
 })
 export class AssetsComponent implements OnChanges {
   /** @type {AssetGroup<Asset>} The group this component displays.*/
-  @Input() group: AssetGroup<Asset>;
+  @Input() group!: AssetGroup<Asset>;
 
-  assets: Asset[]; // The assets, we are displaying
+  assets!: Asset[]; // The assets, we are displaying
 
   constructor(public ref: ElementRef, private as: AssetService, private assetComponents: AssetComponentService) {}
 
@@ -58,6 +58,6 @@ export class AssetsComponent implements OnChanges {
    * @returns {void}
    */
   dragStart(event: DragEvent): void {
-    event.dataTransfer.setDragImage(dragImage, 0, 0);
+    event.dataTransfer?.setDragImage(dragImage, 0, 0);
   }
 }

@@ -7,7 +7,7 @@ import { SceneEntity, createTransformationComponents } from 'common/scene';
 import { Observable, from, of, Subscription } from 'rxjs';
 import { SceneState } from '../states/scene.state';
 import { flatMap } from 'rxjs/operators';
-import { SceneComponent } from '../components';
+import { SceneComponent } from '../components/scene/scene.component';
 
 export interface ISceneRenderer {
 
@@ -46,7 +46,7 @@ export interface ISceneRenderer {
    * @param y The y coordinate.
    * @param asset The asset to create the preview for.
    */
-  createPreview(x: number, y: number, asset: Asset);
+  createPreview(x: number, y: number, asset: Asset): void;
 
   /**
    * Updates the current preview at the given coordinates.
@@ -73,15 +73,15 @@ export interface ISceneRenderer {
  */
 export class NoopRenderer implements ISceneRenderer {
 
-  component: SceneComponent;
+  component!: SceneComponent;
 
-  sceneService: SceneService;
+  sceneService!: SceneService;
 
   projectToScene(x: number, y: number) { return { x, y }; }
 
   setSize(width: number, height: number) { }
 
-  createPreview(x: number, y: number, asset: Asset) { return null; }
+  createPreview(x: number, y: number, asset: Asset): void { }
 
   updatePreview(x: number, y: number) { }
 
@@ -241,8 +241,8 @@ export class SceneService {
    * @return An observable, you can subscribe to.
    */
   createEntity(x: number, y: number, asset?: Asset): Observable<SceneEntity> {
-    const hasAsset = asset instanceof Asset;
-    const obs = hasAsset ? from(this.converter.get(asset)) : of([]);
+    const hasAsset = asset && asset instanceof Asset;
+    const obs = hasAsset ? from(this.converter.get(asset as Asset)) : of([]);
     const parent = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
     const re = obs.pipe(
       flatMap(data => {
@@ -282,10 +282,11 @@ export class SceneService {
    * @param entity An entity instance or its id.
    * @return The found entity.
    */
-  getEntity(entity: string | SceneEntity): SceneEntity {
+  getEntity(entity: string | SceneEntity | null | undefined): SceneEntity | null | undefined {
+    if (entity === null || entity === void 0) return void 0;
     const id = entity instanceof SceneEntity ? entity.id : entity;
     const re = this.idMapping[id];
-    if (!re) return this.store.selectSnapshot(state => state.scene.entities).find(it => it.id === id);
+    if (!re) return this.store.selectSnapshot(state => state.scene.entities).find((it: SceneEntity) => it.id === id);
     return re;
   }
 
@@ -295,8 +296,8 @@ export class SceneService {
    * @param entity The entity to check.
    * @return Whether the given entity exists in the store.
    */
-  assertEntity(entity: SceneEntity | string): boolean {
-    return !!this.getEntity(entity);
+  assertEntity(entity?: SceneEntity | string | null): boolean {
+    return entity === void 0 || entity === null ? false : !!this.getEntity(entity);
   }
 
   /**
@@ -307,7 +308,8 @@ export class SceneService {
    * @param [deep = true] Whether to return also the children of the children.
    * @return A list of scene entity children for the given id.
    */
-  getChildren(entityOrId: string | SceneEntity, deep: boolean = true): SceneEntity[] {
+  getChildren(entityOrId?: string | SceneEntity | null, deep: boolean = true): SceneEntity[] {
+    if (entityOrId === void 0 || entityOrId === null) return [];
     const id = entityOrId instanceof SceneEntity ? entityOrId.id : entityOrId;
     const re = deep ? this.childDeepMapping[id] : this.childFlatMapping[id];
     if (re === void 0) return this._getChildren(entityOrId, deep);

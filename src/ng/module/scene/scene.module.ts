@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { DndModule } from 'ng2-dnd';
-import { SceneComponent } from './components';
+import { SceneComponent } from './components/scene/scene.component';
 import { SceneRendererComponentDirective } from './directives/renderer.directive';
 import { NoopSceneRendererComponent } from './services/scene.service';
 import { ISceneAssetConverter, SceneAssetConverter } from './services/converter.service';
@@ -11,7 +11,7 @@ import { ImageAsset } from 'common/asset/image';
 import { SelectState } from './states/select.state';
 import { createAssetComponent, createColorComponent } from 'common/scene';
 import { SceneComponentService } from './services/component.service';
-import { HistoryState, UndoHistory, RedoHistory } from './states';
+import { HistoryState } from './states/history.state';
 
 
 

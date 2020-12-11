@@ -14,14 +14,14 @@ export interface YameElectronEnvironment extends YameEnvironment {
    *
    * @type {BrowserWindow}
    */
-  window: BrowserWindow;
+  window: BrowserWindow | null;
 
   /**
    * The electron app itself.
    *
    * @type {App}
    */
-  app: App;
+  app: App | null;
 }
 
 const env: YameElectronEnvironment = {

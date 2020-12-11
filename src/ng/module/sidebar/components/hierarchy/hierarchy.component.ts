@@ -17,9 +17,9 @@ import {
   DeleteEntity,
   SortEntity,
   CloneEntity,
-} from 'ng/module/scene/states/actions/entity.action';
-import { Unselect, Select, Isolate } from 'ng/module/scene/states/actions/select.action';
-import { SceneService } from 'ng/module/scene';
+  Unselect, Select, Isolate,
+  SceneService
+} from 'ng/module/scene';
 import { ITreeNode, ITreeOptions } from 'angular-tree-component/dist/defs/api';
 import {
   TreeComponent,
@@ -72,11 +72,11 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
 
   scrollTop: number = 0;
 
-  nodes: TreeNode[];
+  nodes: TreeNode[] = [];
 
   previousShiftSelect: string[] = [];
 
-  lastMouseEvent: MouseEvent;
+  lastMouseEvent?: MouseEvent;
 
   options: ITreeOptions = {
     nodeClass: (node: ITreeNode) => {
@@ -129,17 +129,17 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
         dblClick: (tree: TreeModel, node: TreeNodeModel, $event: MouseEvent) => {
           this.lastMouseEvent = $event;
           const entity = this.scene.getEntity(node.id);
-          if (entity.type !== SceneEntityType.Layer && entity.type !== SceneEntityType.Group) return;
+          if (!entity || (entity.type !== SceneEntityType.Layer && entity.type !== SceneEntityType.Group)) return;
           const isolated = this.store.snapshot().select.isolated as SceneEntity;
           if (isolated) {
             const isolatedNode = tree.getNodeById(isolated.id);
             if (node.id !== isolated.id && node.isDescendantOf(isolatedNode)) {
-              this.store.dispatch(new Isolate(this.scene.getEntity(node.id)));
+              this.store.dispatch(new Isolate(entity));
             } else {
               this.store.dispatch(new Isolate(null));
             }
           } else {
-            this.store.dispatch(new Isolate(this.scene.getEntity(node.id)));
+            this.store.dispatch(new Isolate(entity));
           }
         },
       },
@@ -151,12 +151,12 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    */
   @Input() selected: string[] = [];
 
-  @ViewChild('tree', { read: ElementRef }) protected treeElement: ElementRef;
-  @ViewChild('tree', { read: TreeComponent }) protected treeComponent: TreeComponent;
+  @ViewChild('tree', { read: ElementRef }) protected treeElement!: ElementRef;
+  @ViewChild('tree', { read: TreeComponent }) protected treeComponent!: TreeComponent;
 
-  @ViewChild('header') protected headerElement: ElementRef;
+  @ViewChild('header') protected headerElement!: ElementRef;
 
-  get isolated(): string {
+  get isolated(): string | null {
     const isolated = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
     return isolated ? isolated.id : null;
   }
@@ -224,8 +224,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
         this.actions.pipe(ofActionSuccessful(Select, Unselect)).subscribe((action: Select | Unselect) => {
           if (action instanceof TreeSelect || action instanceof TreeUnselect) return;
           const state = this.treeComponent.treeModel.getState();
-          const activeNodeIds = {};
-          this.store.selectSnapshot((store) => store.select).entities.forEach((id) => (activeNodeIds[id] = true));
+          const activeNodeIds: { [key: string]: boolean } = {};
+          this.store.selectSnapshot((store) => store.select).entities.forEach((id: string) => (activeNodeIds[id] = true));
           this.treeComponent.treeModel.setState({ ...state, activeNodeIds });
         })
       );
@@ -316,7 +316,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    * @param node The node to check the value for.
    */
   isLocked(node: TreeNode): boolean {
-    return node.source.components.getValue('locked', 'bool', false);
+    return node.source.components.getValue('locked', 'bool', false) as boolean;
   }
 
   /**
@@ -346,7 +346,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    * @param node The node to return the value for.
    */
   isVisible(node: TreeNode): boolean {
-    return node.source.components.getValue('visible', 'bool', true);
+    return node.source.components.getValue('visible', 'bool', true) as boolean;
   }
 
   /**
@@ -384,7 +384,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
       this.store.dispatch(new Isolate(null));
     } else {
       const entity = this.scene.getEntity(data.id);
-      const components = cloneDeep(entity.components.elements) as SceneComponent[];
+      const components = cloneDeep(entity?.components.elements) as SceneComponent[];
       this.store.dispatch(new TreeSelect([data.id], components, !this.isolating));
     }
   }
@@ -407,7 +407,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    */
   getDisplayName(node: TreeNode | SceneEntity): string {
     const entity = node instanceof SceneEntity ? node : this.scene.getEntity(node.id);
-    const nameComp = entity.components.byId('name') as StringSceneComponent;
+    const nameComp = entity?.components.byId('name') as StringSceneComponent;
     return nameComp ? nameComp.string || node.id : node.id;
   }
 
@@ -517,8 +517,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
       const selectedNodes = tree.getActiveNodes();
       const parentIsSelected = selectedNodes.find((parent) => parent !== node && node.isDescendantOf(parent));
       if (parentIsSelected) return;
-      let toUnselect = [];
-      let toSelect = [];
+      let toUnselect: string[] = [];
+      let toSelect: string[] = [];
       if (shiftSelect) {
         const focusedNode = tree.focusedNode as TreeNodeModel;
         toSelect.push(node.id);

@@ -1,8 +1,8 @@
-import * as uuid from 'uuid/v4';
+import * as uuid from 'uuid';
 import * as _ from 'lodash';
 import { SceneEntityException } from '../exception/scene/entity';
 import { AbstractEntity } from '@trixt0r/ecs';
-import { SceneComponent, cloneComponent } from './component';
+import { SceneComponent } from './component';
 import { SceneComponentCollection } from './component.collection';
 import { cloneDeep } from 'lodash';
 
@@ -26,7 +26,7 @@ export interface SceneEntityData {
   /**
    * The parent entity id.
    */
-  parent: string;
+  parent: string | null;
 
   /**
    * The type of the entity.
@@ -101,7 +101,7 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
   /**
    * The parent of this entity, if any.
    */
-  parent: string = null;
+  parent: string | null = null;
 
   /**
    * The child entity ids.
@@ -116,15 +116,15 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
   /**
    * @inheritdoc
    */
-  readonly components: SceneComponentCollection<SceneComponent>;
+  readonly components!: SceneComponentCollection<SceneComponent>;
 
 
   /**
    * Creates a new scene entity.
    *
-   * @param [id = uuid()] The id for this entity.
+   * @param id The id for this entity.
    */
-  constructor(public id: string = uuid()) {
+  constructor(public id: string = uuid.v4()) {
     super(id);
     this._components = new SceneComponentCollection();
     this._components.addListener(this, true);

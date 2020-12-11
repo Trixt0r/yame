@@ -18,5 +18,5 @@ import { AssetPreviewComponent } from './interface';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileAssetPreviewComponent implements AssetPreviewComponent {
-  asset: FileAsset;
+  asset!: FileAsset;
 }

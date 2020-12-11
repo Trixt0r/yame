@@ -2,10 +2,6 @@ import { EventEmitter as eventemitter3 } from 'eventemitter3';
 
 /**
  * Event emitter with some more useful methods.
- *
- * @export
- * @class EventEmitter
- * @extends {eventemitter3}
  */
 export class EventEmitter extends eventemitter3 {
 
@@ -16,13 +12,12 @@ export class EventEmitter extends eventemitter3 {
    * Also the event `name` gets triggered without any arguments before
    * `name:property`.
    *
-   * @protected
-   * @param {string} name The name of the event
-   * @param {string} property Name of the property which changes.
-   * @param {any} old The old value of the property.
-   * @param {any} value The new value of the property.
-   * @param {Function} [fn] Function to be called before the events get emitted.
-   * @returns {boolean} `true` if the event has been triggered.
+   * @param name The name of the event
+   * @param property Name of the property which changes.
+   * @param old The old value of the property.
+   * @param value The new value of the property.
+   * @param [fn] Function to be called before the events get emitted.
+   * @returns `true` if the event has been triggered.
    */
   protected triggerOnChange(name: string, property: string, old: any, value: any, fn?: Function): boolean {
     if (old != value) {
@@ -37,11 +32,10 @@ export class EventEmitter extends eventemitter3 {
   /**
    * Shorthand method for `triggerOnChange`.
    *
-   * @protected
-   * @param {string} property
-   * @param {any} currentValue
-   * @param {any} newValue
-   * @returns {boolean}
+   * @param property
+   * @param currentValue
+   * @param newValue
+   * @returns
    */
   protected change(property: string, currentValue: any, newValue: any, fn?: Function): boolean {
     return this.triggerOnChange('change', property, currentValue, newValue, fn);
@@ -52,19 +46,19 @@ export class EventEmitter extends eventemitter3 {
    * This means any event occurring in the given event bus will also be
    * triggered in the current one.
    *
-   * @param {string} event The event name on the given event bus
-   * @param {EventBus} obj The event bus to listen to
-   * @param {string} [alias=event]    Optional event name triggered on this
+   * @param event The event name on the given event bus
+   * @param obj The event bus to listen to
+   * @param [alias=event] Optional event name triggered on this
    * @chainable
    */
-  delegateOn<T extends eventemitter3>(event: string, obj: T, alias: string = event): this {
-    obj.on(event, function() {
-      let args = [alias];
-      args = args.concat(Array.prototype.slice.call(arguments));
-      this.emit.apply(this, args);
-    }.bind(this));
-    return this;
-  }
+  // delegateOn<T extends eventemitter3>(event: string, obj: T, alias: string = event): this {
+  //   const self = this;
+  //   obj.on(event, function() {
+  //     const args = [alias].concat(Array.prototype.slice.call(arguments)) as [event: string | symbol, ...args: any[]];
+  //     self.emit.apply(self, args);
+  //   });
+  //   return this;
+  // }
 
 }
 

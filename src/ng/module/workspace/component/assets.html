@@ -33,7 +33,6 @@
 <div #noFilesContainer
     class="files-empty"
     *ngIf="assets && !assets.length"
-    (keydown)="select($event, null)"
     tabindex="0">
   <mat-card class="text-center">
     Group is empty

@@ -25,28 +25,24 @@ import {
   moduleId: module.id.toString(),
   templateUrl: 'resizable.html',
   selector: 'yame-resizable',
-  providers: null,
   styles: ['div { width: 100%; height: 100%; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   /**
-   * @protected
-   * @type {{ x: number, y: number }} position The click position
+   * The click position
    */
-  protected position: { x: number; y: number };
+  protected position: { x: number; y: number } | null = null;
 
   /**
-   * @private
-   * @type {number} The clicked value
+   * The clicked value
    */
-  private clickedVal: number;
+  private clickedVal!: number;
 
   /**
-   * @private
-   * @type {number} number The property value on click.
+   * The property value on click.
    */
-  protected propVal: number;
+  protected propVal!: number;
 
   /**
    * @private
@@ -55,13 +51,13 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   protected isVer = false;
 
   @Output() sizeUpdated = new EventEmitter();
-  @Input() property: string;
-  @Input() minVal: number;
-  @Input() maxVal: number;
+  @Input() property!: string;
+  @Input() minVal!: number;
+  @Input() maxVal!: number;
 
-  protected onMouseDownBind: EventListenerObject;
-  protected onMouseMoveBind: EventListenerObject;
-  protected onMouseUpBind: EventListenerObject;
+  protected onMouseDownBind: (event: MouseEvent) => void;
+  protected onMouseMoveBind: (event: MouseEvent) => void;
+  protected onMouseUpBind: (event: MouseEvent) => void;
 
   /**
    * Creates an instance of ResizableComponent.
@@ -88,7 +84,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   addListeners(): void {
     const elem = <HTMLElement>this.ref.nativeElement;
     if (elem.childNodes.length > 0) {
-      const resizer = elem.querySelector('.resizer');
+      const resizer = elem.querySelector('.resizer') as HTMLElement;
       if (resizer) resizer.addEventListener('mousedown', this.onMouseDownBind);
     } else elem.addEventListener('mousedown', this.onMouseDownBind);
   }
@@ -100,7 +96,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
     if (this.position) this.onMouseUp();
     const elem = <HTMLElement>this.ref.nativeElement;
     if (elem.childNodes.length > 0) {
-      const resizer = elem.querySelector('.resizer');
+      const resizer = elem.querySelector('.resizer') as HTMLElement;
       if (resizer) resizer.removeEventListener('mousedown', this.onMouseDownBind);
     } else elem.addEventListener('mousedown', this.onMouseDownBind);
     window.removeEventListener('mouseup', this.onMouseUpBind);

@@ -10,7 +10,7 @@
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "scss"
+          "style": "scss"
         }
       },
       "architect": {
@@ -23,13 +23,28 @@
             "polyfills": "src/ng/polyfills.ts",
             "tsConfig": "src/ng/tsconfig.app.json",
             "assets": [
-              "src/ng/favicon.ico",
-              "src/ng/assets/grid.png"
+              {
+                "glob": "favicon.ico",
+                "input": "src/ng",
+                "output": "/assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/ng/assets",
+                "output": "/assets"
+              }
             ],
             "styles": [
               "src/ng/style.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "common/require",
+              "lodash",
+              "@trixt0r/ecs",
+              "uuid",
+              "es6-promise-polyfill"
+            ]
           },
           "configurations": {
             "production": {
@@ -42,11 +57,10 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
-              "vendorChunk": false,
+              "vendorChunk": true,
               "buildOptimizer": true,
               "budgets": [
                 {

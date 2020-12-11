@@ -14,6 +14,7 @@ export class PixiTransformationSystem extends AbstractEntitySystem<SceneEntity> 
    */
   processEntity(entity: SceneEntity) {
     const container = this.service.getContainer(entity.id);
+    if (!container) return;
     const position = entity.components.byId('transformation.position') as PointSceneComponent;
     const scale = entity.components.byId('transformation.scale') as PointSceneComponent;
     const skew = entity.components.byId('transformation.skew') as PointSceneComponent;

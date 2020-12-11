@@ -1,4 +1,4 @@
-import { Component, OnChanges, ElementRef, NgZone, SimpleChanges, Input, ViewChild, AfterViewInit, ViewContainerRef } from '@angular/core';
+import { Component, OnChanges, ElementRef, SimpleChanges, Input, ViewChild, AfterViewInit, ViewContainerRef } from '@angular/core';
 import { SceneService } from '../../services/scene.service';
 import { DragDropData } from 'ng2-dnd';
 import { SceneEntityData } from 'common/scene';
@@ -19,20 +19,20 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    *
    * @type {number}
    */
-  @Input('width') width: number;
+  @Input('width') width!: number;
 
   /**
    * The view port height of the scene.
    *
    * @type {number}
    */
-  @Input('height') height: number;
+  @Input('height') height!: number;
 
   /**
    * The wrapper element.
    * Add the rendered data, e.g. a canvas element, to this element.
    */
-  @ViewChild('wrapper', { static: true }) public readonly wrapper: ElementRef<HTMLElement>;
+  @ViewChild('wrapper', { static: true }) public readonly wrapper!: ElementRef<HTMLElement>;
 
   /**
    * Reference to the bound window resize handler.
@@ -40,7 +40,7 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    * @protected
    * @type {EventListenerObject}
    */
-  protected onResizeBind: EventListenerObject;
+  protected onResizeBind: () => void;
 
   /**
    * Whether the user left the drop zone, i.e. the component.
@@ -115,12 +115,11 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    * Creates a preview for the dragged asset by using the scene service.
    *
    * @param {DragDropData} event
-   * @returns {Promise<Entity>}
    */
-  async onDragEnter(event: DragDropData): Promise<SceneEntityData> {
+  async onDragEnter(event: DragDropData): Promise<SceneEntityData | void> {
     if (!this.dragLeft) {
       this.dragLeft = false;
-      return;
+      return Promise.resolve();
     }
     this.dragLeft = false;
     const asset: Asset = event.dragData;

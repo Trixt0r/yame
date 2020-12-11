@@ -1,9 +1,7 @@
-import * as _ from 'lodash';
-import { Graphics, Point, DisplayObject, Rectangle, Container, InteractionEvent, Transform } from 'pixi.js';
 import { PixiRendererService } from '../../../renderer.service';
 import { PixiSelectionContainerService } from '../../container.service';
-import { SceneEntity } from 'common/scene';
 import { CursorService } from 'ng/services/cursor.service';
+import { Graphics, Point, Rectangle, Container, InteractionEvent } from 'pixi.js';
 
 /**
  * The config interface for the rendering.
@@ -54,17 +52,17 @@ const cursorOrder = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
  * It will make sure that the size can be changed via mouse and keep the visual position at the same point.
  */
 export class ResizeAnchor extends Graphics {
-  private clickedPos: Point = null;
+  private clickedPos?: Point | null = null;
   private containerPos = new Point();
   private clickedSize = new Point();
   private clickedBound = new Point();
   private tmp = new Point();
-  private tmpXDirection: number;
-  private tmpYDirection: number;
-  private tmpXSignBounds: number;
-  private tmpYSignBounds: number;
-  private tmpLocalBounds: Rectangle;
-  private mouseupFn: EventListenerObject;
+  private tmpXDirection: number = 0;
+  private tmpYDirection: number = 0;
+  private tmpXSignBounds: number = 0;
+  private tmpYSignBounds: number = 0;
+  private tmpLocalBounds?: Rectangle | null = null;
+  private mouseupFn: (event: MouseEvent) => void;
   private mouseLeft = false;
 
   readonly xDirection: number;
@@ -75,12 +73,12 @@ export class ResizeAnchor extends Graphics {
   /**
    * The target pixi container.
    */
-  target: Container = null;
+  target: Container | null = null;
 
   /**
    * The container which the target is part of.
    */
-  containerService: PixiSelectionContainerService = null;
+  containerService: PixiSelectionContainerService | null = null;
 
   /**
    * The rendering configuration for this anchor.
@@ -160,17 +158,17 @@ export class ResizeAnchor extends Graphics {
    * Draws this anchor with the current configuration.
    */
   drawData(): void {
-    const lineWidth = this.config.line.width;
-    const lineColor = this.config.line.color;
-    const lineAlpha = this.config.line.alpha;
-    const fillColor = this.config.fill.color;
-    const fillAlpha = this.config.fill.alpha;
+    const lineWidth = this.config?.line?.width;
+    const lineColor = this.config?.line?.color;
+    const lineAlpha = this.config?.line?.alpha;
+    const fillColor = this.config?.fill?.color;
+    const fillAlpha = this.config?.fill?.alpha;
 
     this.clear();
     if (fillAlpha) this.beginFill(fillColor, fillAlpha);
 
     this.lineStyle(lineWidth, lineColor, lineAlpha);
-    this.drawCircle(0, 0, this.config.size / 2);
+    this.drawCircle(0, 0, (this.config?.size || 1) / 2);
 
     if (fillAlpha) this.endFill();
     this.hitArea = this.getLocalBounds().clone();
@@ -181,19 +179,19 @@ export class ResizeAnchor extends Graphics {
    * Updates the cursor based on the current rotation.
    */
   updateCursor(event?: InteractionEvent): void {
-    if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
+    if (this.containerService?.isHandling && this.containerService?.currentHandler !== this) return;
     if (event) event.stopPropagation();
     this.mouseLeft = event === void 0;
     let rotOff = 0;
     if (this.matches(VERT) && this.matches(HOR)) {
       rotOff = this.xDirection * this.yDirection === -1 ? Math.PI * 0.25 : Math.PI * 0.75;
-      rotOff *= Math.sign(this.target.width) * Math.sign(this.target.height);
+      rotOff *= Math.sign(this.target?.width as number) * Math.sign(this.target?.height as number);
     } else if (this.matches(HOR)) {
       rotOff = Math.PI * 0.5;
     }
-    this.cursorService.begin(this.service.view);
+    this.cursorService.begin(this.service.view as HTMLElement);
     this.cursorService.image.src = 'assets/resize-icon.svg';
-    this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation + rotOff}rad)`;
+    this.cursorService.image.style.transform = `rotate(${(this.containerService?.container?.rotation || 0) + rotOff}rad)`;
   }
 
   /**
@@ -212,18 +210,18 @@ export class ResizeAnchor extends Graphics {
    * @param event
    */
   mousedown(event: InteractionEvent): void {
-    if (this.clickedPos) return;
+    if (this.clickedPos || !this.target || !this.containerService) return;
     this.on('mousemove', this.mousemove, this);
     this.off('mouseover', this.updateCursor, this);
     this.off('mouseout', this.resetCursor, this);
     window.addEventListener('mouseup', this.mouseupFn);
-    this.tmpLocalBounds = this.target.getLocalBounds().clone();
+    this.tmpLocalBounds = this.target?.getLocalBounds().clone();
 
-    this.tmp.set(this.target.width, this.target.height);
-    this.target.width = this.tmpLocalBounds.width;
-    this.target.height = this.tmpLocalBounds.height;
+    this.tmp.set(this.target?.width, this.target?.height);
+    this.target.width = this.tmpLocalBounds?.width || 0;
+    this.target.height = this.tmpLocalBounds?.height || 0;
 
-    this.clickedPos = this.target.toLocal(event.data.global, null, null, false);
+    this.clickedPos = this.target?.toLocal(event.data.global, void 0, void 0, false);
     this.containerPos.copyFrom(this.containerService.container.position);
 
     this.target.width = this.tmp.x;
@@ -251,7 +249,7 @@ export class ResizeAnchor extends Graphics {
    * @param event
    */
   mousemove(event: InteractionEvent): void {
-    if (!this.clickedPos) return;
+    if (!this.clickedPos || !this.target || !this.containerService || !this.tmpLocalBounds) return;
     this.containerService.container.position.copyFrom(this.containerPos);
     this.tmp.set(this.target.width, this.target.height);
     this.target.width = this.tmpLocalBounds.width;
@@ -311,7 +309,7 @@ export class ResizeAnchor extends Graphics {
    */
   update(bnds: Rectangle): void {
     this.position.set(bnds.x + bnds.width * this.offset.x, bnds.y + bnds.height * this.offset.y);
-    this.rotation = this.containerService.container.rotation;
-    this.parent.toLocal(this.position, this.containerService.container, this.position);
+    this.rotation = this.containerService?.container.rotation || 0;
+    this.parent.toLocal(this.position, this.containerService?.container, this.position);
   }
 }

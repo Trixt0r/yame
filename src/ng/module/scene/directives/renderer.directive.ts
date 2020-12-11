@@ -16,9 +16,9 @@ export class SceneRendererComponentDirective implements AfterViewInit {
   /**
    * @inheritdoc
    */
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     const compType = this.scene.rendererComponent;
-    if (!compType) return null;
+    if (!compType) return;
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
     this.viewContainerRef.clear();
     const componentRef = this.viewContainerRef.createComponent(componentFactory);

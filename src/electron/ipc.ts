@@ -2,7 +2,6 @@ import { IpcAction } from './ipc/abstract';
 import { IpcDirectory } from './ipc/directory';
 import { IpcDialog } from './ipc/dialog';
 import PubSub from '../common/pubsub';
-import * as Promise from 'bluebird';
 import { IpcPlugins } from './ipc/plugins';
 
 /**
@@ -11,7 +10,7 @@ import { IpcPlugins } from './ipc/plugins';
  * @export
  * @todo Plugins should be able to add their ipc setup.
  */
-export default function(electron: Electron.AllElectron): Promise<any> {
+export default async function() {
 
   let ipcActions: IpcAction[] = [
     new IpcDialog(),
@@ -20,10 +19,5 @@ export default function(electron: Electron.AllElectron): Promise<any> {
   ];
 
   PubSub.emit('ipc:init', ipcActions);
-
-  let proms = [];
-
-  ipcActions.forEach( action => proms.push(action.init(electron)) );
-
-  return Promise.all(proms);
+  await Promise.all(ipcActions.map(action => action.init()));
 }

@@ -1,5 +1,6 @@
-import { NgModule, APP_INITIALIZER, Inject } from '@angular/core';
-import { YAME_RENDERER, YAME_RENDERER_COMPONENT, EngineService } from '../scene';
+import { Store } from '@ngxs/store';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { YAME_RENDERER, YAME_RENDERER_COMPONENT, EngineService, SceneModule } from 'ng/module/scene';
 import { PixiRendererService } from './services/renderer.service';
 import { PixiRendererComponent } from './components/renderer.component';
 import { PixiSelectionService } from './services/selection.service';
@@ -10,19 +11,15 @@ import { PixiSelectionHandlerRotationService } from './services/selection/handle
 import { PixiSelectionHandlerSkewService } from './services/selection/handlers/skew.service';
 import { PixiSelectionHandlerResizeService } from './services/selection/handlers/resize.service';
 import { PixiSelectionHandlerPivotService } from './services/selection/handlers/pivot.service';
-import {
-  PixiGridSystem,
-  PixiCameraSystem,
-  PixiTransformationSystem,
-  PixiRenderingSystem,
-  PixiDebugSystem,
-  PixiSpriteSystem,
-  PixiForegroundSystem,
-  PixiBackdropSystem,
-} from './systems';
-import { Store } from '@ngxs/store';
+import { PixiGridSystem } from './systems/grid.system';
+import { PixiCameraSystem } from './systems/camera.system';
+import { PixiSpriteSystem } from './systems/sprite.system';
+import { PixiBackdropSystem } from './systems/backdrop.system';
+import { PixiDebugSystem } from './systems/debug.system';
+import { PixiForegroundSystem } from './systems/foreground.system';
+import { PixiRenderingSystem } from './systems/rendering.system';
+import { PixiTransformationSystem } from './systems/transformation.system';
 import { AddShortcut } from 'ng/states/hotkey.state';
-
 /**
  * Sets up all necessary systems for rendering entities in the scene.
  *
@@ -79,6 +76,9 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
 
 @NgModule({
   declarations: [PixiRendererComponent],
+  imports: [
+    SceneModule
+  ],
   // entryComponents: [PixiRendererComponent],
   providers: [
     {
@@ -92,7 +92,6 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
     PixiSelectionService,
     PixiSelectionContainerService,
     PixiSelectionRendererService,
-    PixiSelectionHandlerPositionService,
     {
       provide: APP_INITIALIZER,
       useFactory: setupSystems,

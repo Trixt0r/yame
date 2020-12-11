@@ -1,5 +1,5 @@
 import { System } from '@trixt0r/ecs';
-import { Grid } from '../';
+import { Grid } from '../utils/grid';
 import { PixiRendererService } from '../services/renderer.service';
 
 export class PixiGridSystem extends System {
@@ -16,7 +16,7 @@ export class PixiGridSystem extends System {
    */
   process(): void {
     this.grid.update(this.service.component.width, this.service.component.height);
-    if (!this.grid.isReady) this.grid.once('ready', () => requestAnimationFrame(() => this.service.app.render()));
+    if (!this.grid.isReady) this.grid.once('ready', () => requestAnimationFrame(() => this.service.app?.render()));
   }
 
 }

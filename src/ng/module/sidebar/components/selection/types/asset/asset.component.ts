@@ -7,9 +7,8 @@ import { Asset } from 'common/asset';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { MatSelect } from '@angular/material/select';
-import { SceneComponent } from 'common/scene';
 
-let allAssets: Asset[] = null;
+let allAssets: Asset[] = [];
 
 @Component({
   templateUrl: './asset.component.html',
@@ -23,12 +22,12 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   /**
    * Internal list of all assets.
    */
-  protected _allAssets: Asset[];
+  protected _allAssets: Asset[] = [];
 
   /**
    * The current index.
    */
-  currentIndex: number;
+  currentIndex: number = 0;
 
   /**
    * A map of sanitized url values.
@@ -38,12 +37,12 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   /**
    * The virtual scroll viewport reference.
    */
-  @ViewChild(CdkVirtualScrollViewport, { static: true }) cdkVirtualScrollViewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport, { static: true }) cdkVirtualScrollViewport!: CdkVirtualScrollViewport;
 
   /**
    * The select reference.
    */
-  @ViewChild(MatSelect) matSelect: MatSelect;
+  @ViewChild(MatSelect) matSelect!: MatSelect;
 
   /**
    * Compares options with a selection.
@@ -62,19 +61,19 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   /**
    * The current asset instance.
    */
-  get currentAsset(): Asset {
+  get currentAsset(): Asset | null {
     return this.currentIndex >= 0 ? this._allAssets[this.currentIndex] : null;
   }
 
   /**
    * The currently selected asset value.
    */
-  get selected(): string {
-    return this.component.mixed ? null : this.component.asset;
+  get selected(): string | null | undefined {
+    return this.component?.mixed ? null : this.component?.asset;
   }
 
-  set selected(id: string) {
-    if (this.component && this.component.asset === id) return;
+  set selected(id: string | null | undefined) {
+    if (!this.component || (this.component && this.component.asset === id)) return;
     const data = {
       originalEvent: null,
       value: id,
@@ -82,6 +81,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     };
     this.currentIndex = id ? this._allAssets.findIndex(it => it.id === id) : -1;
     const asset = this._allAssets[this.currentIndex];
+    if (!this.component) return;
     this.component.asset = asset ? id : null;
     delete this.component.mixed;
     this.cdr.detectChanges();
@@ -107,7 +107,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    * @return Whether the asset can be used as a value or not.
    */
   checkType(asset: Asset): boolean {
-    let allowedTypes = this.component.allowedTypes;
+    let allowedTypes = this.component?.allowedTypes;
     if (allowedTypes && typeof allowedTypes === 'string')
       allowedTypes = [allowedTypes];
     if (Array.isArray(allowedTypes) && allowedTypes.length > 0) {
@@ -130,10 +130,10 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    * @inheritdoc
    */
   onExternalUpdate(): void {
-    if (this.component.mixed) {
+    if (this.component?.mixed) {
       this.cdr.detectChanges();
     } else {
-      this.selected = this.component.asset;
+      this.selected = this.component?.asset;
     }
   }
 
@@ -156,7 +156,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this._allAssets = allAssets.filter(asset => this.checkType(asset));
     if (Object.keys(this.sanitized).length === 0)
       this._allAssets.forEach(it => this.sanitized[it.id] = this.sanitizer.bypassSecurityTrustUrl(it.content.path));
-    if (this.component.mixed) return;
-    this.selected = this.component.asset;
+    if (this.component?.mixed) return;
+    this.selected = this.component?.asset;
   }
 }

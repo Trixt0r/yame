@@ -7,6 +7,7 @@ import { PixiSelectionContainerService } from './container.service';
 import { Injectable, Inject } from '@angular/core';
 import { YAME_RENDERER } from 'ng/module/scene';
 import { System } from '@trixt0r/ecs';
+import { maxBy, minBy } from 'lodash';
 
 /**
  * The config interface for the rendering.
@@ -15,8 +16,8 @@ import { System } from '@trixt0r/ecs';
  * @interface SelectionRendererConfig
  */
 export interface SelectionRendererConfig {
-  fill?: { alpha?: number; color?: number };
-  line?: { width?: number; color?: number; alpha?: number };
+  fill: { alpha?: number; color?: number };
+  line: { width?: number; color?: number; alpha?: number };
 }
 
 class SelectionRendererSystem extends System {
@@ -50,7 +51,7 @@ export class PixiSelectionRendererService {
   config: SelectionRendererConfig = { fill: {}, line: {} };
 
   // Protected fields, for handling the rendering
-  protected stage: Container;
+  protected stage?: Container;
   protected outerBounds: Rectangle;
   protected attached: boolean;
   protected lastPositionUpdate = new Point();
@@ -108,7 +109,7 @@ export class PixiSelectionRendererService {
     if (this.attached) return;
     if (this.container.entities.length <= 0) return this.detach();
     this.system.active = true;
-    (this.stage.getChildByName('foreground') as Container).addChild(this.graphics);
+    (this.stage?.getChildByName('foreground') as Container).addChild(this.graphics);
     this.attached = true;
     this.attached$.next();
     this.update(true);
@@ -123,16 +124,16 @@ export class PixiSelectionRendererService {
         this.service.scene.scale.x === this.lastSizeUpdate.x && this.service.scene.scale.y === this.lastSizeUpdate.y && !force) return;
     this.graphics.clear();
 
-    const lineWidth = this.config.line.width;
-    const lineColor = this.config.line.color;
-    const lineAlpha = this.config.line.alpha;
-    const fillColor = this.config.fill.color;
-    const fillAlpha = this.config.fill.alpha;
+    const lineWidth = this.config?.line?.width;
+    const lineColor = this.config?.line?.color;
+    const lineAlpha = this.config?.line?.alpha;
+    const fillColor = this.config?.fill?.color;
+    const fillAlpha = this.config?.fill?.alpha;
 
     if (fillAlpha) this.graphics.beginFill(fillColor, fillAlpha);
 
     if (this.container.entities.length > 1) {
-      this.graphics.lineStyle(lineWidth, lineColor, lineAlpha * 0.25);
+      this.graphics.lineStyle(lineWidth, lineColor, (lineAlpha || 1) * 0.25);
       this.container.entities.forEach(entity => this.drawBounds(entity));
       this.graphics.drawShape(this.container.container.getBounds());
     }
@@ -143,15 +144,15 @@ export class PixiSelectionRendererService {
     this.boundingPoints[2].set(bnds.x + bnds.width, bnds.y + bnds.height);
     this.boundingPoints[3].set(bnds.x, bnds.y + bnds.height);
 
-    this.boundingPoints.forEach((point) => this.stage.toLocal(point, this.container.container, point));
-    this.outerBounds.x = _.minBy(this.boundingPoints, 'x').x;
-    this.outerBounds.width = _.maxBy(this.boundingPoints, 'x').x - this.outerBounds.x;
-    this.outerBounds.y = _.minBy(this.boundingPoints, 'y').y;
-    this.outerBounds.height = _.maxBy(this.boundingPoints, 'y').y - this.outerBounds.y;
-    this.graphics.lineStyle(lineWidth, lineColor, lineAlpha * 0.5);
+    this.boundingPoints.forEach((point) => this.stage?.toLocal(point, this.container.container, point));
+    this.outerBounds.x = minBy(this.boundingPoints, 'x')?.x || 0;
+    this.outerBounds.width = (maxBy(this.boundingPoints, 'x')?.x || 0) - this.outerBounds.x;
+    this.outerBounds.y = minBy(this.boundingPoints, 'y')?.y || 0;
+    this.outerBounds.height = (maxBy(this.boundingPoints, 'y')?.y || 0) - this.outerBounds.y;
+    this.graphics.lineStyle(lineWidth, lineColor, (lineAlpha || 0) * 0.5);
     this.graphics.drawShape(this.outerBounds);
     this.graphics.lineStyle(lineWidth, lineColor, lineAlpha);
-    this.drawBounds(null, this.boundingPoints);
+    this.drawBounds(void 0, this.boundingPoints);
 
     if (fillAlpha) this.graphics.endFill();
 
@@ -171,8 +172,7 @@ export class PixiSelectionRendererService {
     this.system.active = false;
     if (this.container.entities.length !== 0 && !force) return this.update();
     this.graphics.clear();
-    // this.stage.removeChild(this.graphics);
-    (this.stage.getChildByName('foreground') as Container).removeChild(this.graphics);
+    (this.stage?.getChildByName('foreground') as Container).removeChild(this.graphics);
     this.attached = false;
     this.detached$.next();
   }
@@ -185,11 +185,11 @@ export class PixiSelectionRendererService {
   }
 
   setConfig(config: SelectionRendererConfig) {
-    this.config.line.width = _.defaultTo(config.line.width, 1);
-    this.config.line.color = _.defaultTo(config.line.color, 0xffffff);
-    this.config.line.alpha = _.defaultTo(config.line.alpha, 1);
-    this.config.fill.color = _.defaultTo(config.fill.color, 0xffffff);
-    this.config.fill.alpha = _.defaultTo(config.fill.alpha, 0);
+    this.config.line.width = _.defaultTo(config.line?.width, 1);
+    this.config.line.color = _.defaultTo(config.line?.color, 0xffffff);
+    this.config.line.alpha = _.defaultTo(config.line?.alpha, 1);
+    this.config.fill.color = _.defaultTo(config.fill?.color, 0xffffff);
+    this.config.fill.alpha = _.defaultTo(config.fill?.alpha, 0);
   }
 
   /**
@@ -213,7 +213,7 @@ export class PixiSelectionRendererService {
       }
     }
     this.graphics.moveTo(points[0].x, points[0].y);
-    points.push(points.shift());
+    points.push(points.shift() as Point);
     points.forEach((point) => this.graphics.lineTo(point.x, point.y));
   }
 }

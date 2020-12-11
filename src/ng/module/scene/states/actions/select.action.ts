@@ -1,5 +1,4 @@
 import { SceneComponent, SceneEntity } from 'common/scene';
-import { EntityAction } from './entity.action';
 
 export class Select {
   static readonly type = '[Selection] Select';

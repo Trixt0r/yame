@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SceneEntity } from 'common/scene';
-import { SceneService } from 'ng/module/scene';
 import { EntityTypeServiceException } from '../exceptions/service/entity-type.exception';
 import { Store } from '@ngxs/store';
-import { CreateEntity } from 'ng/module/scene/states/actions/entity.action';
+import { CreateEntity } from 'ng/module/scene';
 import { Observable } from 'rxjs';
 
 /**
@@ -137,7 +136,7 @@ export class EntityTypeService {
    *
    * @param id The id of the entity type item.
    */
-  getItem(id: string): EntityTypeItem {
+  getItem(id: string): EntityTypeItem | undefined {
     return this.entityTypeItems.find(it => it.id === id);
   }
 

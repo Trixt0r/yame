@@ -1,6 +1,6 @@
 import { State, NgxsOnInit, StateContext, Store, Action } from '@ngxs/store';
 import { HotkeyService } from 'ng/services/hotkey.service';
-import { NgZone } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 
 export interface Shortcut {
 
@@ -61,6 +61,7 @@ export interface IHotkeyState {
     ]
   },
 })
+@Injectable()
 export class HotkeyState implements NgxsOnInit {
 
   constructor(protected hotkeys: HotkeyService, protected store: Store, protected zone: NgZone) { }
@@ -83,7 +84,7 @@ export class HotkeyState implements NgxsOnInit {
    * @inheritdoc
    */
   ngxsOnInit(ctx?: StateContext<IHotkeyState>) {
-    ctx.getState().shortcuts.forEach(it => {
+    ctx?.getState().shortcuts.forEach(it => {
       if (!it.keys) return;
       this.registerShortcut(it);
     });

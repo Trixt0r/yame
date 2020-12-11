@@ -5,7 +5,7 @@ export interface AssetSceneComponent extends SceneComponent {
   /**
    * The asset id.
    */
-  asset: string;
+  asset?: string | null;
 
   /**
    * The asset types, this component can be assigned to.

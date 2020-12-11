@@ -5,7 +5,7 @@ import { SceneComponent, SceneEntity, createComponent, GroupSceneComponent } fro
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { SceneComponentsServiceException } from '../exceptions/service/scene-components.exception';
-import { SceneComponentService } from 'ng/module/scene/services/component.service';
+import { SceneComponentService } from 'ng/module/scene';
 
 /**
  * Type definition of a scene type component.
@@ -181,7 +181,7 @@ export class SceneComponentsService {
    *
    * @param id
    */
-  getItem(id: string): SceneComponentItem {
+  getItem(id: string): SceneComponentItem |undefined {
     return this.sceneComponentItems.find(it => it.id === id);
   }
 
@@ -190,7 +190,7 @@ export class SceneComponentsService {
    *
    * @param type
    */
-  getTypeComponent(type: string): Type<AbstractTypeComponent> {
+  getTypeComponent(type: string): Type<AbstractTypeComponent> | undefined {
     return this.typeComponents[type] ? this.typeComponents[type] : void 0;
   }
 

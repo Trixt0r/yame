@@ -12,9 +12,7 @@ import { Asset } from '../asset';
 export abstract class AssetGroup<T extends Asset> extends Asset {
 
   /** @inheritdoc */
-  get type(): string {
-    return 'group';
-  }
+  type = 'group';
 
   /** @type {T[]} A list of the (direct) group members. */
   members: T[] = [];

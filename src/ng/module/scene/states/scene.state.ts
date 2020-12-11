@@ -1,11 +1,13 @@
-import { cloneDeep, flattenDeep, flatten } from 'lodash';
+import { cloneDeep, flattenDeep, flatten, ListOfRecursiveArraysOrValues } from 'lodash';
 import { State, Action, StateContext, Store } from '@ngxs/store';
 import { CreateEntity, DeleteEntity, UpdateEntity, SortEntity, CloneEntity } from './actions/entity.action';
-import { SceneEntity, SceneEntityData } from 'common/scene';
+import { SceneComponent, SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
 import { Dispatcher, Component, Collection } from '@trixt0r/ecs';
 import { SceneService } from '../services/scene.service';
-import { PushHistory, Select, Unselect } from './actions';
+import { Select } from './actions/select.action';
+import { PushHistory } from './actions/history.action';
+import { Injectable } from '@angular/core';
 
 /**
  * Interface representing the scene state.
@@ -29,7 +31,7 @@ export interface ISceneState {
  * @param index The current index.
  * @param newIndex The new index.
  */
-function move<T>(array: T[], index: number, newIndex: number) {
+function move<T>(array: (T | undefined)[], index: number, newIndex: number) {
   while (index < 0) {
     index += array.length;
   }
@@ -50,6 +52,7 @@ function move<T>(array: T[], index: number, newIndex: number) {
     settings: {},
   },
 })
+@Injectable()
 export class SceneState {
   constructor(public store: Store, public service: SceneService) {}
 
@@ -59,9 +62,9 @@ export class SceneState {
    * @param cloneData The data to clone from.
    * @return The cloned entities.
    */
-  protected getCloneEntities(cloneData: { id: string; index: number; parent?: string }[]): SceneEntity[] {
+  protected getCloneEntities(cloneData: { id: string; index: number; parent?: string | null }[]): SceneEntity[] {
     return flattenDeep(
-      cloneData.map((it) => {
+      cloneData.map(it => {
         const source = this.service.getEntity(it.id);
         if (!source) return null;
         const entity = new SceneEntity();
@@ -69,11 +72,11 @@ export class SceneState {
           entity.components,
           source.components.map((comp) => cloneDeep(comp))
         );
-        entity.components.byId('index').index = it.index;
-        entity.components.byId('name').string += ' clone';
+        (entity.components.byId('index') as SceneComponent).index = it.index;
+        (entity.components.byId('name') as SceneComponent).string += ' clone';
         entity.components.add({ id: 'copy-descriptor', type: 'copy-data', ref: entity.id });
         entity.type = source.type;
-        entity.parent = it.parent;
+        entity.parent = it.parent as (string | null);
         if (source.children) {
           const re = this.getCloneEntities(source.children.map((id, index) => ({ id, index, parent: entity.id })));
           entity.children = re.map((child) => child.id);
@@ -81,8 +84,8 @@ export class SceneState {
         } else {
           return entity;
         }
-      })
-    ).filter((it) => it instanceof SceneEntity);
+      }) as ListOfRecursiveArraysOrValues<SceneEntity | null | undefined>
+    ).filter(it => it instanceof SceneEntity) as SceneEntity[];
   }
 
   /**
@@ -94,8 +97,8 @@ export class SceneState {
    * @param [parent] The new parent of the entity.
    * @return The update array.
    */
-  updateIndices(id: string, index: number, parent?: string): Partial<SceneEntityData>[] {
-    const entity = this.service.getEntity(id);
+  updateIndices(id: string, index: number, parent?: string | null): Partial<SceneEntityData>[] {
+    const entity = this.service.getEntity(id) as SceneEntity;
 
     const currentIndex = index;
     const data = [] as Partial<SceneEntityData>[];
@@ -187,17 +190,17 @@ export class SceneState {
     const entities = state.entities.slice();
     const siblings: { [parent: string]: SceneEntity[] } = {};
     newEntities.forEach((entity) => {
-      if (!siblings[entity.parent]) {
-        siblings[entity.parent] = this.service.getChildren(entity.parent, false);
+      if (!siblings[entity.parent as string]) {
+        siblings[entity.parent as string] = this.service.getChildren(entity.parent, false);
       }
 
       if (!entity.components.byId('index')) {
-        entity.components.add({ id: 'index', type: 'index', index: siblings[entity.parent].length });
+        entity.components.add({ id: 'index', type: 'index', index: siblings[entity.parent as string].length });
       }
 
       // If no name is set, set one, based on the type and sibling count
       if (!entity.components.byId('name')) {
-        const sameTypeCount = siblings[entity.parent].filter((it) => it.type === entity.type).length;
+        const sameTypeCount = siblings[entity.parent as string].filter(it => it.type === entity.type).length;
         entity.components.add({ id: 'name', type: 'name', string: `${entity.type} ${sameTypeCount + 1}` });
       }
 
@@ -239,7 +242,7 @@ export class SceneState {
     const state = ctx.getState();
     const toRemove = Array.isArray(action.id) ? action.id : [action.id];
     const entities = state.entities.slice();
-    const entitiesToRemove = [];
+    const entitiesToRemove: SceneEntity[] = [];
     toRemove.slice().forEach((id) => {
       this.service.getChildren(id).forEach((it) => toRemove.push(it.id));
     });
@@ -257,7 +260,6 @@ export class SceneState {
       entitiesToRemove.push(entity);
     });
     action.deleted = entitiesToRemove;
-    const select = this.store.snapshot().select;
     ctx.patchState({ entities });
     if (action.persist)
       this.store.dispatch(
@@ -279,41 +281,42 @@ export class SceneState {
     let hasChanges = false;
     let resort = false;
 
-    const dataBefore: Partial<SceneEntityData>[] = action.persist ? [] : null;
+    const dataBefore: Partial<SceneEntityData>[] | null = action.persist ? [] : null;
 
     data.forEach((newData) => {
       const entity = this.service.getEntity(newData.id);
       if (!entity) return console.warn(`[SceneState] No entity found for id ${newData.id}`);
       if (!newData.components) return;
       const comps = dataBefore ? entity.components.map((it) => cloneDeep(it)) : null;
-      const oldData = dataBefore ? { id: entity.id, parent: entity.parent, components: [] } : null;
-      if (dataBefore) dataBefore.push(oldData);
+      const oldData = dataBefore ? { id: entity.id, parent: entity.parent, components: [] as SceneComponent[] } : null;
+      if (dataBefore && oldData) dataBefore.push(oldData);
       const listenerIdx = entity.components.listeners.length;
       (entity.components as Dispatcher<SceneComponentCollectionListener>).addListener({
         onAdded: (...added: Component[]) => {
           hasChanges = true;
           if (!dataBefore) return;
           added.forEach((addedComp) => {
-            const comp = cloneDeep(addedComp);
+            const comp = cloneDeep(addedComp) as SceneComponent;
             comp.markedForDelete = true;
-            oldData.components.push(comp);
+            if (oldData) oldData.components.push(comp);
           });
         },
         onRemoved: (...removed: Component[]) => {
           hasChanges = true;
           if (!dataBefore) return;
           removed.forEach((comp) => {
-            const found = comps.find((it) => it.id === comp.id);
-            if (found) oldData.components.push(found);
+            const found = comps ? comps.find((it) => it.id === comp.id) : null;
+            if (found && oldData) oldData.components.push(found);
           });
         },
         onUpdated: (...update: Component[]) => {
           hasChanges = true;
           if (!resort) resort = !!update.find((it) => it.id === 'index');
           if (!dataBefore) return;
-          update.forEach((comp) => {
-            const found = comps.find((it) => it.id === comp.id);
-            if (found) oldData.components.push(found);
+          update.forEach(comp => {
+            if (!comps) return;
+            const found = comps.find(it => it.id === comp.id);
+            if (found && oldData) oldData.components.push(found);
           });
         },
       });
@@ -332,7 +335,7 @@ export class SceneState {
         entity.parent = newData.parent;
         const newParentEntity = this.service.getEntity(newData.parent);
         if (newParentEntity) {
-          newParentEntity.children.splice(entity.components.byId('index').index as number, 0, entity.id);
+          newParentEntity.children.splice(entity.components.byId('index')?.index as number, 0, entity.id);
         }
         hasChanges = true;
         resort = true;
@@ -346,17 +349,17 @@ export class SceneState {
     }
     if (!action.persist) return;
     const select = this.store.snapshot().select;
-    if (select.entities && select.entities.length > 0 && !dataBefore.find(it => it.id === 'select')) {
-      dataBefore.unshift({ id: 'select', components: cloneDeep(select.components) });
+    if (select.entities && select.entities.length > 0 && !dataBefore?.find(it => it.id === 'select')) {
+      dataBefore?.unshift({ id: 'select', components: cloneDeep(select.components) });
     }
     this.store.dispatch(
       new PushHistory(
         [
-          new UpdateEntity(dataBefore, 'Reverse update', false),
+          new UpdateEntity(dataBefore as Partial<SceneEntityData>, 'Reverse update', false),
           // new Unselect([], [], false),
           new Select(
-            dataBefore.map(it => it.id).filter(id => id !== 'select'),
-            dataBefore.find(it => it.id === 'select').components,
+            dataBefore?.map(it => it.id).filter(id => id !== 'select') as string[],
+            dataBefore?.find(it => it.id === 'select')?.components as SceneComponent[],
             false,
             true
           ),
@@ -365,7 +368,7 @@ export class SceneState {
           new UpdateEntity(cloneDeep(data), action.message, false),
           // new Unselect([], [], false),
           new Select(
-            data.map(it => it.id).filter(id => id !== 'select'),
+            data.map(it => it.id).filter(id => id !== 'select') as string[],
             cloneDeep((data.find(it => it.id === 'select') || { components: [] }).components),
             false,
             true
@@ -387,9 +390,9 @@ export class SceneState {
     const entitiesToCreate = this.getCloneEntities(entitiesToClone);
 
     return ctx.dispatch(new CreateEntity(entitiesToCreate)).subscribe(() => {
-      const data = entitiesToCreate.map((it) => {
-        const old = it.components.byId('index').index as number;
-        it.components.byId('index').index = -1;
+      const data = entitiesToCreate.map(it => {
+        const old = it.components.byId('index')?.index as number;
+        (it.components.byId('index') as SceneComponent).index = -1;
         return { id: it.id, index: old, parent: it.parent };
       });
       this.sortEntity(ctx, new SortEntity(data, false));
@@ -405,17 +408,17 @@ export class SceneState {
   @Action(SortEntity)
   sortEntity(ctx: StateContext<ISceneState>, action: SortEntity) {
     const actionData = Array.isArray(action.data) ? action.data : [action.data];
-    const oldData = actionData.map((it) => {
+    const oldData = actionData.map(it => {
       const entity = this.service.getEntity(it.id);
       if (!entity) return it;
       return {
         id: entity.id,
-        index: entity.components.byId('index').index as number,
+        index: entity.components.byId('index')?.index as number,
         parent: entity.parent,
         oldParent: it.parent,
       };
     });
-    const data = flatten(actionData.map((it) => this.updateIndices(it.id, it.index, it.parent)));
+    const data = flatten(actionData.map(it => this.updateIndices(it.id, it.index, it.parent)));
     if (action.persist)
       this.store.dispatch(
         new PushHistory(
@@ -439,7 +442,7 @@ export class SceneState {
    */
   sortByIndex(entities: SceneEntity[] | Collection<SceneEntity>): SceneEntity[] | Collection<SceneEntity> {
     return entities.sort((a, b) => {
-      return Math.sign((a.components.byId('index').index as number) - (b.components.byId('index').index as number));
+      return Math.sign((a.components.byId('index')?.index as number) - (b.components.byId('index')?.index as number));
     });
   }
 }

@@ -19,7 +19,7 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
   /**
    * The entity components directive reference.
    */
-  @ViewChild(EntityComponentsDirective) entityComponentsDirective: EntityComponentsDirective;
+  @ViewChild(EntityComponentsDirective) entityComponentsDirective!: EntityComponentsDirective;
 
   /**
    * The components to display.
@@ -35,7 +35,7 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
    * Whether this group component is expanded or not.
    */
   get expanded(): boolean {
-    return this.component.expanded;
+    return this.component?.expanded || false;
   }
 
   constructor(
@@ -78,10 +78,11 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
   ngOnChanges() {
     this.components =
       this.selectState && this.selectState.components
-        ? this.selectState.components.filter((it) => it.group === this.component.id)
+        ? this.selectState.components.filter(it => it.group === this.component?.id)
         : [];
-    this.canAddComponents = !!this.sceneComponents.items.find((item) => {
-      return this.sceneComponents.canSceneComponentBeAddedToGroup(this.component, item);
+    this.canAddComponents = !!this.sceneComponents.items.find(item => {
+      if (this.component) return this.sceneComponents.canSceneComponentBeAddedToGroup(this.component, item);
+      return false;
     });
     this.cdr.markForCheck();
   }

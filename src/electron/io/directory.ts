@@ -1,10 +1,9 @@
 import * as Promise from 'bluebird';
 import * as path from 'path';
-import * as fs from 'fs-extra';
-import EventEmitter from '../event-emitter';
+import EventEmitter from '../../common/event-emitter';
 import { File } from './file';
-import { DirectoryContent } from '../content/directory';
-import { Exportable } from '../interface/exportable';
+import { DirectoryContent } from '../../common/content/directory';
+import { Exportable } from '../../common/interface/exportable';
 
 export enum ScanState {
   DONE, FAIL, NOOP
@@ -53,12 +52,12 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
     this.scanned = false;
     // Notify any listener that we are scanning now
     this.emit('scan');
-    return fs.readdir(this.pathName)
+    return require('fs-extra').readdir(this.pathName)
       .then((files: string[]) => {
         const scans: Promise<any>[] = [];
         files.forEach(filename => {
           const abs = path.resolve(this.path, filename);
-          const stats = fs.lstatSync(abs);
+          const stats = require('fs-extra').lstatSync(abs);
           if (stats.isDirectory()) {
               const dir = new Directory(abs);
               this._children.push(dir);
@@ -78,7 +77,7 @@ export class Directory extends EventEmitter implements Exportable<DirectoryConte
               .finally(() => this.scanned = true);
     })
     .then(() => { this.emit('scan:done'); return ScanState.DONE; }) // We are done
-    .catch(e => { this.emit('scan:fail', e); return ScanState.FAIL; } ); // We failed
+    .catch((e: Error) => { this.emit('scan:fail', e); return ScanState.FAIL; } ); // We failed
   }
 
   /** Sets the path of this directory. Previously loaded files get lost. */

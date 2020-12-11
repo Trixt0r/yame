@@ -7,6 +7,7 @@ import { PixiSelectionRendererService } from '../renderer.service';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
+import { PointSceneComponent } from 'common/scene';
 
 /**
  * The position handler is responsible to move the selection container in the scene.
@@ -16,7 +17,7 @@ export class PixiSelectionHandlerPositionService {
   protected startPos: Point;
   protected mouseCurrentPos: Point;
   protected mouseStartPos: Point;
-  protected mouseupFn: EventListenerObject;
+  protected mouseupFn: (event: MouseEvent) => void;
   protected container: Container;
 
   /**
@@ -50,9 +51,9 @@ export class PixiSelectionHandlerPositionService {
     window.addEventListener('mouseup', this.mouseupFn);
     this.containerService.beginHandling(this, event);
     this.mouseStartPos.set(event.data.global.x, event.data.global.y);
-    this.container.parent.toLocal(this.mouseStartPos, null, this.mouseStartPos);
+    this.container.parent.toLocal(this.mouseStartPos, void 0, this.mouseStartPos);
     this.startPos.set(this.container.position.x, this.container.position.y);
-    this.rendererService.view.style.cursor = 'move';
+    if (this.rendererService.view) this.rendererService.view.style.cursor = 'move';
   }
 
   /**
@@ -65,7 +66,7 @@ export class PixiSelectionHandlerPositionService {
     this.container.off('pointermove', this.mousemove, this);
     window.removeEventListener('mouseup', this.mouseupFn);
     this.containerService.endHandling(this, event);
-    this.rendererService.view.style.cursor = '';
+    if (this.rendererService.view) this.rendererService.view.style.cursor = '';
   }
 
   /**
@@ -77,10 +78,12 @@ export class PixiSelectionHandlerPositionService {
   mousemove(event: InteractionEvent): void {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
     this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
-    this.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
+    this.container.parent.toLocal(this.mouseCurrentPos, void 0, this.mouseCurrentPos);
     this.container.position.x = this.startPos.x + (this.mouseCurrentPos.x - this.mouseStartPos.x);
     this.container.position.y = this.startPos.y + (this.mouseCurrentPos.y - this.mouseStartPos.y);
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.position'));
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.position') as PointSceneComponent
+    );
   }
 
   /**
@@ -96,7 +99,9 @@ export class PixiSelectionHandlerPositionService {
     }
     if (typeof data.x === 'number') this.container.position.x = data.x;
     if (typeof data.y === 'number') this.container.position.y = data.y;
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.position'));
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.position') as PointSceneComponent
+    );
   }
 
   /**
@@ -104,7 +109,7 @@ export class PixiSelectionHandlerPositionService {
    *
    * @param event The triggered event.
    */
-  keyup(event) {
+  keyup(event: KeyboardEvent) {
     if (this.containerService.currentHandler !== this) return;
     this.containerService.endHandling(this, event);
   }

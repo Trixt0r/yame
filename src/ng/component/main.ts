@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { WorkspaceComponent } from '../module/workspace/component';
 import { ToolbarComponent } from '../module/toolbar/component';
-import { SceneComponent } from 'ng/module/scene';
+import { SceneComponent } from '../module/scene/components/scene/scene.component';
 
 @Component({
   moduleId: module.id.toString(),
@@ -25,11 +25,11 @@ export class MainComponent implements AfterViewInit, OnChanges {
     return window.innerHeight * 0.75;
   }
 
-  @Input() width: number;
+  @Input() width!: number;
 
-  @ViewChild(SceneComponent, { static: false }) scene: SceneComponent;
-  @ViewChild(ToolbarComponent, { static: false }) toolbar: ToolbarComponent;
-  @ViewChild(WorkspaceComponent, { static: false }) workspace: WorkspaceComponent;
+  @ViewChild(SceneComponent, { static: false }) scene!: SceneComponent;
+  @ViewChild(ToolbarComponent, { static: false }) toolbar!: ToolbarComponent;
+  @ViewChild(WorkspaceComponent, { static: false }) workspace!: WorkspaceComponent;
 
   sceneHeight = 0;
 

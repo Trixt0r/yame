@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Engine } from '@trixt0r/ecs';
+import { Collection, Engine } from '@trixt0r/ecs';
 import { ofActionSuccessful, Actions } from '@ngxs/store';
-import { CreateEntity, DeleteEntity, SortEntity, UpdateEntity } from '../states/actions';
+import { CreateEntity, DeleteEntity, SortEntity, UpdateEntity } from '../states/actions/entity.action';
 import { SceneEntity } from 'common/scene';
 
 interface EngineOptions {
@@ -17,9 +17,9 @@ export class EngineService {
   public readonly diagnostics: { [label: string]: number | string | boolean } = { };
 
   protected lastRun: number = Date.now();
-  protected requestId: number;
+  protected requestId?: number;
   public engineOpts: EngineOptions = { delta: 0 };
-  protected tmpEngineOpts: EngineOptions = null;
+  protected tmpEngineOpts: EngineOptions | null = null;
 
   constructor(actions: Actions) {
     this.engine = new Engine();
@@ -30,8 +30,8 @@ export class EngineService {
         else if (action instanceof DeleteEntity)
           this.engine.entities.remove.apply(this.engine.entities, action.deleted);
         else if (action instanceof SortEntity)
-          this.engine.entities.sort((a: SceneEntity, b: SceneEntity) => {
-            return Math.sign((a.components.byId('index').index as number) - (b.components.byId('index').index as number));
+          (this.engine.entities as Collection<SceneEntity>).sort((a: SceneEntity, b: SceneEntity) => {
+            return Math.sign((a.components.byId('index')?.index as number) - (b.components.byId('index')?.index as number));
           });
         this.run();
       });

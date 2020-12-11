@@ -18,7 +18,7 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
   /**
    * The input reference.
    */
-  @ViewChild(MatInput) input: MatInput;
+  @ViewChild(MatInput) input!: MatInput;
 
   /**
    * The value for rounding values.
@@ -29,13 +29,14 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
    * THe current number value.
    */
   get number(): number | string {
-    return typeof this.component.number === 'number' ? this.transform(this.component.number) as number : 0;
+    return typeof this.component?.number === 'number' ? this.transform(this.component.number) as number : 0;
   }
 
   /**
    * @inheritdoc
    */
   onUpdate(event: any): void {
+    if (!this.component) return;
     const val: string | number = event.currentTarget.value;
     this.component.number = this.reverse(typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val) as number;
     delete this.component.mixed;

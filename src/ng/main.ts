@@ -7,8 +7,8 @@ import * as angularPlatformBrowser from '@angular/platform-browser';
 import * as angularPlatformBrowserDynamic from '@angular/platform-browser-dynamic';
 import * as angularRouter from '@angular/router';
 import * as angularPipes from 'angular-pipes';
-import * as bluebird from 'bluebird';
-import * as eventemitter3 from 'eventemitter3';
+// import * as bluebird from 'bluebird';
+// import * as eventemitter3 from 'eventemitter3';
 import * as lodash from 'lodash';
 import * as uuid from 'uuid';
 import * as yame from './idx';
@@ -25,8 +25,8 @@ const mapping = {
   '@angular/platform-browser-dynamic': angularPlatformBrowserDynamic,
   '@angular/router': angularRouter,
   'angular-pipes': angularPipes,
-  bluebird: bluebird,
-  eventemitter3: eventemitter3,
+  // bluebird: bluebird,
+  // eventemitter3: eventemitter3,
   lodash: lodash,
   uuid: uuid,
 };

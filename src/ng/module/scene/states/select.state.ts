@@ -3,13 +3,14 @@ import { State, StateContext, Action, Store, Actions, ofActionSuccessful } from 
 import { Select, Unselect, UpdateComponents, Isolate } from './actions/select.action';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISceneState } from './scene.state';
-import { PushHistory } from './actions';
+import { PushHistory } from './actions/history.action';
 import { cloneDeep } from 'lodash';
+import { Injectable } from '@angular/core';
 
 export interface ISelectState {
   entities: string[];
   components: readonly SceneComponent[];
-  isolated: SceneEntity;
+  isolated: SceneEntity | null;
 }
 
 @State<ISelectState>({
@@ -20,15 +21,16 @@ export interface ISelectState {
     isolated: null,
   },
 })
+@Injectable()
 export class SelectState {
   private beforeSelect = {
-    entities: [],
-    components: [],
+    entities: [] as string[],
+    components: [] as SceneComponent[],
   };
 
   private beforeUnselect = {
-    entities: [],
-    components: [],
+    entities: [] as string[],
+    components: [] as SceneComponent[],
   };
 
   constructor(private store: Store, actions: Actions) {
@@ -66,7 +68,7 @@ export class SelectState {
     const entities: string[] = action.unselectCurrent ? [] : ctx.getState().entities.slice();
     const comps = cloneDeep(ctx.getState().components.slice());
     const components: SceneComponent[] = action.components;
-    const added = [];
+    const added: string[] = [];
     action.entities.forEach((id) => {
       const entity = sceneEntities.find(it => it.id === id);
       if (!entity) return console.warn('[SelectState] Could not find an entity for id', id);
@@ -91,9 +93,10 @@ export class SelectState {
     this.beforeUnselect.components = comps;
     if (!action.entities || action.entities.length === 0) {
       this.beforeUnselect.entities = ctx.getState().entities.slice()
-      return ctx.patchState({ entities: [], components: [] });
+      ctx.patchState({ entities: [], components: [] });
+      return;
     }
-    const removed = [];
+    const removed = [] as string[];
     const entities: string[] = ctx.getState().entities.slice();
     const components: SceneComponent[] = action.components || ctx.getState().components.slice() || [];
     action.entities.forEach(id => {

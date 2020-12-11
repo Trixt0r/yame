@@ -1,14 +1,15 @@
 import { Point, DisplayObject, Container, Graphics, InteractionEvent, Polygon, DEG_TO_RAD } from 'pixi.js';
 import { Injectable, Inject } from '@angular/core';
 import { YAME_RENDERER } from 'ng/module/scene';
-import { PixiRendererService } from '../..';
-import { PixiSelectionContainerService } from '..';
+import { PixiRendererService } from '../../renderer.service';
+import { PixiSelectionContainerService } from '../container.service';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { angleBetween } from 'common/math';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
 import { takeUntil } from 'rxjs/operators';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
+import { RangeSceneComponent } from 'common/scene';
 
 const tempPoint = new Point();
 
@@ -25,15 +26,15 @@ export class PixiSelectionHandlerRotationService {
   protected clickedRot = 0;
   protected clickedPos = new Point();
 
-  protected mouseupFn: EventListenerObject;
+  protected mouseupFn: (event: MouseEvent) => void;
   protected mouseLeft = false;
 
   protected topLeft = new Point();
   protected topRight = new Point();
   protected bottomLeft = new Point();
 
-  protected debugPoints: Point[];
-  protected debugGraphics: Graphics;
+  protected debugPoints: Point[] = [];
+  protected debugGraphics?: Graphics;
   protected debug = false;
 
   protected tmp = new Point();
@@ -71,6 +72,7 @@ export class PixiSelectionHandlerRotationService {
   updateCursor(event?: InteractionEvent): void {
     this.mouseLeft = event === void 0;
     if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
+    if (!this.rendererService.view) return;
     this.cursorService.begin(this.rendererService.view);
     this.cursorService.image.src = 'assets/rotate-icon.svg';
     this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
@@ -103,7 +105,7 @@ export class PixiSelectionHandlerRotationService {
     this.clickedPos.set(this.containerService.container.position.x, this.containerService.container.position.y);
     this.containerService.beginHandling(this, event);
     this.mouseStartPos.set(event.data.global.x, event.data.global.y);
-    this.containerService.container.parent.toLocal(this.mouseStartPos, null, this.mouseStartPos);
+    this.containerService.container.parent.toLocal(this.mouseStartPos, void 0, this.mouseStartPos);
     this.initRot = this.containerService.container.rotation;
     this.clickedRot = angleBetween(this.containerService.container.position, this.mouseStartPos);
   }
@@ -133,10 +135,10 @@ export class PixiSelectionHandlerRotationService {
   mousemove(event: InteractionEvent): void {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
     this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
-    this.containerService.container.parent.toLocal(this.mouseCurrentPos, null, this.mouseCurrentPos);
+    this.containerService.container.parent.toLocal(this.mouseCurrentPos, void 0, this.mouseCurrentPos);
     this.containerService.container.rotation = this.initRot + angleBetween(this.clickedPos, this.mouseCurrentPos) - this.clickedRot;
     this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation'));
+    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation') as RangeSceneComponent);
   }
 
   /**
@@ -180,7 +182,7 @@ export class PixiSelectionHandlerRotationService {
     // outer bottom left
     points[18] = bnds.x - offsetHor - thicknessHor; points[19] = bnds.y + bnds.height + offsetVer + thicknessVer;
 
-    this.rendererService.stage.toLocal(this.area.position, this.containerService.container, this.area.position);
+    this.rendererService.stage?.toLocal(this.area.position, this.containerService.container, this.area.position);
 
     const tmp = this.tmp;
     for (let i = 0; i < points.length; i += 2) {
@@ -194,7 +196,7 @@ export class PixiSelectionHandlerRotationService {
   }
 
   protected debugDraw(): void {
-    if (!this.debug) return;
+    if (!this.debug || !this.debugGraphics) return;
     this.debugGraphics.clear();
     this.debugGraphics.beginFill(0xccaaee, 0.25);
     const points = this.debugPoints;
@@ -222,7 +224,7 @@ export class PixiSelectionHandlerRotationService {
     }
     this.containerService.container.rotation = data.rotation;
     this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation'));
+    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation') as RangeSceneComponent);
   }
 
   /**
@@ -230,7 +232,7 @@ export class PixiSelectionHandlerRotationService {
    *
    * @param event The triggered event.
    */
-  keyup(event) {
+  keyup(event: KeyboardEvent) {
     if (this.containerService.currentHandler !== this) return;
     this.containerService.endHandling(this, event);
   }
@@ -240,7 +242,7 @@ export class PixiSelectionHandlerRotationService {
    * Adds all clickable areas to the stage.
    */
   attached(): void {
-    this.rendererService.stage.addChild(this.area);
+    this.rendererService.stage?.addChild(this.area);
     if (this.debug) {
       if (!this.debugGraphics) this.debugGraphics = new Graphics();
       if (!this.debugPoints) {
@@ -248,7 +250,7 @@ export class PixiSelectionHandlerRotationService {
         for (let i = 0; i < 10; i++)
           this.debugPoints[i] = new Point();
       }
-      (this.rendererService.stage.getChildByName('debug') as Container).addChild(this.debugGraphics);
+      (this.rendererService.stage?.getChildByName('debug') as Container).addChild(this.debugGraphics);
     }
     this.updateAreaPositions();
 
@@ -280,7 +282,8 @@ export class PixiSelectionHandlerRotationService {
    * Removes all clickable areas to the stage.
    */
   detached(): void {
-    if (this.debugGraphics) (this.rendererService.stage.getChildByName('debug') as Container).removeChild(this.debugGraphics);
-    this.rendererService.stage.removeChild(this.area);
+    if (this.debugGraphics)
+      (this.rendererService.stage?.getChildByName('debug') as Container).removeChild(this.debugGraphics);
+    this.rendererService.stage?.removeChild(this.area);
   }
 }

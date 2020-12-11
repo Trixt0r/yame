@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
-import { Pubsub } from '../idx';
+import { Pubsub } from 'common/pubsub';
 import { Environment } from '../environment';
 import { RendererPlugin } from './plugin/interface';
 
-let pluginModules = [];
+let pluginModules: any[] = [];
 
 Environment.plugins.forEach((plugin: RendererPlugin) => {
   if (!Array.isArray(plugin.ngModules)) return;

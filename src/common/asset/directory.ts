@@ -1,7 +1,6 @@
 import { DirectoryContent } from '../content/directory';
 import { FileAsset } from './file';
 import { AssetGroup } from './group';
-import { Asset } from '../asset';
 
 /**
  * A directory asset contains directory information, such as path and a list of its direct members.
@@ -15,11 +14,9 @@ import { Asset } from '../asset';
 export class DirectoryAsset extends AssetGroup<DirectoryAsset | FileAsset> {
 
   /** @inheritdoc */
-  get type(): string {
-    return 'directory';
-  }
+  type = 'directory';
 
   /** @inheritdoc */
-  content: DirectoryContent;
+  content!: DirectoryContent;
 
 }

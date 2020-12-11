@@ -1,6 +1,6 @@
 import { File } from './file';
 import * as Promise from 'bluebird';
-import { DirectoryContent } from '../content/directory';
+import { DirectoryContent } from 'common/content/directory';
 import { Directory, ScanState } from './directory';
 import * as path from 'path';
 import * as fs from 'fs-extra';

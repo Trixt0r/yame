@@ -1,5 +1,5 @@
 import { MainComponent } from './main';
-import { Component, ElementRef, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { SidebarComponent } from '../module/sidebar/components/sidebar.component';
 
 /**
@@ -22,8 +22,8 @@ export class AppComponent implements AfterViewInit {
 
   private initialized = false;
 
-  @ViewChild(MainComponent, { static: false }) main: MainComponent;
-  @ViewChild(SidebarComponent, { static: false }) sidebar: SidebarComponent;
+  @ViewChild(MainComponent, { static: false }) main!: MainComponent;
+  @ViewChild(SidebarComponent, { static: false }) sidebar!: SidebarComponent;
 
   constructor(private cdr: ChangeDetectorRef) {}
 

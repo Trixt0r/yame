@@ -33,17 +33,17 @@ export class NumberDirective {
   /**
    * Last clicked y position of the mouse.
    */
-  protected clickedY: number = null;
+  protected clickedY: number | null = null;
 
   /**
    * Initial clicked value, when moving the mouse.
    */
-  protected clickedValue: number = null;
+  protected clickedValue: number | null = null;
 
   /**
    * The bound mouse move event handler.
    */
-  protected onMouseMoveBound: EventListener;
+  protected onMouseMoveBound!: (event: MouseEvent) => void;
 
   /**
    * The value of the host input.
@@ -126,7 +126,7 @@ export class NumberDirective {
       return;
     }
     if (this.clickedY === null) return window.removeEventListener('mousemove', this.onMouseMoveBound);
-    this.process(this.clickedValue - (event.clientY - this.clickedY), event);
+    this.process((this.clickedValue as number) - (event.clientY - this.clickedY), event);
   }
 
 }

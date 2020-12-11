@@ -1,6 +1,7 @@
 import { DialogProviderException } from '../exception/provider/dialog';
 import { ElectronProvider } from '../provider';
 import * as _ from 'lodash';
+import { IpcRendererEvent } from 'electron/main';
 
 export class DialogProvider extends ElectronProvider {
 
@@ -14,7 +15,7 @@ export class DialogProvider extends ElectronProvider {
     return new Promise((resolve, reject) => {
       const id = _.uniqueId('dialog-');
       this.ipc.send('dialog:open', options, id);
-      this.ipc.once(`dialog:open:${id}`, (event, dialog) => {
+      this.ipc.once(`dialog:open:${id}`, (event: IpcRendererEvent, dialog: { filePaths: string[] }) => {
         if (dialog && dialog.filePaths && dialog.filePaths.length > 0) resolve(dialog.filePaths);
         else reject(new DialogProviderException('No files chosen'));
       });

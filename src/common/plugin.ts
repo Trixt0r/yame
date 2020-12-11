@@ -74,67 +74,49 @@ export class YamePlugin extends EventEmitter {
    * This is unique, i.e. a second plugin with the same id can not be installed.
    * If not set by the plugin itself, it will be set by the plugin manager read from the name on the plugin's
    * pacakge.json.
-   *
-   * @type {string}
    */
-  id: string;
+  id!: string;
 
   /**
    * The yame environment.
    * This will be set by the plugin manager before executing any of the
-   *
-   * @type {YameEnvironment}
    */
-  environment: YameEnvironment;
+  environment!: YameEnvironment;
 
   /**
    * The configuration of the plugin, i.e. the package.json config.
-   *
-   * @type {PluginConfig}
    */
-  config: PluginConfig;
+  config!: PluginConfig;
 
   /**
    * An optional priority value for the plugin.
    * Can be defined to get the plugin earlier initialized than the other plugins during startup.
    * A higher value means higher priority.
    * If no priority is defined, the plugin will be initialized with default priority (0).
-   *
-   * @type {number}
    */
   priority?: number;
 
   /**
    * Tells whether the plugin is initialized.
    * This property will be set to `true` by the plugin manager after successfully calling @see {Plugin#initialize}.
-   *
-   *
-   * @type {boolean}
    */
-  isInitialized: boolean;
+  isInitialized!: boolean;
 
   /**
    * Tells whether the plugin is active.
    * This property will be set to `true` by the plugin manager after successfully calling @see {Plugin#activate}.
-   *
-   *
-   * @type {boolean}
    */
-  isActive: boolean;
+  isActive!: boolean;
 
   /**
    * Internal ng and electron directories.
-   *
-   * @type {string[]}
    */
-  private calculatedDirs: string[];
+  private calculatedDirs!: string[];
 
   /**
    * Activates the plugin (again).
    * This will be executed when trying to switch the @see {Plugin#isActive} flag to `true`.
    * In any case the method will be executed after a successful installation.
-   *
-   * @returns {Promise<void>} Resolves on success and rejects on error.
    */
   activate?(): Promise<void>;
 
@@ -142,9 +124,6 @@ export class YamePlugin extends EventEmitter {
    * Deactivates the plugin.
    * This will be executed when trying to switch the @see {Plugin#isActive} flag to `false`.
    * This method will also be executed before uninstalling the plugin.
-   *
-   * @returns {Promise<void>}
-   * @memberof Plugin
    */
   deactivate?(): Promise<void>;
 
@@ -152,24 +131,20 @@ export class YamePlugin extends EventEmitter {
    * Initializes the plugin.
    * This will be executed after initializing the main application by the plugin manager.
    *
-   * @param {string} type The application type, e.g. `ng` or `electron`.
-   * @returns {Promise<void>} Resolves on success and rejects on error.
+   * @param type The application type, e.g. `ng` or `electron`.
    */
   initialize?(type: string): Promise<void>;
 
   /**
    * Stops the plugin.
    * This will be executed before the main app shuts down completely.
-   *
-   * @returns {Promise<void>}
-   * @memberof Plugin
    */
   finalize?(): Promise<void>;
 
   /**
    * Resolves the ng and electron directories of this plugin.
    *
-   * @returns {string[]} The ng and electron entry directories. Maybe empty.
+   * @return The ng and electron entry directories. Maybe empty.
    */
   get directories(): string[] {
     if (this.calculatedDirs) return this.calculatedDirs;

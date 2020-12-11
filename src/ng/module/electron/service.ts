@@ -25,7 +25,7 @@ export class ElectronService {
    * @type {Electron.IpcRenderer} Reference to the ipc renderer
    */
   get ipc() {
-    return require('electron').ipcRenderer;
+    return (global as any).require('electron').ipcRenderer;
   }
 
   /**

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Point, InteractionEvent, DisplayObject, Polygon, Graphics, Container } from 'pixi.js';
-import { PixiRendererService } from '../..';
-import { PixiSelectionContainerService } from '..';
+import { PixiRendererService } from '../../renderer.service';
+import { PixiSelectionContainerService } from '../container.service';
 import { PixiSelectionRendererService } from '../renderer.service';
 import { YAME_RENDERER } from 'ng/module/scene';
 import { distanceToSegment, angleBetween } from 'common/math';
@@ -9,6 +9,8 @@ import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { CursorService } from 'ng/services/cursor.service';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
 import { takeUntil } from 'rxjs/operators';
+import { PointSceneComponent } from 'common/scene';
+import { SizeSceneComponent } from 'common/scene/component/size';
 
 const tempPoint = new Point();
 
@@ -80,17 +82,17 @@ export class PixiSelectionHandlerSkewService {
   /**
    * Bound mouse up function.
    */
-  protected mouseupFn: EventListenerObject;
+  protected mouseupFn: (event: MouseEvent) => void;
 
   /**
    * Bound key down function.
    */
-  protected keyDownFn: EventListenerObject;
+  protected keyDownFn: (event: KeyboardEvent) => void;
 
   /**
    * Bound key up function.
    */
-  protected keyUpFn: EventListenerObject;
+  protected keyUpFn: (event: KeyboardEvent) => void;
 
   /**
    * Whether the mouse left or not.
@@ -100,17 +102,17 @@ export class PixiSelectionHandlerSkewService {
   /**
    * The previous cursor style.
    */
-  protected prevCursor: string;
+  protected prevCursor?: string;
 
   /**
    * Debug points to render, if active.
    */
-  protected debugPoints: Point[];
+  protected debugPoints?: Point[];
 
   /**
    * Debug graphics to render, if active.
    */
-  protected debugGraphics: Graphics;
+  protected debugGraphics?: Graphics;
 
   /**
    * Whether to render debug graphics.
@@ -187,7 +189,7 @@ export class PixiSelectionHandlerSkewService {
    * Draws the hit area.
    */
   protected debugDraw(): void {
-    if (!this.debug) return;
+    if (!this.debug || !this.debugGraphics || !this.debugPoints) return;
     this.debugGraphics.clear();
     this.debugGraphics.beginFill(0x4499ff, 0.25);
     const points = this.debugPoints;
@@ -265,7 +267,7 @@ export class PixiSelectionHandlerSkewService {
     this.containerSize.set(this.container.width, this.container.height);
     this.clickedSkew.copyFrom(this.container.skew);
     this.clickedPos.copyFrom(event.data.global);
-    this.container.toLocal(this.clickedPos, null, this.clickedPos);
+    this.container.toLocal(this.clickedPos, void 0, this.clickedPos);
 
     const bounds = this.container.getLocalBounds();
     if (this.clickedPos.y <= bounds.y) {
@@ -326,7 +328,7 @@ export class PixiSelectionHandlerSkewService {
     this.container.width = this.containerSize.x;
     this.container.height = this.containerSize.y;
     this.container.skew.copyFrom(this.clickedSkew);
-    this.container.toLocal(this.currentPos, null, this.currentPos);
+    this.container.toLocal(this.currentPos, void 0, this.currentPos);
 
     const bounds = this.container.getLocalBounds();
     tempPoint.copyFrom(this.currentPos);
@@ -353,10 +355,10 @@ export class PixiSelectionHandlerSkewService {
     this.container.position.y = this.containerPos.y - (this.currentRefPos.y - this.clickedRefPosTransform.y);
 
     this.containerService.dispatchUpdate(
-      this.containerService.components.byId('transformation.position'),
-      this.containerService.components.byId('transformation.scale'),
-      this.containerService.components.byId('transformation.size'),
-      this.containerService.components.byId('transformation.skew')
+      this.containerService.components.byId('transformation.position') as PointSceneComponent,
+      this.containerService.components.byId('transformation.scale') as PointSceneComponent,
+      this.containerService.components.byId('transformation.size') as SizeSceneComponent,
+      this.containerService.components.byId('transformation.skew') as PointSceneComponent
     );
   }
 
@@ -368,10 +370,12 @@ export class PixiSelectionHandlerSkewService {
   updateCursor(event?: InteractionEvent): void {
     this.mouseLeft = event === void 0;
     if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
-    this.cursorService.begin(this.rendererService.view);
-    this.cursorService.image.src = 'assets/skew-icon.svg';
+    if (this.rendererService.view) {
+      this.cursorService.begin(this.rendererService.view);
+      this.cursorService.image.src = 'assets/skew-icon.svg';
+    }
 
-    this.container.toLocal(this.rendererService.mouse, null, tempPoint);
+    this.container.toLocal(this.rendererService.mouse, void 0, tempPoint);
     const bounds = this.container.getLocalBounds();
     let xDirection = 0;
     let yDirection = 0;
@@ -454,7 +458,7 @@ export class PixiSelectionHandlerSkewService {
     points[18] = bnds.x - offsetHor - thicknessHor;
     points[19] = bnds.y + bnds.height + offsetVer + thicknessVer;
 
-    this.rendererService.stage.toLocal(this.area.position, this.container, this.area.position);
+    this.rendererService.stage?.toLocal(this.area.position, this.container, this.area.position);
 
     const tmp = tempPoint;
     for (let i = 0; i < points.length; i += 2) {
@@ -480,7 +484,9 @@ export class PixiSelectionHandlerSkewService {
     }
     if (typeof data.x === 'number') this.container.skew.x = data.x;
     if (typeof data.y === 'number') this.container.skew.y = data.y;
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.skew'));
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.skew') as PointSceneComponent
+    );
   }
 
   /**
@@ -488,7 +494,7 @@ export class PixiSelectionHandlerSkewService {
    *
    * @param event The triggered event.
    */
-  hotKeyup(event) {
+  hotKeyup(event: KeyboardEvent) {
     if (this.containerService.currentHandler !== this) return;
     this.containerService.endHandling(this, event);
   }
@@ -501,14 +507,14 @@ export class PixiSelectionHandlerSkewService {
     this.area.interactive = false;
     window.addEventListener('keydown', this.keyDownFn);
     window.addEventListener('keyup', this.keyUpFn);
-    this.rendererService.stage.addChild(this.area);
+    this.rendererService.stage?.addChild(this.area);
     if (this.debug) {
       if (!this.debugGraphics) this.debugGraphics = new Graphics();
       if (!this.debugPoints) {
         this.debugPoints = new Array(10);
         for (let i = 0; i < 10; i++) this.debugPoints[i] = new Point();
       }
-      (this.rendererService.stage.getChildByName('debug') as Container).addChild(this.debugGraphics);
+      (this.rendererService.stage?.getChildByName('debug') as Container).addChild(this.debugGraphics);
     }
     this.updateAreaPositions();
     this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
@@ -539,7 +545,7 @@ export class PixiSelectionHandlerSkewService {
     window.removeEventListener('keyup', this.keyUpFn);
     this.area.interactive = false;
     if (this.debugGraphics)
-      (this.rendererService.stage.getChildByName('debug') as Container).removeChild(this.debugGraphics);
-    this.rendererService.stage.removeChild(this.area);
+      (this.rendererService.stage?.getChildByName('debug') as Container).removeChild(this.debugGraphics);
+    this.rendererService.stage?.removeChild(this.area);
   }
 }

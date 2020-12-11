@@ -18,41 +18,41 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
   /**
    * The slider reference.
    */
-  @ViewChild(MatSlider) slider: MatSlider;
+  @ViewChild(MatSlider) slider!: MatSlider;
 
   /**
    * The minimal allowed value.
    */
   get min(): number {
-    return this.component.min as number || 0;
+    return this.component?.min as number || 0;
   }
 
   /**
    * The maximum allowed value.
    */
   get max(): number {
-    return this.component.max as number || 100;
+    return this.component?.max as number || 100;
   }
 
   /**
    * The step value.
    */
   get step(): number {
-    return this.component.step as number || 1;
+    return this.component?.step as number || 1;
   }
 
   /**
    * The ticks value.
    */
   get ticks(): number | 'auto' {
-    return this.component.ticks ? this.component.ticks as number | 'auto' : 0;
+    return this.component?.ticks ? this.component.ticks as number | 'auto' : 0;
   }
 
   /**
    * The current value.
    */
   get value(): number {
-    return !this.component.mixed && typeof this.component.value === 'number' ? this.transform(this.component.value) as number : 0;
+    return !this.component?.mixed && typeof this.component?.value === 'number' ? this.transform(this.component.value) as number : 0;
   }
 
   constructor(private cdr: ChangeDetectorRef) {
@@ -63,6 +63,7 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
    * @inheritdoc
    */
   onUpdate(event: any): void {
+    if (!this.component) return;
     this.component.value = this.reverse(event.value) as number;
     delete this.component.mixed;
     return super.onUpdate(event);

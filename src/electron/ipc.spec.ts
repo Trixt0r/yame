@@ -5,7 +5,7 @@ import PubSub from '../common/pubsub';
 describe('Ipc action loader', function() {
 
   it('should load ipc handlers and resolve', function() {
-    return ipc(this.app.electron.remote)
+    return ipc()
       .then(() => expect(true).toBe(true))
       .catch(() => expect(false).toBe(true));
   });
@@ -14,7 +14,7 @@ describe('Ipc action loader', function() {
     PubSub.on('ipc:init', () => {
       expect(true).toBe(true);
     });
-    return ipc(this.app.electron.remote);
+    return ipc();
   });
 
   it('should trigger the ipc:init public event', function() {
@@ -22,7 +22,7 @@ describe('Ipc action loader', function() {
     class CustomIpcAction extends IpcAction {
       init(): Promise<any> {
         return new Promise((resolve) => {
-          this.internalInitialized = true;
+          this._initialized = true;
           resolve();
         });
       }
@@ -30,7 +30,7 @@ describe('Ipc action loader', function() {
 
     let action = new CustomIpcAction();
     PubSub.on('ipc:init', (list: IpcAction[]) => list.push(action));
-    return ipc(this.app.electron.remote)
+    return ipc()
       .then(() => expect(action.isInitialized).toBe(true));
   });
 });

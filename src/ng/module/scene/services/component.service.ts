@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { UpdateEntity } from '../states/actions/entity.action';
 import { EntityNotFoundException } from '../exceptions/scene/entity-not-found.exception';
 import { UpdateComponents } from '../states/actions/select.action';
-import { ISelectState } from '../states';
+import { ISelectState } from '../states/select.state';
 import { isNil, maxBy, cloneDeep } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
@@ -109,9 +109,9 @@ export class SceneComponentService {
         throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     });
-    const max = maxBy(entityObjects, it => it.components.byType(type).length);
-    const components = max.components.byType(type);
-    return `${type} ${components.length + 1}`;
+    const max = maxBy(entityObjects, it => it?.components.byType(type).length);
+    const components = max?.components.byType(type);
+    return `${type} ${(components?.length || 0) + 1}`;
   }
 
   /**
@@ -146,7 +146,7 @@ export class SceneComponentService {
     }
 
     const selected = this.store.selectSnapshot(data => data.select);
-    const data = entityObjects.map(it => ({ id: it.id, components: [cloneDeep(component)] }));
+    const data = entityObjects.map(it => ({ id: it?.id, components: [cloneDeep(component)] }));
     const components = [ ...selected.components, component ];
     return this.store.dispatch([
       new UpdateEntity(
@@ -173,7 +173,7 @@ export class SceneComponentService {
     });
     component.markedForDelete = true;
     const selected = this.store.selectSnapshot(data => data.select) as ISelectState;
-    const data = entityObjects.map(it => ({ id: it.id, components: [component] }));
+    const data = entityObjects.map(it => ({ id: it?.id, components: [component] }));
     const components = selected.components.slice();
     const idx = components.findIndex(it => it.id === component.id);
     if (idx >= 0) components.splice(idx, 1);
@@ -200,10 +200,10 @@ export class SceneComponentService {
       if (!this.scene.assertEntity(entityObj))
         throw new EntityNotFoundException('No entity found', it);
       return entityObj;
-    }).filter(entity => !!entity.components.byId(old.id));
+    }).filter(entity => !!entity?.components.byId(old.id));
     const selected = this.store.selectSnapshot(data => data.select) as ISelectState;
     old.markedForDelete = true;
-    const data = entityObjects.map(it => ({ id: it.id, components: [cloneDeep(component), cloneDeep(old)] }));
+    const data = entityObjects.map(it => ({ id: it?.id, components: [cloneDeep(component), cloneDeep(old)] }));
     const components = selected.components.slice();
     const idx = components.indexOf(old);
     if (idx >= 0) components[idx] = component;

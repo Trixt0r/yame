@@ -11,7 +11,7 @@ export class CreateEntity {
 interface CloneData {
   id: string;
   index: number,
-  parent?: string;
+  parent?: string | null;
 }
 
 /**
@@ -23,7 +23,7 @@ export class CloneEntity {
 }
 
 interface SortData extends CloneData {
-  oldParent?: string;
+  oldParent?: string | null;
 }
 
 /**

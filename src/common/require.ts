@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 /**
  * Extends the default require function.
  * The 'yame' module gets faked, by overriding the require function and checking for that
@@ -9,11 +7,13 @@ import * as path from 'path';
  * @return {void}
  */
 export function extend(mapping: { [key: string]: any }) {
-  const Module = require('module');
-  const originalRequire = Module.prototype.require;
-  const nodeModules = path.resolve(__dirname, '..', 'node_modules');
+  const requireFn = typeof (global as any).require === 'function' ? (global as any).require : require;
 
-  Module.prototype.require = function(name) {
+  const Module = requireFn('module');
+  const originalRequire = Module.prototype.require;
+  const nodeModules = requireFn('path').resolve(__dirname, '..', 'node_modules');
+
+  Module.prototype.require = function(name: string) {
     if (!this._yame_pushed && name === 'yame') {
       this.paths.unshift(nodeModules);
       this._yame_pushed = true;

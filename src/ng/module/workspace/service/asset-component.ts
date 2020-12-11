@@ -1,10 +1,7 @@
 import { EmptyAssetComponentMenuOptionsException } from '../exception/service/empty-asset-component-menu-options';
 import { MenuOption } from '../component/assets/interface/menu-option';
 import { AssetPreviewComponent } from '../component/assets/component/preview/interface';
-import { DirectoryGroupComponent } from '../component/groups/component/group/directory';
 import { Asset } from '../../../../common/asset';
-import { AssetGroup } from '../../../../common/asset/group';
-import { GroupComponent } from '../component/groups/component/group/abstract';
 import { Injectable, Type } from '@angular/core';
 
 /**

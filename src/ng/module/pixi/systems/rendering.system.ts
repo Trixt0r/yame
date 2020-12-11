@@ -1,4 +1,4 @@
-import { System } from '@trixt0r/ecs';
+import { Collection, System } from '@trixt0r/ecs';
 import { PixiRendererService } from '../services/renderer.service';
 import { SceneEntity } from 'common/scene';
 
@@ -12,14 +12,15 @@ export class PixiRenderingSystem extends System {
    * @inheritdoc
    */
   process(): void {
-    this.engine.entities.forEach((entity: SceneEntity) => {
+    (this.engine?.entities as Collection<SceneEntity>).forEach((entity: SceneEntity) => {
       const container = this.service.getContainer(entity.id);
-      container.visible = entity.components.getValue('visible', 'bool', true);
+      if (!container) return;
+      container.visible = entity.components.getValue('visible', 'bool', true) as boolean;
       if (!entity.components.byId('transform-off'))
-        container.zIndex = entity.components.getValue('index', 'index', 1);
+        container.zIndex = entity.components.getValue('index', 'index', 1) as number;
     });
     this.service.diagnostics.startRenderingTime = performance.now();
-    this.service.renderer.render(this.service.scene);
+    this.service.renderer?.render(this.service.scene);
     this.service.diagnostics.endRenderingTime = performance.now();
   }
 }

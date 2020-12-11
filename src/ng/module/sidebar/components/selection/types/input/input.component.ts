@@ -18,14 +18,14 @@ export class InputTypeComponent<T extends SceneComponent = SceneComponent> exten
   /**
    * The input reference.
    */
-  @ViewChild(MatInput) input: MatInput;
+  @ViewChild(MatInput) input!: MatInput;
 
   /**
    * @inheritdoc
    */
   onUpdate(event: any): void {
     (this.component as unknown as StringSceneComponent).string = this.reverse(event.currentTarget.value) as string;
-    delete this.component.mixed;
+    delete this.component?.mixed;
     return super.onUpdate(event);
   }
 

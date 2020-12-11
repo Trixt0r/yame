@@ -4,6 +4,7 @@ import { DefaultToolComponent } from './component/default';
 import { Tool } from './tool';
 import { Subject } from 'rxjs';
 import { ToolbarServiceException } from './exception/service';
+import { first } from 'rxjs/operators';
 
 interface ToolComponents {
   [key: string]: Type<ToolComponent>;
@@ -31,7 +32,7 @@ export class ToolbarService {
   protected toolArray: Tool[] = [];
 
   /** @type {Tool} The currently active tool. */
-  protected currentTool: Tool;
+  protected currentTool?: Tool;
 
   private registeredSource = new Subject<Tool>();
   private activatedSource = new Subject<Tool>();
@@ -56,7 +57,7 @@ export class ToolbarService {
       throw new ToolbarServiceException(`Tool '${tool.id}' is already registered`);
     if (this.registering)
       return new Promise((resolve, reject) => {
-        this.registered$.first().subscribe(() => {
+        this.registered$.pipe(first()).subscribe(() => {
           this.register(tool, component)
             .then(resolve)
             .catch(reject);
@@ -103,7 +104,7 @@ export class ToolbarService {
   }
 
   /** @type {Tool} The currently activate tool. */
-  get activeTool(): Tool {
+  get activeTool(): Tool | undefined {
     return this.currentTool;
   }
 

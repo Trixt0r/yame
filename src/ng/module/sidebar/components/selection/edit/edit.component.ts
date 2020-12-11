@@ -4,9 +4,8 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { SceneComponentsService } from 'ng/module/sidebar/services/scene-components.service';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { FormControl, Validators } from '@angular/forms';
-import { SceneComponentService } from 'ng/module/scene/services/component.service';
+import { SceneComponentService, componentIdValidator } from 'ng/module/scene';
 import { Subscription } from 'rxjs';
-import { componentIdValidator } from 'ng/module/scene/forms/validators/component-id.validator';
 import { DefaultErrorStateMatcher } from 'ng/module/utils/matchers/default-error-state.matcher';
 
 /**
@@ -37,12 +36,12 @@ export class EditComponentComponent {
   /**
    * The scene entity reference.
    */
-  @Input() entities: SceneEntity[];
+  @Input() entities: SceneEntity[] = [];
 
   /**
    * The scene component reference.
    */
-  @Input() component: SceneComponent;
+  @Input() component?: SceneComponent;
 
   /**
    * Creates an instance of an edit component.
@@ -64,7 +63,7 @@ export class EditComponentComponent {
     const dialogRef = this.dialog.open(EditComponentDialogComponent, {
       autoFocus: true,
       data: {
-        id: this.component.id,
+        id: this.component?.id,
         entities: this.entities,
       },
       restoreFocus: false,
@@ -73,7 +72,7 @@ export class EditComponentComponent {
 
     const sub = dialogRef.afterClosed().subscribe(id => {
       sub.unsubscribe();
-      if (!id) return;
+      if (!id || !this.component) return;
       const old = _.cloneDeep(this.component);
       this.component.id = id;
       this.components.updateSceneComponent(this.entities, this.component, old);

@@ -31,7 +31,7 @@ export class WorkspaceComponent extends ResizableComponent {
   /**
    * All currently loaded content.
    */
-  content: (DirectoryContent | FileContent)[] = null;
+  content: (DirectoryContent | FileContent)[] | null = null;
 
   /**
    * The minimum width for each column.
@@ -41,29 +41,29 @@ export class WorkspaceComponent extends ResizableComponent {
   /**
    * The currently selected asset group.
    */
-  assetGroup: AssetGroup<Asset>;
+  assetGroup: AssetGroup<Asset> | null = null;
 
   /**
    * The resizer between both inner components.
    */
-  @ViewChild('resizer', { static: false }) resizer: ResizableComponent;
+  @ViewChild('resizer', { static: false }) resizer!: ResizableComponent;
 
   /**
    * The groups component, on the left.
    */
-  @ViewChild('groupsComponent', { static: false }) groupsComponent: GroupsComponent;
+  @ViewChild('groupsComponent', { static: false }) groupsComponent!: GroupsComponent;
 
   /**
    * The assets component, on the right.
    */
-  @ViewChild('assetsComponent', { static: false }) assetsComponent: AssetsComponent;
+  @ViewChild('assetsComponent', { static: false }) assetsComponent!: AssetsComponent;
 
   /**
    * The row, which is wrapped around all inner components.
    */
-  @ViewChild('row', { static: false }) row: ElementRef;
+  @ViewChild('row', { static: false }) row!: ElementRef;
 
-  protected onResizeBind: EventListenerObject;
+  protected onResizeBind: () => void;
 
   constructor(
     public ref: ElementRef,

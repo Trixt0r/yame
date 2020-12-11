@@ -10,7 +10,7 @@ export { UtilsModule } from './module/utils/utils.module';
 export { ToolbarModule } from './module/toolbar/toolbar.module';
 export { WorkspaceModule } from './module/workspace';
 export * from './module/electron/idx';
-export * from './module/pixi';
+// export * from './module/pixi';
 export * from './module/toolbar/idx';
 export * from './module/utils';
 export * from './module/workspace/idx';

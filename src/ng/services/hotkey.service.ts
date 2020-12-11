@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { EventManager } from '@angular/platform-browser';
 import { Observable, merge, Subscriber } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
+import { mergeAll } from 'rxjs/operators';
 
 export interface HotkeyOptions {
   element: HTMLElement;
@@ -38,17 +39,17 @@ export class HotkeyService {
     const observables = keys.map(combination => {
       const eventName = `${merged.event}.${combination}`;
       return new Observable<KeyboardEvent>(observer => {
-        this.registry.push({ element: merged.element, eventName, observer });
+        this.registry.push({ element: merged.element as HTMLElement, eventName, observer });
         const handler = (event: KeyboardEvent) => {
           event.preventDefault();
           event.stopImmediatePropagation();
           observer.next(event);
         };
-        const dispose = this.eventManager.addEventListener(merged.element, eventName, handler);
+        const dispose = this.eventManager.addEventListener(merged.element as HTMLElement, eventName, handler);
         return () => dispose();
       });
     });
-    return merge(observables).mergeAll();
+    return merge(observables).pipe(mergeAll());
   }
 
   /**

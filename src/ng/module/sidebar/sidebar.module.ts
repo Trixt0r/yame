@@ -12,14 +12,6 @@ import { EntityComponentsDirective } from './directives/entity-components.direct
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GroupTypeComponent } from './components/selection/types/group/group.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {
-  AssetTypeComponent,
-  ColorTypeComponent,
-  InputTypeComponent,
-  NumberTypeComponent,
-  RangeTypeComponent,
-  PointTypeComponent,
-} from './components/selection/types';
 import { DndModule } from 'ng2-dnd';
 import { MatSelectModule } from '@angular/material/select';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -34,12 +26,18 @@ import {
 } from 'common/scene';
 import { MatDialogModule } from '@angular/material/dialog';
 import { EditComponentComponent, EditComponentDialogComponent } from './components/selection/edit/edit.component';
-import { SceneComponentService } from '../scene/services/component.service';
+import { SceneComponentService } from 'ng/module/scene';
 import { AddEntityComponent } from './components/hierarchy/add/add.component';
 import { EntityTypeService } from './services/entity-type.service';
 import { TreeModule } from 'angular-tree-component';
 import { createSizeComponent } from 'common/scene/component/size';
 import { SizeTypeComponent } from './components/selection/types/size/size.component';
+import { NumberTypeComponent } from './components/selection/types/number/number.component';
+import { AssetTypeComponent } from './components/selection/types/asset/asset.component';
+import { ColorTypeComponent } from './components/selection/types/color/color.component';
+import { InputTypeComponent } from './components/selection/types/input/input.component';
+import { PointTypeComponent } from './components/selection/types/point/point.component';
+import { RangeTypeComponent } from './components/selection/types/range/range.component';
 
 @NgModule({
   imports: [
@@ -92,7 +90,7 @@ import { SizeTypeComponent } from './components/selection/types/size/size.compon
     HierarchyComponent,
     EntityComponentsDirective,
     SelectionComponent,
-    InputTypeComponent,
+    SizeTypeComponent,
     NumberTypeComponent,
     ColorTypeComponent,
     RangeTypeComponent,
@@ -161,12 +159,12 @@ export class SidebarModule {
 
     components.registerTypeComponent(InputTypeComponent);
     components.registerTypeComponent(AssetTypeComponent);
-    components.registerTypeComponent(NumberTypeComponent);
-    components.registerTypeComponent(ColorTypeComponent);
-    components.registerTypeComponent(RangeTypeComponent);
-    components.registerTypeComponent(PointTypeComponent);
-    components.registerTypeComponent(SizeTypeComponent);
-    components.registerTypeComponent(GroupTypeComponent);
+    components.registerTypeComponent(NumberTypeComponent as any);
+    components.registerTypeComponent(ColorTypeComponent as any);
+    components.registerTypeComponent(RangeTypeComponent as any);
+    components.registerTypeComponent(PointTypeComponent as any);
+    components.registerTypeComponent(SizeTypeComponent as any);
+    components.registerTypeComponent(GroupTypeComponent as any);
 
     entityTypes.registerItem({
       id: 'entity',

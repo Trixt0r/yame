@@ -1,18 +1,16 @@
-import { Directive, Input, ViewContainerRef, ComponentFactoryResolver, ComponentRef, OnChanges } from '@angular/core';
+import { Directive, Input, ViewContainerRef, ComponentFactoryResolver, ComponentRef, OnChanges, SimpleChanges } from '@angular/core';
 import { Tool } from '../tool';
 import { ToolbarService } from '../service';
 import { ToolComponent } from '../component/tool';
 
 /**
  * Directive for rendering a tool component in a template.
- *
- * @class ToolDirective
  */
 @Directive({
   selector: '[toolHost]',
 })
 export class ToolDirective implements OnChanges {
-  @Input('toolHost') tool: Tool;
+  @Input('toolHost') tool!: Tool;
 
   constructor(
     private tools: ToolbarService,
@@ -21,17 +19,16 @@ export class ToolDirective implements OnChanges {
   ) {}
 
   /** @inheritdoc */
-  ngOnChanges(changes) {
+  ngOnChanges(changes: SimpleChanges) {
     if (changes.tool) this.render();
   }
 
   /**
    * Renders the tool, if a component type for the currently set tool is registered.
    *
-   * @returns {ComponentRef<ToolComponent>} The created component reference or `null`
-   *                                          if no component found for the current tool.
+   * @return The created component reference or `null` if no component found for the current tool.
    */
-  render(): ComponentRef<ToolComponent> {
+  render(): ComponentRef<ToolComponent> | null {
     const compType = this.tools.getComponent(this.tool);
     if (!compType) return null;
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
