@@ -8,6 +8,7 @@ import { PointSceneComponent } from 'common/scene';
 import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
+import { CursorService } from 'ng/services/cursor.service';
 
 const tmp1 = new Point();
 const tmp2 = new Point();
@@ -54,6 +55,7 @@ export class PixiSelectionHandlerPivotService {
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
     protected selectionRenderer: PixiSelectionRendererService,
+    protected cursorService: CursorService,
     protected actions: Actions
   ) {
 
@@ -89,7 +91,10 @@ export class PixiSelectionHandlerPivotService {
   updateCursor(event?: InteractionEvent): void {
     this.mouseLeft = event === void 0;
     if (this.containerService.isHandling && this.containerService.currentHandler !== this) return;
-    if (this.rendererService.view) this.rendererService.view.style.cursor = 'grab';
+    if (this.rendererService.view) {
+      this.cursorService.begin(this.rendererService.view);
+      this.rendererService.view.style.cursor = 'grab';
+    }
   }
 
   /**
@@ -100,7 +105,7 @@ export class PixiSelectionHandlerPivotService {
   resetCursor(event?: any): void {
     if (event !== void 0) this.mouseLeft = true;
     if ((this.containerService.isHandling && this.containerService.currentHandler === this) || !this.mouseLeft) return;
-    if (this.rendererService.view) this.rendererService.view.style.cursor = '';
+    this.cursorService.end();
   }
 
   /**

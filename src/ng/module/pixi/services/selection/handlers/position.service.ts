@@ -8,6 +8,7 @@ import { Actions, ofActionSuccessful } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
 import { PointSceneComponent } from 'common/scene';
+import { CursorService } from 'ng/services/cursor.service';
 
 /**
  * The position handler is responsible to move the selection container in the scene.
@@ -27,6 +28,7 @@ export class PixiSelectionHandlerPositionService {
     @Inject(YAME_RENDERER) protected rendererService: PixiRendererService,
     protected containerService: PixiSelectionContainerService,
     protected selectionRenderer: PixiSelectionRendererService,
+    protected cursorService: CursorService,
     protected actions: Actions,
   ) {
     this.startPos = new Point();
@@ -53,7 +55,10 @@ export class PixiSelectionHandlerPositionService {
     this.mouseStartPos.set(event.data.global.x, event.data.global.y);
     this.container.parent.toLocal(this.mouseStartPos, void 0, this.mouseStartPos);
     this.startPos.set(this.container.position.x, this.container.position.y);
-    if (this.rendererService.view) this.rendererService.view.style.cursor = 'move';
+    if (this.rendererService.view) {
+      this.cursorService.begin(this.rendererService.view);
+      this.rendererService.view.style.cursor = 'move';
+    }
   }
 
   /**
@@ -66,7 +71,7 @@ export class PixiSelectionHandlerPositionService {
     this.container.off('pointermove', this.mousemove, this);
     window.removeEventListener('mouseup', this.mouseupFn);
     this.containerService.endHandling(this, event);
-    if (this.rendererService.view) this.rendererService.view.style.cursor = '';
+    this.cursorService.end();
   }
 
   /**

@@ -57,7 +57,7 @@ export class CursorService {
     if (this.target === target) return;
     const attached = !!this.target;
     if (this.target) this.end(false);
-    this.cachedCursor = target.style.cursor;
+    if (target.style.cursor && target.style.cursor !== 'none') this.cachedCursor = target.style.cursor;
     target.style.cursor = 'none';
     this.target = target;
     if (attached) return;
