@@ -31,11 +31,6 @@ export class CursorService {
   protected target: HTMLElement | null = null;
 
   /**
-   * The cached cursor string, for restoring the old cursor on end.
-   */
-  protected cachedCursor: string | null = null;
-
-  /**
    * Bound mousemove handler.
    */
   protected boundOnMousemove = this.onMousemove.bind(this);
@@ -57,7 +52,6 @@ export class CursorService {
     if (this.target === target) return;
     const attached = !!this.target;
     if (this.target) this.end(false);
-    if (target.style.cursor && target.style.cursor !== 'none') this.cachedCursor = target.style.cursor;
     target.style.cursor = 'none';
     this.target = target;
     if (attached) return;
@@ -72,7 +66,7 @@ export class CursorService {
    */
   end(remove = true): void {
     if (!this.target) return;
-    if (this.cachedCursor) this.target.style.cursor = this.cachedCursor;
+    this.target.style.cursor = 'inherit';
     this.target = null;
     if (!remove) return;
     this.image.style.removeProperty('transform');
