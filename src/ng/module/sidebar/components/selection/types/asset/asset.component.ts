@@ -1,14 +1,12 @@
-import { Component, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { AbstractTypeComponent } from '../abstract';
 import { AssetSceneComponent as AssetComponent } from 'common/scene/component/asset';
 import { AssetService } from 'ng/module/workspace/idx';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from 'common/asset';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { MatSelect } from '@angular/material/select';
 
-let allAssets: Asset[] = [];
+let allAssets: Asset[] | null = null;
 
 @Component({
   templateUrl: './asset.component.html',
@@ -34,22 +32,10 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   sanitized: { [key: string]: SafeUrl } = { };
 
-  /**
-   * The virtual scroll viewport reference.
-   */
-  @ViewChild(CdkVirtualScrollViewport, { static: true }) cdkVirtualScrollViewport!: CdkVirtualScrollViewport;
+  assetBuffer: Asset[] = [];
 
-  /**
-   * The select reference.
-   */
-  @ViewChild(MatSelect) matSelect!: MatSelect;
-
-  /**
-   * Compares options with a selection.
-   */
-  compare = (option: string, selection: string) => {
-    return this.selected ? selection === this.selected : selection === option;
-  };
+  bufferSize = 25;
+  bufferThreshold = 10;
 
   /**
    * A list of all assets for the current asset type.
@@ -92,12 +78,12 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     super();
   }
 
-  /**
-   * Handles the opened event.
-   */
-  onOpened(): void {
-    this.cdkVirtualScrollViewport.scrollToIndex(this.currentIndex + 1);
-    this.cdkVirtualScrollViewport.checkViewportSize();
+  updateAssetBuffer(initial = false) {
+    const length = this.assetBuffer.length;
+    let idx = initial ? this._allAssets.findIndex(it => it.id === this.selected) : length + this.bufferSize;
+    idx = Math.max(Math.min(length + this.bufferSize, this._allAssets.length), idx + 1);
+    console.log(length, idx);
+    this.assetBuffer = this.assetBuffer.concat(this._allAssets.slice(length, idx));
   }
 
   /**
@@ -127,6 +113,18 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   }
 
   /**
+   * Handles an asset drop onto this component.
+   *
+   * @param data The drop data.
+   */
+  onDrop(data: DragDropData): void {
+    if (!this.checkType(data.dragData)) return;
+    this.selected = data.dragData.id;
+    this.updateAssetBuffer(true);
+    this.cdr.detectChanges();
+  }
+
+  /**
    * @inheritdoc
    */
   onExternalUpdate(): void {
@@ -137,14 +135,14 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     }
   }
 
-  /**
-   * Handles an asset drop onto this component.
-   *
-   * @param data The drop data.
-   */
-  onDrop(data: DragDropData): void {
-    if (!this.checkType(data.dragData)) return;
-    this.selected = data.dragData.id;
+  onScrollToEnd() {
+    this.updateAssetBuffer();
+  }
+
+  onScroll({ end }: { end: number }) {
+    if (this._allAssets.length <= this.assetBuffer.length) return;
+
+    if (end + this.bufferThreshold >= this.assetBuffer.length) this.updateAssetBuffer();
   }
 
   /**
@@ -158,5 +156,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
       this._allAssets.forEach(it => this.sanitized[it.id] = this.sanitizer.bypassSecurityTrustUrl(it.content.path));
     if (this.component?.mixed) return;
     this.selected = this.component?.asset;
+    this.updateAssetBuffer(true);
+    this.cdr.detectChanges();
   }
 }

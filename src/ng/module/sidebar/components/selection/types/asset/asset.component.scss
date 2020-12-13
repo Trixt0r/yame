@@ -5,9 +5,17 @@
 }
 
 .preview {
-  max-height: 40px;
+  max-height: 20px;
+  max-width: 20px;
+  height: auto;
   position: absolute;
-  right: 0;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.name {
+  margin-left: 20px;
 }
 
 mat-select-trigger .preview {

@@ -131,6 +131,11 @@ export class AssetService {
     );
   }
 
+  /**
+   * Searches for all assets in the given group recursively.
+   *
+   * @return A list of all assets.
+   */
   getAssetsRecursive(root: AssetGroup<Asset> | null = this.rootGroup): Asset[] {
     if (!root) throw new Error('No root set');
     let assets = this.getAssets(root);

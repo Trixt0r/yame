@@ -1,27 +1,17 @@
-<mat-form-field class="full" [class.editable]="component.editable" [class.removable]="component.removable">
-  <mat-label>{{ component.mixed ? component.id + ' ' + placeholder : component.id }}</mat-label>
-  <mat-select
-    (opened)="onOpened()"
-    [(ngModel)]="selected"
-    [compareWith]="compare"
-    dnd-droppable
-    [allowDrop]="allowDrop"
-    (onDropSuccess)="onDrop($event)"
-    >
-    <mat-select-trigger *ngIf="currentAsset">
-      <img class="preview" [src]="sanitized[currentAsset.id]" />
-      {{ (currentAsset.content || { }).simpleName }}
-    </mat-select-trigger>
-    <cdk-virtual-scroll-viewport itemSize="42" [style.height.px]=252 minBufferPx="252" maxBufferPx="500">
-      <mat-option [class.mat-selected]="!selected" [value]="null">None</mat-option>
-      <mat-option *cdkVirtualFor="let asset of allAssets" [value]="asset.id" [class.mat-selected]="asset.id === selected">
-        <img class="preview" [src]="sanitized[asset.id]" />
-        {{ asset.content.simpleName }}
-      </mat-option>
-    </cdk-virtual-scroll-viewport>
-  </mat-select>
-</mat-form-field>
-<yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
-<button *ngIf="component.removable" mat-icon-button class="remove" (click)="onRemove($event)">
-  <mat-icon>delete</mat-icon>
-</button>
+<ng-select
+  class="custom"
+  [(ngModel)]="selected"
+  dnd-droppable
+  [placeholder]="component.mixed ? component.id + ' ' + placeholder : component.id"
+  appearance="outline"
+  appendTo="yame-sidebar"
+  [allowDrop]="allowDrop"
+  (onDropSuccess)="onDrop($event)"
+  (scroll)="onScroll($event)"
+  (scrollToEnd)="onScrollToEnd()"
+  [virtualScroll]="true">
+  <ng-option *ngFor="let asset of assetBuffer" [value]="asset.id">
+    <img class="preview" [src]="sanitized[asset.id]" />
+    <span class="name">{{ asset.content.simpleName }}</span>
+  </ng-option>
+</ng-select>

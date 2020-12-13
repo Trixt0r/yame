@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { SidebarComponent } from './components/sidebar.component';
 import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { UtilsModule } from '../utils';
@@ -49,6 +50,7 @@ import { RangeTypeComponent } from './components/selection/types/range/range.com
     ReactiveFormsModule,
     BrowserAnimationsModule,
     ColorPickerModule,
+    NgSelectModule,
     DndModule,
     MatSelectModule,
     MatDialogModule,

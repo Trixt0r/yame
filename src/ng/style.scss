@@ -5,6 +5,7 @@
 @import '../../node_modules/@angular/material/prebuilt-themes/pink-bluegrey.css';
 @import '../../node_modules/ng2-dnd/bundles/style.css';
 @import './variables.scss';
+@import "~@ng-select/ng-select/themes/material.theme.css";
 
 $tree-node-toggle-size: $tree-indent-size;
 $tree-node-icon-size: $tree-indent-size + 8px;
@@ -259,6 +260,46 @@ tree-node > div.isolated {
         opacity: inherit;
         transform: none;
       }
+    }
+  }
+}
+
+
+.ng-select.custom, .ng-select.custom.ng-select-focused {
+
+  .ng-select-container, .ng-clear-wrapper, .ng-arrow-wrapper .ng-arrow, .ng-input input {
+    color: white;
+  }
+
+  .ng-input {
+    padding: 0 30px;
+  }
+
+  .ng-select-container.ng-appearance-outline:hover:after {
+    border-color: rgba($color: white, $alpha: 0.5);
+  }
+
+  .ng-select-container .ng-value-container .ng-placeholder {
+    background-color: #424242;
+    color: rgba($color: white, $alpha: 1.0);
+  }
+}
+.ng-select.custom.ng-select-focused {
+
+  .ng-select-container.ng-appearance-outline:after {
+    border-color: rgba($color: white, $alpha: 0.5);
+  }
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items {
+  background: #424242;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  color: white;
+  .ng-option, .ng-option.ng-option-marked {
+    color: white;
+    &.ng-option-selected {
+      color: white;
+      font-weight: bold;
     }
   }
 }

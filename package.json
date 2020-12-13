@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@iplab/ngx-color-picker": "^1.0.5",
+    "@ng-select/ng-select": "^5.0.9",
     "@trixt0r/ecs": "^0.4.1",
     "angular-pipes": "^9.0.1",
     "bluebird": "^3.5.0",
