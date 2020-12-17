@@ -324,6 +324,7 @@ export class PixiSelectionContainerService {
     const data: Partial<SceneEntityData>[] = [];
     const componentsBefore: { [id: string]: SceneComponentCollection<SceneComponent> } = { };
     data.push({ id: 'select', components: cloneDeep(this.components.elements) as SceneComponent[] });
+    this.container.transform.updateTransform(this.container.parent.transform);
     this.entities.forEach(entity => {
       const child = this.pixi.getContainer(entity.id);
       if (!child) return;
