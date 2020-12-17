@@ -171,8 +171,9 @@ export class PixiSelectionService {
           );
           if (!reset) service.applyComponents(collection, containerService.container);
         } else {
-          if (!action.entities || action.entities.length === 0) containerService.unselect();
-          else containerService.unselect(scene.entities.filter(it => (action.entities?.indexOf(it.id) || -1) >= 0));
+          const entities = action.entities || [];
+          if (entities.length === 0) containerService.unselect();
+          else containerService.unselect(scene.entities.filter(it => entities.indexOf(it.id) >= 0));
         }
         (this.service.stage?.getChildByName('foreground') as Container).removeChild(graphics);
         const actionComponents = [] as SceneComponent[];

@@ -69,8 +69,10 @@ export class AddSceneComponentButtonComponent implements OnChanges {
     flatList.forEach(item => {
       const sceneCategory = sceneCategories.find(it => item.id === it.id);
       if (!sceneCategory) return;
-      if (sceneCategory.categories)
-        item.children = flatList.filter(it => (sceneCategory.categories?.indexOf(it.id) || -1) >= 0);
+      if (sceneCategory.categories) {
+        const categories = sceneCategory.categories || [];
+        item.children = flatList.filter(it => categories.indexOf(it.id) >= 0);
+      }
       if (!sceneCategory.parent)
         items.push(item);
     });
