@@ -82,7 +82,6 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     const length = this.assetBuffer.length;
     let idx = initial ? this._allAssets.findIndex(it => it.id === this.selected) : length + this.bufferSize;
     idx = Math.max(Math.min(length + this.bufferSize, this._allAssets.length), idx + 1);
-    console.log(length, idx);
     this.assetBuffer = this.assetBuffer.concat(this._allAssets.slice(length, idx));
   }
 
