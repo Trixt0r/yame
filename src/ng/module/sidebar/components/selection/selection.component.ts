@@ -102,6 +102,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     this.actions
       .pipe(ofActionSuccessful(InputAction), debounceTime(SelectionComponent.INPUT_HISTORY_DEBOUNCE))
       .subscribe((action: InputAction) => {
+        this.store.snapshot().select.components = this.previousData?.select;
         this.store.dispatch(action.actions);
         const selectComps = cloneDeep(this.store.snapshot().select.components) as SceneComponent[];
         if (this.lastInputData)
@@ -136,14 +137,15 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
    *
    * @param reset Whether to reset the current data.
    */
-  protected initPreviousData(reset: boolean = false) {
+  protected initPreviousData(reset = false) {
     if (reset) {
       this.previousData = null;
       this.lastInputData = null;
     }
     if (!this.previousData) {
-      this.previousData = {};
-      this.previousData.select = cloneDeep(this.store.snapshot().select.components);
+      this.previousData = {
+        select: cloneDeep(this.store.snapshot().select.components)
+      };
       this.entities.forEach(
         (entity) =>
           ((this.previousData as { [key: string]: SceneComponent[] })[entity.id] = cloneDeep(
@@ -178,7 +180,6 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     else this.lastInputData?.push(cloneDeep(event.component as SceneComponent));
 
     inputData.unshift({ id: 'select', parent: null, components: this.lastInputData as SceneComponent[] });
-    this.store.snapshot().select.components = this.previousData?.select;
     this.entities.forEach(entity => {
       if (!this.previousData) return;
       entity.components.set.apply(entity.components, this.previousData[entity.id])
