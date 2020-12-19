@@ -41,6 +41,7 @@ export class HotkeyService {
       return new Observable<KeyboardEvent>(observer => {
         this.registry.push({ element: merged.element as HTMLElement, eventName, observer });
         const handler = (event: KeyboardEvent) => {
+          if (merged.element && event.target !== merged.element) return;
           event.preventDefault();
           event.stopImmediatePropagation();
           observer.next(event);
