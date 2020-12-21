@@ -1,4 +1,4 @@
-import { Store } from '@ngxs/store';
+import { Actions, Store } from '@ngxs/store';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { YAME_RENDERER, YAME_RENDERER_COMPONENT, EngineService, SceneModule } from 'ng/module/scene';
 import { PixiRendererService } from './services/renderer.service';
@@ -26,10 +26,10 @@ import { AddShortcut } from 'ng/states/hotkey.state';
  * @param renderer The pixi renderer service.
  * @param engineService The engine service.
  */
-export function setupSystems(renderer: PixiRendererService, engineService: EngineService, store: Store): () => void {
+export function setupSystems(renderer: PixiRendererService, engineService: EngineService, store: Store, actions : Actions): () => void {
   return () => {
     engineService.engine.systems.add(new PixiGridSystem(renderer, 0));
-    engineService.engine.systems.add(new PixiCameraSystem(renderer, 1));
+    engineService.engine.systems.add(new PixiCameraSystem(renderer, actions, 1));
     engineService.engine.systems.add(new PixiSpriteSystem(renderer, 2));
     engineService.engine.systems.add(new PixiBackdropSystem(renderer, 3));
     engineService.engine.systems.add(new PixiTransformationSystem(renderer, 10));
@@ -69,6 +69,11 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
         id: 'selection.pivot',
         label: 'Pivot selection',
         keys: ['alt.arrowleft', 'alt.arrowright', 'alt.arrowup', 'alt.arrowdown'],
+      }),
+      new AddShortcut({
+        id: 'camera.move',
+        label: 'Move camera',
+        keys: ['space']
       })
     ]);
   };
@@ -99,6 +104,7 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
         YAME_RENDERER,
         EngineService,
         Store,
+        Actions,
         PixiSelectionService,
         PixiSelectionContainerService,
         PixiSelectionRendererService,
