@@ -4,7 +4,7 @@ import { MatFormFieldControl } from '@angular/material/form-field';
 import { Subject } from 'rxjs';
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { IPoint } from 'common/interface/point';
+import { IPoint } from 'common/interfaces/point';
 import * as _ from 'lodash';
 
 /**

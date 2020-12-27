@@ -23,7 +23,7 @@
       <mat-icon>{{ node.isExpanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
     </button>
     <div *ngIf="isolated && isolated === node.id" class="isolated"></div>
-    <mat-icon class="entity-icon mat-icon-rtl-mirror"> {{ getIcon(node.data, node.isExpanded) }} </mat-icon>
+    <mat-icon class="node-icon mat-icon-rtl-mirror"> {{ getIcon(node.data, node.isExpanded) }} </mat-icon>
     <h5 class="mat-h5 node-name">{{ node.data.name }}</h5>
     <div class="inline-actions-wrapper">
       <div class="inline-actions">

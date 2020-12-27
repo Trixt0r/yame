@@ -7,17 +7,17 @@ import { ISceneAssetConverter, SceneAssetConverter } from './services/converter.
 import { SceneComponent as SceneComp, createGroupComponent } from 'common/scene';
 import { NgxsModule } from '@ngxs/store';
 import { SceneState } from './states/scene.state';
-import { ImageAsset } from 'common/asset/image';
 import { SelectState } from './states/select.state';
 import { createAssetComponent, createColorComponent } from 'common/scene';
 import { SceneComponentService } from './services/component.service';
 import { HistoryState } from './states/history.state';
+import { Asset } from 'common/asset';
 
 
 
-@SceneAssetConverter('image')
-export class ImageAssetConverter implements ISceneAssetConverter<ImageAsset> {
-  async execute(asset: ImageAsset): Promise<SceneComp[]> {
+@SceneAssetConverter(['png', 'jpg', 'jpeg', 'gif'])
+export class ImageAssetConverter implements ISceneAssetConverter {
+  async execute(asset: Asset): Promise<SceneComp[]> {
     const color = createColorComponent('sprite.color', 'sprite');
     color.red = 255;
     color.green = 255;
@@ -25,7 +25,7 @@ export class ImageAssetConverter implements ISceneAssetConverter<ImageAsset> {
     color.alpha = 1;
     color.label = 'Color';
     const assetComp = createAssetComponent('sprite.texture', asset.id, 'sprite');
-    assetComp.allowedTypes = ['image'];
+    assetComp.allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
     assetComp.label = 'Texture';
     const sprite = createGroupComponent('sprite', ['sprite.texture', 'sprite.color']);
     sprite.label = 'Sprite';

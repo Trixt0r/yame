@@ -32,7 +32,9 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
   /**
    * The amount to subtract from the window width on resize events.
    */
-  static readonly WIDTH_SUB: number = 400;
+  static get WIDTH_SUB(): number {
+    return Math.min(window.innerWidth * 0.33, 250);
+  }
 
   /**
    * Returns the default size based on the current window width.

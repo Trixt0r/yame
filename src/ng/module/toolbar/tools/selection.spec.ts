@@ -1,6 +1,6 @@
 import { SelectionToolService } from './selection';
 import { Tool } from '../tool';
-import { Pubsub } from 'electron/idx';
+import { Pubsub } from 'electron';
 import { PixiService, SpriteEntity } from 'ng/module/pixi/idx';
 import { SelectionRectangle } from './selection/rectangle';
 import { SelectionRenderer } from './selection/renderer';

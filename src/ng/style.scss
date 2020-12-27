@@ -113,7 +113,7 @@ mat-form-field:not(.mat-focused) .mat-form-field-appearance-legacy .mat-form-fie
   &::before {
     position: absolute;
     content: ' ';
-    z-index: -9999;
+    z-index: -1;
     top: 0;
     left: -100%;
     width: 200%;
@@ -154,7 +154,7 @@ tree-node-wrapper {
     position: relative;
     padding-left: $tree-node-toggle-size;
     width: 100%;
-    .toggle-btn, .entity-icon {
+    .toggle-btn, .node-icon {
       position: absolute;
       left: 0;
       top: 50%;
@@ -170,7 +170,7 @@ tree-node-wrapper {
       }
     }
 
-    .entity-icon {
+    .node-icon {
       left: $tree-node-toggle-size;
       width: $tree-node-icon-size;
       height: $tree-node-icon-size;

@@ -11,6 +11,7 @@ import {
   NgZone,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { Subject } from 'rxjs';
 
 /**
  * Abstract component which is able to handle resizes.
@@ -45,8 +46,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   protected propVal!: number;
 
   /**
-   * @private
-   * @type {boolean} isVer Whether the property has to be calculated clientY.
+   * Whether the property has to be calculated clientY.
    */
   protected isVer = false;
 
@@ -59,10 +59,12 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   protected onMouseMoveBind: (event: MouseEvent) => void;
   protected onMouseUpBind: (event: MouseEvent) => void;
 
+  protected destroy$ = new Subject();
+
   /**
    * Creates an instance of ResizableComponent.
    *
-   * @param {ElementRef} ref Injected by angular
+   * @param ref Injected by angular
    */
   constructor(public ref: ElementRef, protected zone: NgZone) {
     this.onMouseDownBind = this.onMouseDown.bind(this);
@@ -70,7 +72,9 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
     this.onMouseUpBind = this.onMouseUp.bind(this);
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   */
   ngOnChanges(changes: SimpleChanges) {
     if (changes.property) {
       this.isVer = ['top', 'bottom', 'height'].indexOf(this.property) >= 0;
@@ -104,7 +108,8 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   /**
    * Starts the resizing.
-   * @param {MouseEvent} event
+   *
+   * @param event
    */
   onMouseDown(event: MouseEvent): void {
     this.zone.runOutsideAngular(() => {
@@ -123,7 +128,8 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   /**
    * Resizes component.
-   * @param {MouseEvent} event
+   *
+   * @param event
    */
   onMouseMove(event: MouseEvent): void {
     if (this.position) {
@@ -140,7 +146,9 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
     }
   }
 
-  /** Stops the resizing. */
+  /**
+   * Stops the resizing.
+   */
   onMouseUp(): void {
     if (this.position) {
       this.zone.runOutsideAngular(() => {
@@ -151,7 +159,9 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
     }
   }
 
-  /** Handles window resize event. */
+  /**
+   * Handles window resize event.
+   */
   onResize(): void {
     const style = window.getComputedStyle(this.ref.nativeElement);
     const newVal = parseFloat(style.getPropertyValue(this.property));
@@ -160,18 +170,19 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   /**
    * Updates the css property to the given value.
-   * @param {number} newVal
+   *
+   * @param val The new value.
    */
-  updateValue(newVal: number): void {
-    this.propVal = newVal;
-    this.ref.nativeElement.style[this.property] = `${newVal}px`;
-    this.sizeUpdated.emit(newVal);
+  updateValue(val: number): void {
+    this.propVal = val;
+    this.ref.nativeElement.style[this.property] = `${val}px`;
+    this.sizeUpdated.emit(val);
   }
 
   /**
    * Clamps the given value the the currently set constraints.
-   * @param {number} value
-   * @returns {number}
+   * @param value
+   * @return The clamped value.
    */
   clampValue(value: number): number {
     if (this.minVal >= 0) value = isNaN(value) ? this.minVal : Math.max(value, this.minVal);
@@ -193,7 +204,11 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
    * @inheritdoc
    */
   ngOnDestroy() {
-    this.zone.runOutsideAngular(() => this.removeListeners());
+    this.zone.runOutsideAngular(() => {
+      this.removeListeners();
+      this.destroy$.next();
+      this.destroy$.complete();
+    });
   }
 
   /**
@@ -206,8 +221,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   /**
-   * @readonly
-   * @type number
+   * The css property value.
    */
   get propertyValue(): number {
     return this.propVal;

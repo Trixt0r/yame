@@ -1,6 +1,6 @@
-import { YameEnvironment } from "common/interface/environment";
+import { IYameEnvironment } from "common/interfaces/environment";
 
-const env: YameEnvironment = {
+const env: IYameEnvironment = {
   appDir: '',
   commonDir: '',
   ngDir: '',

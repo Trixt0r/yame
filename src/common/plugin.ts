@@ -1,36 +1,28 @@
-import { YameEnvironment } from "./interface/environment";
+import { IYameEnvironment } from "./interfaces/environment";
 import { EventEmitter } from 'eventemitter3';
 import * as path from 'path';
 
-interface YamePluginConfig {
+interface IYamePluginConfig {
   /**
    * Whether the plugin is active or not.
-   *
-   * @type {boolean}
    */
   active: boolean;
 
   /**
    * The electron entry point.
-   *
-   * @type {string}
    */
   electron?: string;
 
   /**
    * The angular entry point.
-   *
-   * @type {string}
    */
   ng?: string;
 }
 
 /**
  * Plugin configuration read from it's *.json file.
- *
- * @interface PluginConfig
  */
-export interface PluginConfig {
+export interface IPluginConfig {
 
   /**
    * The name of the plugin.
@@ -42,9 +34,9 @@ export interface PluginConfig {
   /**
    * The yame specific configuration.
    *
-   * @type {YamePluginConfig}
+   * @type {IYamePluginConfig}
    */
-  yame: YamePluginConfig;
+  yame: IYamePluginConfig;
 
   /**
    * The full path of the plugin.
@@ -64,8 +56,6 @@ export interface PluginConfig {
  * the plugin manager is listening to.
  *
  * @todo Define events which the plugin manager listens for.
- *
- * @class YamePlugin
  */
 export class YamePlugin extends EventEmitter {
 
@@ -73,7 +63,7 @@ export class YamePlugin extends EventEmitter {
    * The identifier of the plugin.
    * This is unique, i.e. a second plugin with the same id can not be installed.
    * If not set by the plugin itself, it will be set by the plugin manager read from the name on the plugin's
-   * pacakge.json.
+   * package.json.
    */
   id!: string;
 
@@ -81,12 +71,12 @@ export class YamePlugin extends EventEmitter {
    * The yame environment.
    * This will be set by the plugin manager before executing any of the
    */
-  environment!: YameEnvironment;
+  environment!: IYameEnvironment;
 
   /**
    * The configuration of the plugin, i.e. the package.json config.
    */
-  config!: PluginConfig;
+  config!: IPluginConfig;
 
   /**
    * An optional priority value for the plugin.

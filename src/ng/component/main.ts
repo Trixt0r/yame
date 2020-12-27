@@ -9,47 +9,39 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
-import { WorkspaceComponent } from '../module/workspace/component';
 import { ToolbarComponent } from '../module/toolbar/component';
 import { SceneComponent } from '../module/scene/components/scene/scene.component';
+import { AssetPanelComponent } from 'ng/module/asset/components/panel/panel.component';
 
 @Component({
   moduleId: module.id.toString(),
   selector: 'yame-main',
   templateUrl: 'main.html',
-  styleUrls: ['./main.scss'],
+  styleUrls: ['main.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements AfterViewInit, OnChanges {
   static get DEFAULT_SIZE(): number {
-    return window.innerHeight * 0.75;
+    return window.innerHeight * 0.66;
   }
 
   @Input() width!: number;
 
   @ViewChild(SceneComponent, { static: false }) scene!: SceneComponent;
   @ViewChild(ToolbarComponent, { static: false }) toolbar!: ToolbarComponent;
-  @ViewChild(WorkspaceComponent, { static: false }) workspace!: WorkspaceComponent;
+  @ViewChild(AssetPanelComponent) assets!: AssetPanelComponent;
+  // @ViewChild(WorkspaceComponent, { static: false }) workspace!: WorkspaceComponent;
 
   sceneHeight = 0;
 
   constructor(public ref: ElementRef, protected cdr: ChangeDetectorRef) {}
 
   /**
-   * Sidebar update handler.
-   * @param {number} left
-   */
-  sidebarUpdate(left: number): void {
-    this.ref.nativeElement.style.width = `${left}px`;
-    this.workspace.onResize();
-  }
-
-  /**
    * Handles the size update event of the workspace.
    * @param {number} top The top value of the workspace.
    * @returns {void}
    */
-  onWorkspaceSizeUpdated(top: number): void {
+  onAssetSizeUpdated(top: number): void {
     this.sceneHeight = top;
     this.cdr.detectChanges();
   }
@@ -58,7 +50,7 @@ export class MainComponent implements AfterViewInit, OnChanges {
    * @inheritdoc
    */
   ngAfterViewInit() {
-    this.workspace.updateValue(this.workspace.clampValue(MainComponent.DEFAULT_SIZE));
+    this.assets.updateValue(this.assets.clampValue(MainComponent.DEFAULT_SIZE));
   }
 
   /**
@@ -67,8 +59,7 @@ export class MainComponent implements AfterViewInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.width) {
       this.ref.nativeElement.style.width = `${changes.width.currentValue}px`;
-      if (this.workspace)
-        this.workspace.onResize();
+      if (this.assets) this.assets.onResize();
     }
   }
 }

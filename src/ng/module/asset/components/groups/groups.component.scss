@@ -1,0 +1,56 @@
+@import '../../../../variables.scss';
+$init-padding: 16px;
+
+:host {
+  @extend div !optional;
+  overflow: hidden;
+  overflow-y: auto;
+  box-shadow: 3px 0px 1px -2px rgba(0, 0, 0, 0.2), 2px 0px 2px 0 rgba(0, 0, 0, 0.14), 1px 0px 5px 0 rgba(0, 0, 0, 0.12);
+
+  &.no-overflow { overflow-y: hidden; }
+  text-align: center;
+}
+
+.tree-wrapper {
+  height: calc(100% - 69.5px);
+  width: calc(100% - #{$resizer-size * 2});
+  padding-left: $resizer-size;
+
+  tree-root {
+    display: block;
+    max-height: 100%;
+    overflow-y: auto;
+    background: none;
+    .toggle-btn mat-icon { font-size: $tree-icon-font-size; }
+  }
+
+  h5 {
+    margin: 6px 0;
+    max-width: 80%;
+    box-sizing: border-box;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .inline-actions-wrapper {
+    min-width: unset;
+    width: 20%;
+    mat-icon { font-size: $tree-icon-font-size; }
+    .inline-actions {
+      float: right;
+    }
+  }
+}
+
+.empty {
+  padding: $init-padding;
+  opacity: 0.5;
+}
+
+button[mat-raised-button] {
+  width: calc(100% - #{$init-padding} * 2);
+  margin: $init-padding;
+  max-width: 240px;
+}

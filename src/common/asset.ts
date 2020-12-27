@@ -1,42 +1,45 @@
-import { AssetGroup } from './asset/group';
-/**
- * The content details of an asset instance.
- *
- * Details of an asset can be anything, such as
- * file path, size, dimensions, children, length, etc.
- *
- * @interface AssetContent
- */
-interface AssetContent {
-
-  [key: string]: any;
-
-}
+import { IResource } from './interfaces/resource';
 
 /**
- * An asset represents any resource which can be part of an map as an instance,
- * this can be e.g. in form of an image, atlas texture, particle object, sound file, etc.
+ * An asset represents any resource which can be part of an entity.
  *
- * @export
- * @abstract
- * @class Asset
+ * For instance this could be an image, atlas texture, particle object, sound file, etc.
  */
-export abstract class Asset {
+export class Asset<T = unknown> {
 
-  /** The unique identifier of the asset. */
+  /**
+   * The unique identifier of the asset.
+   */
   id!: string;
 
-  /** The type of the asset, e.g. file, directory, etc. */
+  /**
+   * The type of the asset.
+   */
   type!: string;
 
-  /** The content of the asset. */
-  content: AssetContent;
+  /**
+   * The parent of this asset. Is `null` if it is the root group.
+   */
+  parent: string | null = null;
 
-  /** The parent of this asset. Is `null` if it is the root group. */
-  parent!: AssetGroup<Asset>;
+  /**
+   * A list of asset child ids, if any.
+   */
+  children: string[] = [];
 
-  constructor() {
-    this.content = { };
-  }
+  /**
+   * The resource reference of the asset. Contains the actual data and further information
+   */
+  resource: IResource<T> = {
+    uri: '',
+    type: '',
+    name: '',
+    source: ''
+  };
+
+  /**
+   * The icon to display.
+   */
+  icon?: string;
 
 }

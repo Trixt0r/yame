@@ -1,6 +1,6 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { ToolbarComponent } from './component';
-import { MaterialModule } from '../material';
+import { MaterialModule } from '../material.module';
 import { CommonModule } from '@angular/common';
 import { ToolDirective } from './directive/tool';
 import { DefaultToolComponent } from './component/default';

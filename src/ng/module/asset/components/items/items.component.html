@@ -1,0 +1,42 @@
+<div *ngIf="!group || (group && group.resource.loaded && !assets.length)" class="no-items">
+  <div class ="fill half relative text-right inline-block border-box padding-left-8 padding-right-16 padding-vert-32">
+    <mat-icon class="sign">not_interested</mat-icon>
+    <mat-icon class="bg front">folder</mat-icon>
+    <mat-icon class="bg back right">description</mat-icon>
+    <mat-icon class="bg back left">image</mat-icon>
+  </div>
+  <div class="fill half text-left inline-block border-box vert-align-top relative">
+    <div class="absolute vert-center padding-right-16 border-box">
+      <h3 class="mat-h3 no-margin-bottom">No assets found</h3>
+      <span *ngIf="!group" class="mat-caption no-margin-top">Add an asset source and select it</span>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-center fill-height relative">
+  <div class="absolute vert-center fill-width">
+    <div class="inline-block text-center">
+      <mat-spinner [diameter]="64"></mat-spinner>
+    </div>
+    <h4 class="mat-h4 opacity-50 margin-top-16">Loading assets...</h4>
+  </div>
+</div>
+
+<div class="cards padding-bottom-4 flex wrap">
+  <mat-card *ngFor="let asset of assets"
+            dnd-draggable
+            [dragEnabled]="true"
+            [dragData]="asset"
+            (dragstart)="onDragStart($event)"
+            class="margin-4">
+    <div class="preview">
+      <div class="fill-width fill-height relative">
+        <ng-template [yameAssetPreview]="asset"></ng-template>
+      </div>
+    </div>
+    <mat-card-content>
+      <mat-icon inline class="inline">{{ getIcon(asset) }}</mat-icon>
+      <span class="mat-caption vert-align-bottom margin-left-8">{{ asset.resource.name }}</span>
+    </mat-card-content>
+  </mat-card>
+</div>

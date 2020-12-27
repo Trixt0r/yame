@@ -1,16 +1,17 @@
-import { Component, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, ChangeDetectionStrategy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AbstractTypeComponent } from '../abstract';
 import { AssetSceneComponent as AssetComponent } from 'common/scene/component/asset';
-import { AssetService } from 'ng/module/workspace/idx';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from 'common/asset';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-
-let allAssets: Asset[] | null = null;
+import { AssetState } from 'ng/module/asset/states/asset.state';
+import { Select, Store } from '@ngxs/store';
+import { Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { ScanResource } from 'ng/module/asset/states/actions/asset.action';
 
 @Component({
-  templateUrl: './asset.component.html',
-  styleUrls: ['../style.scss', './asset.component.scss'],
+  templateUrl: 'asset.component.html',
+  styleUrls: ['../style.scss', 'asset.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeComponent<T> implements OnChanges {
@@ -18,37 +19,29 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   static readonly type: string = 'asset';
 
   /**
-   * Internal list of all assets.
+   * A list of all assets for the current asset type.
    */
-  protected _allAssets: Asset[] = [];
+  protected allAssets: Asset[] = [];
+
+  loading = false;
 
   /**
    * The current index.
    */
   currentIndex: number = 0;
 
-  /**
-   * A map of sanitized url values.
-   */
-  sanitized: { [key: string]: SafeUrl } = { };
-
   assetBuffer: Asset[] = [];
 
   bufferSize = 25;
   bufferThreshold = 10;
 
-  /**
-   * A list of all assets for the current asset type.
-   */
-  get allAssets(): Asset[] {
-    return this._allAssets;
-  }
+  @Select(AssetState.assets) assets$!: Observable<Asset[]>;
 
   /**
    * The current asset instance.
    */
   get currentAsset(): Asset | null {
-    return this.currentIndex >= 0 ? this._allAssets[this.currentIndex] : null;
+    return this.currentIndex >= 0 ? this.allAssets[this.currentIndex] : null;
   }
 
   /**
@@ -65,8 +58,8 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
       value: id,
       component: this.component
     };
-    this.currentIndex = id ? this._allAssets.findIndex(it => it.id === id) : -1;
-    const asset = this._allAssets[this.currentIndex];
+    this.currentIndex = id ? this.allAssets.findIndex(it => it.id === id) : -1;
+    const asset = this.allAssets[this.currentIndex];
     if (!this.component) return;
     this.component.asset = asset ? id : null;
     delete this.component.mixed;
@@ -74,15 +67,39 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this.updateEvent.emit(data);
   }
 
-  constructor(protected assets: AssetService, private sanitizer: DomSanitizer, private cdr: ChangeDetectorRef) {
+  constructor(protected cdr: ChangeDetectorRef, protected zone: NgZone, protected store: Store) {
     super();
+    zone.runOutsideAngular(() => {
+      this.assets$.pipe(takeUntil(this.destroy$)).subscribe(assets => {
+        this.allAssets = assets;
+        this.updateAssetBuffer();
+        this.cdr.markForCheck();
+      });
+    });
   }
 
+  /**
+   * Updates the asset buffer.
+   *
+   * @param initial Indicates whether a full initial load should be done.
+   */
   updateAssetBuffer(initial = false) {
+    if (initial) this.assetBuffer = [];
+    const filtered = this.allAssets.filter(it => this.checkType(it));
     const length = this.assetBuffer.length;
-    let idx = initial ? this._allAssets.findIndex(it => it.id === this.selected) : length + this.bufferSize;
-    idx = Math.max(Math.min(length + this.bufferSize, this._allAssets.length), idx + 1);
-    this.assetBuffer = this.assetBuffer.concat(this._allAssets.slice(length, idx));
+    let idx = initial ? filtered.findIndex(it => it.id === this.selected) : length + this.bufferSize;
+    idx = Math.max(Math.min(length + this.bufferSize, filtered.length), idx + 1);
+    this.assetBuffer = this.assetBuffer.concat(filtered.slice(length, idx));
+  }
+
+  loadMoreAssets() {
+    const notLoaded = this.allAssets.find(it => it.type === 'group' && !it.resource.loaded);
+    if (notLoaded) {
+      this.loading = true;
+      console.log(notLoaded.resource.uri, this.assetBuffer.length);
+      this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source))
+                .subscribe(() => this.loading = false);
+    }
   }
 
   /**
@@ -92,14 +109,10 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    * @return Whether the asset can be used as a value or not.
    */
   checkType(asset: Asset): boolean {
+    if (asset.type === 'group' || !asset.parent) return false;
     let allowedTypes = this.component?.allowedTypes;
-    if (allowedTypes && typeof allowedTypes === 'string')
-      allowedTypes = [allowedTypes];
-    if (Array.isArray(allowedTypes) && allowedTypes.length > 0) {
-        return allowedTypes.indexOf(asset.type) >= 0;
-    } else {
-      return true;
-    }
+    if (allowedTypes && typeof allowedTypes === 'string') allowedTypes = [allowedTypes];
+    return Array.isArray(allowedTypes) && allowedTypes.length > 0 ? allowedTypes.indexOf(asset.type) >= 0 : true;
   }
 
   /**
@@ -134,14 +147,25 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     }
   }
 
-  onScrollToEnd() {
-    this.updateAssetBuffer();
+  /**
+   * Handles the scroll end event.
+   */
+  onScrollToEnd(): void {
+    if (this.loading) return;
+    this.loadMoreAssets();
   }
 
+  /**
+   * Handles the scroll event.
+   */
   onScroll({ end }: { end: number }) {
-    if (this._allAssets.length <= this.assetBuffer.length) return;
-
-    if (end + this.bufferThreshold >= this.assetBuffer.length) this.updateAssetBuffer();
+    if (this.loading || this.allAssets.length <= this.assetBuffer.length) return;
+    if (end + this.bufferThreshold >= this.assetBuffer.length) {
+      if (end + this.bufferThreshold >= this.allAssets.filter(it => this.checkType(it)).length)
+        this.loadMoreAssets();
+      else
+        this.updateAssetBuffer();
+    }
   }
 
   /**
@@ -149,13 +173,9 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes.component) return;
-    if (!allAssets) allAssets = this.assets.getAssetsRecursive();
-    this._allAssets = allAssets.filter(asset => this.checkType(asset));
-    if (Object.keys(this.sanitized).length === 0)
-      this._allAssets.forEach(it => this.sanitized[it.id] = this.sanitizer.bypassSecurityTrustUrl(it.content.path));
     if (this.component?.mixed) return;
     this.selected = this.component?.asset;
     this.updateAssetBuffer(true);
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 }

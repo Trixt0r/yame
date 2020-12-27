@@ -3,7 +3,7 @@ import { NgModule, SimpleChange } from "@angular/core";
 import { TestBed, ComponentFixture } from "@angular/core/testing";
 import { ToolbarComponent } from "./component";
 import { NoopAnimationsModule } from "@angular/platform-browser/animations";
-import { MaterialModule } from "../material";
+import { MaterialModule } from "../material.module";
 import { ToolbarService } from "./service";
 import { Tool } from "./tool";
 import { By } from "@angular/platform-browser";

@@ -1,4 +1,4 @@
-import { Logger as ILogger } from './interface/logger';
+import { Logger as ILogger } from './interfaces/logger';
 
 /**
  * Wrapper for logging to a specific target.

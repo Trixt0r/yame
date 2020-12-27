@@ -1,0 +1,81 @@
+:host {
+  @extend div !optional;
+  padding: 0 !important;
+  position: relative;
+}
+
+.no-items {
+
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+
+  opacity: 0.5;
+
+  .fill.half.text-left {
+    height: 110px;
+  }
+
+  mat-icon {
+    user-select: none;
+    &.sign {
+      position: absolute;
+      font-size: 42px;
+      color: #005599;
+      right: 30px;
+      bottom: 48px;
+    }
+
+    &.bg {
+      bottom: 24px;
+
+      &.front {
+        z-index: -1;
+        color: white;
+        font-size: 74px;
+      }
+
+      &.back {
+        position: absolute;
+        z-index: -2;
+        color: #005599;
+        font-size: 48px;
+        &.left { transform: translate(-79px, -65px) rotate(-20deg); }
+        &.right { transform:translate(-42px, -56px) rotate(30deg); }
+      }
+    }
+    width: auto;
+    height: auto;
+  }
+}
+
+.cards {
+  height: calc(100% - 8px);
+  overflow-y: auto;
+  align-content: flex-start;
+  mat-card {
+    height: 92px;
+    width: 92px;
+    position: relative;
+    padding: 8px;
+    .preview {
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: calc(100% - 4px);
+      height: 66%;
+      overflow: hidden;
+    }
+    mat-card-content {
+      position: absolute;
+      width: calc(100% - 16px);
+      bottom: 8px;
+      left: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      mat-icon { display: inline; }
+    }
+  }
+}

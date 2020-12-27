@@ -5,13 +5,14 @@
   [placeholder]="component.mixed ? component.id + ' ' + placeholder : component.id"
   appearance="outline"
   appendTo="yame-sidebar"
+  [loading]="loading"
   [allowDrop]="allowDrop"
   (onDropSuccess)="onDrop($event)"
   (scroll)="onScroll($event)"
   (scrollToEnd)="onScrollToEnd()"
   [virtualScroll]="true">
   <ng-option *ngFor="let asset of assetBuffer" [value]="asset.id">
-    <img class="preview" [src]="sanitized[asset.id]" />
-    <span class="name">{{ asset.content.simpleName }}</span>
+    <img class="preview" [src]="asset.resource.uri" />
+    <span class="name">{{ asset.resource.label }}</span>
   </ng-option>
 </ng-select>

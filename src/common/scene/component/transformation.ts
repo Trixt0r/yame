@@ -3,7 +3,7 @@ import { createRangeComponent, RangeSceneComponent } from './range';
 import { createPointComponent, PointSceneComponent } from './point';
 import { createSizeComponent } from './size';
 import { SceneComponent, SceneComponentTransform } from '..';
-import { IPoint } from 'common/interface/point';
+import { IPoint } from '../../interfaces/point';
 const RAD2DEG = 180 / Math.PI;
 const DEG2RAD = Math.PI / 180;
 const PI2 = Math.PI * 2;

@@ -1,7 +1,8 @@
 import { EventEmitter, HostBinding, OnDestroy } from '@angular/core';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISelectState } from 'ng/module/scene';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 export interface AbstractInputEvent<T extends SceneComponent = SceneComponent> {
   originalEvent: any;
@@ -53,7 +54,10 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    */
   externalEvent: EventEmitter<SceneComponent[]> = new EventEmitter();
 
-  protected _externalEventSub: Subscription;
+  /**
+   * Emitted as soon as the component got destroyed.
+   */
+  protected destroy$ = new Subject();
 
   /**
    * Whether this component is disabled or not.
@@ -77,7 +81,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   }
 
   constructor() {
-    this._externalEventSub = this.externalEvent.subscribe((comps: SceneComponent[]) => {
+    this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe((comps: SceneComponent[]) => {
       const found = comps.find(comp => comp.id === this.component?.id);
       if (!found) return;
       this.onExternalUpdate(comps);
@@ -146,6 +150,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * @inheritdoc
    */
   ngOnDestroy(): void {
-    this._externalEventSub.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

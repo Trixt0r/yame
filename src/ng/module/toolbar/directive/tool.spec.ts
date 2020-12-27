@@ -4,7 +4,7 @@ import { Tool } from "../tool";
 import { DefaultToolComponent } from "../component/default";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ToolDirective } from "./tool";
-import { MaterialModule } from "../../material";
+import { MaterialModule } from "../../material.module";
 import { ToolbarService } from "../service";
 import { By } from "@angular/platform-browser";
 

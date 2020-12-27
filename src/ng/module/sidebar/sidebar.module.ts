@@ -4,7 +4,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { SidebarComponent } from './components/sidebar.component';
 import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { UtilsModule } from '../utils';
-import { MaterialModule } from '../material';
+import { MaterialModule } from '../material.module';
 import { HierarchyComponent } from './components/hierarchy/hierarchy.component';
 import { SelectionComponent } from './components/selection/selection.component';
 import { NgMathPipesModule } from 'angular-pipes';
@@ -57,18 +57,6 @@ import { RangeTypeComponent } from './components/selection/types/range/range.com
     ScrollingModule,
     TreeModule.forRoot(),
   ],
-  // entryComponents: [
-  //   InputTypeComponent,
-  //   NumberTypeComponent,
-  //   ColorTypeComponent,
-  //   RangeTypeComponent,
-  //   PointTypeComponent,
-  //   SizeTypeComponent,
-  //   GroupTypeComponent,
-  //   AssetTypeComponent,
-  //   EditComponentComponent,
-  //   EditComponentDialogComponent,
-  // ],
   declarations: [
     SidebarComponent,
     HierarchyComponent,
@@ -154,7 +142,7 @@ export class SidebarModule {
       icon: 'image',
       factory: (entities, type, group) => {
         const component = createAssetComponent(compService.generateComponentId(entities, type));
-        component.allowedTypes = ['image'];
+        component.allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
         return component;
       },
     });

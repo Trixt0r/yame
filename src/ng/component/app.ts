@@ -20,6 +20,13 @@ export class AppComponent implements AfterViewInit {
 
   mainWidth = window.innerWidth;
 
+  /**
+   * Minimum resize value for the sidebar.
+   */
+  get sidebarMinVal(): number {
+    return Math.max(window.innerWidth * 0.33, 400);
+  }
+
   private initialized = false;
 
   @ViewChild(MainComponent, { static: false }) main!: MainComponent;

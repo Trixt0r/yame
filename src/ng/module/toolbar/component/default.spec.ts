@@ -1,6 +1,6 @@
 import { DefaultToolComponent } from "./default";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { MaterialModule } from "../../material";
+import { MaterialModule } from "../../material.module";
 import { Tool } from "../tool";
 import { ToolComponent } from "./tool";
 import { By } from "@angular/platform-browser";

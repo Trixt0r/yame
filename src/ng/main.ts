@@ -11,7 +11,7 @@ import * as angularPipes from 'angular-pipes';
 // import * as eventemitter3 from 'eventemitter3';
 import * as lodash from 'lodash';
 import * as uuid from 'uuid';
-import * as yame from './idx';
+import * as yame from '.';
 import { extend } from 'common/require';
 
 const mapping = {
@@ -41,7 +41,7 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { enableProdMode } from '@angular/core';
 import { environment } from '../environments';
-import { PluginManager } from './module/plugin/manager';
+import { PluginManager } from './module/plugin/plugin.manager';
 
 if (environment.production)
   enableProdMode();
@@ -52,7 +52,7 @@ if (environment.production)
  * @returns {Promise<any>}
  */
 function initNg(): Promise<any> {
-  return import('./module/app')
+  return import('./module/app.module')
     .then(module => {
       return platformBrowserDynamic()
         .bootstrapModule(module.AppModule)

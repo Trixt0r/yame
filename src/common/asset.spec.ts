@@ -14,7 +14,7 @@ describe('Asset', function() {
 
   it('should have type "my-asset"', () => expect(new MyAsset().type).toEqual('my-asset') );
 
-  it('should have a content object', () => expect(new MyAsset().content).toBeDefined() );
+  it('should have a content object', () => expect(new MyAsset().resource).toBeDefined() );
 
   it('should have no parent', () => expect(new MyAsset().parent).toBeUndefined() );
 

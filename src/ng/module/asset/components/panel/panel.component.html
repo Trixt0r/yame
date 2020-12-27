@@ -1,0 +1,14 @@
+<div class="resizer"></div>
+
+
+<div #row class="fill-width">
+  <yame-asset-groups class="absolute fill-height" (select)="onGroupSelect($event)" (unselect)="onGroupUnselect($event)"></yame-asset-groups>
+  <yame-asset-items class="absolute fill-height" [group]="selectedGroup$ | async"></yame-asset-items>
+  <yame-resizable
+    class="left"
+    [property]="'left'"
+    [maxVal]="'500'"
+    [minVal]="'200'"
+    (sizeUpdated)="updateColumns($event)">
+  </yame-resizable>
+</div>

@@ -1,0 +1,63 @@
+<div class="tree-wrapper">
+  <tree-root #tree
+            *ngIf="assetGroups.length > 0"
+            [nodes]="assetGroups"
+            [options]="options"
+            (activate)="onActivate($event)"
+            (deactivate)="onDeactivate($event)">
+    <ng-template #loadingTemplate>
+      <div class="text-center fill full">
+        <mat-spinner [diameter]="16"></mat-spinner>
+      </div>
+    </ng-template>
+    <ng-template #treeNodeTemplate let-node let-index="index">
+      <button *ngIf="!node.isLeaf"
+              class="toggle-btn"
+              mat-icon-button
+              disableRipple
+              [attr.aria-label]="'toggle ' + node.id"
+              (click)="$event.preventDefault(); $event.stopPropagation(); node.toggleExpanded()">
+        <mat-icon>{{ node.isExpanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      </button>
+      <mat-icon class="node-icon mat-icon-rtl-mirror">{{ getIcon(node.data.asset) }}</mat-icon>
+      <h5 class="mat-h5 node-name">{{ node.data.name }}</h5>
+      <div *ngIf="!node.data.asset.parent" class="inline-actions-wrapper">
+        <div class="inline-actions inline">
+          <button mat-icon-button (click)="removeSource($event, node.data)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </tree-root>
+  <div *ngIf="assetGroups.length === 0" class="empty text-center">
+    <div class="inline-block">
+      <span class="vert-align-middle table-cell"><mat-icon>error</mat-icon></span>
+      <span class="mat-caption padding-left-8 vert-align-middle table-cell">Asset source not found</span>
+    </div>
+  </div>
+</div>
+
+
+<button *ngIf="assetSources.length === 1"
+        mat-raised-button
+        aria-label="Add resource group"
+        (click)="addFromSource(assetSources[0])">
+  <mat-icon>library_add</mat-icon>
+  <span class="margin-left-4">Add source</span>
+</button>
+
+<button *ngIf="assetSources.length > 1"
+        mat-raised-button
+        aria-label="Add resource group"
+        [matMenuTriggerFor]="menu">
+  <mat-icon>library_add</mat-icon>
+  <span class="margin-left-4">Add source</span>
+</button>
+
+<mat-menu #menu="matMenu">
+  <button *ngFor="let source of assetSources" mat-menu-item (click)="addFromSource(source)">
+    <mat-icon *ngIf="source.icon">{{ source.icon }}</mat-icon>
+    <span>{{ source.label }}</span>
+  </button>
+</mat-menu>

@@ -4,6 +4,7 @@ import { Store } from '@ngxs/store';
 import { GroupSceneComponent, SceneComponent } from 'common/scene';
 import { SceneComponentsService } from 'ng/module/sidebar/services/scene-components.service';
 import { EntityComponentsDirective } from 'ng/module/sidebar/directives/entity-components.directive';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: `./group.component.html`,
@@ -44,8 +45,8 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
     private cdr: ChangeDetectorRef
   ) {
     super();
-    this._externalEventSub.unsubscribe();
-    this._externalEventSub = this.externalEvent.subscribe((comps: SceneComponent[]) => this.onExternalUpdate(comps));
+    this.destroy$.next();
+     this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe((comps: SceneComponent[]) => this.onExternalUpdate(comps));
   }
 
   /**
