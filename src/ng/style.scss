@@ -295,7 +295,7 @@ tree-node > div.isolated {
   background: #424242;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   color: white;
-  .ng-option, .ng-option.ng-option-marked {
+  .ng-option, .ng-option.ng-option-marked, .ng-option.ng-option-disabled {
     color: white;
     &.ng-option-selected {
       color: white;

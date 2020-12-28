@@ -72,6 +72,12 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     zone.runOutsideAngular(() => {
       this.assets$.pipe(takeUntil(this.destroy$)).subscribe(assets => {
         this.allAssets = assets;
+        this.assetBuffer.slice().forEach(it => {
+          const found = this.allAssets.find(asset => asset.id === it.id);
+          if (found) return;
+          const idx = this.assetBuffer.indexOf(it);
+          if (idx >= 0) this.assetBuffer.splice(idx, 1);
+        });
         this.updateAssetBuffer();
         this.cdr.markForCheck();
       });
