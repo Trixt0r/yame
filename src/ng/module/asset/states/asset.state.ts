@@ -6,6 +6,9 @@ import { Injectable, Type } from '@angular/core';
 import { IResource } from 'common/interfaces/resource';
 import { IAssetPreviewComponent } from '../directives/preview.directive';
 
+/**
+ * Preview components to initialize initially.
+ */
 const initPreviewComponents: { [type: string]: Type<IAssetPreviewComponent> } = { }
 
 /**
@@ -74,23 +77,44 @@ export interface IAssetState {
 @Injectable()
 export class AssetState implements NgxsOnInit {
 
+  /**
+   * Returns all loaded assets in the state.
+   */
   @Selector()
   static assets(state: IAssetState) { return state.assets; }
 
+  /**
+   * Returns all asset sources in the state.
+   */
   @Selector()
   static sources(state: IAssetState) { return state.sources; }
 
   @Selector()
+  static groups(state: IAssetState) { return state.assets.filter(asset => asset.type === 'group'); }
+
+  /**
+   * Returns the currently selected asset group.
+   */
+  @Selector()
   static selectedGroup(state: IAssetState) { return state.selectedGroup; }
 
+  /**
+   * Returns the currently selected asset.
+   */
   @Selector()
   static selectedAsset(state: IAssetState) { return state.selectedAsset; }
 
+  /**
+   * Returns all registered preview components.
+   */
   @Selector()
   static previewComponents(state: IAssetState) {
     return state.ui.previews;
   }
 
+  /**
+   * Returns the icon map.
+   */
   @Selector()
   static icons(state: IAssetState) {
     return state.ui.icons;
@@ -110,7 +134,13 @@ export class AssetState implements NgxsOnInit {
     ctx?.patchState({ ui: merge({ previews: initPreviewComponents }, ui) });
   }
 
-  getAssetForResource(resource: IResource) {
+  /**
+   * Returns an asset instance for the given resource.
+   *
+   * @param resource The resource
+   * @return A new asset instance or an existing one from the current state.
+   */
+  getAssetForResource(resource: IResource): Asset {
     const state = this.store.snapshot().assets as IAssetState;
     let found = state.assets.find(it => it.resource.uri === resource.uri);
     if (!found) {
@@ -120,6 +150,29 @@ export class AssetState implements NgxsOnInit {
       found.resource = resource;
     }
     return found;
+  }
+
+  getAssetForUri(uri: string): Asset | undefined {
+    const state = this.store.snapshot().assets as IAssetState;
+    return state.assets.find(it => it.resource.uri === uri);
+  }
+
+  getAssetById(id: string): Asset | undefined {
+    const state = this.store.snapshot().assets as IAssetState;
+    return state.assets.find(it => it.id === id);
+  }
+
+  getChildren(asset: Asset, deep = true) {
+    let children: Asset[] = [];
+    const state = this.store.snapshot().assets as IAssetState;
+    asset.children.forEach(id => {
+      const child = state.assets.find(it => it.id === id);
+      if (!child) return;
+      children.push(child);
+      if (!deep || child.children.length === 0) return;
+      children = children.concat(this.getChildren(child));
+    });
+    return children;
   }
 
   @Action(AddAssetsSource)
@@ -158,8 +211,13 @@ export class AssetState implements NgxsOnInit {
   removeAsset(ctx: StateContext<IAssetState>, action: RemoveAsset) {
     const assets = ctx.getState().assets.slice();
     const toRemove = Array.isArray(action.id) ? action.id : [action.id];
-    const deletedAssets = toRemove.map(id => assets.find(it => it.id === id)).filter(it => !!it);
+    let deletedAssets = toRemove.map(id => assets.find(it => it.id === id)).filter(it => !!it) as Asset[];
     if (deletedAssets.length === 0) return;
+    let children: Asset[] = [];
+    deletedAssets.forEach(it => {
+      children = children.concat(this.getChildren(it, true));
+    });
+    deletedAssets = deletedAssets.concat(children);
     deletedAssets.forEach(asset => {
       if (!asset) return;
       const idx = assets.indexOf(asset);

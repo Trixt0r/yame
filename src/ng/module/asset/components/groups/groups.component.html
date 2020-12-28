@@ -1,7 +1,7 @@
 <div class="tree-wrapper">
   <tree-root #tree
-            *ngIf="assetGroups.length > 0"
-            [nodes]="assetGroups"
+            *ngIf="groupNodes.length > 0"
+            [nodes]="groupNodes"
             [options]="options"
             (activate)="onActivate($event)"
             (deactivate)="onDeactivate($event)">
@@ -30,7 +30,7 @@
       </div>
     </ng-template>
   </tree-root>
-  <div *ngIf="assetGroups.length === 0" class="empty text-center">
+  <div *ngIf="groupNodes.length === 0" class="empty text-center">
     <div class="inline-block">
       <span class="vert-align-middle table-cell"><mat-icon>error</mat-icon></span>
       <span class="mat-caption padding-left-8 vert-align-middle table-cell">Asset source not found</span>

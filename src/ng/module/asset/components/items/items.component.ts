@@ -24,14 +24,40 @@ const dragImage = new Image(0, 0);
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetItemsComponent implements OnChanges, OnDestroy {
+
+  /**
+   * The group to render the assets for.
+   */
   @Input() group?: Asset;
 
+  /**
+   * Selector for subscribing to asset updates.
+   */
   @Select(AssetState.assets) assets$!: Observable<Asset[]>;
+
+  /**
+   * Selector for subscribing to icon updates.
+   */
   @Select(AssetState.icons) icons$!: Observable<{ [icon: string]: string }>;
+
+  /**
+   * A list of all currently available assets.
+   */
   allAssets: Asset[] = [];
+
+  /**
+   * The assets to display.
+   */
   assets: Asset[] = [];
+
+  /**
+   * The current asset icon map.
+   */
   icons: { [icon: string]: string } = { };
 
+  /**
+   * Whether assets are being loaded or not.
+   */
   loading = false;
 
   /**

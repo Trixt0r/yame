@@ -1,12 +1,25 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Input,
+  NgZone,
+  ViewChild,
+} from '@angular/core';
+import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { ResizableComponent } from 'ng/module/utils';
 import { Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { SelectAssetGroup, UnselectAssetGroup } from '../../states/actions/asset.action';
 import { AssetState } from '../../states/asset.state';
 import { AssetGroupsComponent } from '../groups/groups.component';
 import { AssetItemsComponent } from '../items/items.component';
+
+// Use an extended instance type, to be able to distinguish, who dispatched the action
+class PanelSelect extends SelectAssetGroup {}
+class PanelUnselect extends UnselectAssetGroup {}
 
 @Component({
   selector: 'yame-asset-panel',
@@ -15,7 +28,6 @@ import { AssetItemsComponent } from '../items/items.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetPanelComponent extends ResizableComponent {
-
   /**
    * The minimum width for each column.
    */
@@ -41,16 +53,40 @@ export class AssetPanelComponent extends ResizableComponent {
    */
   @ViewChild(AssetItemsComponent, { read: ElementRef }) items!: ElementRef<HTMLElement>;
 
+  /**
+   * Selector for subscribing to the selected asset group.
+   */
   @Select(AssetState.selectedGroup) selectedGroup$!: Observable<Asset>;
 
+  /**
+   * The currently selected asset group.
+   */
+  selectedGroup: Asset | null = null;
+
+  /**
+   * A bound resize handler reference.
+   */
   protected onResizeBind: () => void;
 
-  constructor(public ref: ElementRef, protected zone: NgZone, protected store: Store) {
+  constructor(
+    public ref: ElementRef,
+    protected zone: NgZone,
+    protected store: Store,
+    protected actions: Actions,
+    protected cdr: ChangeDetectorRef
+  ) {
     super(ref, zone);
     this.maxVal = window.innerHeight - 150;
     this.onResizeBind = this.onResize.bind(this);
     this.zone.runOutsideAngular(() => {
       window.addEventListener('resize', this.onResizeBind);
+      actions
+        .pipe(ofActionSuccessful(SelectAssetGroup, UnselectAssetGroup), takeUntil(this.destroy$))
+        .subscribe((action: SelectAssetGroup | UnselectAssetGroup) => {
+          if (action instanceof PanelSelect || action instanceof PanelUnselect) return;
+          this.selectedGroup = action instanceof SelectAssetGroup ? action.asset : null;
+          cdr.markForCheck();
+        });
     });
   }
 
@@ -86,12 +122,21 @@ export class AssetPanelComponent extends ResizableComponent {
     return true;
   }
 
+  /**
+   * Handles the selection of an asset group.
+   *
+   * @param asset The selected asset group.
+   */
   onGroupSelect(asset: Asset) {
-    this.store.dispatch(new SelectAssetGroup(asset));
+    this.store.dispatch(new PanelSelect(asset));
   }
 
+  /**
+   * Handles the deselection of the currently selected asset group.
+   *
+   * @param asset The previously selected asset group.
+   */
   onGroupUnselect(asset: Asset) {
-    this.store.dispatch(new UnselectAssetGroup());
+    this.store.dispatch(new PanelUnselect());
   }
-
 }
