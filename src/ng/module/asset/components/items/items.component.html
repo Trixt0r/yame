@@ -22,21 +22,76 @@
   </div>
 </div>
 
-<div class="cards padding-bottom-4 flex wrap">
-  <mat-card *ngFor="let asset of assets"
+<mat-drawer-container class="fill-height">
+  <mat-drawer mode="side" position="end" [opened]="!!selectedAsset">
+    <ng-container *ngIf="selectedAsset">
+      <h2 class="mat-h2">
+        <mat-icon inline class="inline vert-align-top">{{ getIcon(selectedAsset) }}</mat-icon>
+        <div class="name margin-left-16">{{ selectedAsset.resource.name }}</div>
+        <button mat-icon-button class="pull-right" (click)="toggleAsset(selectedAsset)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </h2>
+      <mat-divider></mat-divider>
+      <div class="preview"
             dnd-draggable
             [dragEnabled]="true"
-            [dragData]="asset"
-            (dragstart)="onDragStart($event)"
-            class="margin-4">
-    <div class="preview">
-      <div class="fill-width fill-height relative">
-        <ng-template [yameAssetPreview]="asset"></ng-template>
+            [dragData]="selectedAsset"
+            (dragstart)="onDragStart($event)">
+        <div class="fill-width fill-height relative">
+          <ng-template [yameAssetPreview]="selectedAsset"></ng-template>
+        </div>
       </div>
-    </div>
-    <mat-card-content>
-      <mat-icon inline class="inline">{{ getIcon(asset) }}</mat-icon>
-      <span class="mat-caption vert-align-bottom margin-left-8">{{ asset.resource.name }}</span>
-    </mat-card-content>
-  </mat-card>
-</div>
+      <mat-divider></mat-divider>
+      <mat-grid-list cols="2" rowHeight="32px" class="margin-top-16">
+        <mat-grid-tile class="mat-caption opacity-90">
+          <div class="fill full text-left">Type</div>
+        </mat-grid-tile>
+        <mat-grid-tile class="mat-caption">
+          <div class="fill full text-left">{{ selectedAsset?.type }}</div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="selectedAsset?.resource.size !== undefined" class="mat-caption opacity-90">
+          <div class="fill full text-left">Size</div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="selectedAsset?.resource.size !== undefined" class="mat-caption">
+          <div class="fill full text-left">{{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)</div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="selectedAsset?.resource.created !== undefined" class="mat-caption opacity-90">
+          <div class="fill full text-left">Created</div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="selectedAsset?.resource.created !== undefined" class="mat-caption">
+          <div class="fill full text-left">{{ selectedAsset?.resource.created | date : 'medium' }}</div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="selectedAsset?.resource.changed !== undefined" class="mat-caption opacity-90">
+          <div class="fill full text-left">Modified</div>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="selectedAsset?.resource.changed !== undefined" class="mat-caption">
+          <div class="fill full text-left">{{ selectedAsset?.resource.changed | date : 'medium' }}</div>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </ng-container>
+  </mat-drawer>
+
+  <div class="cards padding-bottom-4 flex wrap">
+    <mat-card *ngFor="let asset of assets"
+              dnd-draggable
+              [dragEnabled]="true"
+              [dragData]="asset"
+              (dragstart)="onDragStart($event)"
+              (click)="toggleAsset(asset)"
+              class="margin-4"
+              [class.mat-elevation-z8]="selectedAsset?.id === asset.id"
+              [class.selected]="selectedAsset?.id === asset.id">
+      <div class="preview">
+        <div class="fill-width fill-height relative">
+          <ng-template [yameAssetPreview]="asset"></ng-template>
+        </div>
+      </div>
+      <mat-card-content>
+        <mat-icon inline class="inline">{{ getIcon(asset) }}</mat-icon>
+        <span class="mat-caption vert-align-bottom margin-left-8">{{ asset.resource.name }}</span>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</mat-drawer-container>

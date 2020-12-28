@@ -7,7 +7,7 @@ import { UtilsModule } from '../utils';
 import { MaterialModule } from '../material.module';
 import { HierarchyComponent } from './components/hierarchy/hierarchy.component';
 import { SelectionComponent } from './components/selection/selection.component';
-import { NgMathPipesModule } from 'angular-pipes';
+import { NgRoundPipeModule } from 'angular-pipes';
 import { SceneComponentsService } from './services/scene-components.service';
 import { EntityComponentsDirective } from './directives/entity-components.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -45,7 +45,7 @@ import { RangeTypeComponent } from './components/selection/types/range/range.com
     BrowserModule,
     UtilsModule,
     MaterialModule,
-    NgMathPipesModule,
+    NgRoundPipeModule,
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,

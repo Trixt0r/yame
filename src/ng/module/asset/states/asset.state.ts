@@ -1,6 +1,6 @@
 import { Asset } from 'common/asset';
 import { State, Action, StateContext, Selector, Store, NgxsOnInit } from '@ngxs/store';
-import { AddAsset, AddAssetsSource, RemoveAsset, RemoveAssetsSource, IAssetsSource, UpdateAsset, LoadAssetResource, SelectAssetGroup, UnselectAssetGroup, RegisterAssetIcon } from './actions/asset.action';
+import { AddAsset, AddAssetsSource, RemoveAsset, RemoveAssetsSource, IAssetsSource, UpdateAsset, LoadAssetResource, SelectAssetGroup, UnselectAssetGroup, RegisterAssetIcon, SelectAsset, UnselectAsset } from './actions/asset.action';
 import { merge } from 'lodash';
 import { Injectable, Type } from '@angular/core';
 import { IResource } from 'common/interfaces/resource';
@@ -209,7 +209,8 @@ export class AssetState implements NgxsOnInit {
 
   @Action(RemoveAsset)
   removeAsset(ctx: StateContext<IAssetState>, action: RemoveAsset) {
-    const assets = ctx.getState().assets.slice();
+    const state = ctx.getState();
+    const assets = state.assets.slice();
     const toRemove = Array.isArray(action.id) ? action.id : [action.id];
     let deletedAssets = toRemove.map(id => assets.find(it => it.id === id)).filter(it => !!it) as Asset[];
     if (deletedAssets.length === 0) return;
@@ -217,13 +218,18 @@ export class AssetState implements NgxsOnInit {
     deletedAssets.forEach(it => {
       children = children.concat(this.getChildren(it, true));
     });
+    const patch: Partial<IAssetState> = { assets };
     deletedAssets = deletedAssets.concat(children);
     deletedAssets.forEach(asset => {
       if (!asset) return;
       const idx = assets.indexOf(asset);
-      if (idx >= 0) assets.splice(idx, 1);
+      if (idx >= 0) {
+        if (asset.id === state.selectedGroup?.id) patch.selectedGroup = null;
+        if (asset.id === state.selectedAsset?.id) patch.selectedAsset = null;
+        assets.splice(idx, 1);
+      }
     });
-    return ctx.patchState({ assets });
+    return ctx.patchState(patch);
   }
 
   @Action(UpdateAsset)
@@ -257,7 +263,10 @@ export class AssetState implements NgxsOnInit {
     }
 
     return ctx.dispatch(new AddAsset(assets))
-                .subscribe(() => parent.resource.loaded = true);
+                .subscribe(() => {
+                  merge(parent.resource, resource);
+                  parent.resource.loaded = true;
+                });
   }
 
   @Action(SelectAssetGroup)
@@ -268,7 +277,20 @@ export class AssetState implements NgxsOnInit {
 
   @Action(UnselectAssetGroup)
   unselectAssetGroup(ctx: StateContext<IAssetState>, action: UnselectAssetGroup) {
+    if (!ctx.getState().selectedGroup) return;
     ctx.patchState({ selectedGroup: null });
+  }
+
+  @Action(SelectAsset)
+  selectAsset(ctx: StateContext<IAssetState>, action: SelectAsset) {
+    if (ctx.getState().selectedGroup?.id === action.asset.id) return;
+    ctx.patchState({ selectedAsset: action.asset });
+  }
+
+  @Action(UnselectAsset)
+  unselectAsset(ctx: StateContext<IAssetState>, action: UnselectAsset) {
+    if (!ctx.getState().selectedAsset) return;
+    ctx.patchState({ selectedAsset: null });
   }
 
   @Action(RegisterAssetIcon)

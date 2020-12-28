@@ -9,10 +9,9 @@ import { SidebarComponent } from '../module/sidebar/components/sidebar.component
  * @class AppComponent
  */
 @Component({
-  moduleId: module.id.toString(),
   selector: 'yame-root',
   templateUrl: 'app.html',
-  styleUrls: ['./app.scss'],
+  styleUrls: ['app.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements AfterViewInit {
@@ -24,7 +23,7 @@ export class AppComponent implements AfterViewInit {
    * Minimum resize value for the sidebar.
    */
   get sidebarMinVal(): number {
-    return Math.max(window.innerWidth * 0.33, 400);
+    return Math.max(window.innerWidth * 0.66, 400);
   }
 
   private initialized = false;

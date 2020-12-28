@@ -47,7 +47,7 @@
     "@iplab/ngx-color-picker": "^1.0.5",
     "@ng-select/ng-select": "^5.0.9",
     "@trixt0r/ecs": "^0.4.1",
-    "angular-pipes": "^9.0.1",
+    "angular-pipes": "^10.0.0",
     "bluebird": "^3.5.0",
     "eventemitter3": "^3.1.0",
     "fs-extra": "^9.0.1",

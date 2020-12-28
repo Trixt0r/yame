@@ -7,12 +7,14 @@ import {
   OnChanges,
   OnDestroy,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { MatDrawer } from '@angular/material/sidenav';
+import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ScanResource } from '../../states/actions/asset.action';
+import { take, takeUntil } from 'rxjs/operators';
+import { LoadAssetResource, ScanResource, SelectAsset, UnselectAsset } from '../../states/actions/asset.action';
 import { AssetState } from '../../states/asset.state';
 
 const dragImage = new Image(0, 0);
@@ -40,6 +42,10 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   @Select(AssetState.icons) icons$!: Observable<{ [icon: string]: string }>;
 
+  @Select(AssetState.selectedAsset) asset$!: Observable<Asset>;
+
+  @ViewChild(MatDrawer) drawer!: MatDrawer;
+
   /**
    * A list of all currently available assets.
    */
@@ -56,6 +62,11 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
   icons: { [icon: string]: string } = { };
 
   /**
+   * The currently selected asset.
+   */
+  selectedAsset: Asset | null = null;
+
+  /**
    * Whether assets are being loaded or not.
    */
   loading = false;
@@ -65,13 +76,22 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   protected destroy$ = new Subject();
 
-  constructor(protected store: Store, protected cdr: ChangeDetectorRef, protected zone: NgZone) {
+  constructor(protected store: Store, protected cdr: ChangeDetectorRef, protected zone: NgZone, actions: Actions) {
     zone.runOutsideAngular(() => {
       this.assets$.pipe(takeUntil(this.destroy$)).subscribe(assets => {
         this.allAssets = assets;
         this.updateAssets();
       });
       this.icons$.pipe(takeUntil(this.destroy$)).subscribe(icons => this.icons = icons);
+      this.asset$.subscribe(asset => {
+        this.selectedAsset = asset;
+        if (!asset || asset.resource.loaded) return this.cdr.markForCheck();
+        this.store.dispatch(new ScanResource(asset.resource.uri, asset.resource.source, asset.resource.type))
+                    .subscribe(() => {
+                      actions.pipe(ofActionSuccessful(LoadAssetResource), take(1))
+                              .subscribe(() => this.cdr.markForCheck());
+                    });
+      });
     });
   }
 
@@ -92,6 +112,15 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   getIcon(asset: Asset): string {
     return this.icons[asset.type] || 'insert_drive_file';
+  }
+
+  /**
+   * Toggles the given asset.
+   *
+   * @param asset The asset to toggle.
+   */
+  toggleAsset(asset: Asset): void {
+    this.store.dispatch(this.selectedAsset?.id === asset.id ? new UnselectAsset() : new SelectAsset(asset));
   }
 
   /**

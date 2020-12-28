@@ -31,7 +31,7 @@ export class AssetPanelComponent extends ResizableComponent {
   /**
    * The minimum width for each column.
    */
-  @Input() minWidth = 300;
+  @Input() minWidth = 415;
 
   /**
    * The resizable component between groups and items.

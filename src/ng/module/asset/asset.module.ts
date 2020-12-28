@@ -11,6 +11,7 @@ import { AssetPreviewDirective } from './directives/preview.directive';
 import { DefaultAssetPreviewComponent } from './components/previews/default/default.component';
 import { ImageAssetPreviewComponent } from './components/previews/image/image.component';
 import { Store } from '@ngxs/store';
+import { NgBytesPipeModule } from 'angular-pipes';
 import { RegisterAssetIcon } from './states/actions/asset.action';
 
 @NgModule({
@@ -18,6 +19,7 @@ import { RegisterAssetIcon } from './states/actions/asset.action';
     BrowserModule,
     UtilsModule,
     MaterialModule,
+    NgBytesPipeModule ,
     TreeModule.forRoot(),
     DndModule.forRoot()
   ],

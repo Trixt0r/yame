@@ -81,7 +81,7 @@ export class UpdateAsset {
 export class ScanResource {
   public static readonly type = '[Asset] Scan Resource';
 
-  constructor(public uri: string, public source: string) { }
+  constructor(public uri: string, public source: string, public type = 'group') { }
 }
 
 export class LoadAssetResource {
@@ -98,6 +98,18 @@ export class SelectAssetGroup {
 
 export class UnselectAssetGroup {
   public static readonly type = '[Asset] Unselect asset group';
+
+  constructor() { }
+}
+
+export class SelectAsset {
+  public static readonly type = '[Asset] Select asset';
+
+  constructor(public asset: Asset) { }
+}
+
+export class UnselectAsset {
+  public static readonly type = '[Asset] Unselect asset';
 
   constructor() { }
 }

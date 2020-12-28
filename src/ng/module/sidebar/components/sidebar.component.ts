@@ -25,7 +25,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'yame-sidebar',
   templateUrl: 'sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'],
+  styleUrls: ['sidebar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent extends ResizableComponent implements AfterViewInit, OnDestroy {
@@ -33,7 +33,7 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
    * The amount to subtract from the window width on resize events.
    */
   static get WIDTH_SUB(): number {
-    return Math.min(window.innerWidth * 0.33, 250);
+    return Math.min(window.innerWidth * 0.66, 250);
   }
 
   /**

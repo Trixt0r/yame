@@ -38,19 +38,30 @@ export class File implements IResource<string | Buffer>, IExportable<IResource> 
   label: string;
 
   /**
+   * The file stats.
+   */
+  stats?: Stats;
+
+  /**
    * The creation timestamp.
    */
-  created?: number;
+  get created(): number | undefined {
+    return this.stats?.birthtimeMs;
+  }
 
   /**
    * The last modification timestamp.
    */
-  changed?: number;
+  get changed(): number | undefined {
+    return this.stats?.mtime.getTime();
+  }
 
   /**
    * The size of the file, in bytes.
    */
-  size?: number;
+  get size(): number | undefined {
+    return this.stats?.size;
+  }
 
   /**
    * The file content.
@@ -82,7 +93,19 @@ export class File implements IResource<string | Buffer>, IExportable<IResource> 
   }
 
   /**
-   * Reads the content from disc and resolves it.
+   * Reads the stats for this file.
+   *
+   * @param force Whether to force a stats read.
+   * @return The file stats.
+   */
+  async getStats(force = false): Promise<Stats | void> {
+    if (this.stats && !force) return this.stats;
+    this.stats = await require('fs-extra').stat(this.uri);
+    return this.stats;
+  }
+
+  /**
+   * Reads the content from the file and resolves it.
    *
    * @param encoding
    * @param stats Whether to read the file stats too.
@@ -96,10 +119,7 @@ export class File implements IResource<string | Buffer>, IExportable<IResource> 
     const re: string | Buffer = await require('fs-extra').readFile(this.uri, encoding);
     this.data = re;
     if (!stats) return re;
-    const sts: Stats = await require('fs-extra').stat(this.uri);
-    this.created = sts.birthtimeMs;
-    this.changed = sts.mtime.getTime();
-    this.size = sts.size;
+    await this.getStats();
     return re;
   }
 
