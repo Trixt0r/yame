@@ -1,7 +1,7 @@
 <div class="content">
   <mat-nav-list dense>
-    <mat-list-item *ngFor="let tool of service.tools" (click)="service.activate(tool)">
-      <ng-template [toolHost]="tool">
+    <mat-list-item *ngFor="let tool of tools" (click)="activate(tool)">
+      <ng-template [yameTool]="tool">
       </ng-template>
     </mat-list-item>
   </mat-nav-list>

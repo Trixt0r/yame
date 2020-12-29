@@ -1,19 +1,21 @@
 import { Directive, Input, ViewContainerRef, ComponentFactoryResolver, ComponentRef, OnChanges, SimpleChanges } from '@angular/core';
-import { Tool } from '../tool';
-import { ToolbarService } from '../service';
-import { ToolComponent } from '../component/tool';
+import { Tool, ToolComponent } from '../tool';
+import { DefaultToolComponent } from '../components/tool/default/default.component';
 
 /**
  * Directive for rendering a tool component in a template.
  */
 @Directive({
-  selector: '[toolHost]',
+  selector: '[yameTool]',
 })
 export class ToolDirective implements OnChanges {
-  @Input('toolHost') tool!: Tool;
+
+  /**
+   * The tool to display.
+   */
+  @Input('yameTool') tool!: Tool;
 
   constructor(
-    private tools: ToolbarService,
     private viewContainerRef: ViewContainerRef,
     private componentFactoryResolver: ComponentFactoryResolver
   ) {}
@@ -29,11 +31,11 @@ export class ToolDirective implements OnChanges {
    * @return The created component reference or `null` if no component found for the current tool.
    */
   render(): ComponentRef<ToolComponent> | null {
-    const compType = this.tools.getComponent(this.tool);
-    if (!compType) return null;
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
+    const compType = this.tool.component || DefaultToolComponent
     const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
+    if (!compType) return null;
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
     const componentRef = viewContainerRef.createComponent(componentFactory);
     componentRef.instance.tool = this.tool;
     return componentRef;

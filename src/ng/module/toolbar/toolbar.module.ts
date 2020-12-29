@@ -1,19 +1,20 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
-import { ToolbarComponent } from './component';
 import { MaterialModule } from '../material.module';
 import { CommonModule } from '@angular/common';
-import { ToolDirective } from './directive/tool';
-import { DefaultToolComponent } from './component/default';
+import { ToolDirective } from './directives/tool.directive';
+import { DefaultToolComponent } from './components/tool/default/default.component';
 import { SelectionToolService } from './tools/selection';
+import { NgxsModule, Store } from '@ngxs/store';
+import { ToolbarState } from './states/toolbar.state';
+import { ToolbarComponent } from './components/toolbar/toolbar.component';
+import { RegisterTool } from './states/actions/toolbar.action';
 
 @NgModule({
   imports: [
     CommonModule,
-    MaterialModule
+    MaterialModule,
+    NgxsModule.forFeature([ToolbarState])
   ],
-  // entryComponents: [
-  //   DefaultToolComponent
-  // ],
   declarations: [
     ToolbarComponent,
     DefaultToolComponent,
@@ -24,8 +25,13 @@ import { SelectionToolService } from './tools/selection';
     SelectionToolService,
     {
       provide: APP_INITIALIZER,
-      useFactory: () => () => { },
-      deps: [SelectionToolService],
+      useFactory: (store: Store, tool: SelectionToolService) => () => {
+        store.dispatch(new RegisterTool(tool));
+      },
+      deps: [
+        Store,
+        SelectionToolService
+      ],
       multi: true,
     }
   ]

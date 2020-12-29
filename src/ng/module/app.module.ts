@@ -17,14 +17,13 @@ import { PixiModule } from './pixi/pixi.module';
 import { ToolbarModule } from './toolbar/toolbar.module';
 import { CursorService } from 'ng/services/cursor.service';
 import { HotkeyState } from 'ng/states/hotkey.state';
-import { AssetState } from 'ng/module/asset/states/asset.state';
 import { AssetModule } from './asset/asset.module';
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    NgxsModule.forRoot([HotkeyState, AssetState]),
+    NgxsModule.forRoot([HotkeyState]),
     MaterialModule,
     UtilsModule,
     SceneModule,

@@ -1,13 +1,12 @@
-import { DefaultToolComponent } from "./component/default";
-import { NgModule, SimpleChange } from "@angular/core";
-import { TestBed, ComponentFixture } from "@angular/core/testing";
-import { ToolbarComponent } from "./component";
-import { NoopAnimationsModule } from "@angular/platform-browser/animations";
-import { MaterialModule } from "../material.module";
-import { ToolbarService } from "./service";
-import { Tool } from "./tool";
-import { By } from "@angular/platform-browser";
-import { ToolDirective } from "./directive/tool";
+import { DefaultToolComponent } from '../tool/default/default.component';
+import { NgModule, SimpleChange } from '@angular/core';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { ToolbarComponent } from './toolbar.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MaterialModule } from '../../../material.module';
+import { Tool } from '../../tool';
+import { By } from '@angular/platform-browser';
+import { ToolDirective } from '../../directives/tool.directive';
 
 
 @NgModule({
@@ -21,7 +20,6 @@ describe('ToolbarComponent', () => {
 
   let comp: ToolbarComponent;
   let fixture: ComponentFixture<ToolbarComponent>;
-  let service: ToolbarService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

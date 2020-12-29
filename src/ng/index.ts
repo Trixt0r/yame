@@ -10,5 +10,4 @@ export { UtilsModule } from './module/utils/utils.module';
 export { ToolbarModule } from './module/toolbar/toolbar.module';
 export { AssetModule } from './module/asset/asset.module';
 // export * from './module/pixi';
-export * from './module/toolbar/idx';
 export * from './module/utils';

@@ -9,9 +9,9 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
-import { ToolbarComponent } from '../module/toolbar/component';
 import { SceneComponent } from '../module/scene/components/scene/scene.component';
 import { AssetPanelComponent } from 'ng/module/asset/components/panel/panel.component';
+import { ToolbarComponent } from 'ng/module/toolbar/components/toolbar/toolbar.component';
 
 @Component({
   moduleId: module.id.toString(),

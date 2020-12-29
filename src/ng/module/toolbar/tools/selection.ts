@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 import { Select, Unselect, SceneService } from 'ng/module/scene';
 import { SceneComponent, SceneEntity, SceneEntityType } from 'common/scene';
 import { HotkeyService } from 'ng/services/hotkey.service';
-import { ToolbarService } from '../service';
+import { RegisterTool } from '../states/actions/toolbar.action';
 
 /**
  *
@@ -28,12 +28,12 @@ export interface SelectionToolConfig {
 @Injectable({ providedIn: 'root' })
 export class SelectionToolService extends Tool {
   /**
-   * @type {SelectionToolConfig} The configuration for this tool.
+   * The configuration for this tool.
    */
   config: SelectionToolConfig = { fill: {}, line: {} };
 
   /**
-   * @type {any[]} The handlers of the selection container.
+   * The handlers of the selection container.
    */
   readonly handlers: any[] = [];
 
@@ -64,10 +64,9 @@ export class SelectionToolService extends Tool {
     return this.graphics;
   }
 
-  constructor(protected store: Store, protected scene: SceneService, service: ToolbarService, hotkeys: HotkeyService) {
+  constructor(protected store: Store, protected scene: SceneService, hotkeys: HotkeyService) {
     super('edit', 'edit');
     this.initFunctions();
-    service.register(this);
 
     hotkeys.register({ keys: ['control.a', 'meta.a'] }).subscribe(() => {
       this.store.dispatch(

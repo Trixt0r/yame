@@ -10,11 +10,12 @@ import { TreeModule } from 'angular-tree-component';
 import { AssetPreviewDirective } from './directives/preview.directive';
 import { DefaultAssetPreviewComponent } from './components/previews/default/default.component';
 import { ImageAssetPreviewComponent } from './components/previews/image/image.component';
-import { Store } from '@ngxs/store';
+import { NgxsModule, Store } from '@ngxs/store';
 import { NgBytesPipeModule } from 'angular-pipes';
 import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
 import { AssetDetailsDirective } from './directives/details.directive';
 import { ImageAssetDetailsComponent } from './components/details/image/image.component';
+import { AssetState } from './states/asset.state';
 
 @NgModule({
   imports: [
@@ -23,7 +24,8 @@ import { ImageAssetDetailsComponent } from './components/details/image/image.com
     MaterialModule,
     NgBytesPipeModule ,
     TreeModule.forRoot(),
-    DndModule.forRoot()
+    DndModule.forRoot(),
+    NgxsModule.forFeature([AssetState])
   ],
   declarations: [
     AssetItemsComponent,

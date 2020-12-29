@@ -1,9 +1,8 @@
-import { DefaultToolComponent } from "./default";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { MaterialModule } from "../../material.module";
-import { Tool } from "../tool";
-import { ToolComponent } from "./tool";
-import { By } from "@angular/platform-browser";
+import { DefaultToolComponent } from './default.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MaterialModule } from '../../../../material.module';
+import { Tool } from '../../../tool';
+import { By } from '@angular/platform-browser';
 
 
 describe('DefaultToolComponent', () => {
@@ -19,10 +18,6 @@ describe('DefaultToolComponent', () => {
     comp = fixture.componentInstance;
     comp.tool = new Tool('edit', 'edit');
     fixture.detectChanges();
-  });
-
-  it('should be an instance of ToolComponent', () => {
-    expect(comp instanceof ToolComponent).toBe(true, 'Is not a ToolComponent');
   });
 
   it('should show the icon of the tool in a mat-icon', () => {

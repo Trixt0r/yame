@@ -1,11 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ToolComponent } from './tool';
+import { Tool, ToolComponent } from '../../../../toolbar/tool';
 
 /**
  * The default tool component displays the icon of the tool,
- *
- * @class DefaultToolComponent
- * @extends {ToolComponent}
  */
 @Component({
   template: `
@@ -23,4 +20,10 @@ import { ToolComponent } from './tool';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DefaultToolComponent extends ToolComponent {}
+export class DefaultToolComponent implements ToolComponent {
+
+  /**
+   * @inheritdoc
+   */
+  tool!: Tool;
+}

@@ -1,4 +1,15 @@
+import { Type } from '@angular/core';
 import { Subject } from 'rxjs';
+
+/**
+ * A tool component draws it's current assigned tool.
+ */
+export interface ToolComponent {
+  /**
+   * The tool for this component.
+   */
+  tool: Tool;
+}
 
 /**
  * A tool defines the implementation of a tool.
@@ -11,8 +22,20 @@ export class Tool {
    */
   icon?: string;
 
+  /**
+   * Triggered when this tool got activated.
+   */
   readonly activated$ = new Subject();
+
+  /**
+   * Triggered when this tool god deactivated.
+   */
   readonly deactivated$ = new Subject();
+
+  /**
+   * The component for this tool.
+   */
+  readonly component: Type<ToolComponent> | null = null;
 
   /**
    * Internal state indicating whether this tool is active or not.

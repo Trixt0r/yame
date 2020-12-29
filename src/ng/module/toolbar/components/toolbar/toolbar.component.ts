@@ -9,10 +9,17 @@ import {
   Output,
   EventEmitter,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnDestroy,
 } from '@angular/core';
 import { RippleAnimationConfig } from '@angular/material/core';
-import { ToolbarService } from './service';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
+import { Select, Store } from '@ngxs/store';
+import { ToolbarState } from '../../states/toolbar.state';
+import { Observable, Subject } from 'rxjs';
+import { Tool } from '../../tool';
+import { ActivateTool } from '../../states/actions/toolbar.action';
+import { takeUntil } from 'rxjs/operators';
 
 /**
  * The toolbar renders all tools.
@@ -24,8 +31,8 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
 @Component({
   moduleId: module.id.toString(),
   selector: 'yame-toolbar',
-  templateUrl: 'component.html',
-  styleUrls: ['component.scss'],
+  templateUrl: 'toolbar.component.html',
+  styleUrls: ['toolbar.component.scss'],
   animations: [
     trigger('state', [
       state('open', style({ transform: 'translateX(0)' })),
@@ -35,39 +42,79 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ToolbarComponent implements OnChanges {
-  /** @type {'open' | 'closed'} The internal state for animating the component. */
-  @HostBinding('@state') protected state = 'closed';
+export class ToolbarComponent implements OnChanges, OnDestroy {
+  /**
+   * The internal state for animating the component.
+   */
+  @HostBinding('@state') protected state: 'open' | 'closed' = 'closed';
 
-  /** @type {boolean} Whether the toolbar is opened or closed. */
+  /**
+   * Whether the toolbar is opened or closed.
+   */
   @Input('open') open = false;
 
   @Input('height') height!: number;
 
-  /** @type {EventEmitter} Event which gets emitted when the toolbar gets opened. */
+  /**
+   * Event which gets emitted when the toolbar gets opened.
+   */
   @Output('opening') opening = new EventEmitter();
 
-  /** @type {EventEmitter} Event which gets emitted when the toolbar has been opened. */
+  /**
+   * Event which gets emitted when the toolbar has been opened.
+   */
   @Output('opened') opened = new EventEmitter();
 
-  /** @type {EventEmitter} Event which gets emitted when the toolbar gets closed. */
+  /**
+   * Event which gets emitted when the toolbar gets closed.
+   */
   @Output('closing') closing = new EventEmitter();
 
-  /** @type {EventEmitter} Event which gets emitted when the toolbar has been closed. */
+  /**
+   * Event which gets emitted when the toolbar has been closed.
+   */
   @Output('closed') closed = new EventEmitter();
 
-  /** @type {RippleAnimationConfig} The ripple animation config for the toggle button. */
+  /**
+   * The ripple animation config for the toggle button.
+   */
   rippleAnimationConfig: RippleAnimationConfig = {
     enterDuration: 100,
     exitDuration: 100,
   };
 
-  constructor(public ref: ElementRef, public service: ToolbarService) {}
+  /**
+   * Selects the current tools.
+   */
+  @Select(ToolbarState.tools) tools$!: Observable<Tool[]>;
 
-  /** @inheritdoc */
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.open) this.updateState();
-    if (changes.height) this.ref.nativeElement.style['height'] = `${changes.height.currentValue}px`;
+  /**
+   * A list of current tools.
+   */
+  tools: Tool[] = [];
+
+  /**
+   * Triggered as soon as this component gets removed
+   */
+  protected destroy$ = new Subject();
+
+  constructor(public ref: ElementRef, public store: Store, cdr: ChangeDetectorRef) {
+    this.tools$.pipe(takeUntil(this.destroy$)).subscribe((tools) => {
+      this.tools = tools;
+      cdr.markForCheck();
+    });
+  }
+
+  /**
+   * Updates the animation state based on the open flag.
+   */
+  protected updateState() {
+    if (this.open) this.state = 'open';
+    else this.state = 'closed';
+  }
+
+  activate(tool: Tool) {
+    this.store.dispatch(new ActivateTool(tool));
   }
 
   /**
@@ -79,19 +126,9 @@ export class ToolbarComponent implements OnChanges {
   }
 
   /**
-   * Updates the animation state based on the open flag.
-   *
-   * @protected
-   */
-  protected updateState() {
-    if (this.open) this.state = 'open';
-    else this.state = 'closed';
-  }
-
-  /**
    * Handles the animation start when either opening or closing the toolbar.
    *
-   * @param {AnimationEvent} event
+   * @param event
    */
   @HostListener('@state.start', ['$event'])
   stateAnimStart(event: AnimationEvent): void {
@@ -102,11 +139,27 @@ export class ToolbarComponent implements OnChanges {
   /**
    * Handles the animation end when either opening or closing the toolbar.
    *
-   * @param {AnimationEvent} event
+   * @param event
    */
   @HostListener('@state.done', ['$event'])
   stateAnimDone(event: AnimationEvent): void {
     if (event.toState === 'open') this.opened.emit();
     else if (event.toState === 'closed') this.closed.emit();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.open) this.updateState();
+    if (changes.height) this.ref.nativeElement.style['height'] = `${changes.height.currentValue}px`;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

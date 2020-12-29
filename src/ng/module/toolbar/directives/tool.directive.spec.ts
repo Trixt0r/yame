@@ -1,18 +1,17 @@
-import { Component, NgModule } from "@angular/core";
-import { ToolComponent } from "../component/tool";
-import { Tool } from "../tool";
-import { DefaultToolComponent } from "../component/default";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ToolDirective } from "./tool";
-import { MaterialModule } from "../../material.module";
-import { ToolbarService } from "../service";
-import { By } from "@angular/platform-browser";
+import { Component, NgModule } from '@angular/core';
+import { Tool, ToolComponent } from '../tool';
+import { DefaultToolComponent } from '../components/tool/default/default.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ToolDirective } from './tool.directive';
+import { MaterialModule } from '../../material.module';
+import { ToolbarService } from '../service';
+import { By } from '@angular/platform-browser';
 
 @Component({
-  template: `<div [toolHost]="tool"></div>`
+  template: `<div [toolHost]='tool'></div>`
 })
-class TestToolComponent {
-  tool: Tool;
+class TestToolComponent implements ToolComponent{
+  tool!: Tool;
 }
 
 @NgModule({
