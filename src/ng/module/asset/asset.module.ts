@@ -12,7 +12,9 @@ import { DefaultAssetPreviewComponent } from './components/previews/default/defa
 import { ImageAssetPreviewComponent } from './components/previews/image/image.component';
 import { Store } from '@ngxs/store';
 import { NgBytesPipeModule } from 'angular-pipes';
-import { RegisterAssetIcon } from './states/actions/asset.action';
+import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
+import { AssetDetailsDirective } from './directives/details.directive';
+import { ImageAssetDetailsComponent } from './components/details/image/image.component';
 
 @NgModule({
   imports: [
@@ -29,7 +31,9 @@ import { RegisterAssetIcon } from './states/actions/asset.action';
     AssetPanelComponent,
     DefaultAssetPreviewComponent,
     ImageAssetPreviewComponent,
-    AssetPreviewDirective
+    ImageAssetDetailsComponent,
+    AssetPreviewDirective,
+    AssetDetailsDirective
   ],
   exports: [
     AssetItemsComponent,
@@ -41,5 +45,6 @@ import { RegisterAssetIcon } from './states/actions/asset.action';
 export class AssetModule {
   constructor(store: Store) {
     store.dispatch(new RegisterAssetIcon('image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
+    store.dispatch(new RegisterAssetTypeLabel('Image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
   }
 }

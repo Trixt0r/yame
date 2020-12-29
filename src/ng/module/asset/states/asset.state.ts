@@ -1,15 +1,21 @@
 import { Asset } from 'common/asset';
 import { State, Action, StateContext, Selector, Store, NgxsOnInit } from '@ngxs/store';
-import { AddAsset, AddAssetsSource, RemoveAsset, RemoveAssetsSource, IAssetsSource, UpdateAsset, LoadAssetResource, SelectAssetGroup, UnselectAssetGroup, RegisterAssetIcon, SelectAsset, UnselectAsset } from './actions/asset.action';
+import { AddAsset, AddAssetsSource, RemoveAsset, RemoveAssetsSource, IAssetsSource, UpdateAsset, LoadAssetResource, SelectAssetGroup, UnselectAssetGroup, RegisterAssetIcon, SelectAsset, UnselectAsset, RegisterAssetTypeLabel } from './actions/asset.action';
 import { merge } from 'lodash';
 import { Injectable, Type } from '@angular/core';
 import { IResource } from 'common/interfaces/resource';
 import { IAssetPreviewComponent } from '../directives/preview.directive';
+import { IAssetDetailsComponent } from '../directives/details.directive';
 
 /**
  * Preview components to initialize initially.
  */
-const initPreviewComponents: { [type: string]: Type<IAssetPreviewComponent> } = { }
+const initPreviewComponents: { [type: string]: Type<IAssetPreviewComponent> } = { };
+
+/**
+ * Details components to initialize initially.
+ */
+const initDetailsComponents: { [type: string]: Type<IAssetDetailsComponent> } = { };
 
 /**
  * Defines asset ui state.
@@ -21,9 +27,19 @@ interface AssetUI {
   previews: { [type: string]: Type<IAssetPreviewComponent> };
 
   /**
+   * Component map for asset details.
+   */
+  details: { [type: string]: Type<IAssetDetailsComponent> };
+
+  /**
    * The icon mapping.
    */
   icons: { [key: string]: string };
+
+  /**
+   * The type label mapping.
+   */
+  typeLabels: { [key: string]: string };
 }
 
 export interface IAssetState {
@@ -62,7 +78,9 @@ export interface IAssetState {
     selectedAsset: null,
     ui: {
       previews: { },
-      icons: { }
+      details: { },
+      icons: { },
+      typeLabels: { }
     },
     sources: [
       {
@@ -89,6 +107,9 @@ export class AssetState implements NgxsOnInit {
   @Selector()
   static sources(state: IAssetState) { return state.sources; }
 
+  /**
+   * Returns all assets of type 'groups'.
+   */
   @Selector()
   static groups(state: IAssetState) { return state.assets.filter(asset => asset.type === 'group'); }
 
@@ -113,6 +134,14 @@ export class AssetState implements NgxsOnInit {
   }
 
   /**
+   * Returns all registered details components.
+   */
+  @Selector()
+  static detailsComponents(state: IAssetState) {
+    return state.ui.details;
+  }
+
+  /**
    * Returns the icon map.
    */
   @Selector()
@@ -120,8 +149,30 @@ export class AssetState implements NgxsOnInit {
     return state.ui.icons;
   }
 
-  static _initPreviewComponent(comp: Type<IAssetPreviewComponent>, ...types: string[]) {
+  /**
+   * Returns the type label map.
+   */
+  @Selector()
+  static typeLabels(state: IAssetState) {
+    return state.ui.typeLabels;
+  }
+
+  /**
+   * @private
+   *
+   * Initializes the given preview component for the given types.
+   */
+  static _initPreviewComponent(comp: Type<IAssetPreviewComponent>, ...types: string[]): void {
     types.forEach(assetType => initPreviewComponents[assetType] = comp);
+  }
+
+  /**
+   * @private
+   *
+   * Initializes the given details component for the given types.
+   */
+  static _initDetailsComponent(comp: Type<IAssetDetailsComponent>, ...types: string[]): void {
+    types.forEach(assetType => initDetailsComponents[assetType] = comp);
   }
 
   constructor(protected store: Store) { }
@@ -131,7 +182,7 @@ export class AssetState implements NgxsOnInit {
    */
   ngxsOnInit(ctx?: StateContext<IAssetState>) {
     const ui = ctx?.getState().ui;
-    ctx?.patchState({ ui: merge({ previews: initPreviewComponents }, ui) });
+    ctx?.patchState({ ui: merge({ previews: initPreviewComponents, details: initDetailsComponents }, ui) });
   }
 
   /**
@@ -300,6 +351,16 @@ export class AssetState implements NgxsOnInit {
     action.types.forEach(it => icons[it] = action.icon);
     const ui = merge({ }, currentUi);
     ui.icons = { ...ui.icons, ...icons };
+    ctx.patchState({ ui });
+  }
+
+  @Action(RegisterAssetTypeLabel)
+  registerAssetTypeLabel(ctx: StateContext<IAssetState>, action: RegisterAssetTypeLabel) {
+    const currentUi = ctx.getState().ui;
+    const labels: { [label: string] : string } = { };
+    action.types.forEach(it => labels[it] = action.label);
+    const ui = merge({ }, currentUi);
+    ui.typeLabels = { ...ui.typeLabels, ...labels };
     ctx.patchState({ ui });
   }
 

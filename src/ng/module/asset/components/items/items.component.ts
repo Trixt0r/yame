@@ -42,8 +42,19 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   @Select(AssetState.icons) icons$!: Observable<{ [icon: string]: string }>;
 
+  /**
+   * Selector for subscribing to type label updates.
+   */
+  @Select(AssetState.typeLabels) labels$!: Observable<{ [label: string]: string }>;
+
+  /**
+   * Selector for subscribing to asset selection.
+   */
   @Select(AssetState.selectedAsset) asset$!: Observable<Asset>;
 
+  /**
+   * Material drawer reference.
+   */
   @ViewChild(MatDrawer) drawer!: MatDrawer;
 
   /**
@@ -60,6 +71,11 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    * The current asset icon map.
    */
   icons: { [icon: string]: string } = { };
+
+  /**
+   * The current asset type label map.
+   */
+  labels: { [label: string]: string } = { };
 
   /**
    * The currently selected asset.
@@ -83,6 +99,7 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
         this.updateAssets();
       });
       this.icons$.pipe(takeUntil(this.destroy$)).subscribe(icons => this.icons = icons);
+      this.labels$.pipe(takeUntil(this.destroy$)).subscribe(labels => this.labels = labels);
       this.asset$.subscribe(asset => {
         this.selectedAsset = asset;
         if (!asset || asset.resource.loaded) return this.cdr.markForCheck();
@@ -112,6 +129,16 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   getIcon(asset: Asset): string {
     return this.icons[asset.type] || 'insert_drive_file';
+  }
+
+  /**
+   * Returns the type label for the given asset.
+   *
+   * @param asset The asset.
+   * @return The label name.
+   */
+  getLabel(asset: Asset): string {
+    return this.labels[asset.type] || asset.type;
   }
 
   /**

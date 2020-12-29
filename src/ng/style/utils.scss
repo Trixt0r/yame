@@ -33,15 +33,10 @@
 }
 
 .absolute { position: absolute !important; }
-
 .block { display: block; }
-
 .inline { display: inline; }
-
 .inline-block { display: inline-block; }
-
 .inline-flex { display: inline-flex; }
-
 .table { display: table; }
 .table-cell { display: table-cell; }
 
@@ -59,22 +54,22 @@
 .hidden { display: none; }
 
 .fill {
-  &.full {
-    width: 100%;
-  }
-  &.threequarter {
-    width: 75%;
-  }
-  &.half {
-    width: 50%;
-  }
-  &.quarter {
-    width: 25%;
-  }
+  &.full { width: 100%; }
+  &.threequarter { width: 75%; }
+  &.half { width: 50%; }
+  &.quarter { width: 25%; }
+  mat-slider { width: 100%; }
+}
 
-  mat-slider {
-    width: 100%;
-  }
+$fills: 5, 10, 15, 20, 25, 30, 33, 35, 40, 45, 50, 55, 60, 65, 66, 70, 75, 80, 85, 90, 95, 100;
+@each $fill in $fills {
+  .fill-#{$fill} { width: #{$fill}#{'%'}; }
+}
+
+.row {
+  width: 100%;
+  display: block;
+  .col { display: inline-block; }
 }
 
 .no-padding { padding: 0; }

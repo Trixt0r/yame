@@ -119,3 +119,9 @@ export class RegisterAssetIcon {
 
   constructor(public icon: string, public types: string[]) { }
 }
+
+export class RegisterAssetTypeLabel {
+  public static readonly type = '[Asset] Register asset type label';
+
+  constructor(public label: string, public types: string[]) { }
+}

@@ -1,74 +1,76 @@
-<div *ngIf="!group || (group && group.resource.loaded && !assets.length)" class="no-items">
-  <div class ="fill half relative text-right inline-block border-box padding-left-8 padding-right-16 padding-vert-32">
-    <mat-icon class="sign">not_interested</mat-icon>
-    <mat-icon class="bg front">folder</mat-icon>
-    <mat-icon class="bg back right">description</mat-icon>
-    <mat-icon class="bg back left">image</mat-icon>
-  </div>
-  <div class="fill half text-left inline-block border-box vert-align-top relative">
-    <div class="absolute vert-center padding-right-16 border-box">
-      <h3 class="mat-h3 no-margin-bottom">No assets found</h3>
-      <span *ngIf="!group" class="mat-caption no-margin-top">Add an asset source and select it</span>
-    </div>
-  </div>
-</div>
-
-<div *ngIf="loading" class="text-center fill-height relative">
-  <div class="absolute vert-center fill-width">
-    <div class="inline-block text-center">
-      <mat-spinner [diameter]="64"></mat-spinner>
-    </div>
-    <h4 class="mat-h4 opacity-50 margin-top-16">Loading assets...</h4>
-  </div>
-</div>
-
 <mat-drawer-container class="fill-height">
+  <div *ngIf="!group || (group && group.resource.loaded && !assets.length)" class="no-items">
+    <div class ="fill half relative text-right inline-block border-box padding-left-8 padding-right-16 padding-vert-32">
+      <mat-icon class="sign">not_interested</mat-icon>
+      <mat-icon class="bg front">folder</mat-icon>
+      <mat-icon class="bg back right">description</mat-icon>
+      <mat-icon class="bg back left">image</mat-icon>
+    </div>
+    <div class="fill half text-left inline-block border-box vert-align-top relative">
+      <div class="absolute vert-center padding-right-16 border-box">
+        <h3 class="mat-h3 no-margin-bottom">No assets found</h3>
+        <span *ngIf="!group" class="mat-caption no-margin-top">Add an asset source and select it</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center fill-height relative">
+    <div class="absolute vert-center fill-width">
+      <div class="inline-block text-center">
+        <mat-spinner [diameter]="64"></mat-spinner>
+      </div>
+      <h4 class="mat-h4 opacity-50 margin-top-16">Loading assets...</h4>
+    </div>
+  </div>
+
   <mat-drawer mode="side" position="end" [opened]="!!selectedAsset">
     <ng-container *ngIf="selectedAsset">
-      <h2 class="mat-h2">
+      <h2 class="mat-h2 margin-bottom-4">
         <mat-icon inline class="inline vert-align-top">{{ getIcon(selectedAsset) }}</mat-icon>
         <div class="name margin-left-16">{{ selectedAsset.resource.name }}</div>
         <button mat-icon-button class="pull-right" (click)="toggleAsset(selectedAsset)">
           <mat-icon>close</mat-icon>
         </button>
       </h2>
-      <mat-divider></mat-divider>
-      <div class="preview"
-            dnd-draggable
-            [dragEnabled]="true"
-            [dragData]="selectedAsset"
-            (dragstart)="onDragStart($event)">
-        <div class="fill-width fill-height relative">
-          <ng-template [yameAssetPreview]="selectedAsset"></ng-template>
-        </div>
-      </div>
-      <mat-divider></mat-divider>
-      <mat-grid-list cols="2" rowHeight="32px" class="margin-top-16">
-        <mat-grid-tile class="mat-caption opacity-90">
-          <div class="fill full text-left">Type</div>
-        </mat-grid-tile>
-        <mat-grid-tile class="mat-caption">
-          <div class="fill full text-left">{{ selectedAsset?.type }}</div>
-        </mat-grid-tile>
-        <mat-grid-tile *ngIf="selectedAsset?.resource.size !== undefined" class="mat-caption opacity-90">
-          <div class="fill full text-left">Size</div>
-        </mat-grid-tile>
-        <mat-grid-tile *ngIf="selectedAsset?.resource.size !== undefined" class="mat-caption">
-          <div class="fill full text-left">{{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)</div>
-        </mat-grid-tile>
-        <mat-grid-tile *ngIf="selectedAsset?.resource.created !== undefined" class="mat-caption opacity-90">
-          <div class="fill full text-left">Created</div>
-        </mat-grid-tile>
-        <mat-grid-tile *ngIf="selectedAsset?.resource.created !== undefined" class="mat-caption">
-          <div class="fill full text-left">{{ selectedAsset?.resource.created | date : 'medium' }}</div>
-        </mat-grid-tile>
-        <mat-grid-tile *ngIf="selectedAsset?.resource.changed !== undefined" class="mat-caption opacity-90">
-          <div class="fill full text-left">Modified</div>
-        </mat-grid-tile>
-        <mat-grid-tile *ngIf="selectedAsset?.resource.changed !== undefined" class="mat-caption">
-          <div class="fill full text-left">{{ selectedAsset?.resource.changed | date : 'medium' }}</div>
-        </mat-grid-tile>
-      </mat-grid-list>
+      <mat-tab-group mat-align-tabs="center">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="absolute">info</mat-icon>
+            <span>Details</span>
+          </ng-template>
+          <div class="preview"
+                dnd-draggable
+                [dragEnabled]="true"
+                [dragData]="selectedAsset"
+                (dragstart)="onDragStart($event)">
+            <div class="fill-width fill-height relative">
+              <ng-container [yameAssetPreview]="selectedAsset"></ng-container>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="details margin-top-16">
+            <div class="row">
+              <div class="col fill-33 text-left mat-caption opacity-90">Type</div>
+              <div class="col fill-66 text-left mat-caption">{{ getLabel(selectedAsset) }}</div>
+            </div>
+            <div class="row" *ngIf="selectedAsset?.resource.size !== undefined">
+              <div class="col fill-33 text-left mat-caption opacity-90">Size</div>
+              <div class="col fill-66 text-left mat-caption">
+                {{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)
+              </div>
+            </div>
+            <div class="row" *ngIf="selectedAsset?.resource.created !== undefined">
+              <div class="col fill-33 text-left mat-caption opacity-90">Created</div>
+              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.created | date : 'medium' }}</div>
+            </div>
+            <div class="row" *ngIf="selectedAsset?.resource.changed !== undefined">
+              <div class="col fill-33 text-left mat-caption opacity-90">Modified</div>
+              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.changed | date : 'medium' }}</div>
+            </div>
+            <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     </ng-container>
   </mat-drawer>
 

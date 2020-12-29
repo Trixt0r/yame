@@ -54,17 +54,33 @@ mat-drawer {
   width: 300px;
   max-width: 26vw;
   padding: 8px;
-  mat-icon { font-size: 32px; }
+  h2 mat-icon { font-size: 32px; }
+  button.pull-right { margin-top: -4px; }
   .name {
     max-width: 180px;
     word-break: break-all;
     display: inline-block;
   }
+
   .preview {
     height: 192px;
     max-height: 50%;
   }
-  button.pull-right { margin-top: -4px; }
+
+  .details {
+    .row {
+      .col {
+        vertical-align: top;
+        padding: 4px 8px;
+        &:first-child { padding-left: 0; }
+        box-sizing: border-box;
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .mat-tab-label-content mat-icon.absolute { left: 8px; }
 }
 
 .cards {

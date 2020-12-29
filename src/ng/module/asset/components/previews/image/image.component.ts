@@ -11,5 +11,9 @@ import { IAssetPreviewComponent } from '../../../directives/preview.directive';
 })
 @AssetPreviewComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
 export class ImageAssetPreviewComponent implements IAssetPreviewComponent {
+
+  /**
+   * @inheritdoc
+   */
   asset!: Asset;
 }

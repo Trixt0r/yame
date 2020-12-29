@@ -16,12 +16,11 @@ import { Select } from '@ngxs/store';
 import { AssetState } from '../states/asset.state';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DefaultAssetPreviewComponent } from '../components/previews/default/default.component';
 
 /**
  * An interface for defining a component which is able to render a preview of a certain asset.
  */
-export interface IAssetPreviewComponent<T = unknown> {
+export interface IAssetDetailsComponent<T = unknown> {
 
   /**
    * The asset instance.
@@ -31,27 +30,27 @@ export interface IAssetPreviewComponent<T = unknown> {
 
 
 /**
- * Directive for injecting a preview component for a certain asset.
+ * Directive for displaying further details for a certain asset.
  */
 @Directive({
-  selector: '[yameAssetPreview]',
+  selector: '[yameAssetDetails]',
 })
-export class AssetPreviewDirective implements OnChanges, OnDestroy {
+export class AssetDetailsDirective implements OnChanges, OnDestroy {
 
   /**
    * The asset to render.
    */
-  @Input('yameAssetPreview') asset!: Asset;
+  @Input('yameAssetDetails') asset!: Asset;
 
   /**
-   * Selector for reacting to preview component updates.
+   * Selector for reacting to details component updates.
    */
-  @Select(AssetState.previewComponents) previews$!: Observable<{ [key: string]: Type<IAssetPreviewComponent> }>;
+  @Select(AssetState.detailsComponents) details$!: Observable<{ [key: string]: Type<IAssetDetailsComponent> }>;
 
   /**
-   * A map of all preview components.
+   * A map of all details components.
    */
-  previews: { [key: string]: Type<IAssetPreviewComponent> } = { };
+  details: { [key: string]: Type<IAssetDetailsComponent> } = { };
 
   /**
    * Triggered when this directive gets destroyed.
@@ -64,7 +63,7 @@ export class AssetPreviewDirective implements OnChanges, OnDestroy {
     protected zone: NgZone
   ) {
     this.zone.runOutsideAngular(() => {
-      this.previews$.pipe(takeUntil(this.destroy$)).subscribe(previews => this.previews = previews);
+      this.details$.pipe(takeUntil(this.destroy$)).subscribe(details => this.details = details);
     });
   }
 
@@ -73,8 +72,8 @@ export class AssetPreviewDirective implements OnChanges, OnDestroy {
    *
    * @return The created component reference or `null` if no component found for the current group.
    */
-  render(): ComponentRef<IAssetPreviewComponent> | null {
-    const compType = this.previews[this.asset.type] || DefaultAssetPreviewComponent;
+  render(): ComponentRef<IAssetDetailsComponent> | null {
+    const compType = this.details[this.asset.type];
     const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
     if (!compType) return null;
