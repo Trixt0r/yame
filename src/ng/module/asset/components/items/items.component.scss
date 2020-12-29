@@ -100,6 +100,7 @@ mat-drawer {
       height: 66%;
       overflow: hidden;
     }
+    mat-divider { top: calc(66% + 2px); }
     mat-card-content {
       position: absolute;
       width: calc(100% - 16px);
