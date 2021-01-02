@@ -8,19 +8,13 @@ import { NgxsModule, Store } from '@ngxs/store';
 import { ToolbarState } from './states/toolbar.state';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { RegisterTool } from './states/actions/toolbar.action';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    MaterialModule,
-    NgxsModule.forFeature([ToolbarState])
-  ],
-  declarations: [
-    ToolbarComponent,
-    DefaultToolComponent,
-    ToolDirective
-  ],
-  exports: [ ToolbarComponent ],
+  imports: [CommonModule, MaterialModule, OverlayModule, FormsModule, NgxsModule.forFeature([ToolbarState])],
+  declarations: [ToolbarComponent, DefaultToolComponent, ToolDirective],
+  exports: [ToolbarComponent],
   providers: [
     SelectionToolService,
     {
@@ -28,12 +22,9 @@ import { RegisterTool } from './states/actions/toolbar.action';
       useFactory: (store: Store, tool: SelectionToolService) => () => {
         store.dispatch(new RegisterTool(tool));
       },
-      deps: [
-        Store,
-        SelectionToolService
-      ],
+      deps: [Store, SelectionToolService],
       multi: true,
-    }
-  ]
+    },
+  ],
 })
-export class ToolbarModule { }
+export class ToolbarModule {}

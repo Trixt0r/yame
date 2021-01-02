@@ -1,4 +1,5 @@
 import EventEmitter from 'common/event-emitter';
+import { IPoint } from 'common/math';
 
 import { DisplayObject, Point } from 'pixi.js';
 
@@ -11,85 +12,12 @@ export class Camera extends EventEmitter {
    * The target position.
    * The coordinate space should be the one of the attached container's parent.
    */
-  public targetPosition: Point;
+  public targetPosition: IPoint = new Point();
 
   /**
    * The zoom step value, i.e. how fast the camera zooms to the set value.
    */
-  public zoomStep: number;
-
-  /**
-   * The current bound container.
-   */
-  protected _container: DisplayObject | null;
-
-  /**
-   * Internal zoom value.
-   */
-  protected _zoom: number;
-
-  /**
-   * Internal min zoom value.
-   */
-  protected _minZoom: number;
-
-  /**
-   * Internal max zoom value.
-   */
-  protected _maxZoom: number;
-
-  /**
-   * Internal local target position.
-   */
-  protected localTargetPosition: Point;
-
-  constructor() {
-    super();
-    this._container = null;
-    this._zoom = 1;
-    this._minZoom = 0.05;
-    this._maxZoom = 3;
-    this.targetPosition = new Point();
-    this.localTargetPosition = new Point();
-    this.zoomStep = 0.03;
-    this.on('updated', () => {
-      if (!this._container) return;
-      this._container.emit('camera:updated', this);
-    });
-  }
-
-  /**
-   * Attaches this camera to the given container.
-   *
-   * Triggers the `camera:attached` event on the given container.
-   * If a container is already is set, it will be detached before.
-   *
-   * @param container
-   * @returns This instance, useful for chaining.
-   */
-  attach(container: DisplayObject): Camera {
-    if (this._container) this.detach();
-    this._zoom = Math.max(container.scale.x, container.scale.y);
-    this._container = container;
-    this._container.emit('camera:attached', this);
-    return this;
-  }
-
-  /**
-   * Detaches this camera from the current container, if this camera is attached to any.
-   *
-   * Triggers the `camera:detached` event on the current container.
-   *
-   * @returns This instance, useful for chaining.
-   */
-  detach(): Camera {
-    if (!this._container) return this;
-    this._zoom = 1;
-    const prev = this._container;
-    this._container = null;
-    prev.emit('camera:detached', this);
-    return this;
-  }
+  public zoomStep: number = 0.03;
 
   /**
    * The container this camera is attached to.
@@ -101,7 +29,7 @@ export class Camera extends EventEmitter {
   /**
    * Whether this camera is attached to a container.
    */
-  isAttached(): boolean {
+  get isAttached(): boolean {
     return this._container !== null;
   }
 
@@ -116,18 +44,17 @@ export class Camera extends EventEmitter {
    * @param target
    */
   set zoom(target: number) {
-    if (!this.isAttached() || !this._container) return;
+    if (!this.isAttached || !this._container) return;
     target = Math.max(Math.min(this._maxZoom, target), this._minZoom);
     const diff = target - this._zoom;
     const diffAbs = Math.abs(diff);
-    if (diffAbs > 0) {
-      this._container.toLocal(this.targetPosition, void 0, this.localTargetPosition);
-      this._zoom += Math.sign(diff) * Math.min(this.zoomStep, diffAbs);
-      this._container.scale.set(this._zoom);
-      this._container.position.x = -(this.localTargetPosition.x * this._zoom) + this.targetPosition.x;
-      this._container.position.y = -(this.localTargetPosition.y * this._zoom) + this.targetPosition.y;
-      this.emit('updated');
-    }
+    if (diffAbs === 0) return;
+    this._container.toLocal(this.targetPosition, void 0, this.localTargetPosition as Point);
+    this._zoom += Math.sign(diff) * Math.min(this.zoomStep, diffAbs);
+    this._container.scale.set(this._zoom);
+    this._container.position.x = -(this.localTargetPosition.x * this._zoom) + this.targetPosition.x;
+    this._container.position.y = -(this.localTargetPosition.y * this._zoom) + this.targetPosition.y;
+    this.emit('updated');
   }
 
   /**
@@ -185,18 +112,84 @@ export class Camera extends EventEmitter {
   /**
    * The container position.
    */
-  get position(): Point | undefined {
+  get position(): IPoint | undefined {
     return this._container?.position;
   }
 
   /**
    * Sets the position of this camera, i.e. shifts the container this camera is attached to.
    */
-  set position(pos: Point | undefined) {
+  set position(pos: IPoint | undefined) {
     if (this.position?.x !== pos?.x || this.position?.y !== pos?.y) {
       this._container?.position.set(pos?.x, pos?.y);
       this.emit('updated');
     }
+  }
+
+  /**
+   * The current bound container.
+   */
+  protected _container: DisplayObject | null = null;
+
+  /**
+   * Internal zoom value.
+   */
+  protected _zoom: number = 1;
+
+  /**
+   * Internal min zoom value.
+   */
+  protected _minZoom: number = 0.05;
+
+  /**
+   * Internal max zoom value.
+   */
+  protected _maxZoom: number = 3;
+
+  /**
+   * Internal local target position.
+   */
+  protected localTargetPosition: IPoint = new Point();
+
+  constructor() {
+    super();
+    this.on('updated', () => {
+      if (!this._container) return;
+      this._container.emit('camera:updated', this);
+    });
+  }
+
+  /**
+   * Attaches this camera to the given container.
+   *
+   * Triggers the `camera:attached` event on the given container.
+   * If a container is already is set, it will be detached before.
+   *
+   * @param container
+   * @returns This instance, useful for chaining.
+   */
+  attach(container: DisplayObject): Camera {
+    if (this._container) this.detach();
+    this._zoom = Math.max(container.scale.x, container.scale.y);
+    this._container = container;
+    this._container.emit('camera:attached', this);
+    return this;
+  }
+
+  /**
+   * Detaches this camera from the current container, if this camera is attached to any.
+   *
+   * Triggers the `camera:detached` event on the current container.
+   *
+   * @returns This instance, useful for chaining.
+   */
+  detach(): Camera {
+    if (!this._container) return this;
+    this._zoom = 1;
+    const prev = this._container;
+    this._container = null;
+    prev.emit('camera:detached', this);
+    return this;
   }
 }
 

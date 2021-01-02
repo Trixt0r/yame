@@ -1,5 +1,5 @@
 import { Directive, Input, ViewContainerRef, ComponentFactoryResolver, ComponentRef, OnChanges, SimpleChanges } from '@angular/core';
-import { Tool, ToolComponent } from '../tool';
+import { Tool, IToolComponent } from '../tool';
 import { DefaultToolComponent } from '../components/tool/default/default.component';
 
 /**
@@ -30,7 +30,7 @@ export class ToolDirective implements OnChanges {
    *
    * @return The created component reference or `null` if no component found for the current tool.
    */
-  render(): ComponentRef<ToolComponent> | null {
+  render(): ComponentRef<IToolComponent> | null {
     const compType = this.tool.component || DefaultToolComponent
     const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();

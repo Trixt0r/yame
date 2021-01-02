@@ -1,5 +1,5 @@
 import { cloneDeep, flattenDeep, flatten, ListOfRecursiveArraysOrValues } from 'lodash';
-import { State, Action, StateContext, Store } from '@ngxs/store';
+import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
 import { CreateEntity, DeleteEntity, UpdateEntity, SortEntity, CloneEntity } from './actions/entity.action';
 import { SceneComponent, SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
@@ -54,6 +54,13 @@ function move<T>(array: (T | undefined)[], index: number, newIndex: number) {
 })
 @Injectable()
 export class SceneState {
+
+  /**
+   * Returns all current entities in the scene.
+   */
+  @Selector()
+  static entities(state: ISceneState) { return state.entities; }
+
   constructor(public store: Store, public service: SceneService) {}
 
   /**

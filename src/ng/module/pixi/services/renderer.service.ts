@@ -281,7 +281,7 @@ export class PixiRendererService implements ISceneRenderer {
         this._previewEntity.components.add({
           id: 'index',
           type: 'index',
-          index: (maxBy(this.scene.children, (child) => child.zIndex)?.zIndex || 0) + 1,
+          index: (maxBy(this.scene.children, (child) => child.zIndex)?.zIndex ?? 0) + 1,
         });
         this.engineService.run();
       });

@@ -1,6 +1,12 @@
 <div class="content">
   <mat-nav-list dense>
-    <mat-list-item *ngFor="let tool of tools" (click)="activate(tool)">
+    <mat-list-item *ngFor="let tool of tools" (click)="activate(tool, $event)" [class.active]="(activeTool$ | async)?.id === tool.id">
+      <ng-template [yameTool]="tool">
+      </ng-template>
+    </mat-list-item>
+  </mat-nav-list>
+  <mat-nav-list dense class="clickers">
+    <mat-list-item *ngFor="let tool of clickers" (click)="activate(tool, $event)">
       <ng-template [yameTool]="tool">
       </ng-template>
     </mat-list-item>

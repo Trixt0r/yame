@@ -25,6 +25,14 @@ $toggle-speed: 100ms;
       padding-bottom: 8px;
       mat-list-item {
         padding: 0;
+        &.active { background: #505050; }
+      }
+      &.clickers {
+        padding-bottom: 0;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: calc(100% - #{$toggler-width});
       }
     }
   }

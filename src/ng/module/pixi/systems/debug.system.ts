@@ -11,7 +11,7 @@ export class PixiDebugSystem extends System {
     super(priority);
     this.debugDisplay = new Container();
     this.debugDisplay.name = 'debug';
-    this.debugDisplay.position.set(76, 8);
+    this.debugDisplay.position.set(10, 8);
     this.service.init$.subscribe(() => {
       this.service.stage?.addChild(this.debugDisplay);
       this.debugDuration = new Text('0ms', { fill: 0xffffff, fontSize: 12, fontFamily: 'Courier New' });

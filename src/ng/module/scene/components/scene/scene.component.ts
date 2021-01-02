@@ -100,7 +100,7 @@ export class SceneComponent implements OnChanges, AfterViewInit {
   onDrop(event: DragDropData): void {
     const asset: Asset = event.dragData;
     const mouseEvent = event.mouseEvent;
-    const sub = this.service.addEntity(mouseEvent.clientX, mouseEvent.clientY, asset)
+    const sub = this.service.addEntity(mouseEvent.offsetX, mouseEvent.offsetY, asset)
       .pipe(catchError(error => {
         console.log(error);
         return of(null);
@@ -146,7 +146,7 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    */
   onDragOver(event: DragDropData) {
     const mouseEvent = event.mouseEvent;
-    this.service.updatePreview(mouseEvent.x, mouseEvent.y);
+    this.service.updatePreview(mouseEvent.offsetX, mouseEvent.offsetY);
   }
 
   /**

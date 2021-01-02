@@ -111,7 +111,7 @@ export class SceneComponentService {
     });
     const max = maxBy(entityObjects, it => it?.components.byType(type).length);
     const components = max?.components.byType(type);
-    return `${type} ${(components?.length || 0) + 1}`;
+    return `${type} ${(components?.length ?? 0) + 1}`;
   }
 
   /**

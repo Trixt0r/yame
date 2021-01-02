@@ -3,11 +3,10 @@ import { Tool } from '../tool';
 import { Injectable } from '@angular/core';
 import { Graphics, Container } from 'pixi.js';
 import { Store } from '@ngxs/store';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Select, Unselect, SceneService } from 'ng/module/scene';
 import { SceneComponent, SceneEntity, SceneEntityType } from 'common/scene';
 import { HotkeyService } from 'ng/services/hotkey.service';
-import { RegisterTool } from '../states/actions/toolbar.action';
 
 /**
  *
@@ -57,15 +56,14 @@ export class SelectionToolService extends Tool {
   handledByExternal = false;
 
   /**
-   * @readonly
-   * @type {Graphics} The graphics which render the rectangle following the mouse.
+   * The graphics which render the rectangle following the mouse.
    */
   get selectionGraphics(): Graphics {
     return this.graphics;
   }
 
   constructor(protected store: Store, protected scene: SceneService, hotkeys: HotkeyService) {
-    super('edit', 'edit');
+    super('edit', 'edit', 0);
     this.initFunctions();
 
     hotkeys.register({ keys: ['control.a', 'meta.a'] }).subscribe(() => {
@@ -80,8 +78,6 @@ export class SelectionToolService extends Tool {
 
   /**
    * Initializes the mouse handler functions, if not done yet.
-   *
-   * @returns {void}
    */
   protected initFunctions(): void {
     if (!this.onMousedown) this.onMousedown = this.mousedown.bind(this);
@@ -105,7 +101,14 @@ export class SelectionToolService extends Tool {
       : !entity.parent || isOnLayer || (fromHierarchy && entity.type !== SceneEntityType.Layer);
   }
 
-  dispatchSelect(entities: string[], components: SceneComponent[]) {
+  /**
+   * Dispatches the select action.
+   *
+   * @param entities The ids of the entities to select.
+   * @param components The components to be selected.
+   * @return An observable to subscribe to.
+   */
+  dispatchSelect<T>(entities: string[], components: SceneComponent[]): Observable<T> {
     this.selectAction.components = components;
     this.selectAction.entities = entities;
     return this.store.dispatch(this.selectAction);
@@ -113,8 +116,6 @@ export class SelectionToolService extends Tool {
 
   /**
    * Adds the mouse handlers to the canvas element.
-   *
-   * @returns {void}
    */
   addToolListeners(): void {
     setImmediate(() => this.scene.renderer.component.ref.nativeElement.addEventListener('mousedown', this.onMousedown));
@@ -122,8 +123,6 @@ export class SelectionToolService extends Tool {
 
   /**
    * Removes the mouse listeners from the canvas element.
-   *
-   * @returns {void}
    */
   removeToolListeners(): void {
     this.scene.renderer.component.ref.nativeElement.removeEventListener('mousedown', this.onMousedown);
@@ -132,8 +131,7 @@ export class SelectionToolService extends Tool {
   /**
    * The mousedown handler.
    *
-   * @param {MouseEvent} event
-   * @returns {void}
+   * @param event
    */
   mousedown(event: MouseEvent): void {
     if (this.handledByExternal) return; // Delegate the work to the current container
@@ -150,8 +148,7 @@ export class SelectionToolService extends Tool {
   /**
    * The mouseup handler.
    *
-   * @param {MouseEvent} event
-   * @returns {void}
+   * @param event
    */
   mouseup(event: MouseEvent): void {
     if (!this.down) return;
@@ -165,8 +162,7 @@ export class SelectionToolService extends Tool {
   /**
    * The mousemove handler.
    *
-   * @param {MouseEvent} event
-   * @returns {void}
+   * @param event
    */
   mousemove(event: MouseEvent): void {
     if (!this.down) return;
@@ -176,8 +172,6 @@ export class SelectionToolService extends Tool {
 
   /**
    * Finishes the selection.
-   *
-   *
    */
   finish(event?: MouseEvent): void {
     this.down = false;

@@ -1,5 +1,5 @@
 import { Component, NgModule } from '@angular/core';
-import { Tool, ToolComponent } from '../tool';
+import { Tool, IToolComponent } from '../tool';
 import { DefaultToolComponent } from '../components/tool/default/default.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolDirective } from './tool.directive';
@@ -10,7 +10,7 @@ import { By } from '@angular/platform-browser';
 @Component({
   template: `<div [toolHost]='tool'></div>`
 })
-class TestToolComponent implements ToolComponent{
+class TestToolComponent implements IToolComponent{
   tool!: Tool;
 }
 

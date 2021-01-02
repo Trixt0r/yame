@@ -309,10 +309,9 @@ export class SceneService {
    * @return A list of scene entity children for the given id.
    */
   getChildren(entityOrId?: string | SceneEntity | null, deep: boolean = true): SceneEntity[] {
-    if (entityOrId === void 0 || entityOrId === null) return [];
     const id = entityOrId instanceof SceneEntity ? entityOrId.id : entityOrId;
-    const re = deep ? this.childDeepMapping[id] : this.childFlatMapping[id];
-    if (re === void 0) return this._getChildren(entityOrId, deep);
+    const re = deep ? this.childDeepMapping[id as string] : this.childFlatMapping[id as string];
+    if (re === void 0) return this._getChildren(entityOrId as string, deep);
     else return re;
   }
 

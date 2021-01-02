@@ -18,6 +18,7 @@ import { ToolbarModule } from './toolbar/toolbar.module';
 import { CursorService } from 'ng/services/cursor.service';
 import { HotkeyState } from 'ng/states/hotkey.state';
 import { AssetModule } from './asset/asset.module';
+import { CameraModule } from './camera/camera.module';
 
 @NgModule({
   imports: [
@@ -32,6 +33,7 @@ import { AssetModule } from './asset/asset.module';
     AssetModule,
     SidebarModule,
     ToolbarModule,
+    CameraModule,
     PixiModule,
   ],
   declarations: [AppComponent, MainComponent],

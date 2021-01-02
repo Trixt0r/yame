@@ -42,6 +42,11 @@ export class Grid extends EventEmitter {
   private lastUpdatePosition: Point;
 
   /**
+   * The last update scale.
+   */
+  private lastUpdateScale: Point;
+
+  /**
    * Container for rendering the grid.
    */
   private gridContainer: Container;
@@ -87,6 +92,7 @@ export class Grid extends EventEmitter {
 
     this.lastUpdateSize = new Point();
     this.lastUpdatePosition = new Point();
+    this.lastUpdateScale = new Point();
     this.gridContainer = new ParticleContainer();
     this.gridContainer.zIndex = -999999;
     this.pWidth = width;
@@ -179,6 +185,7 @@ export class Grid extends EventEmitter {
    */
   update(width: number, height: number): Grid {
     if (this.container.position.x === this.lastUpdatePosition.x && this.container.position.y === this.lastUpdatePosition.y &&
+        this.lastUpdateScale.x === this.container.scale.x && this.lastUpdateScale.y === this.container.scale.y &&
         this.lastUpdateSize.x === width && this.lastUpdateSize.y === height) return this;
     this.lastUpdateSize.set(width, height);
     this.lastUpdatePosition.copyFrom(this.container.position);

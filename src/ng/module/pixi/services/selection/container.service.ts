@@ -241,7 +241,7 @@ export class PixiSelectionContainerService {
         this.pixi.updateComponents(entity.components, child);
       }
     });
-    this.container.zIndex = (maxBy(this.pixi.scene.children, (child) => child.zIndex)?.zIndex || 0) + 1;
+    this.container.zIndex = (maxBy(this.pixi.scene.children, (child) => child.zIndex)?.zIndex ?? 0) + 1;
     this.pixi.scene.addChild(this.container);
 
     entities.forEach((entity) => {

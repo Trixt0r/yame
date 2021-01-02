@@ -102,7 +102,6 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     const notLoaded = this.allAssets.find(it => it.type === 'group' && !it.resource.loaded);
     if (notLoaded) {
       this.loading = true;
-      console.log(notLoaded.resource.uri, this.assetBuffer.length);
       this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source))
                 .subscribe(() => this.loading = false);
     }

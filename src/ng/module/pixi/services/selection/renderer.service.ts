@@ -145,10 +145,10 @@ export class PixiSelectionRendererService {
     this.boundingPoints[3].set(bnds.x, bnds.y + bnds.height);
 
     this.boundingPoints.forEach((point) => this.stage?.toLocal(point, this.container.container, point));
-    this.outerBounds.x = minBy(this.boundingPoints, 'x')?.x || 0;
-    this.outerBounds.width = (maxBy(this.boundingPoints, 'x')?.x || 0) - this.outerBounds.x;
-    this.outerBounds.y = minBy(this.boundingPoints, 'y')?.y || 0;
-    this.outerBounds.height = (maxBy(this.boundingPoints, 'y')?.y || 0) - this.outerBounds.y;
+    this.outerBounds.x = minBy(this.boundingPoints, 'x')!.x;
+    this.outerBounds.width = maxBy(this.boundingPoints, 'x')!.x - this.outerBounds.x;
+    this.outerBounds.y = minBy(this.boundingPoints, 'y')!.y;
+    this.outerBounds.height = maxBy(this.boundingPoints, 'y')!.y - this.outerBounds.y;
     this.graphics.lineStyle(lineWidth, lineColor, (lineAlpha || 0) * 0.5);
     this.graphics.drawShape(this.outerBounds);
     this.graphics.lineStyle(lineWidth, lineColor, lineAlpha);

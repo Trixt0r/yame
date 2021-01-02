@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { State, StateContext, Action, Store, Actions, ofActionSuccessful } from '@ngxs/store';
+import { State, StateContext, Action, Store, Actions, ofActionSuccessful, Selector } from '@ngxs/store';
 import { Select, Unselect, UpdateComponents, Isolate } from './actions/select.action';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISceneState } from './scene.state';
@@ -23,6 +23,11 @@ export interface ISelectState {
 })
 @Injectable()
 export class SelectState {
+
+  @Selector() static entities(state: ISelectState) { return state.entities; }
+  @Selector() static components(state: ISelectState) { return state.components; }
+  @Selector() static isolated(state: ISelectState) { return state.isolated; }
+
   private beforeSelect = {
     entities: [] as string[],
     components: [] as SceneComponent[],

@@ -2,18 +2,33 @@ import { PixiRendererService } from '../services/renderer.service';
 import { System } from '@trixt0r/ecs';
 import Camera from '../utils/camera';
 import { Point } from 'pixi.js';
-import { Actions, ofActionSuccessful } from '@ngxs/store';
-import { Subscription } from 'rxjs';
+import { Actions, ofActionDispatched, ofActionSuccessful, Select } from '@ngxs/store';
+import { Observable, Subscription } from 'rxjs';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
+import { CameraState } from 'ng/module/camera/states/camera.state';
+import { CameraZoom } from 'ng/module/toolbar/states/toolbar.interface';
+import {
+  MoveCameraToPosition,
+  UpdateCameraPosition,
+  UpdateCameraZoom,
+  ZoomCameraOut,
+  ZoomCameraToPosition,
+} from 'ng/module/camera/states/actions/camera.action';
+import { IPoint } from 'common/math';
+import { Isolate, SceneState, SelectState, Unselect, Select as SelectEntities } from 'ng/module/scene';
+import { SceneComponent, SceneEntity } from 'common/scene';
+import { maxBy, minBy } from 'lodash';
+import { BoundsContainer } from '../utils/bounds.utils';
 
 enum MoveInitiator {
-  MOUSE, WHEEL, KEYBOARD
+  MOUSE,
+  WHEEL,
+  KEYBOARD,
 }
 
 const tmpPos = new Point();
 
 export class PixiCameraSystem extends System {
-
   public readonly camera: Camera;
 
   /**
@@ -25,6 +40,56 @@ export class PixiCameraSystem extends System {
    * The mouse button to be pressed for moving the camera.
    */
   public mouseMoveButton = 1;
+
+  /**
+   * Selector for getting the current camera zoom value.
+   */
+  @Select(CameraState.zoom) cameraZoom$!: Observable<CameraZoom>;
+
+  /**
+   * Selector for getting the current camera position.
+   */
+  @Select(CameraState.position) cameraPosition$!: Observable<IPoint>;
+
+  /**
+   * Selector for getting the current entities in the scene.
+   */
+  @Select(SceneState.entities) entities$!: Observable<SceneEntity[]>;
+
+  /**
+   * Selector for getting all selected entity ids.
+   */
+  @Select(SelectState.entities) selectedEntities$!: Observable<string[]>;
+
+  /**
+   * Selector for getting the selected entity components.
+   */
+  @Select(SelectState.components) selectedComponents$!: Observable<SceneComponent[]>;
+
+  /**
+   * Selector for getting the isolated entity.
+   */
+  @Select(SelectState.isolated) isolated$!: Observable<SceneEntity | null>;
+
+  /**
+   * A list of all current entities having no parent entity.
+   */
+  rootEntities: SceneEntity[] = [];
+
+  /**
+   * A list of selected entity ids.
+   */
+  selectedEntities: string[] = [];
+
+  /**
+   * A list of selected entity components
+   */
+  selectedComponents: SceneComponent[] = [];
+
+  /**
+   * The isolated entity.
+   */
+  isolated: SceneEntity | null = null;
 
   private prevPos: Point | null = null;
   private camPos: Point | null = null;
@@ -57,15 +122,17 @@ export class PixiCameraSystem extends System {
     this.onActivated();
   }
 
-
   /**
    * Removes all listeners and subscriptions.
    */
   private clearListenersAndSubs() {
     if (this.lastBoundElement) {
-      this.lastBoundElement.removeEventListener('mousewheel', this.onMouseWheelBound as EventListenerOrEventListenerObject);
+      this.lastBoundElement.removeEventListener(
+        'mousewheel',
+        this.onMouseWheelBound as EventListenerOrEventListenerObject
+      );
       this.lastBoundElement.removeEventListener('pointerdown', this.onPointerDownBound);
-      this.keyboardSubs.forEach(sub => sub.unsubscribe());
+      this.keyboardSubs.forEach((sub) => sub.unsubscribe());
     }
   }
 
@@ -86,8 +153,63 @@ export class PixiCameraSystem extends System {
       this.actions.pipe(ofActionSuccessful(Keyup)).subscribe((data: Keyup) => {
         if (data.shortcut.id !== 'camera.move' || !this.moving || this.moveInitiator !== MoveInitiator.KEYBOARD) return;
         this.end();
-      })
+      }),
     ];
+
+    this.entities$.subscribe(entities => this.rootEntities = entities.filter(it => !it.parent));
+
+    this.selectedEntities$.subscribe(entities => this.selectedEntities = entities);
+    this.selectedComponents$.subscribe(components => this.selectedComponents = components);
+    this.isolated$.subscribe(isolated => this.isolated = isolated);
+
+    this.cameraZoom$.subscribe((zoom) => {
+      (this.camera.targetPosition as Point).copyFrom(zoom.target);
+      this.camera.minZoom = zoom.min ?? this.camera.minZoom;
+      this.camera.maxZoom = zoom.max ?? this.camera.maxZoom;
+      this.camera.zoomStep = zoom.step ?? this.camera.zoomStep;
+      this.camera.zoom = zoom.value;
+      this.service.store.dispatch(new UpdateCameraPosition(this.camera.position as IPoint));
+    });
+    this.cameraPosition$.subscribe((pos) => (this.camera.position = pos));
+    this.actions.pipe(ofActionDispatched(ZoomCameraToPosition)).subscribe((action: ZoomCameraToPosition) => {
+      if (action.target)
+        this.camera.targetPosition = action.global
+          ? this.service.stage!.toLocal(action.target)
+          : action.target;
+      this.camera.zoom = action.zoom;
+      const zoom = {
+        target: this.camera.targetPosition,
+        value: this.camera.zoom,
+      };
+      this.service.store.dispatch(new UpdateCameraZoom(zoom));
+    });
+    this.actions.pipe(ofActionDispatched(MoveCameraToPosition)).subscribe((action: MoveCameraToPosition) => {
+      this.service.store.dispatch(
+        new UpdateCameraPosition(
+          action.global ? this.service.stage!.toLocal(action.position) : action.position
+        )
+      );
+    });
+    this.actions.pipe(ofActionDispatched(ZoomCameraOut))
+                  .subscribe(async (action: ZoomCameraOut) => {
+                    const actions = [];
+                    const selectedEntities = this.selectedEntities.slice();
+                    const selectedComponents = this.selectedComponents.slice();
+                    const isolated = this.isolated;
+                    if (selectedEntities.length > 0) actions.push(new Unselect(selectedEntities, [], false));
+                    if (isolated) actions.push(new Isolate(null, false));
+                    await this.service.store.dispatch(actions).toPromise();
+                    if (action.entities.length > 0) {
+                      await this.zoomToEntities(action.entities.map(it => this.service.sceneService.getEntity(it)) as SceneEntity[]);
+                    } else {
+                      if (isolated) await this.zoomToEntities(this.service.sceneService.getChildren(isolated));
+                      else await this.zoomToEntities(this.rootEntities);
+                    }
+                    const revertActions = [];
+                    if (isolated) revertActions.push(new Isolate(isolated, false));
+                    if (selectedEntities.length > 0) revertActions.push(new SelectEntities(selectedEntities, selectedComponents, false));
+                    await this.service.store.dispatch(revertActions).toPromise();
+                  });
   }
 
   /**
@@ -96,9 +218,7 @@ export class PixiCameraSystem extends System {
   begin(): void {
     if (this.moving) return;
     this.lastBoundElement?.querySelector('canvas')?.setAttribute('style', 'cursor: grabbing !important');
-    const service = this.service;
-    const data = service.renderer?.plugins.interaction.eventData.data;
-    this.prevPos = data.getLocalPosition(service.stage, null, service.renderer?.plugins.interaction.eventData.data.global);
+    this.prevPos = this.service.stage!.toLocal(this.service.mouse);
     this.camPos = new Point(this.camera.position?.x, this.camera.position?.y);
     window.addEventListener('pointermove', this.onPointerMoveBound);
   }
@@ -114,19 +234,55 @@ export class PixiCameraSystem extends System {
   }
 
   /**
+   * Zooms the camera to the given entities, so that every entity will be visible in the current viewport.
+   *
+   * @param entities The entities to show.
+   */
+  async zoomToEntities(entities: SceneEntity[]): Promise<void> {
+    if (!this.service.renderer) return;
+    const boundsContainer = new BoundsContainer(this.service);
+    boundsContainer.begin(entities);
+    const bounds = boundsContainer.getLocalBounds();
+
+    const value = Math.min(
+      this.service.renderer.width / bounds.width,
+      this.service.renderer.height / bounds.height
+    );
+    const step = this.camera.zoomStep;
+    this.camera.zoomStep = Math.abs(this.camera.zoom - value);
+    this.camera.zoom = value;
+    this.camera.position = { x: 0, y: 0 };
+    boundsContainer.transform.updateTransform(boundsContainer.parent.transform);
+
+    const boundingPoints = boundsContainer.getBoundingPoints();
+
+    boundsContainer.end();
+
+    const x = minBy(boundingPoints, 'x')?.x ?? 0;
+    const width = (maxBy(boundingPoints, 'x')?.x ?? 0) - x;
+    const y = minBy(boundingPoints, 'y')?.y ?? 0;
+    const height = (maxBy(boundingPoints, 'y')?.y ?? 0) - y;
+    const widthDiff = this.service.renderer.width - width;
+    const heightDiff = this.service.renderer.height - height;
+    this.camera.position = {
+      x: widthDiff - (x + widthDiff / 2),
+      y: heightDiff - (y + heightDiff / 2)
+    };
+
+    await this.service.store.dispatch(new UpdateCameraZoom({ value, step })).toPromise();
+  }
+
+  /**
    * @inheritdoc
    */
-  process(): void { }
+  process(): void {}
 
   /**
    * @inheritdoc
    */
   onActivated() {
-    if (!this.service.component) {
-      this.service.init$.subscribe(() => this.init());
-    } else {
-      this.init();
-    }
+    if (!this.service.component) this.service.init$.subscribe(() => this.init());
+    else this.init();
   }
 
   /**
@@ -153,15 +309,13 @@ export class PixiCameraSystem extends System {
         this.camera.position!.x + event.deltaX * (2 - this.camera.zoom),
         this.camera.position!.y + event.deltaY * (2 - this.camera.zoom)
       );
-      this.camera.position = tmpPos;
-      return;
+      this.service.store.dispatch(new MoveCameraToPosition(tmpPos, false));
+    } else {
+      if (this.moving && this.moveInitiator === MoveInitiator.WHEEL) this.end();
+      this.service.store.dispatch(
+        new ZoomCameraToPosition(event.deltaY < 0 ? this.camera.maxZoom : this.camera.minZoom, this.service.mouse)
+      );
     }
-    if (this.moving && this.moveInitiator === MoveInitiator.WHEEL) this.end();
-    const service = this.service;
-    const data = service.renderer?.plugins.interaction.eventData.data;
-    this.camera.targetPosition = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
-    if (event.deltaY < 0) this.camera.zoom = this.camera.maxZoom;
-    else if (event.deltaY > 0) this.camera.zoom = this.camera.minZoom;
   }
 
   /**
@@ -188,16 +342,13 @@ export class PixiCameraSystem extends System {
   /**
    * Handles the mouse up event, which makes the camera move.
    *
-   * @param event THe triggered mouse move event.
+   * @param event The triggered mouse move event.
    */
   onPointerMove(event: PointerEvent): void {
     if (!this.moving || this.moveInitiator === MoveInitiator.WHEEL) return this.end(); // Only listen for right click
     if (this.moveInitiator === MoveInitiator.KEYBOARD) event.stopImmediatePropagation();
-    const service = this.service;
-    const data = service.renderer?.plugins.interaction.eventData.data;
-    const pos = data.getLocalPosition(service.stage, null, { x: event.clientX, y: event.clientY });
-    tmpPos.set((this.camPos?.x || 0) + (pos.x - this.prevPos!.x), (this.camPos?.y || 0) + (pos.y - this.prevPos!.y));
-    this.camera.position = tmpPos;
+    const pos = this.service.stage!.toLocal(this.service.mouse);
+    tmpPos.set(this.camPos!.x + (pos.x - this.prevPos!.x), this.camPos!.y + (pos.y - this.prevPos!.y));
+    this.service.store.dispatch(new MoveCameraToPosition(tmpPos, false));
   }
-
 }

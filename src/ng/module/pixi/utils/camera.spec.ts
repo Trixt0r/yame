@@ -26,12 +26,12 @@ describe('Camera', () => {
 
   describe('attach/detach', () => {
     it('should not be attached to any display object', () => {
-      expect(cam.isAttached()).toBe(false, 'The camera is attached');
+      expect(cam.isAttached).toBe(false, 'The camera is attached');
     });
 
     it('should be attached to a display object after attaching it', () => {
       cam.attach(container);
-      expect(cam.isAttached()).toBe(true, 'The camera is not attached');
+      expect(cam.isAttached).toBe(true, 'The camera is not attached');
     });
 
     it('should be attached to the correct display object after attaching it', () => {
@@ -42,7 +42,7 @@ describe('Camera', () => {
     it('should not be attached after detaching it from the previously attached display object', () => {
       cam.attach(container);
       cam.detach();
-      expect(cam.isAttached()).toBe(false, 'The camera is still attached');
+      expect(cam.isAttached).toBe(false, 'The camera is still attached');
     });
 
     it('should have zoom = 1 after detaching', () => {

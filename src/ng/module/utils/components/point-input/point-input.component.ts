@@ -4,8 +4,8 @@ import { MatFormFieldControl } from '@angular/material/form-field';
 import { Subject } from 'rxjs';
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { IPoint } from 'common/interfaces/point';
 import * as _ from 'lodash';
+import { IPoint } from 'common/math';
 
 /**
  * The point input component displays a point's values in an input field on the same line.

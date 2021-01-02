@@ -17,7 +17,7 @@ import { animate, AnimationEvent, state, style, transition, trigger } from '@ang
 import { Select, Store } from '@ngxs/store';
 import { ToolbarState } from '../../states/toolbar.state';
 import { Observable, Subject } from 'rxjs';
-import { Tool } from '../../tool';
+import { Tool, ToolType } from '../../tool';
 import { ActivateTool } from '../../states/actions/toolbar.action';
 import { takeUntil } from 'rxjs/operators';
 
@@ -53,7 +53,10 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
    */
   @Input('open') open = false;
 
-  @Input('height') height!: number;
+  /**
+   * The height of the toolbar.
+   */
+  @Input('height') height: number = 0;
 
   /**
    * Event which gets emitted when the toolbar gets opened.
@@ -84,23 +87,38 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
   };
 
   /**
+   * Selects the current active tool.
+   */
+  @Select(ToolbarState.activeTool) activeTool$!: Observable<Tool>;
+
+  /**
    * Selects the current tools.
    */
   @Select(ToolbarState.tools) tools$!: Observable<Tool[]>;
 
   /**
-   * A list of current tools.
+   * A list of current tools which can be toggled.
    */
   tools: Tool[] = [];
+
+  /**
+   * A list of clickable tools.
+   */
+  clickers: Tool[] = [];
+
+  get width(): number {
+    return this.open ? this.ref.nativeElement.clientWidth : 15;
+  }
 
   /**
    * Triggered as soon as this component gets removed
    */
   protected destroy$ = new Subject();
 
-  constructor(public ref: ElementRef, public store: Store, cdr: ChangeDetectorRef) {
+  constructor(public ref: ElementRef<HTMLElement>, public store: Store, cdr: ChangeDetectorRef) {
     this.tools$.pipe(takeUntil(this.destroy$)).subscribe((tools) => {
-      this.tools = tools;
+      this.tools = tools.filter(it => it.type === ToolType.TOGGLE).sort((a, b) => a.position - b.position);
+      this.clickers = tools.filter(it => it.type === ToolType.CLICK).sort((a, b) => b.position - a.position);
       cdr.markForCheck();
     });
   }
@@ -113,8 +131,14 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
     else this.state = 'closed';
   }
 
-  activate(tool: Tool) {
-    this.store.dispatch(new ActivateTool(tool));
+  /**
+   * Activates the given tool.
+   *
+   * @param tool The tool.
+   * @param event The triggered DOM event.
+   */
+  activate(tool: Tool, event: Event): void {
+    this.store.dispatch(new ActivateTool(tool, event));
   }
 
   /**
