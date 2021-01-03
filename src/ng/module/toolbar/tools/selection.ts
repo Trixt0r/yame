@@ -69,7 +69,7 @@ export class SelectionToolService extends Tool {
     hotkeys.register({ keys: ['control.a', 'meta.a'] }).subscribe(() => {
       this.store.dispatch(
         new Select(
-          scene.entities.filter((it) => this.isSelectable(it)).map((it) => it.id),
+          scene.entities.filter(it => it.type !== SceneEntityType.Layer && this.isSelectable(it)).map(it => it.id),
           []
         )
       );

@@ -1,7 +1,7 @@
 import { PixiRendererService } from '../services/renderer.service';
 import { System } from '@trixt0r/ecs';
 import Camera from '../utils/camera';
-import { Point } from 'pixi.js';
+import { Point, Rectangle } from 'pixi.js';
 import { Actions, ofActionDispatched, ofActionSuccessful, Select } from '@ngxs/store';
 import { Observable, Subscription } from 'rxjs';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
@@ -15,10 +15,9 @@ import {
   ZoomCameraToPosition,
 } from 'ng/module/camera/states/actions/camera.action';
 import { IPoint } from 'common/math';
-import { Isolate, SceneState, SelectState, Unselect, Select as SelectEntities } from 'ng/module/scene';
+import { SceneState, SelectState } from 'ng/module/scene';
 import { SceneComponent, SceneEntity } from 'common/scene';
-import { maxBy, minBy } from 'lodash';
-import { BoundsContainer } from '../utils/bounds.utils';
+import { getBoundingRect, getCornerPoints } from '../utils/bounds.utils';
 
 enum MoveInitiator {
   MOUSE,
@@ -27,6 +26,7 @@ enum MoveInitiator {
 }
 
 const tmpPos = new Point();
+const tmpRect = new Rectangle();
 
 export class PixiCameraSystem extends System {
   public readonly camera: Camera;
@@ -191,24 +191,14 @@ export class PixiCameraSystem extends System {
       );
     });
     this.actions.pipe(ofActionDispatched(ZoomCameraOut))
-                  .subscribe(async (action: ZoomCameraOut) => {
-                    const actions = [];
-                    const selectedEntities = this.selectedEntities.slice();
-                    const selectedComponents = this.selectedComponents.slice();
+                  .subscribe((action: ZoomCameraOut) => {
                     const isolated = this.isolated;
-                    if (selectedEntities.length > 0) actions.push(new Unselect(selectedEntities, [], false));
-                    if (isolated) actions.push(new Isolate(null, false));
-                    await this.service.store.dispatch(actions).toPromise();
                     if (action.entities.length > 0) {
-                      await this.zoomToEntities(action.entities.map(it => this.service.sceneService.getEntity(it)) as SceneEntity[]);
+                      this.zoomToEntities(action.entities.map(it => this.service.sceneService.getEntity(it)) as SceneEntity[]);
                     } else {
-                      if (isolated) await this.zoomToEntities(this.service.sceneService.getChildren(isolated));
-                      else await this.zoomToEntities(this.rootEntities);
+                      if (isolated) this.zoomToEntities(this.service.sceneService.getChildren(isolated));
+                      else this.zoomToEntities(this.rootEntities);
                     }
-                    const revertActions = [];
-                    if (isolated) revertActions.push(new Isolate(isolated, false));
-                    if (selectedEntities.length > 0) revertActions.push(new SelectEntities(selectedEntities, selectedComponents, false));
-                    await this.service.store.dispatch(revertActions).toPromise();
                   });
   }
 
@@ -240,10 +230,8 @@ export class PixiCameraSystem extends System {
    */
   async zoomToEntities(entities: SceneEntity[]): Promise<void> {
     if (!this.service.renderer) return;
-    const boundsContainer = new BoundsContainer(this.service);
-    boundsContainer.begin(entities);
-    const bounds = boundsContainer.getLocalBounds();
-
+    // Get the bounds in scene space and adjust the zoom accordingly
+    const bounds = getBoundingRect(entities, this.service, this.service.scene, tmpRect);
     const value = Math.min(
       this.service.renderer.width / bounds.width,
       this.service.renderer.height / bounds.height
@@ -252,21 +240,13 @@ export class PixiCameraSystem extends System {
     this.camera.zoomStep = Math.abs(this.camera.zoom - value);
     this.camera.zoom = value;
     this.camera.position = { x: 0, y: 0 };
-    boundsContainer.transform.updateTransform(boundsContainer.parent.transform);
 
-    const boundingPoints = boundsContainer.getBoundingPoints();
-
-    boundsContainer.end();
-
-    const x = minBy(boundingPoints, 'x')?.x ?? 0;
-    const width = (maxBy(boundingPoints, 'x')?.x ?? 0) - x;
-    const y = minBy(boundingPoints, 'y')?.y ?? 0;
-    const height = (maxBy(boundingPoints, 'y')?.y ?? 0) - y;
-    const widthDiff = this.service.renderer.width - width;
-    const heightDiff = this.service.renderer.height - height;
+    const stageBounds = getBoundingRect(entities, this.service, this.service.stage!, tmpRect);
+    const widthDiff = this.service.renderer.width - stageBounds.width;
+    const heightDiff = this.service.renderer.height - stageBounds.height;
     this.camera.position = {
-      x: widthDiff - (x + widthDiff / 2),
-      y: heightDiff - (y + heightDiff / 2)
+      x: widthDiff - (stageBounds.x + widthDiff / 2),
+      y: heightDiff - (stageBounds.y + heightDiff / 2)
     };
 
     await this.service.store.dispatch(new UpdateCameraZoom({ value, step })).toPromise();

@@ -1,96 +1,57 @@
 import { SceneEntity } from 'common/scene';
-import { Container, IPoint, Point } from 'pixi.js';
+import { maxBy, minBy } from 'lodash';
+import { DisplayObject, IPoint, Point, Rectangle } from 'pixi.js';
 import { PixiRendererService } from '../services/renderer.service';
-import { transformTo } from './transform.utils';
 
 /**
- * A container which can be used to calculate bounds for a list of given scene entities.
+ * Returns the corner points for the given scene entities.
  *
- * Usage:
- * ```ts
- * const boundsContainer = new BoundsContainer(service);
- * // Start a "session"
- * boundsContainer.begin(myEntities, [optionalParent]);
- * // ... calculate stuff and stop the "session"
- * boundsContainer.end();
- * ```
- *
- * Note that you have to call `end` once you called `begin` to ensure consistency.
+ * @param entities A list of scene entities.
+ * @param rendererService The renderer service, for getting the actual pixi container.
+ * @param space The display object to which the points should be mapped.
+ * @return A list containing corner points for each given scene entity.
  */
-export class BoundsContainer extends Container {
-
-  /**
-   * Previous parent mapping.
-   *
-   * @internal
-   */
-  prevParents!: { [id: string]: Container };
-
-  /**
-   * The entities bound to the current session.
-   */
-  entities?: SceneEntity[];
-
-  /**
-   * The pixi renderer service instance.
-   */
-  constructor(public service: PixiRendererService) {
-    super();
-  }
-
-  /**
-   * Starts a "session" for the given scene entities.
-   *
-   * @param entities The entities to put into this container.
-   * @param parent Optional parent.
-   */
-  begin(entities: SceneEntity[], parent: Container = this.service.scene): void {
-    if (this.entities) this.end();
-    this.entities = entities;
-    parent.addChild(this);
-    this.transform.updateTransform(this.parent.transform);
-    this.prevParents = { };
-    this.entities.forEach(it => {
-      const container = this.service.getContainer(it.id) as Container;
-      if (!container) return;
-      this.prevParents[it.id] = container.parent;
-      container.transform.updateTransform(container.parent.transform);
-      this.addChild(container);
-      transformTo(container, this);
-    });
-  }
-
-  /**
-   * Ends the previously started "session".
-   */
-  end(): void {
-    if (!this.entities) return;
-    this.entities.forEach(it => {
-      const container = this.service.getContainer(it.id);
-      if (!container) return;
-      const parent = this.prevParents[it.id] || this.service.scene;
-      container.transform.updateTransform(container.parent.transform);
-      parent.addChild(container);
-      transformTo(container, parent);
-    });
-    this.parent.removeChild(this);
-    delete this.entities;
-  }
-
-  /**
-   * Returns the bound points for the currently bound scene entities.
-   *
-   * @param target Optional target to map the points to.
-   * @return A list with top left, top right, bottom left and bottom right points.
-   */
-  getBoundingPoints(target: Container = this.service.stage!): IPoint[] {
-    const bounds = this.getLocalBounds();
+export function getCornerPoints(
+  entities: SceneEntity[],
+  rendererService: PixiRendererService,
+  space: DisplayObject = rendererService.scene
+): IPoint[] {
+  let points: IPoint[] = [];
+  entities.forEach((it) => {
+    const container = rendererService.getContainer(it.id);
+    if (!container) return;
+    const bounds = container.getLocalBounds();
     const boundingPoints = [new Point(), new Point(), new Point(), new Point()];
     boundingPoints[0].set(bounds.x, bounds.y);
     boundingPoints[1].set(bounds.x + bounds.width, bounds.y);
     boundingPoints[2].set(bounds.x + bounds.width, bounds.y + bounds.height);
     boundingPoints[3].set(bounds.x, bounds.y + bounds.height);
-    boundingPoints.forEach(point => target.toLocal(point, this, point));
-    return boundingPoints;
-  }
+    if (space) boundingPoints.forEach(point => space.toLocal(point, container, point));
+    else boundingPoints.forEach(point => container.toGlobal(point, point));
+    points = points.concat(boundingPoints);
+  });
+  return points;
+}
+
+/**
+ * Calculates bounds for the given scene entities.
+ *
+ * @param entities A list of scene entities.
+ * @param rendererService The renderer service, for getting the actual pixi container.
+ * @param space The display object to which the rectangle should be mapped.
+ * @param target An optional rectangle, to store the bounds values in.
+ * @return The rectangle containing the bounds information.
+ */
+export function getBoundingRect(
+  entities: SceneEntity[],
+  rendererService: PixiRendererService,
+  space: DisplayObject = rendererService.scene,
+  target: Rectangle = new Rectangle()
+): Rectangle {
+  const boundingPoints = getCornerPoints(entities, rendererService, space!);
+  target.x = minBy(boundingPoints, 'x')?.x ?? 0;
+  target.width = (maxBy(boundingPoints, 'x')?.x ?? 0) - target.x;
+  target.y = minBy(boundingPoints, 'y')?.y ?? 0;
+  target.height = (maxBy(boundingPoints, 'y')?.y ?? 0) - target.y;
+  return target;
 }
