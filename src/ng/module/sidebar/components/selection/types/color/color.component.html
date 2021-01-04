@@ -1,7 +1,7 @@
 <div class="half">
   <mat-expansion-panel>
     <mat-expansion-panel-header [class.editable]="component.editable" [class.removable]="component.removable">
-      <h5 class="mat-h5">{{ component.mixed ? component.id + ' ' + placeholder : component.id }}</h5>
+      <h5 class="mat-h5">{{ component.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</h5>
       <div class="preview-wrapper">
         <span class="preview bg"></span>
         <span class="preview" [style.background-color]="rgbaString"></span>

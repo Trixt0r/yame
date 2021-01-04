@@ -10,6 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
+import { TranslateService } from '@ngx-translate/core';
 import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { Observable, Subject } from 'rxjs';
@@ -26,7 +27,6 @@ const dragImage = new Image(0, 0);
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetItemsComponent implements OnChanges, OnDestroy {
-
   /**
    * The group to render the assets for.
    */
@@ -70,12 +70,12 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
   /**
    * The current asset icon map.
    */
-  icons: { [icon: string]: string } = { };
+  icons: { [icon: string]: string } = {};
 
   /**
    * The current asset type label map.
    */
-  labels: { [label: string]: string } = { };
+  labels: { [label: string]: string } = {};
 
   /**
    * The currently selected asset.
@@ -88,26 +88,41 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
   loading = false;
 
   /**
+   * The current language.
+   */
+  lang: string = 'en';
+
+  /**
    * Subject which gets triggered as soon as this component gets destroyed.
    */
   protected destroy$ = new Subject();
 
-  constructor(protected store: Store, protected cdr: ChangeDetectorRef, protected zone: NgZone, actions: Actions) {
+  constructor(
+    protected store: Store,
+    protected translate: TranslateService,
+    protected cdr: ChangeDetectorRef,
+    protected zone: NgZone,
+    actions: Actions
+  ) {
     zone.runOutsideAngular(() => {
-      this.assets$.pipe(takeUntil(this.destroy$)).subscribe(assets => {
+      this.assets$.pipe(takeUntil(this.destroy$)).subscribe((assets) => {
         this.allAssets = assets;
         this.updateAssets();
       });
-      this.icons$.pipe(takeUntil(this.destroy$)).subscribe(icons => this.icons = icons);
-      this.labels$.pipe(takeUntil(this.destroy$)).subscribe(labels => this.labels = labels);
-      this.asset$.subscribe(asset => {
+      this.icons$.pipe(takeUntil(this.destroy$)).subscribe((icons) => (this.icons = icons));
+      this.labels$.pipe(takeUntil(this.destroy$)).subscribe((labels) => (this.labels = labels));
+      this.asset$.subscribe((asset) => {
         this.selectedAsset = asset;
         if (!asset || asset.resource.loaded) return this.cdr.markForCheck();
-        this.store.dispatch(new ScanResource(asset.resource.uri, asset.resource.source, asset.resource.type))
-                    .subscribe(() => {
-                      actions.pipe(ofActionSuccessful(LoadAssetResource), take(1))
-                              .subscribe(() => this.cdr.markForCheck());
-                    });
+        this.store
+          .dispatch(new ScanResource(asset.resource.uri, asset.resource.source, asset.resource.type))
+          .subscribe(() => {
+            actions.pipe(ofActionSuccessful(LoadAssetResource), take(1)).subscribe(() => this.cdr.markForCheck());
+          });
+      });
+      translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe((lang) => {
+        this.lang = lang.lang;
+        cdr.markForCheck();
       });
     });
   }
@@ -166,11 +181,10 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
     if (!changes.group) return;
     if (this.group && !this.group.resource.loaded) {
       this.loading = true;
-      this.store.dispatch(new ScanResource(this.group.resource.uri, this.group.resource.source))
-                .subscribe(() => {
-                  this.loading = false;
-                  this.cdr.markForCheck();
-                });
+      this.store.dispatch(new ScanResource(this.group.resource.uri, this.group.resource.source)).subscribe(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      });
     } else this.updateAssets();
   }
 

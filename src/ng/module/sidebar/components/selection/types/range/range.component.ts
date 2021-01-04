@@ -2,6 +2,7 @@ import { AbstractTypeComponent } from '../abstract';
 import { Component, ChangeDetectionStrategy, ViewChild, OnChanges, ChangeDetectorRef } from '@angular/core';
 import { RangeSceneComponent, SceneComponent } from 'common/scene';
 import { MatSlider, MatSliderChange } from '@angular/material/slider';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: './range.component.html',
@@ -55,8 +56,8 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
     return !this.component?.mixed && typeof this.component?.value === 'number' ? this.transform(this.component.value) as number : 0;
   }
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
+  constructor(protected translate: TranslateService, private cdr: ChangeDetectorRef) {
+    super(translate);
   }
 
   /**

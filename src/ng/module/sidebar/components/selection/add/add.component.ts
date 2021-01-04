@@ -3,6 +3,7 @@ import { GroupSceneComponent, SceneEntity } from 'common/scene';
 import { SceneComponentsService } from 'ng/module/sidebar/services/scene-components.service';
 import { NavItem } from 'ng/module/utils/components/nested-menu-item/nested-menu-item.component';
 import * as _ from 'lodash';
+import { TranslateService } from '@ngx-translate/core';
 
 /**
  * The add scene component button handles the creation of new components per entity.
@@ -33,21 +34,8 @@ export class AddSceneComponentButtonComponent implements OnChanges {
    */
   items: NavItem[] = [];
 
-  constructor(protected sceneComponents: SceneComponentsService) {
+  constructor(protected sceneComponents: SceneComponentsService, protected translate: TranslateService) {
   }
-
-  // /**
-  //  * The items, which are not categorized.
-  //  */
-  // get componentItems(): string[] {
-  //   const items = [];
-  //   this.sceneComponents.items.forEach(item => {
-  //     const categories = this.sceneComponents.getCategories(item);
-  //     if (categories.length > 0) return;
-  //     items.push(item);
-  //   });
-  //   return items;
-  // }
 
   /**
    * Initializes the items to render.
@@ -95,6 +83,7 @@ export class AddSceneComponentButtonComponent implements OnChanges {
           const child = Object.assign({}, componentItem);
           if (!child.label)
             child.label = item.id.split(/\.|_|-/g).filter(str => it.id !== str).map(str => _.capitalize(str)).join(' ');
+          child.label = this.translate.instant(child.label);
           navItem?.children?.push(child);
         });
       }

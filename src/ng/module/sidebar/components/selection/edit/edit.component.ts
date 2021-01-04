@@ -28,8 +28,8 @@ interface DialogData {
  */
 @Component({
   selector: 'yame-edit-component',
-  templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.scss'],
+  templateUrl: 'edit.component.html',
+  styleUrls: ['edit.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditComponentComponent {
@@ -85,7 +85,7 @@ export class EditComponentComponent {
  */
 @Component({
   selector: 'yame-edit-dialog-component',
-  templateUrl: './dialog.component.html',
+  templateUrl: 'dialog.component.html',
 })
 export class EditComponentDialogComponent implements OnDestroy {
   /**

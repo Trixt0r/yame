@@ -39,6 +39,7 @@ import { ColorTypeComponent } from './components/selection/types/color/color.com
 import { InputTypeComponent } from './components/selection/types/input/input.component';
 import { PointTypeComponent } from './components/selection/types/point/point.component';
 import { RangeTypeComponent } from './components/selection/types/range/range.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @NgModule({
   imports: [
@@ -56,6 +57,7 @@ import { RangeTypeComponent } from './components/selection/types/range/range.com
     MatDialogModule,
     ScrollingModule,
     TreeModule.forRoot(),
+    // TranslateModule.forRoot(),
   ],
   declarations: [
     SidebarComponent,
@@ -91,35 +93,37 @@ import { RangeTypeComponent } from './components/selection/types/range/range.com
   ],
 })
 export class SidebarModule {
-  constructor(components: SceneComponentsService, entityTypes: EntityTypeService, compService: SceneComponentService) {
+  constructor(components: SceneComponentsService, entityTypes: EntityTypeService, compService: SceneComponentService, translate: TranslateService) {
     components.registerCategory({
       id: 'general',
       items: ['general.string', 'general.number', 'general.point', 'general.size', 'general.color', 'general.range'],
-      label: 'General',
+      label: 'componentLabel.general',
       icon: 'adjust',
     });
 
     components.registerCategory({
       id: 'asset',
       items: ['asset.any', 'asset.texture', 'asset.sound', 'asset.music'],
-      label: 'Asset',
+      label: 'componentLabel.asset',
       icon: 'attach_file',
     });
 
-    components.registerItem({ id: 'group', type: 'group', icon: 'filter_none' });
-    components.registerItem({ id: 'general.string', type: 'string', icon: 'text_fields' });
-    components.registerItem({ id: 'general.number', type: 'number', icon: 'short_text' });
-    components.registerItem({ id: 'general.range', type: 'range', icon: 'linear_scale' });
+    components.registerItem({ id: 'group', type: 'group', icon: 'filter_none', label: 'componentLabel.group' });
+    components.registerItem({ id: 'general.string', type: 'string', icon: 'text_fields', label: 'componentLabel.string' });
+    components.registerItem({ id: 'general.number', type: 'number', icon: 'short_text', label: 'componentLabel.number' });
+    components.registerItem({ id: 'general.range', type: 'range', icon: 'linear_scale', label: 'componentLabel.range' });
     components.registerItem({
       id: 'general.point',
       type: 'point',
       icon: 'location_on',
+      label: 'componentLabel.transformation.position',
       factory: (entities, type, group) => createPointComponent(compService.generateComponentId(entities, type), 0, 0),
     });
     components.registerItem({
       id: 'general.size',
       type: 'size',
-      icon: 'open_in_full',
+      icon: 'aspect_ratio',
+      label: 'componentLabel.transformation.size',
       factory: (entities, type, group) => createSizeComponent(compService.generateComponentId(entities, type), 0, 0),
     });
 
@@ -127,6 +131,7 @@ export class SidebarModule {
       id: 'general.color',
       type: 'color',
       icon: 'palette',
+      label: 'componentLabel.sprite.color',
       factory: (entities, type, group) => createColorComponent(compService.generateComponentId(entities, type)),
     });
 
@@ -134,12 +139,14 @@ export class SidebarModule {
       id: 'asset.any',
       type: 'asset',
       icon: 'insert_drive_file',
+      label: 'componentLabel.anyAsset'
     });
 
     components.registerItem({
       id: 'asset.texture',
       type: 'asset',
       icon: 'image',
+      label: 'componentLabel.texture',
       factory: (entities, type, group) => {
         const component = createAssetComponent(compService.generateComponentId(entities, type));
         component.allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
@@ -159,7 +166,7 @@ export class SidebarModule {
     entityTypes.registerItem({
       id: 'entity',
       type: 'entity',
-      label: 'Entity',
+      label: 'entityLabel.entity',
       icon: 'insert_drive_file',
       factory: (id, parent) => {
         const entity = new SceneEntity();
@@ -172,7 +179,7 @@ export class SidebarModule {
     entityTypes.registerItem({
       id: 'group',
       type: 'group',
-      label: 'Group',
+      label: 'entityLabel.group',
       icon: 'folder',
       factory: (id, parent) => {
         const entity = new SceneEntity();
@@ -186,7 +193,7 @@ export class SidebarModule {
     entityTypes.registerItem({
       id: 'layer',
       type: 'layer',
-      label: 'Layer',
+      label: 'entityLabel.layer',
       icon: 'layers',
       factory: (id, parent) => {
         const entity = new SceneEntity();

@@ -3,6 +3,7 @@ import { AbstractTypeComponent, AbstractInputEvent } from '../abstract';
 import { PointSceneComponent } from 'common/scene/component/point';
 import { PointInputComponent } from 'ng/module/utils';
 import { IPoint } from 'common/math';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: './point.component.html',
@@ -26,6 +27,10 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
    */
   get value() {
     return this.component?.mixed ? { x: '', y: '' } : this.transform(this.component) || { x: 0, y: 0 };
+  }
+
+  constructor(protected translate: TranslateService) {
+    super(translate);
   }
 
   /**

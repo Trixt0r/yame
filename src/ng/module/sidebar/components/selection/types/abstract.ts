@@ -1,7 +1,8 @@
 import { EventEmitter, HostBinding, OnDestroy } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISelectState } from 'ng/module/scene';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 export interface AbstractInputEvent<T extends SceneComponent = SceneComponent> {
@@ -80,7 +81,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
     return !!this.component?.group;
   }
 
-  constructor() {
+  constructor(protected translate: TranslateService) {
     this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe((comps: SceneComponent[]) => {
       const found = comps.find(comp => comp.id === this.component?.id);
       if (!found) return;
@@ -144,6 +145,16 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   reverse(value: unknown): unknown {
     if (!this.component?.transform) return value;
     return this.component?.transform.reverse(value);
+  }
+
+  /**
+   * Returns the label for currently bound component.
+   */
+  getLabel(): string {
+    if (!this.component || !this.component.id) return '';
+    const found = this.translate.instant(`componentLabel.${this.component.id}`);
+    if (typeof found === 'string' && found.indexOf('componentLabel.') < 0) return found;
+    return this.component.id;
   }
 
   /**

@@ -47,6 +47,6 @@ import { AssetState } from './states/asset.state';
 export class AssetModule {
   constructor(store: Store) {
     store.dispatch(new RegisterAssetIcon('image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
-    store.dispatch(new RegisterAssetTypeLabel('Image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
+    store.dispatch(new RegisterAssetTypeLabel('asset.type.image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
   }
 }

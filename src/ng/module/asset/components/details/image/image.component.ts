@@ -9,7 +9,7 @@ import { IAssetDetailsComponent } from '../../../directives/details.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @AssetDetailsComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
-export class ImageAssetDetailsComponent implements IAssetDetailsComponent, AfterViewInit, OnChanges {
+export class ImageAssetDetailsComponent implements IAssetDetailsComponent, AfterViewInit {
 
   /**
    * @inheritdoc
@@ -29,10 +29,6 @@ export class ImageAssetDetailsComponent implements IAssetDetailsComponent, After
       this.cdr.markForCheck();
     };
     img.src = this.asset.resource.uri;
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
   }
 
 

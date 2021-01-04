@@ -33,7 +33,7 @@
   <div *ngIf="groupNodes.length === 0" class="empty text-center">
     <div class="inline-block">
       <span class="vert-align-middle table-cell"><mat-icon>error</mat-icon></span>
-      <span class="mat-caption padding-left-8 vert-align-middle table-cell">Asset source not found</span>
+      <span class="mat-caption padding-left-8 vert-align-middle table-cell">{{ 'asset.notFound.source' | translate }}</span>
     </div>
   </div>
 </div>
@@ -44,7 +44,7 @@
         aria-label="Add resource group"
         (click)="addFromSource(assetSources[0])">
   <mat-icon>library_add</mat-icon>
-  <span class="margin-left-4">Add source</span>
+  <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
 </button>
 
 <button *ngIf="assetSources.length > 1"
@@ -52,7 +52,7 @@
         aria-label="Add resource group"
         [matMenuTriggerFor]="menu">
   <mat-icon>library_add</mat-icon>
-  <span class="margin-left-4">Add source</span>
+  <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
 </button>
 
 <mat-menu #menu="matMenu">

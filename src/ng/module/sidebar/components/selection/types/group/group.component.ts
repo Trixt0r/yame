@@ -5,6 +5,7 @@ import { GroupSceneComponent, SceneComponent } from 'common/scene';
 import { SceneComponentsService } from 'ng/module/sidebar/services/scene-components.service';
 import { EntityComponentsDirective } from 'ng/module/sidebar/directives/entity-components.directive';
 import { takeUntil } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: `./group.component.html`,
@@ -40,13 +41,14 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
   }
 
   constructor(
+    protected translate: TranslateService,
     protected store: Store,
     protected sceneComponents: SceneComponentsService,
     private cdr: ChangeDetectorRef
   ) {
-    super();
+    super(translate);
     this.destroy$.next();
-     this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe((comps: SceneComponent[]) => this.onExternalUpdate(comps));
+    this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe(comps => this.onExternalUpdate(comps));
   }
 
   /**

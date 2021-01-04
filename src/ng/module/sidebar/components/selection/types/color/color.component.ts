@@ -3,6 +3,7 @@ import { InputTypeComponent } from '../input/input.component';
 import { ColorPickerControl } from '@iplab/ngx-color-picker';
 import { Subscription } from 'rxjs';
 import { ColorSceneComponent } from 'common/scene/component/color';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: './color.component.html',
@@ -35,8 +36,8 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
     return this._rgbaString;
   }
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
+  constructor(protected translate: TranslateService, private cdr: ChangeDetectorRef) {
+    super(translate);
     this.sub = this.control.valueChanges.subscribe(val => {
       if (!this.component) return;
       this._rgbaString = val.toRgbaString();

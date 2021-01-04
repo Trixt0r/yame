@@ -8,6 +8,7 @@ import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ScanResource } from 'ng/module/asset/states/actions/asset.action';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: 'asset.component.html',
@@ -15,7 +16,6 @@ import { ScanResource } from 'ng/module/asset/states/actions/asset.action';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeComponent<T> implements OnChanges {
-
   static readonly type: string = 'asset';
 
   /**
@@ -56,9 +56,9 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     const data = {
       originalEvent: null,
       value: id,
-      component: this.component
+      component: this.component,
     };
-    this.currentIndex = id ? this.allAssets.findIndex(it => it.id === id) : -1;
+    this.currentIndex = id ? this.allAssets.findIndex((it) => it.id === id) : -1;
     const asset = this.allAssets[this.currentIndex];
     if (!this.component) return;
     this.component.asset = asset ? id : null;
@@ -67,13 +67,18 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this.updateEvent.emit(data);
   }
 
-  constructor(protected cdr: ChangeDetectorRef, protected zone: NgZone, protected store: Store) {
-    super();
+  constructor(
+    protected translate: TranslateService,
+    protected cdr: ChangeDetectorRef,
+    protected zone: NgZone,
+    protected store: Store
+  ) {
+    super(translate);
     zone.runOutsideAngular(() => {
-      this.assets$.pipe(takeUntil(this.destroy$)).subscribe(assets => {
+      this.assets$.pipe(takeUntil(this.destroy$)).subscribe((assets) => {
         this.allAssets = assets;
-        this.assetBuffer.slice().forEach(it => {
-          const found = this.allAssets.find(asset => asset.id === it.id);
+        this.assetBuffer.slice().forEach((it) => {
+          const found = this.allAssets.find((asset) => asset.id === it.id);
           if (found) return;
           const idx = this.assetBuffer.indexOf(it);
           if (idx >= 0) this.assetBuffer.splice(idx, 1);
@@ -91,19 +96,20 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   updateAssetBuffer(initial = false) {
     if (initial) this.assetBuffer = [];
-    const filtered = this.allAssets.filter(it => this.checkType(it));
+    const filtered = this.allAssets.filter((it) => this.checkType(it));
     const length = this.assetBuffer.length;
-    let idx = initial ? filtered.findIndex(it => it.id === this.selected) : length + this.bufferSize;
+    let idx = initial ? filtered.findIndex((it) => it.id === this.selected) : length + this.bufferSize;
     idx = Math.max(Math.min(length + this.bufferSize, filtered.length), idx + 1);
     this.assetBuffer = this.assetBuffer.concat(filtered.slice(length, idx));
   }
 
   loadMoreAssets() {
-    const notLoaded = this.allAssets.find(it => it.type === 'group' && !it.resource.loaded);
+    const notLoaded = this.allAssets.find((it) => it.type === 'group' && !it.resource.loaded);
     if (notLoaded) {
       this.loading = true;
-      this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source))
-                .subscribe(() => this.loading = false);
+      this.store
+        .dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source))
+        .subscribe(() => (this.loading = false));
     }
   }
 
@@ -166,10 +172,8 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   onScroll({ end }: { end: number }) {
     if (this.loading || this.allAssets.length <= this.assetBuffer.length) return;
     if (end + this.bufferThreshold >= this.assetBuffer.length) {
-      if (end + this.bufferThreshold >= this.allAssets.filter(it => this.checkType(it)).length)
-        this.loadMoreAssets();
-      else
-        this.updateAssetBuffer();
+      if (end + this.bufferThreshold >= this.allAssets.filter((it) => this.checkType(it)).length) this.loadMoreAssets();
+      else this.updateAssetBuffer();
     }
   }
 

@@ -8,8 +8,8 @@
     </div>
     <div class="fill half text-left inline-block border-box vert-align-top relative">
       <div class="absolute vert-center padding-right-16 border-box">
-        <h3 class="mat-h3 no-margin-bottom">No assets found</h3>
-        <span *ngIf="!group" class="mat-caption no-margin-top">Add an asset source and select it</span>
+        <h3 class="mat-h3 no-margin-bottom">{{ 'asset.notFound.assets.title' | translate }}</h3>
+        <span *ngIf="!group" class="mat-caption no-margin-top">{{ 'asset.notFound.assets.hint' | translate }}</span>
       </div>
     </div>
   </div>
@@ -19,7 +19,7 @@
       <div class="inline-block text-center">
         <mat-spinner [diameter]="64"></mat-spinner>
       </div>
-      <h4 class="mat-h4 opacity-50 margin-top-16">Loading assets...</h4>
+      <h4 class="mat-h4 opacity-50 margin-top-16">{{ 'asset.loading' | translate }}</h4>
     </div>
   </div>
 
@@ -36,7 +36,7 @@
         <mat-tab>
           <ng-template mat-tab-label>
             <mat-icon class="absolute">info</mat-icon>
-            <span>Details</span>
+            <span>{{ 'asset.details.title' | translate }}</span>
           </ng-template>
           <div class="preview"
                 dnd-draggable
@@ -50,22 +50,22 @@
           <mat-divider></mat-divider>
           <div class="details margin-top-16">
             <div class="row">
-              <div class="col fill-33 text-left mat-caption opacity-90">Type</div>
-              <div class="col fill-66 text-left mat-caption">{{ getLabel(selectedAsset) }}</div>
+              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.type' | translate }}</div>
+              <div class="col fill-66 text-left mat-caption">{{ getLabel(selectedAsset) | translate }}</div>
             </div>
             <div class="row" *ngIf="selectedAsset?.resource.size !== undefined">
-              <div class="col fill-33 text-left mat-caption opacity-90">Size</div>
+              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.size' | translate }}</div>
               <div class="col fill-66 text-left mat-caption">
                 {{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)
               </div>
             </div>
             <div class="row" *ngIf="selectedAsset?.resource.created !== undefined">
-              <div class="col fill-33 text-left mat-caption opacity-90">Created</div>
-              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.created | date : 'medium' }}</div>
+              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.created' | translate }}</div>
+              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.created | date : 'medium' : undefined : lang }}</div>
             </div>
             <div class="row" *ngIf="selectedAsset?.resource.changed !== undefined">
-              <div class="col fill-33 text-left mat-caption opacity-90">Modified</div>
-              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.changed | date : 'medium' }}</div>
+              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.modified' | translate }}</div>
+              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.changed | date : 'medium' : undefined : lang }}</div>
             </div>
             <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
           </div>

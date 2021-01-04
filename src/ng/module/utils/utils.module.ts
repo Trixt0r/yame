@@ -8,6 +8,13 @@ import { NestedMenuItemComponent } from './components/nested-menu-item/nested-me
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { NumberDirective } from './directives/number.directive';
+import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 @NgModule({
   imports: [
@@ -16,6 +23,14 @@ import { NumberDirective } from './directives/number.directive';
     MatMenuModule,
     MatIconModule,
     ReactiveFormsModule,
+    HttpClientModule,
+    TranslateModule.forRoot({
+      loader: {
+          provide: TranslateLoader,
+          useFactory: createTranslateLoader,
+          deps: [HttpClient]
+      }
+    }),
   ],
   declarations: [
     ResizableComponent,
@@ -25,6 +40,8 @@ import { NumberDirective } from './directives/number.directive';
     ColorPipe
   ],
   exports: [
+    HttpClientModule,
+    TranslateModule,
     ResizableComponent,
     PointInputComponent,
     NestedMenuItemComponent,
@@ -32,4 +49,8 @@ import { NumberDirective } from './directives/number.directive';
     ColorPipe
   ],
 })
-export class UtilsModule {}
+export class UtilsModule {
+  constructor(translate: TranslateService) {
+    translate.setDefaultLang('en');
+  }
+}

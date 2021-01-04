@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainComponent } from '../component/main';
+import { TranslateLoader, TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 // Modules
 import { SidebarModule } from './sidebar/sidebar.module';
@@ -40,5 +42,4 @@ import { CameraModule } from './camera/camera.module';
   providers: [CursorService],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule { }

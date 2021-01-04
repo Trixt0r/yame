@@ -2,6 +2,7 @@ import { AbstractTypeComponent } from '../abstract';
 import { Component, ChangeDetectionStrategy, OnChanges, ViewChild, SimpleChanges, SimpleChange } from '@angular/core';
 import { SceneComponent, StringSceneComponent } from 'common/scene';
 import { MatInput } from '@angular/material/input';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: './input.component.html',
@@ -19,6 +20,10 @@ export class InputTypeComponent<T extends SceneComponent = SceneComponent> exten
    * The input reference.
    */
   @ViewChild(MatInput) input!: MatInput;
+
+  constructor(protected translate: TranslateService) {
+    super(translate);
+  }
 
   /**
    * @inheritdoc

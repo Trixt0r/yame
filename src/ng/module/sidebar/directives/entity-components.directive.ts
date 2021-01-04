@@ -21,6 +21,7 @@ import { SceneComponent, SceneEntity } from 'common/scene';
 import { Subscription } from 'rxjs';
 import { ISelectState } from 'ng/module/scene';
 import * as _ from 'lodash';
+import { TranslateService } from '@ngx-translate/core';
 
 type SceneComponentRef = ComponentRef<AbstractTypeComponent>;
 
@@ -167,6 +168,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   ngAfterViewInit(): void {
     const types = this.service.types;
     types.forEach(type => {
+      if (!EntityComponentsDirective.componentRefPool[type]) return;
       EntityComponentsDirective.componentRefPool[type].forEach(ref => {
         const idx = this.viewContainerRef.indexOf(ref.hostView);
         if (idx >= 0) this.viewContainerRef.detach(idx);

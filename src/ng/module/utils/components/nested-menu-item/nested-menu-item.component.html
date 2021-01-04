@@ -4,7 +4,7 @@
     <span *ngIf="child.children && child.children.length > 0">
       <button mat-menu-item color="primary" [matMenuTriggerFor]="menu.childMenu">
         <mat-icon>{{child.icon}}</mat-icon>
-        <span>{{child.label}}</span>
+        <span>{{ child.label | translate}}</span>
       </button>
       <nested-menu-item #menu [items]="child.children" (selected)="select($event)"></nested-menu-item>
     </span>
@@ -12,7 +12,7 @@
     <span *ngIf="!child.children || child.children.length === 0">
       <button mat-menu-item (click)="select(child)">
         <mat-icon>{{child.icon}}</mat-icon>
-        <span>{{child.label}}</span>
+        <span>{{child.label | translate}}</span>
       </button>
     </span>
   </span>

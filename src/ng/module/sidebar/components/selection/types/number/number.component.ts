@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, ViewChild, OnChanges, SimpleChanges
 import { AbstractTypeComponent } from '../abstract';
 import { NumberSceneComponent, SceneComponent } from 'common/scene';
 import { MatInput } from '@angular/material/input';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: './number.component.html',
@@ -30,6 +31,10 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
    */
   get number(): number | string {
     return typeof this.component?.number === 'number' ? this.transform(this.component.number) as number : 0;
+  }
+
+  constructor(protected translate: TranslateService) {
+    super(translate);
   }
 
   /**

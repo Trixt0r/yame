@@ -6,6 +6,7 @@ import { SizeSceneComponent } from 'common/scene/component/size';
 import { IPointData } from 'pixi.js';
 import { PointSceneComponent } from 'common/scene';
 import { cloneDeep } from 'lodash';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   templateUrl: './size.component.html',
@@ -34,6 +35,10 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
    */
   get value() {
     return this.val;
+  }
+
+  constructor(protected translate: TranslateService) {
+    super(translate);
   }
 
   /**
