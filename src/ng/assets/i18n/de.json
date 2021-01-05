@@ -1,0 +1,62 @@
+{
+  "asset": {
+    "notFound": {
+      "assets": {
+        "title": "Keine Assets gefunden",
+        "hint": "Füge eine Quelle hinzu und wähle sie aus"
+      },
+      "source": "Quelle für Assets nicht gefunden"
+    },
+    "details": {
+      "title": "Details",
+      "type": "Typ",
+      "size": "Größe",
+      "created": "Erstellt",
+      "modified": "Geändert"
+    },
+    "loading": "Lade Assets...",
+    "addSource": "Quelle hinzufügen",
+    "type": {
+      "image": "Bild"
+    }
+  },
+  "sidebar": {
+    "hierarchy": {
+      "title": "Hierarchie"
+    }
+  },
+  "component": "Komponente",
+  "componentLabel": {
+    "transformation": "Transformation",
+    "transformation.position": "Position",
+    "transformation.size": "Größe",
+    "transformation.rotation": "Rotation",
+    "transformation.skew": "Schiefe",
+    "transformation.pivot": "Drehpunkt",
+    "sprite": "Sprite",
+    "sprite.texture": "Textur",
+    "sprite.color": "Farbe",
+    "number": "Zahl",
+    "string": "String",
+    "range": "Intervall",
+    "general": "Allgemein",
+    "group": "Gruppe",
+    "asset": "Asset",
+    "anyAsset": "Beliebig",
+    "texture": "Textur"
+  },
+  "entityLabel": {
+    "entity": "Entität",
+    "group": "Gruppe",
+    "layer": "Ebene"
+  },
+  "editComponent": {
+    "title": "Editiere ID",
+    "label": "ID",
+    "inUse": "Diese ID wird bereits benutzt",
+    "reserved": "Diese ID is reserviert",
+    "required": "Eine ID darf <strong>nicht leer</strong> sein"
+  },
+  "save": "Speichern",
+  "cancel": "Abbrechen"
+}

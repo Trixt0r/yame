@@ -167,7 +167,7 @@ export class SidebarModule {
       id: 'entity',
       type: 'entity',
       label: 'entityLabel.entity',
-      icon: 'insert_drive_file',
+      icon: 'lens',
       factory: (id, parent) => {
         const entity = new SceneEntity();
         const comps = createTransformationComponents();

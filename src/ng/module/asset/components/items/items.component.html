@@ -61,11 +61,11 @@
             </div>
             <div class="row" *ngIf="selectedAsset?.resource.created !== undefined">
               <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.created' | translate }}</div>
-              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.created | date : 'medium' : undefined : lang }}</div>
+              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.created | date : 'medium' : undefined : translate.currentLang }}</div>
             </div>
             <div class="row" *ngIf="selectedAsset?.resource.changed !== undefined">
               <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.modified' | translate }}</div>
-              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.changed | date : 'medium' : undefined : lang }}</div>
+              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.changed | date : 'medium' : undefined : translate.currentLang }}</div>
             </div>
             <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
           </div>
