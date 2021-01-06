@@ -22,6 +22,9 @@ import initIpc from './ipc';
 import { Environment } from './environment';
 import { PluginManager } from './plugin/manager';
 
+
+// app.commandLine.appendSwitch('ignore-connections-limit', '/'); doesn't seem to work for files
+
 Environment.app = app;
 
 Environment.appDir = path.resolve(__dirname, '..');
@@ -68,22 +71,23 @@ function init() {
   yame.Pubsub.emit('ready', window);
   }
 
-app.on('ready', () => {
-  const file = new File(path.resolve(__dirname, '..', 'config.json'));
-  file.read()
-    .then(async data => {
-      try {
-        const json = JSON.parse(data.toString());
-        Environment.config = json;
-        return pluginManager.initialize();
-      } catch (e) {
-        Environment.config = { };
-        console.error('Could not parse config file');
-      }
-    })
-    .catch(e => console.warn(e))
-    .then(() => initIpc())
-    .finally(init);
+app.on('ready', async () => {
+  try {
+    const file = new File(path.resolve(__dirname, '..', 'config.json'));
+    const data = await file.read();
+    try {
+      const json = JSON.parse(data.toString());
+      Environment.config = json;
+      await pluginManager.initialize();
+    } catch (e) {
+      Environment.config = { };
+      console.error('Could not parse config file');
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  await initIpc();
+  init();
 });
 
 app.on('window-all-closed', quit);
