@@ -18,7 +18,8 @@
     "addSource": "Add source",
     "type": {
       "image": "Image"
-    }
+    },
+    "imageDimensions": "Dimensions"
   },
   "sidebar": {
     "hierarchy": {

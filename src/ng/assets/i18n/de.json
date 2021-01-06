@@ -18,7 +18,8 @@
     "addSource": "Quelle hinzufügen",
     "type": {
       "image": "Bild"
-    }
+    },
+    "imageDimensions": "Abmessungen"
   },
   "sidebar": {
     "hierarchy": {
