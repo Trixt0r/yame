@@ -6,12 +6,12 @@
     "baseUrl": "../",
     "paths": {
       "@common/*": ["./common/*"],
-      "@main/*": ["./ng/module/main/*"],
-      "@pixi/*": ["./ng/module/pixi/*"],
-      "@plugin/*": ["./ng/module/plugin/*"],
-      "@sidebar/*": ["./ng/module/sidebar/*"],
-      "@toolbar/*": ["./ng/module/toolbar/*"],
-      "@utils/*": ["./ng/module/utils/*"],
+      "@main/*": ["./ng/modules/main/*"],
+      "@pixi/*": ["./ng/modules/pixi/*"],
+      "@plugin/*": ["./ng/modules/plugin/*"],
+      "@sidebar/*": ["./ng/modules/sidebar/*"],
+      "@toolbar/*": ["./ng/modules/toolbar/*"],
+      "@utils/*": ["./ng/modules/utils/*"],
       "*": ["./*", "./node_modules/*"],
     }
   },
