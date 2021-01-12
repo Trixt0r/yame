@@ -26,15 +26,3 @@ export interface CameraZoom {
    */
   target: IPoint;
 }
-
-export interface ICameraState {
-  /**
-   * The zoom settings.
-   */
-  zoom: CameraZoom;
-
-  /**
-   * The position of the camera.
-   */
-  position: IPoint;
-}

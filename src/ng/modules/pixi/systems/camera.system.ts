@@ -6,7 +6,6 @@ import { Actions, ofActionDispatched, ofActionSuccessful, Select } from '@ngxs/s
 import { Observable, Subscription } from 'rxjs';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
 import { CameraState } from 'ng/modules/camera/states/camera.state';
-import { CameraZoom } from 'ng/modules/toolbar/states/toolbar.interface';
 import {
   MoveCameraToPosition,
   UpdateCameraPosition,
@@ -17,7 +16,8 @@ import {
 import { IPoint } from 'common/math';
 import { SceneState, SelectState } from 'ng/modules/scene';
 import { SceneComponent, SceneEntity } from 'common/scene';
-import { getBoundingRect, getCornerPoints } from '../utils/bounds.utils';
+import { getBoundingRect } from '../utils/bounds.utils';
+import { CameraZoom } from 'ng/modules/camera/camera-zoom.interface';
 
 enum MoveInitiator {
   MOUSE,

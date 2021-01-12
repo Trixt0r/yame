@@ -1,5 +1,5 @@
 import { IPoint } from 'common/math';
-import { CameraZoom } from 'ng/modules/toolbar/states/toolbar.interface';
+import { CameraZoom } from '../../camera-zoom.interface';
 
 export class ZoomCameraToPosition {
   static type = '[Camera] Zoom camera';

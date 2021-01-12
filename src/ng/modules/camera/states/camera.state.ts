@@ -1,7 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Action, Selector, State, StateContext } from '@ngxs/store';
-import { ICameraState } from 'ng/modules/toolbar/states/toolbar.interface';
 import { UpdateCameraZoom, UpdateCameraPosition } from './actions/camera.action';
+import { IPoint } from 'common/math';
+import { CameraZoom } from '../camera-zoom.interface';
+
+export interface ICameraState {
+  /**
+   * The zoom settings.
+   */
+  zoom: CameraZoom;
+
+  /**
+   * The position of the camera.
+   */
+  position: IPoint;
+}
 
 @State<ICameraState>({
   name: 'camera',

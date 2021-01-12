@@ -3,10 +3,10 @@ import { MatSliderChange } from '@angular/material/slider';
 import { Select, Store } from '@ngxs/store';
 import { IPoint } from 'common/math';
 import { SelectState } from 'ng/modules/scene';
-import { CameraZoom } from 'ng/modules/toolbar/states/toolbar.interface';
 import { IToolComponent, Tool } from 'ng/modules/toolbar/tool';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { CameraZoom } from '../../camera-zoom.interface';
 import { UpdateCameraZoom, ZoomCameraOut, ZoomCameraToPosition } from '../../states/actions/camera.action';
 import { CameraState } from '../../states/camera.state';
 
