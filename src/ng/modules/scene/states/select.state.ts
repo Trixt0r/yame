@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { State, StateContext, Action, Store, Actions, ofActionSuccessful, Selector } from '@ngxs/store';
 import { Select, Unselect, UpdateComponents, Isolate } from './actions/select.action';
 import { SceneComponent, SceneEntity } from 'common/scene';

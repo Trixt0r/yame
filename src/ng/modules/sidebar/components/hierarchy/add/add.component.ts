@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnChanges, AfterViewInit, Input } from '@angular/core';
 import { NavItem } from 'ng/modules/utils/components/nested-menu-item/nested-menu-item.component';
-import * as _ from 'lodash';
-import { EntityTypeItem, EntityTypeService } from 'ng/modules/sidebar/services/entity-type.service';
+import { EntityTypeService } from 'ng/modules/sidebar/services/entity-type.service';
+import { capitalize, isNil } from 'lodash';
 
 /**
  * The add entity component handles the creation of new object.
@@ -76,14 +76,14 @@ export class AddEntityComponent implements AfterViewInit {
       const categories = entityTypeCategories.filter(it => it.items.indexOf(item.id) >= 0);
       if (categories.length === 0) {
         if (!entityTypeItem.label)
-          entityTypeItem.label = item.id.split(/\.|_|-/g).map(str => _.capitalize(str)).join(' ');
+          entityTypeItem.label = item.id.split(/\.|_|-/g).map(str => capitalize(str)).join(' ');
         items.push(entityTypeItem);
       } else {
         categories.forEach(it => {
-          const navItem = flatList.find(_ => _.id === it.id);
+          const navItem = flatList.find(it => it.id === it.id);
           const child = Object.assign({}, entityTypeItem);
           if (!child.label)
-            child.label = item.id.split(/\.|_|-/g).filter(str => it.id !== str).map(str => _.capitalize(str)).join(' ');
+            child.label = item.id.split(/\.|_|-/g).filter(str => it.id !== str).map(str => capitalize(str)).join(' ');
           navItem?.children?.push(child);
         });
       }
@@ -92,7 +92,7 @@ export class AddEntityComponent implements AfterViewInit {
 
       if (it.id === 'layer' && this.parent) return false;
 
-      return _.isNil(it.children) || (it.children && it.children.length > 0);
+      return isNil(it.children) || (it.children && it.children.length > 0);
     });
   }
 

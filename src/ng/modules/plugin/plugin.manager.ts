@@ -1,9 +1,9 @@
 import { CommonPluginManager } from 'common/plugin.manager';
 import { ipcRenderer, IpcRendererEvent } from 'electron';
-import * as _ from 'lodash';
 import { IYameEnvironment } from 'common/interfaces/environment';
 import { Environment } from '../../environment';
 import { YamePlugin } from 'common/plugin';
+import { uniqueId } from 'lodash';
 
 /**
  * Plugin manager for the angular side of the editor.
@@ -35,7 +35,7 @@ export class PluginManager extends CommonPluginManager {
    */
   getFiles(): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      const id = _.uniqueId('plugins-');
+      const id = uniqueId('plugins-');
       let resolver: (event: IpcRendererEvent, files: string[]) => void, rejecter: (event: IpcRendererEvent, message: string) => void;
       resolver = (event: IpcRendererEvent, files: string[]) => {
         ipcRenderer.removeListener(`plugins:files:${id}:error`, rejecter);

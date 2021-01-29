@@ -55,8 +55,33 @@
     "title": "Editiere ID",
     "label": "ID",
     "inUse": "Diese ID wird bereits benutzt",
-    "reserved": "Diese ID is reserviert",
+    "reserved": "Diese ID ist reserviert",
     "required": "Eine ID darf <strong>nicht leer</strong> sein"
+  },
+  "preferences": {
+    "settings": {
+      "title": "Einstellungen",
+      "section": {
+        "general": "Allgemein",
+        "camera": "Kamera",
+        "keyboardShortcuts": "Tastenkürzel",
+        "language": "Sprache"
+      },
+      "option": {
+        "autoSave": "Automatisch speichern",
+        "camera": {
+          "moveType": "Bewegen mit",
+          "moveTypeOptions": {
+            "mmb": "Mittlere Maustaste",
+            "rmb": "Rechte Maustaste",
+            "trackpad": "Trackpad (für Laptops empfohlen)"
+          },
+          "zoomStep": "Zoom erhöhen um",
+          "zoomMax": "Maximaler zoom",
+          "zoomMin": "Minimaler zoom"
+        }
+      }
+    }
   },
   "save": "Speichern",
   "cancel": "Abbrechen"

@@ -39,7 +39,7 @@ import { ColorTypeComponent } from './components/selection/types/color/color.com
 import { InputTypeComponent } from './components/selection/types/input/input.component';
 import { PointTypeComponent } from './components/selection/types/point/point.component';
 import { RangeTypeComponent } from './components/selection/types/range/range.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @NgModule({
   imports: [

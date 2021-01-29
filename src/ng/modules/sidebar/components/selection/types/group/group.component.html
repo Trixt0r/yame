@@ -2,8 +2,8 @@
   <mat-expansion-panel-header>
     <h5 class="mat-h5">{{ getLabel() }}</h5>
     <div class="inline-actions">
-      <yame-edit-component *ngIf="component.editable" [entities]="entities" [component]="component"></yame-edit-component>
-      <button *ngIf="component.removable" mat-icon-button (click)="onRemove($event)">
+      <yame-edit-component *ngIf="component?.editable" [entities]="entities" [component]="component"></yame-edit-component>
+      <button *ngIf="component?.removable" mat-icon-button (click)="onRemove($event)">
         <mat-icon>delete</mat-icon>
       </button>
     </div>

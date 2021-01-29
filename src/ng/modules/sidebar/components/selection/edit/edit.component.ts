@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { Component, Inject, Input, ChangeDetectionStrategy, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SceneComponentsService } from 'ng/modules/sidebar/services/scene-components.service';
@@ -7,6 +6,7 @@ import { FormControl, Validators } from '@angular/forms';
 import { SceneComponentService, componentIdValidator } from 'ng/modules/scene';
 import { Subscription } from 'rxjs';
 import { DefaultErrorStateMatcher } from 'ng/modules/utils/matchers/default-error-state.matcher';
+import { cloneDeep } from 'lodash';
 
 /**
  * Interface for the dialog exchange data.
@@ -73,7 +73,7 @@ export class EditComponentComponent {
     const sub = dialogRef.afterClosed().subscribe(id => {
       sub.unsubscribe();
       if (!id || !this.component) return;
-      const old = _.cloneDeep(this.component);
+      const old = cloneDeep(this.component);
       this.component.id = id;
       this.components.updateSceneComponent(this.entities, this.component, old);
     });

@@ -15,7 +15,6 @@ import { Asset } from 'common/asset';
 
 
 
-@SceneAssetConverter(['png', 'jpg', 'jpeg', 'gif'])
 export class ImageAssetConverter implements ISceneAssetConverter {
   async execute(asset: Asset): Promise<SceneComp[]> {
     const color = createColorComponent('sprite.color', 'sprite');
@@ -34,6 +33,7 @@ export class ImageAssetConverter implements ISceneAssetConverter {
     return [ sprite, assetComp, color ];
   }
 }
+SceneAssetConverter(['png', 'jpg', 'jpeg', 'gif'])(ImageAssetConverter);
 
 @NgModule({
 

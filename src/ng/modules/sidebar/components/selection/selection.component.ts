@@ -11,7 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ResizableComponent } from 'ng/modules/utils';
-import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
+import { Store, Actions, ofActionSuccessful, Select } from '@ngxs/store';
 import { SceneComponentsService } from '../../services/scene-components.service';
 import { AbstractRemoveEvent, AbstractInputEvent } from './types/abstract';
 import { SceneEntity, SceneComponent, SceneEntityData } from 'common/scene';
@@ -19,6 +19,8 @@ import { ISelectState, UpdateEntity, UpdateComponents, Input as InputAction } fr
 import { EntityComponentsDirective } from '../../directives/entity-components.directive';
 import { cloneDeep } from 'lodash';
 import { debounceTime } from 'rxjs/operators';
+import { SettingsState } from 'ng/modules/preferences/states/settings.state';
+import { Observable } from 'rxjs';
 
 /**
  * The selection component is responsible for rendering the assigned property array.
@@ -49,6 +51,8 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
   @Input() selected: ISelectState = { entities: [], components: [], isolated: null };
 
   @ViewChild(EntityComponentsDirective) entityComponentsDirective!: EntityComponentsDirective;
+
+  @Select(SettingsState.value('language')) language$!: Observable<string>;
 
   /**
    * The title of the component.
@@ -95,7 +99,10 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     this.title = 'Properties';
     this.maxVal = window.innerHeight - SelectionComponent.HEIGHT_SUB;
     this.onResizeBound = this.onResize.bind(this);
-    this.zone.runOutsideAngular(() => window.addEventListener('resize', this.onResizeBound));
+    this.zone.runOutsideAngular(() => {
+      window.addEventListener('resize', this.onResizeBound);
+      this.language$.subscribe(() => this.updateDirective(this.components));
+    });
     this.actions
       .pipe(ofActionSuccessful(UpdateComponents))
       .subscribe((action: UpdateComponents) => this.updateDirective(action.components));

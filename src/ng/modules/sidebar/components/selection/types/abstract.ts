@@ -1,4 +1,4 @@
-import { EventEmitter, HostBinding, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, HostBinding, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { ISelectState } from 'ng/modules/scene';
@@ -16,6 +16,7 @@ export interface AbstractRemoveEvent<T extends SceneComponent = SceneComponent> 
   index?: number;
 }
 
+@Component({ template: '' })
 export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComponent> implements OnDestroy {
 
   static readonly type: string = 'abstract';

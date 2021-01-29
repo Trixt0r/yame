@@ -1,0 +1,28 @@
+<mat-card class="sections mat-elevation-z8">
+  <h2 #sectionHeader class="mat-h2">{{ 'preferences.settings.title' | translate }}</h2>
+  <mat-divider></mat-divider>
+  <div #listWrapper class="list-wrapper">
+    <mat-selection-list dense [multiple]="false" (selectionChange)="onSectionSelect($event)">
+      <mat-list-option *ngFor="let section of sections" [value]="section.id" [selected]="currentSection === section.id">
+        <mat-icon *ngIf="section.icon" mat-list-icon>{{ section.icon }}</mat-icon>
+        <span>{{ section.label | translate }}</span>
+      </mat-list-option>
+    </mat-selection-list>
+  </div>
+</mat-card>
+
+<div class="content" (scroll)="onContentScroll()">
+  <ng-container *ngFor="let section of sections">
+    <section #sections [id]="section.id" *ngIf="options[section.id]">
+      <h3 class="mat-h3">{{ section.label | translate }}</h3>
+      <mat-card class="mat-elevation-z2 margin-bottom-32">
+        <mat-list dense>
+          <ng-container *ngFor="let option of options[section.id]; let i = index; let l = count">
+            <ng-container [yameSettingOption]="option"></ng-container>
+            <mat-divider *ngIf="i < l - 1"></mat-divider>
+          </ng-container>
+        </mat-list>
+      </mat-card>
+    </section>
+  </ng-container>
+</div>

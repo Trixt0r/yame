@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule, NgZone } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ResizableComponent } from './component/resizable';
 import { ColorPipe } from './pipes/color.pipe';
@@ -12,6 +12,10 @@ import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-transla
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { registerLocaleData } from '@angular/common';
+import { Select, Store } from '@ngxs/store';
+import { SettingsState } from '../preferences/states/settings.state';
+import { Observable } from 'rxjs';
+import { UpdateSettingsValue } from '../preferences/states/actions/settings.action';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -49,20 +53,43 @@ export function createTranslateLoader(http: HttpClient) {
     NumberDirective,
     ColorPipe,
   ],
+  providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (store: Store, translate: TranslateService) => () => {
+        const lng = translate.getBrowserLang();
+        store.dispatch(new UpdateSettingsValue('language', lng));
+      },
+      deps: [ Store, TranslateService ],
+      multi: true,
+    }
+  ]
 })
 export class UtilsModule {
-  constructor(translate: TranslateService) {
+
+  @Select(SettingsState.value('language')) language$!: Observable<string>;
+
+  constructor(protected translate: TranslateService, zone: NgZone, store: Store) {
     translate.setDefaultLang('en');
-    const lng = translate.getBrowserLang();
-    translate.use(lng).toPromise()
-      .then(async () => {
-        const localeResults = await Promise.all([
-          import(`@angular/common/locales/${lng}`)
-            .catch(error => console.warn('[Utils] Could not load angular locales ', error)),
-          import(`@angular/common/locales/extra/${lng}`)
-            .catch(error => console.warn('[Utils] Could not load angular locale extras ', error))
-        ]);
-        if (localeResults.length > 0) registerLocaleData(localeResults[0].default, localeResults[1]?.default);
-      }).catch(error => console.warn('[Utils] Could not load navigator language', error));
+    zone.runOutsideAngular(() => this.language$.subscribe(lng => this.setLang(lng)) );
+  }
+
+  /**
+   *
+   * @param lng
+   */
+  async setLang(lng: string) {
+    await this.translate.use(lng).toPromise();
+    try {
+      const localeResults = await Promise.all([
+        import(`@angular/common/locales/${lng}`)
+          .catch(error => console.warn('[Utils] Could not load angular locales ', error)),
+        import(`@angular/common/locales/extra/${lng}`)
+          .catch(error => console.warn('[Utils] Could not load angular locale extras ', error))
+      ]);
+      if (localeResults.length > 0) registerLocaleData(localeResults[0].default, localeResults[1]?.default);
+    } catch(error) {
+      console.warn('[Utils] Could not load navigator language', error);
+    }
   }
 }

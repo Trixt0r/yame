@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy } from '@angular/core';
 import { MatSliderChange } from '@angular/material/slider';
 import { Select, Store } from '@ngxs/store';
 import { IPoint } from 'common/math';
+import { SettingsState } from 'ng/modules/preferences/states/settings.state';
 import { SelectState } from 'ng/modules/scene';
 import { IToolComponent, Tool } from 'ng/modules/toolbar/tool';
 import { Observable, Subject } from 'rxjs';
@@ -55,15 +56,18 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
 
   constructor(
     protected store: Store,
-    protected cdr: ChangeDetectorRef
+    protected cdr: ChangeDetectorRef,
+    protected zone: NgZone
   ) {
-    this.cameraZoom$.pipe(takeUntil(this.destroy$)).subscribe(zoom => {
-      this.cameraZoom = zoom;
-      cdr.markForCheck();
-    });
-    this.selectedEntities$.pipe(takeUntil(this.destroy$)).subscribe(entities => {
-      this.selectedEntities = entities;
-      cdr.markForCheck();
+    zone.runOutsideAngular(() => {
+      this.cameraZoom$.pipe(takeUntil(this.destroy$)).subscribe(zoom => {
+        this.cameraZoom = zoom;
+        cdr.markForCheck();
+      });
+      this.selectedEntities$.pipe(takeUntil(this.destroy$)).subscribe(entities => {
+        this.selectedEntities = entities;
+        cdr.markForCheck();
+      });
     });
   }
 

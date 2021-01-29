@@ -1,14 +1,14 @@
 <div class="half">
   <mat-expansion-panel>
-    <mat-expansion-panel-header [class.editable]="component.editable" [class.removable]="component.removable">
-      <h5 class="mat-h5">{{ component.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</h5>
+    <mat-expansion-panel-header [class.editable]="component?.editable" [class.removable]="component?.removable">
+      <h5 class="mat-h5">{{ component?.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</h5>
       <div class="preview-wrapper">
         <span class="preview bg"></span>
         <span class="preview" [style.background-color]="rgbaString"></span>
       </div>
       <div class="inline-actions">
-        <yame-edit-component *ngIf="component.editable" [entities]="entities" [component]="component"></yame-edit-component>
-        <button *ngIf="component.removable" mat-icon-button (click)="onRemove($event)">
+        <yame-edit-component *ngIf="component?.editable" [entities]="entities" [component]="component"></yame-edit-component>
+        <button *ngIf="component?.removable" mat-icon-button (click)="onRemove($event)">
           <mat-icon>delete</mat-icon>
         </button>
       </div>

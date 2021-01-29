@@ -16,12 +16,11 @@ import {
 } from '@angular/core';
 import { SceneComponentsService } from '../services/scene-components.service';
 import { AbstractTypeComponent, AbstractInputEvent, AbstractRemoveEvent } from '../components/selection/types/abstract';
-import * as uuid from 'uuid';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { Subscription } from 'rxjs';
 import { ISelectState } from 'ng/modules/scene';
-import * as _ from 'lodash';
-import { TranslateService } from '@ngx-translate/core';
+import { merge } from 'lodash';
+import { v4 } from 'uuid';
 
 type SceneComponentRef = ComponentRef<AbstractTypeComponent>;
 
@@ -112,7 +111,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
     private viewContainerRef: ViewContainerRef,
     private componentFactoryResolver: ComponentFactoryResolver
   ) {
-    this.cachePrefix = uuid.v4();
+    this.cachePrefix = v4();
   }
 
   /**
@@ -232,7 +231,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
             index: this.viewContainerRef.indexOf(componentRef.hostView),
           };
         }
-        if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = uuid.v4();
+        if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = v4();
         const previous = componentRef.instance.component;
         componentRef.instance.component = component;
         componentRef.instance.entities = this.entities;
@@ -285,7 +284,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
         if (! componentRef.instance.component) return;
         const found = components.find(it => it.id === componentRef.instance?.component?.id);
         if (found) {
-          _.merge(componentRef.instance.component, found);
+          merge(componentRef.instance.component, found);
           componentRef.changeDetectorRef.markForCheck();
         }
         componentRef.instance.externalEvent.emit(components);

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { UtilsModule } from '../utils';
 import { MaterialModule } from '../material.module';
@@ -16,6 +16,13 @@ import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asse
 import { AssetDetailsDirective } from './directives/details.directive';
 import { ImageAssetDetailsComponent } from './components/details/image/image.component';
 import { AssetState } from './states/asset.state';
+import { AssetPreviewComponent } from './decorators/preview.decorator';
+import { AssetDetailsComponent } from './decorators/details.decorator';
+
+// Normally those components would be decorated with those functions.
+// But since it does not work for the prod mode, the components have to be registered this way.
+AssetPreviewComponent('png', 'jpg', 'jpeg', 'gif', 'svg')(ImageAssetPreviewComponent);
+AssetDetailsComponent('png', 'jpg', 'jpeg', 'gif', 'svg')(ImageAssetDetailsComponent);
 
 @NgModule({
   imports: [
@@ -42,11 +49,19 @@ import { AssetState } from './states/asset.state';
     AssetGroupsComponent,
     AssetPanelComponent,
     AssetPreviewDirective
+  ],
+  providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (store: Store) => () => {
+        store.dispatch([
+          new RegisterAssetIcon('image', ['png', 'gif', 'jpg', 'jpeg', 'svg']),
+          new RegisterAssetTypeLabel('asset.type.image', ['png', 'gif', 'jpg', 'jpeg', 'svg'])
+        ]);
+      },
+      deps: [ Store ],
+      multi: true,
+    }
   ]
 })
-export class AssetModule {
-  constructor(store: Store) {
-    store.dispatch(new RegisterAssetIcon('image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
-    store.dispatch(new RegisterAssetTypeLabel('asset.type.image', ['png', 'gif', 'jpg', 'jpeg', 'svg']));
-  }
-}
+export class AssetModule { }

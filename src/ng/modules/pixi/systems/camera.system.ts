@@ -18,6 +18,7 @@ import { SceneState, SelectState } from 'ng/modules/scene';
 import { SceneComponent, SceneEntity } from 'common/scene';
 import { getBoundingRect } from '../utils/bounds.utils';
 import { CameraZoom } from 'ng/modules/camera/camera-zoom.interface';
+import { SettingsState } from 'ng/modules/preferences/states/settings.state';
 
 enum MoveInitiator {
   MOUSE,
@@ -70,6 +71,8 @@ export class PixiCameraSystem extends System {
    * Selector for getting the isolated entity.
    */
   @Select(SelectState.isolated) isolated$!: Observable<SceneEntity | null>;
+
+  @Select(SettingsState.value('camera.moveType')) moveButton$!: Observable<number>;
 
   /**
    * A list of all current entities having no parent entity.
@@ -161,6 +164,10 @@ export class PixiCameraSystem extends System {
     this.selectedEntities$.subscribe(entities => this.selectedEntities = entities);
     this.selectedComponents$.subscribe(components => this.selectedComponents = components);
     this.isolated$.subscribe(isolated => this.isolated = isolated);
+    this.moveButton$.subscribe(val => {
+      this.mouseMoveButton = val;
+      this.trackPad = val === -1;
+    });
 
     this.cameraZoom$.subscribe((zoom) => {
       (this.camera.targetPosition as Point).copyFrom(zoom.target);

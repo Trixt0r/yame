@@ -58,6 +58,31 @@
     "reserved": "This ID is reserved",
     "required": "An ID is <strong>required</strong>"
   },
+  "preferences": {
+    "settings": {
+      "title": "Settings",
+      "section": {
+        "general": "General",
+        "camera": "Camera",
+        "keyboardShortcuts": "Keyboard Shortcuts",
+        "language": "Language"
+      },
+      "option": {
+        "autoSave": "Auto save",
+        "camera": {
+          "moveType": "Move with",
+          "moveTypeOptions": {
+            "mmb": "Middle mouse button",
+            "rmb": "Right mouse button",
+            "trackpad": "Track pad (recommended for laptops)"
+          },
+          "zoomStep": "Increase zoom by",
+          "zoomMax": "Maximum zoom",
+          "zoomMin": "Minimum zoom"
+        }
+      }
+    }
+  },
   "save": "Save",
   "cancel": "Cancel"
 }

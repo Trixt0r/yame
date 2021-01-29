@@ -1,5 +1,8 @@
+import { Type } from '@angular/core';
 import { Asset } from 'common/asset';
 import { IResource } from 'common/interfaces/resource';
+import { IAssetDetailsComponent } from '../../directives/details.directive';
+import { IAssetPreviewComponent } from '../../directives/preview.directive';
 
 export interface IAssetsSource {
 
@@ -112,6 +115,16 @@ export class UnselectAsset {
   public static readonly type = '[Asset] Unselect asset';
 
   constructor() { }
+}
+
+export class RegisterAssetPreviewComponent {
+  public static readonly type = '[Asset] Register asset preview';
+  constructor(public component: Type<IAssetPreviewComponent>, public types: string[]) { }
+}
+
+export class RegisterAssetDetailsComponent {
+  public static readonly type = '[Asset] Register asset preview';
+  constructor(public component: Type<IAssetDetailsComponent>, public types: string[]) { }
 }
 
 export class RegisterAssetIcon {

@@ -17,7 +17,7 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
   /**
    * The color control.
    */
-  protected control = new ColorPickerControl();
+  control = new ColorPickerControl();
 
   /**
    * The subscription to the color control value changes.

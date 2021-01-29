@@ -4,8 +4,8 @@ import { MatFormFieldControl } from '@angular/material/form-field';
 import { Subject } from 'rxjs';
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import * as _ from 'lodash';
 import { IPoint } from 'common/math';
+import { isNil } from 'lodash';
 
 /**
  * The point input component displays a point's values in an input field on the same line.
@@ -89,7 +89,7 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
    */
   get empty() {
     const { value: { x, y } } = this.parts;
-    return (_.isNil(x) || x === '') && (y === '' || _.isNil(y));
+    return (isNil(x) || x === '') && (y === '' || isNil(y));
   }
 
   /**

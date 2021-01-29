@@ -1,0 +1,14 @@
+<mat-list-item>
+  <div class="fill-75">{{ option.label | translate }}</div>
+  <mat-slider
+    class="fill-20"
+    style="height: 46px !important;"
+    [max]="option.componentSettings?.max"
+    [min]="option.componentSettings?.min"
+    [step]="option.componentSettings?.step"
+    [thumbLabel]="option.componentSettings?.thumb"
+    [tickInterval]="option.componentSettings?.ticks"
+    [(ngModel)]="value">
+  </mat-slider>
+  <span class="fill-5 text-right">{{ value === undefined ? '-' : value }}</span>
+</mat-list-item>

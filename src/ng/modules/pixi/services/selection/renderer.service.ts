@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { Graphics, Container, Rectangle, Point } from 'pixi.js';
 import { SceneEntity } from 'common/scene';
 import { PixiRendererService } from '../renderer.service';
@@ -7,7 +6,7 @@ import { PixiSelectionContainerService } from './container.service';
 import { Injectable, Inject } from '@angular/core';
 import { YAME_RENDERER } from 'ng/modules/scene';
 import { System } from '@trixt0r/ecs';
-import { maxBy, minBy } from 'lodash';
+import { maxBy, minBy, defaultTo } from 'lodash';
 
 /**
  * The config interface for the rendering.
@@ -185,11 +184,11 @@ export class PixiSelectionRendererService {
   }
 
   setConfig(config: SelectionRendererConfig) {
-    this.config.line.width = _.defaultTo(config.line?.width, 1);
-    this.config.line.color = _.defaultTo(config.line?.color, 0xffffff);
-    this.config.line.alpha = _.defaultTo(config.line?.alpha, 1);
-    this.config.fill.color = _.defaultTo(config.fill?.color, 0xffffff);
-    this.config.fill.alpha = _.defaultTo(config.fill?.alpha, 0);
+    this.config.line.width = defaultTo(config.line?.width, 1);
+    this.config.line.color = defaultTo(config.line?.color, 0xffffff);
+    this.config.line.alpha = defaultTo(config.line?.alpha, 1);
+    this.config.fill.color = defaultTo(config.fill?.color, 0xffffff);
+    this.config.fill.alpha = defaultTo(config.fill?.alpha, 0);
   }
 
   /**

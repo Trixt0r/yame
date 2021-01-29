@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
-import { Action, Selector, State, StateContext } from '@ngxs/store';
+import { Injectable, NgZone } from '@angular/core';
+import { Action, Select, Selector, State, StateContext, Store } from '@ngxs/store';
 import { UpdateCameraZoom, UpdateCameraPosition } from './actions/camera.action';
 import { IPoint } from 'common/math';
 import { CameraZoom } from '../camera-zoom.interface';
+import { SettingsState } from 'ng/modules/preferences/states/settings.state';
+import { Observable } from 'rxjs';
 
 export interface ICameraState {
   /**
@@ -43,6 +45,24 @@ export class CameraState {
    */
   @Selector()
   static position(state: ICameraState) { return state.position; }
+
+  @Select(SettingsState.value('camera.zoomStep')) zoomStep$!: Observable<number>;
+  @Select(SettingsState.value('camera.zoomMax')) zoomMax$!: Observable<number>;
+  @Select(SettingsState.value('camera.zoomMin')) zoomMin$!: Observable<number>;
+
+  constructor(store: Store, zone: NgZone) {
+    zone.runOutsideAngular(() => {
+      this.zoomStep$.subscribe(zoom => {
+        store.dispatch(new UpdateCameraZoom({ step: typeof zoom === 'number' ? zoom : 0.05 }));
+      });
+      this.zoomMax$.subscribe(max => {
+        store.dispatch(new UpdateCameraZoom({ max: typeof max === 'number' ? max : 3 }));
+      });
+      this.zoomMin$.subscribe(min => {
+        store.dispatch(new UpdateCameraZoom({ min: typeof min === 'number' ? min : 0.05 }));
+      });
+    });
+  }
 
   @Action(UpdateCameraZoom)
   updateZoom(ctx: StateContext<ICameraState>, action: UpdateCameraZoom) {

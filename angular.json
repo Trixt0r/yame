@@ -50,8 +50,8 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/ng/environments/environment.ts",
-                  "with": "src/ng/environments/environment.prod.ts"
+                  "replace": "src/environments/index.ts",
+                  "with": "src/environments/index.prod.ts"
                 }
               ],
               "optimization": true,

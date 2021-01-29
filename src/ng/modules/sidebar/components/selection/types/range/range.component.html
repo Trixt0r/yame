@@ -1,7 +1,7 @@
 <div class="slider-container full inline-block"
-      [class.editable]="component.editable"
-      [class.removable]="component.removable">
-  <label class="mat-form-field-label">{{ component.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</label>
+      [class.editable]="component?.editable"
+      [class.removable]="component?.removable">
+  <label class="mat-form-field-label">{{ component?.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</label>
   <mat-slider
     [max]="max"
     [min]="min"
@@ -14,7 +14,7 @@
   >
   </mat-slider>
 </div>
-<yame-edit-component *ngIf="component.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
-<button *ngIf="component.removable" mat-icon-button class="remove" (click)="onRemove($event)">
+<yame-edit-component *ngIf="component?.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
+<button *ngIf="component?.removable" mat-icon-button class="remove" (click)="onRemove($event)">
   <mat-icon>delete</mat-icon>
 </button>

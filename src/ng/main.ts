@@ -12,11 +12,12 @@
 // import * as eventemitter3 from 'eventemitter3';
 // import * as lodash from 'lodash';
 // import * as uuid from 'uuid';
-import * as yame from '.';
+// import * as yame from '.';
+import { Pubsub } from '.';
 import { extend } from 'common/require';
 
 const mapping = {
-  yame: yame,
+  // yame: yame,
   // '@angular/animations': angularAnimation,
   // '@angular/cdk': angularCdk,
   // '@angular/common': angularCommon,
@@ -57,7 +58,7 @@ function initNg(): Promise<any> {
     .then(module => {
       return platformBrowserDynamic()
         .bootstrapModule(module.AppModule)
-        .then(componentRef => yame.Pubsub.emit('ready', componentRef))
+        .then(componentRef => Pubsub.emit('ready', componentRef))
     });
 }
 

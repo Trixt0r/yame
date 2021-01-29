@@ -2,7 +2,7 @@
   class="custom"
   [(ngModel)]="selected"
   dnd-droppable
-  [placeholder]="component.mixed ? getLabel() + ' ' + placeholder : getLabel()"
+  [placeholder]="component?.mixed ? getLabel() + ' ' + placeholder : getLabel()"
   appearance="outline"
   appendTo="yame-sidebar"
   [loading]="loading"

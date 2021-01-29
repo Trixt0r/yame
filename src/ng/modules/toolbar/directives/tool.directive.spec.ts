@@ -3,7 +3,7 @@ import { Tool, IToolComponent } from '../tool';
 import { DefaultToolComponent } from '../components/tool/default/default.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolDirective } from './tool.directive';
-import { MaterialModule } from '../../material.module';
+// import { MaterialModule } from '../../material.module';
 import { ToolbarService } from '../service';
 import { By } from '@angular/platform-browser';
 

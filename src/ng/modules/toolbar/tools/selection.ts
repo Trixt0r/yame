@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { Tool } from '../tool';
 import { Injectable } from '@angular/core';
 import { Graphics, Container } from 'pixi.js';

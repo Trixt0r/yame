@@ -2,7 +2,6 @@ import { Injectable, Type } from '@angular/core';
 import { AbstractTypeComponent } from '../components/selection/types/abstract';
 import { InvalidSceneTypeComponentException } from '../exceptions/service/invalid-property-component.exception';
 import { SceneComponent, SceneEntity, createComponent, GroupSceneComponent } from 'common/scene';
-import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { SceneComponentsServiceException } from '../exceptions/service/scene-components.exception';
 import { SceneComponentService } from 'ng/modules/scene';

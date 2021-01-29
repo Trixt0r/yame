@@ -19,6 +19,7 @@ import { CursorService } from 'ng/services/cursor.service';
 import { HotkeyState } from 'ng/states/hotkey.state';
 import { AssetModule } from './modules/asset/asset.module';
 import { CameraModule } from './modules/camera/camera.module';
+import { PreferencesModule } from './modules/preferences/preferences.module';
 
 @NgModule({
   imports: [
@@ -33,6 +34,7 @@ import { CameraModule } from './modules/camera/camera.module';
     AssetModule,
     SidebarModule,
     ToolbarModule,
+    PreferencesModule,
     CameraModule,
     PixiModule,
   ],
