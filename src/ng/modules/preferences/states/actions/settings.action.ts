@@ -30,3 +30,8 @@ export class UpdateSettingsValue<T> {
   static type = '[Settings] Update settings value';
   constructor(public id: string, public value: T) { }
 }
+
+export class InitDefaultSettingsValue<T> {
+  static type = '[Settings] Init default settings value';
+  constructor(public id: string, public value: T) { }
+}

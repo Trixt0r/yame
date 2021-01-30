@@ -40,8 +40,6 @@ import { SettingsState } from './states/settings.state';
         store.dispatch([
           new AddSettingsSection([
             { id: 'general', label: 'preferences.settings.section.general', icon: 'web', position: 0 },
-            // { id: 'keyboard', label: 'preferences.settings.section.keyboardShortcuts', icon: 'keyboard' },
-            // { id: 'language', label: 'preferences.settings.section.language', icon: 'translate' },
           ]),
           new AddSettingsOption([
             { id: 'autoSave', label: 'preferences.settings.option.autoSave', component: SettingsToggleComponent, section: 'general' },

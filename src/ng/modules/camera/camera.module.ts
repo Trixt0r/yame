@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgxsModule, Store } from '@ngxs/store';
 import { MaterialModule } from '../material.module';
 import { SettingsSelectionComponent } from '../preferences/components/settings/types/selection/selection.component';
-import { AddSettingsOption, AddSettingsSection, UpdateSettingsValue } from '../preferences/states/actions/settings.action';
+import { AddSettingsOption, AddSettingsSection, InitDefaultSettingsValue, UpdateSettingsValue } from '../preferences/states/actions/settings.action';
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { CameraTool } from './camera.tool';
 import { CameraToolComponent } from './components/tool/tool.component';
@@ -20,10 +20,10 @@ import { CameraState } from './states/camera.state';
       useFactory: (store: Store, cameraTool: CameraTool) => () => {
         store.dispatch([
           new RegisterTool(cameraTool),
-          new UpdateSettingsValue('camera.moveType', 1),
-          new UpdateSettingsValue('camera.zoomStep', 0.05),
-          new UpdateSettingsValue('camera.zoomMax', 3),
-          new UpdateSettingsValue('camera.zoomMin', 0.05),
+          new InitDefaultSettingsValue('camera.moveType', 1),
+          new InitDefaultSettingsValue('camera.zoomStep', 0.05),
+          new InitDefaultSettingsValue('camera.zoomMax', 3),
+          new InitDefaultSettingsValue('camera.zoomMin', 0.05),
           new AddSettingsSection({
             id: 'camera',
             label: 'preferences.settings.section.camera',

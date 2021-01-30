@@ -15,7 +15,7 @@ import { registerLocaleData } from '@angular/common';
 import { Select, Store } from '@ngxs/store';
 import { SettingsState } from '../preferences/states/settings.state';
 import { Observable } from 'rxjs';
-import { UpdateSettingsValue } from '../preferences/states/actions/settings.action';
+import { InitDefaultSettingsValue, UpdateSettingsValue } from '../preferences/states/actions/settings.action';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -31,9 +31,9 @@ export function createTranslateLoader(http: HttpClient) {
     HttpClientModule,
     TranslateModule.forRoot({
       loader: {
-          provide: TranslateLoader,
-          useFactory: createTranslateLoader,
-          deps: [HttpClient]
+        provide: TranslateLoader,
+        useFactory: createTranslateLoader,
+        deps: [HttpClient]
       }
     }),
   ],
@@ -58,7 +58,7 @@ export function createTranslateLoader(http: HttpClient) {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, translate: TranslateService) => () => {
         const lng = translate.getBrowserLang();
-        store.dispatch(new UpdateSettingsValue('language', lng));
+        store.dispatch(new InitDefaultSettingsValue('language', lng));
       },
       deps: [ Store, TranslateService ],
       multi: true,
@@ -69,12 +69,13 @@ export class UtilsModule {
 
   @Select(SettingsState.value('language')) language$!: Observable<string>;
 
-  constructor(protected translate: TranslateService, zone: NgZone, store: Store) {
+  constructor(protected translate: TranslateService, zone: NgZone) {
     translate.setDefaultLang('en');
     zone.runOutsideAngular(() => this.language$.subscribe(lng => this.setLang(lng)) );
   }
 
   /**
+   * Sets the current language to the given value.
    *
    * @param lng
    */
