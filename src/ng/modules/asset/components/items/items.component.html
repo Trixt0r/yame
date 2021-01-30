@@ -74,7 +74,7 @@
     </ng-container>
   </mat-drawer>
 
-  <div class="cards padding-bottom-4 flex wrap">
+  <div *ngIf="!loading" class="cards padding-bottom-4 flex wrap">
     <mat-card *ngFor="let asset of assets"
               dnd-draggable
               [dragEnabled]="true"

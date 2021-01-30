@@ -1,9 +1,27 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  Output,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import { IAssetsSource, LoadAssetResource, LoadFromAssetsSource, RemoveAsset, ScanResource } from '../../states/actions/asset.action';
+import {
+  IAssetsSource,
+  LoadAssetResource,
+  LoadFromAssetsSource,
+  RemoveAsset,
+  ScanResource,
+} from '../../states/actions/asset.action';
 import { AssetState } from '../../states/asset.state';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, mergeMap, reduce, take, takeUntil } from 'rxjs/operators';
 import { Asset } from 'common/asset';
 import { ITreeOptions, TreeComponent, TreeNode } from 'angular-tree-component';
 import { IResourceGroup } from 'common/interfaces/resource';
@@ -28,7 +46,6 @@ interface AssetTreeNode {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetGroupsComponent implements OnDestroy, OnChanges {
-
   /**
    * The group to be set externally.
    */
@@ -60,6 +77,11 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
   @Select(AssetState.icons) icons$!: Observable<{ [icon: string]: string }>;
 
   /**
+   * Stream for subscribing to the group loading state.
+   */
+  @Select(AssetState.scanningResource) loading$!: Observable<string>;
+
+  /**
    * The tree component reference.
    */
   @ViewChild(TreeComponent) tree!: TreeComponent;
@@ -67,7 +89,7 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
   /**
    * Current asset icon map.
    */
-  icons: { [icon: string]: string } = { };
+  icons: { [icon: string]: string } = {};
 
   /**
    * The currently available asset sources.
@@ -88,17 +110,19 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
    * Tree options to be passed to the tree component.
    */
   options: ITreeOptions = {
-    getChildren: (node: TreeNode) => {
-      return new Promise(resolve => {
-        this.store.dispatch(new ScanResource(node.data.asset.resource.uri, node.data.asset.resource.source))
-                  .subscribe(() => {
-                    resolve(
-                      this.groups.filter(it => it.parent === node.data.asset.id)
-                                      .map(this.mapAssetToTreeNode.bind(this))
-                    );
-                  });
-      });
-    }
+    getChildren: async (node: TreeNode) => {
+      const uri = node.data.asset.resource.uri;
+      if (node.data.asset.resource.loaded)
+        return this.groups.filter((it) => it.parent === uri).map(this.mapAssetToTreeNode.bind(this));
+      const current = await this.loading$.pipe(take(1)).toPromise();
+      if (current === uri) {
+        await this.loading$.pipe(filter(val => val === null)).toPromise();
+        return this.groups.filter((it) => it.parent === uri).map(this.mapAssetToTreeNode.bind(this));
+      }
+      this.store.dispatch(new ScanResource(node.data.asset.resource.uri, node.data.asset.resource.source));
+      await this.loading$.pipe(take(2), reduce(() => null, null)).toPromise();
+      return this.groups.filter((it) => it.parent === uri).map(this.mapAssetToTreeNode.bind(this));
+    },
   };
 
   /**
@@ -108,13 +132,13 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
 
   constructor(protected store: Store, protected zone: NgZone, protected cdr: ChangeDetectorRef) {
     zone.runOutsideAngular(() => {
-      this.assetSources$.pipe(takeUntil(this.destroy$)).subscribe(sources => this.assetSources = sources);
-      this.groups$.pipe(takeUntil(this.destroy$)).subscribe(assets => {
+      this.assetSources$.pipe(takeUntil(this.destroy$)).subscribe((sources) => (this.assetSources = sources));
+      this.groups$.pipe(takeUntil(this.destroy$)).subscribe((assets) => {
         this.groups = assets;
-        this.groupNodes = assets.filter(it => !it.parent).map(this.mapAssetToTreeNode.bind(this));
+        this.groupNodes = assets.filter((it) => !it.parent).map(this.mapAssetToTreeNode.bind(this));
         this.cdr.markForCheck();
       });
-      this.icons$.pipe(takeUntil(this.destroy$)).subscribe(icons => this.icons = icons);
+      this.icons$.pipe(takeUntil(this.destroy$)).subscribe((icons) => (this.icons = icons));
     });
   }
 
@@ -129,7 +153,7 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
       name: asset.resource.label || asset.resource.name,
       asset,
       hasChildren: asset.type === 'group' || (Array.isArray(asset.resource.data) && asset.resource.data.length > 0),
-      children: this.groups.filter(it => it.parent === asset.id).map(this.mapAssetToTreeNode.bind(this)),
+      children: this.groups.filter((it) => it.parent === asset.id).map(this.mapAssetToTreeNode.bind(this)),
     };
     if (re.children?.length === 0) delete re.children;
     return re;
@@ -192,9 +216,9 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes.group || !this.tree) return;
     const state = this.tree.treeModel.getState();
-    const activeNodeIds: { [key: string]: boolean } = { };
-    const expandedNodeIds: { [key: string]: boolean } = { };
-    this.groups.forEach(group => {
+    const activeNodeIds: { [key: string]: boolean } = {};
+    const expandedNodeIds: { [key: string]: boolean } = {};
+    this.groups.forEach((group) => {
       activeNodeIds[group.id] = group.id === this.group?.id;
       expandedNodeIds[group.id] = group.id === this.group?.id;
     });
@@ -208,5 +232,4 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 }

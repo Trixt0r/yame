@@ -52,6 +52,8 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   @Select(AssetState.selectedAsset) asset$!: Observable<Asset>;
 
+  @Select(AssetState.scanningResource) loading$!: Observable<string>;
+
   /**
    * Material drawer reference.
    */
@@ -120,6 +122,13 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
             actions.pipe(ofActionSuccessful(LoadAssetResource), take(1)).subscribe(() => this.cdr.markForCheck());
           });
       });
+
+      this.loading$.pipe(takeUntil(this.destroy$)).subscribe(loading => {
+        this.loading = this.group?.id === loading;
+        this.updateAssets();
+        cdr.markForCheck();
+      });
+
       translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe((lang) => {
         this.lang = lang.lang;
         cdr.markForCheck();
@@ -179,13 +188,10 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes.group) return;
-    if (this.group && !this.group.resource.loaded) {
-      this.loading = true;
-      this.store.dispatch(new ScanResource(this.group.resource.uri, this.group.resource.source)).subscribe(() => {
-        this.loading = false;
-        this.cdr.markForCheck();
-      });
-    } else this.updateAssets();
+    if (this.group && !this.group.resource.loaded)
+      this.store.dispatch(new ScanResource(this.group.resource.uri, this.group.resource.source));
+    else
+      this.updateAssets();
   }
 
   /**
