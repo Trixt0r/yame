@@ -84,7 +84,6 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
   imports: [
     SceneModule
   ],
-  // entryComponents: [PixiRendererComponent],
   providers: [
     {
       provide: YAME_RENDERER,

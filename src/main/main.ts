@@ -5,6 +5,7 @@ import * as fsExtra from 'fs-extra';
 import * as lodash from 'lodash';
 import * as uuid from 'uuid';
 import { extend } from '../common/require';
+
 const mapping = {
   yame: yame,
   bluebird: bluebird,
@@ -46,7 +47,7 @@ function quit() {
 }
 
 /**
- * Initializes the app window and triggers the public subscribtion event 'ready'.
+ * Initializes the app window and triggers the public subscription event 'ready'.
  *
  * @returns {void}
  */
@@ -57,9 +58,13 @@ function init() {
     height: 720,
     minWidth: 800,
     minHeight: 600,
+    frame: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
     }
   });
   window.setAutoHideMenuBar(true);
@@ -69,6 +74,7 @@ function init() {
 
   window.loadURL(`file:///${path.resolve(Environment.ngDir, 'index.html')}`);
   yame.Pubsub.emit('ready', window);
+  window.on('close', () => window.destroy());
   }
 
 app.on('ready', async () => {

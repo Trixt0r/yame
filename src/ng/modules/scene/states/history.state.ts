@@ -1,5 +1,5 @@
 import { State, StateContext, Action, Store, Actions, ofActionSuccessful } from '@ngxs/store';
-import { UndoHistory, PushHistory, RedoHistory } from './actions/history.action';
+import { UndoHistory, PushHistory, RedoHistory, ResetHistory } from './actions/history.action';
 import { cloneDeep } from 'lodash';
 import { Keydown } from 'ng/states/hotkey.state';
 import { Injectable } from '@angular/core';
@@ -70,6 +70,11 @@ export class HistoryState {
     previous.push({ actions: cloneDeep(difference.last), last: cloneDeep(difference.actions), date: new Date() });
     ctx.patchState({ previous, next });
     this.store.dispatch(difference.actions);
+  }
+
+  @Action(ResetHistory)
+  reset(ctx: StateContext<IHistoryState>, action: ResetHistory) {
+    ctx.setState({ previous: [], next: [] });
   }
 
 }

@@ -1,9 +1,10 @@
 import { createGroupComponent } from './group';
 import { createRangeComponent, RangeSceneComponent } from './range';
 import { createPointComponent, PointSceneComponent } from './point';
-import { createSizeComponent } from './size';
+import { createSizeComponent, SizeSceneComponent } from './size';
 import { SceneComponent, SceneComponentTransform } from '..';
 import { IPoint } from 'common/math';
+import { registerIO } from '../component.io';
 const RAD2DEG = 180 / Math.PI;
 const DEG2RAD = Math.PI / 180;
 const PI2 = Math.PI * 2;
@@ -60,11 +61,12 @@ export function createRotationComponent(
   group = 'transformation'
 ): RangeSceneComponent {
   const comp = createRangeComponent(id, value, group);
-  comp.label = 'Rotation';
   comp.min = 0;
   comp.max = 360;
   comp.ticks = 90;
   comp.step = 1;
+  comp.type = 'rotation';
+  comp.extends = 'range';
   comp.transform = getRadiansTransform();
   return comp;
 }
@@ -84,7 +86,6 @@ export function createScaleComponent(
   group = 'transformation'
 ): PointSceneComponent {
   const comp = createPointComponent(id, x, y, group);
-  comp.label = 'Scale';
   comp.transform = getPointTransform(getScaleTransform());
   comp.type = 'scale';
   comp.extends = 'point';
@@ -107,18 +108,19 @@ export function createSkewComponent(
   group = 'transformation'
 ): PointSceneComponent {
   const comp = createPointComponent(id, x, y, group);
-  comp.label = 'Skew';
+  comp.type = 'skew';
+  comp.extends = 'point';
   comp.transform = getPointTransform(getRadiansTransform());
   return comp;
 }
 
 /**
- * Creates a transformation component and returns all parts of it.
+ * Creates a transformation component.
  *
  * @param id
  * @param group
  */
-export function createTransformationComponents(id = 'transformation', group?: string): SceneComponent[] {
+export function createTransformationComponent(id = 'transformation', group?: string): SceneComponent {
   const transform = createGroupComponent(
     id,
     [
@@ -131,9 +133,21 @@ export function createTransformationComponents(id = 'transformation', group?: st
     ],
     group
   );
-  transform.label = 'Transformation';
   transform.allowedMemberTypes = [];
   transform.allowedMemberItems = [];
+  transform.type = 'transformation-group';
+  transform.extends = 'group';
+  return transform;
+}
+
+/**
+ * Creates a transformation component and returns all parts of it.
+ *
+ * @param id
+ * @param group
+ */
+export function createTransformationComponents(id = 'transformation', group?: string): SceneComponent[] {
+  const transform = createTransformationComponent(id, group);
 
   const position = createPointComponent('transformation.position');
   const scale = createScaleComponent();
@@ -141,9 +155,6 @@ export function createTransformationComponents(id = 'transformation', group?: st
   const size = createSizeComponent('transformation.size');
   const rotation = createRotationComponent();
   const skew = createSkewComponent();
-
-  position.label = 'Position';
-  pivot.label = 'Pivot';
 
   position.group = transform.id;
   scale.group = transform.id;
@@ -154,3 +165,35 @@ export function createTransformationComponents(id = 'transformation', group?: st
 
   return [transform, position, scale, size, rotation, skew, pivot];
 }
+
+registerIO({
+  type: [
+    'point',
+    'rotation',
+    'scale',
+    'size',
+    'skew',
+    'transformation-group'
+  ],
+
+  async serialize(comp, entity, ctx) {
+    return null;
+  },
+  async deserialize(data: Partial<PointSceneComponent | RangeSceneComponent | SizeSceneComponent>, entity, ctx) {
+    switch (data.type) {
+      case 'transformation-group':
+        return createTransformationComponent(data.id, data.group);
+      case 'point':
+        return createPointComponent(data.id as string, data.x as number, data.y as number, data.group);
+      case 'scale':
+        return createScaleComponent(data.id as string, data.x as number, data.y as number, data.group);
+      case 'size':
+        return createSizeComponent(data.id as string, data.width as number, data.height as number, data.group);
+      case 'rotation':
+        return createRotationComponent(data.id as string, data.value as number, data.group);
+      case 'skew':
+        return createSkewComponent(data.id as string, data.x as number, data.y as number, data.group);
+    }
+    return null;
+  }
+});

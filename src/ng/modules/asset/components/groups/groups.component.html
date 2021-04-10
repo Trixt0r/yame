@@ -41,7 +41,7 @@
 
 <button *ngIf="assetSources.length === 1"
         mat-raised-button
-        aria-label="Add resource group"
+        [attr.aria-label]="'asset.addResourceGroup' | translate"
         (click)="addFromSource(assetSources[0])">
   <mat-icon>library_add</mat-icon>
   <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
@@ -49,7 +49,7 @@
 
 <button *ngIf="assetSources.length > 1"
         mat-raised-button
-        aria-label="Add resource group"
+        [attr.aria-label]="'asset.addResourceGroup' | translate"
         [matMenuTriggerFor]="menu">
   <mat-icon>library_add</mat-icon>
   <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
@@ -58,6 +58,6 @@
 <mat-menu #menu="matMenu">
   <button *ngFor="let source of assetSources" mat-menu-item (click)="addFromSource(source)">
     <mat-icon *ngIf="source.icon">{{ source.icon }}</mat-icon>
-    <span>{{ source.label }}</span>
+    <span>{{ ('asset.source.' + source.type) | translate }}</span>
   </button>
 </mat-menu>

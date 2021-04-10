@@ -292,7 +292,7 @@ tree-node > div.isolated {
 
 .ng-dropdown-panel .ng-dropdown-panel-items {
   background: #424242;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, "Helvetica New", sans-serif;
   color: white;
   .ng-option, .ng-option.ng-option-marked, .ng-option.ng-option-disabled {
     color: white;
@@ -305,4 +305,12 @@ tree-node > div.isolated {
 
 .preferences-menu {
   margin-left: 64px;
+}
+
+.titlebar {
+  font: 400 12px/28px Roboto, "Helvetica New", sans-serif;
+
+  &.inactive {
+    opacity: 0.5;
+  }
 }

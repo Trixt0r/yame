@@ -14,14 +14,41 @@ export class FileProvider extends ElectronProvider {
    */
   async scan(uri: string): Promise<IResource> {
     return new Promise((resolve, reject) => {
-      const id = uniqueId('directory-');
-      this.ipc.send('file:scan', uri, id);
-      this.ipc.once(`file:scan:${id}:done`, (event: IpcRendererEvent, resource: IResource) => {
-        this.ipc.removeAllListeners(`file:scan:${id}:fail`);
+      this.ipc.send('file:scan', uri);
+      this.ipc.once(`file:scan:${uri}:done`, (event: IpcRendererEvent, resource: IResource) => {
+        this.ipc.removeAllListeners(`file:scan:${uri}:fail`);
         resolve(resource);
       });
-      this.ipc.once(`file:scan:${id}:fail`, (event: IpcRendererEvent, e: Error) => {
-        this.ipc.removeAllListeners(`file:scan:${id}:done`);
+      this.ipc.once(`file:scan:${uri}:fail`, (event: IpcRendererEvent, e: Error) => {
+        this.ipc.removeAllListeners(`file:scan:${uri}:done`);
+        reject(new DirectoryProviderException(e.message));
+      });
+    });
+  }
+
+  async read(uri: string): Promise<string | Buffer> {
+    return new Promise((resolve, reject) => {
+      this.ipc.send('file:read', uri);
+      this.ipc.once(`file:read:${uri}:done`, (event: IpcRendererEvent, data: string | Buffer) => {
+        this.ipc.removeAllListeners(`file:read:${uri}:fail`);
+        resolve(data);
+      });
+      this.ipc.once(`file:read:${uri}:fail`, (event: IpcRendererEvent, e: Error) => {
+        this.ipc.removeAllListeners(`file:read:${uri}:done`);
+        reject(new DirectoryProviderException(e.message));
+      });
+    });
+  }
+
+  async write(uri: string, data: string, encoding?: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.ipc.send('file:write', uri, data, encoding);
+      this.ipc.once(`file:write:${uri}:done`, (event: IpcRendererEvent) => {
+        this.ipc.removeAllListeners(`file:scan:${uri}:fail`);
+        resolve();
+      });
+      this.ipc.once(`file:write:${uri}:fail`, (event: IpcRendererEvent, e: Error) => {
+        this.ipc.removeAllListeners(`file:write:${uri}:done`);
         reject(new DirectoryProviderException(e.message));
       });
     });

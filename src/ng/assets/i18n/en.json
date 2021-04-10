@@ -16,10 +16,14 @@
     },
     "loading": "Loading assets...",
     "addSource": "Add source",
+    "addResourceGroup": "Add resource group",
     "type": {
       "image": "Image"
     },
-    "imageDimensions": "Dimensions"
+    "imageDimensions": "Dimensions",
+    "source": {
+      "local": "Local folder"
+    }
   },
   "sidebar": {
     "hierarchy": {

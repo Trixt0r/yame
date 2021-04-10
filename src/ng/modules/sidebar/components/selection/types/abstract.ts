@@ -133,7 +133,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * @return The transformed value or the original value.
    */
   transform(value: unknown): unknown {
-    if (!this.component?.transform) return value;
+    if (!this.component?.transform || typeof this.component?.transform.apply !== 'function') return value;
     return this.component?.transform.apply(value);
   }
 
@@ -144,7 +144,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * @return The reversed value or the given value.
    */
   reverse(value: unknown): unknown {
-    if (!this.component?.transform) return value;
+    if (!this.component?.transform || typeof this.component?.transform.reverse !== 'function') return value;
     return this.component?.transform.reverse(value);
   }
 
@@ -152,8 +152,10 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * Returns the label for currently bound component.
    */
   getLabel(): string {
-    if (!this.component || !this.component.id) return '';
-    const found = this.translate.instant(`componentLabel.${this.component.id}`);
+    if (!this.component || (!this.component.id && !this.component.label)) return '';
+    let found = this.translate.instant(`componentLabel.${this.component.id}`);
+    if (typeof found === 'string' && found.indexOf('componentLabel.') < 0) return found;
+    found = this.translate.instant(`componentLabel.${this.component.label}`);
     if (typeof found === 'string' && found.indexOf('componentLabel.') < 0) return found;
     return this.component.id;
   }

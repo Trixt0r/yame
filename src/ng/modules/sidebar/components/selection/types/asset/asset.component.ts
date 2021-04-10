@@ -52,15 +52,15 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   }
 
   set selected(id: string | null | undefined) {
+    this.currentIndex = id ? this.allAssets.findIndex((it) => it.id === id) : -1;
+    const asset = this.allAssets[this.currentIndex];
+    if (id === this.component?.asset && id && !asset) this.loadMoreAssets();
     if (!this.component || (this.component && this.component.asset === id)) return;
     const data = {
       originalEvent: null,
       value: id,
       component: this.component,
     };
-    this.currentIndex = id ? this.allAssets.findIndex((it) => it.id === id) : -1;
-    const asset = this.allAssets[this.currentIndex];
-    if (!this.component) return;
     this.component.asset = asset ? id : null;
     delete this.component.mixed;
     this.cdr.detectChanges();
@@ -103,6 +103,9 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     this.assetBuffer = this.assetBuffer.concat(filtered.slice(length, idx));
   }
 
+  /**
+   * Loads assets, which were not loaded yet.
+   */
   loadMoreAssets() {
     const notLoaded = this.allAssets.find((it) => it.type === 'group' && !it.resource.loaded);
     if (notLoaded) {

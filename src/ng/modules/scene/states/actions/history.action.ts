@@ -13,4 +13,9 @@ export class RedoHistory {
   constructor() { }
 }
 
-export type HistoryActions = PushHistory | UndoHistory | RedoHistory;
+export class ResetHistory {
+  static readonly type = '[History] Reset';
+  constructor() { }
+}
+
+export type HistoryActions = PushHistory | UndoHistory | RedoHistory | ResetHistory;

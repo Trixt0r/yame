@@ -15,6 +15,7 @@ import {
   UnselectAsset,
   RegisterAssetTypeLabel,
   ScanResource,
+  ResetAssets,
 } from './actions/asset.action';
 import { merge } from 'lodash';
 import { Injectable, Type } from '@angular/core';
@@ -106,7 +107,7 @@ export interface IAssetState {
       {
         origin: 'file:///',
         type: 'local',
-        label: 'Local folder',
+        label: 'asset.source.local',
         icon: 'folder_open',
       },
     ],
@@ -403,5 +404,10 @@ export class AssetState implements NgxsOnInit {
     const ui = merge({}, currentUi);
     ui.typeLabels = { ...ui.typeLabels, ...labels };
     ctx.patchState({ ui });
+  }
+
+  @Action(ResetAssets)
+  reset(ctx: StateContext<IAssetState>, action: ResetAssets) {
+    ctx.patchState({ assets: [], selectedAsset: null, selectedGroup: null, scanningResource: null });
   }
 }

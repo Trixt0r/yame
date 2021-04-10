@@ -111,7 +111,7 @@ export class File implements IResource<string | Buffer>, IExportable<IResource> 
    * @param stats Whether to read the file stats too.
    * @return The file content.
    */
-  async read(encoding = 'utf8', stats = false): Promise<string | Buffer> {
+  async read(encoding: string = 'utf8', stats = false): Promise<string | Buffer> {
     if (this.data) {
       if (stats && this.size) return this.data;
       else if (!stats) return this.data;
@@ -125,10 +125,12 @@ export class File implements IResource<string | Buffer>, IExportable<IResource> 
 
   /**
    * Writes the given data to disc and resolves if successful.
-   * @param data
+   *
+   * @param data The file content to write.
+   * @param encoding Optional encoding
    */
-  async write(data: any): Promise<void> {
-    const re = await require('fs-extra').writeFile(this.uri, data);
+  async write(data: any, encoding: string = 'utf8'): Promise<void> {
+    const re = await require('fs-extra').writeFile(this.uri, data, encoding);
     this.data = data;
     return re;
   }

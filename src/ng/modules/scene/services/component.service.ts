@@ -138,7 +138,7 @@ export class SceneComponentService {
     component.editable = true;
     // Make sure the hierarchy is set up properly
     if (group) {
-      if (group.type === 'group') {
+      if (group.type === 'group' || group.extends === 'group') {
         if (!group.members) group.members = [];
         group.members.push(component.id);
         component.group = group.id;

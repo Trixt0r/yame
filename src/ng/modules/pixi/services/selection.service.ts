@@ -198,9 +198,9 @@ export class PixiSelectionService {
             const data = Array.isArray(act.data) ? act.data : [act.data];
             const found = data.find(it => it.id === 'select');
             const components = found ? found.components : null;
-            if (!components || !components.find(comp => comp.id.indexOf('transformation') >= 0)) return;
+            if (!components || !components.find(comp => comp.id!.indexOf('transformation') >= 0)) return;
             containerService.updateDispatched$.next(act);
-            containerService.components.set.apply(containerService.components, components);
+            containerService.components.set.apply(containerService.components, components as SceneComponent[]);
             containerService.applyComponents();
             if (action instanceof Input) act.data = containerService.updateEntities(false);
             else containerService.dispatchUpdate.apply(containerService, containerService.components.elements as SceneComponent[]);

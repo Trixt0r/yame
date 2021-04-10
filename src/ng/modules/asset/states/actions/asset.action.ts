@@ -138,3 +138,8 @@ export class RegisterAssetTypeLabel {
 
   constructor(public label: string, public types: string[]) { }
 }
+
+export class ResetAssets {
+  public static readonly type = '[Asset] Reset assets';
+  constructor() { }
+}

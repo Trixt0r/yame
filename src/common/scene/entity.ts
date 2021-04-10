@@ -1,10 +1,10 @@
 import * as uuid from 'uuid';
-import * as _ from 'lodash';
 import { SceneEntityException } from '../exception/scene/entity';
 import { AbstractEntity } from '@trixt0r/ecs';
 import { SceneComponent } from './component';
 import { SceneComponentCollection } from './component.collection';
-import { cloneDeep } from 'lodash';
+import { deserialize, serialize } from './component.io';
+import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 
 /**
  * Data which has to be exported for an entity.
@@ -12,7 +12,6 @@ import { cloneDeep } from 'lodash';
  * @interface SceneEntityData
  */
 export interface SceneEntityData {
-
   /**
    *The id of the entity.
    */
@@ -21,12 +20,12 @@ export interface SceneEntityData {
   /**
    * The component data of the entity.
    */
-  components: SceneComponent[];
+  components: Partial<SceneComponent>[];
 
   /**
    * The parent entity id.
    */
-  parent: string | null;
+  parent?: string | null;
 
   /**
    * The type of the entity.
@@ -35,7 +34,6 @@ export interface SceneEntityData {
 }
 
 export enum SceneEntityType {
-
   /**
    * Defines a scene entity as a plain object.
    * A plain object can not be referenced as a parent,
@@ -56,7 +54,6 @@ export enum SceneEntityType {
    * A layer can be referenced as a parent, but never references a parent.
    */
   Layer = 'layer',
-
 }
 
 /**
@@ -68,7 +65,6 @@ export enum SceneEntityType {
  * @extends {AbstractEntity}
  */
 export class SceneEntity extends AbstractEntity<SceneComponent> {
-
   /**
    * Creates a new entity from the given scene entity data.
    *
@@ -76,16 +72,18 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
    * emitted right before resolving.
    *
    * @param data The data to create the entity from.
+   * @param context An import context.
    * @returns The entity on success.
    */
-  static async import(data: SceneEntityData): Promise<SceneEntity> {
+  static async import(data: SceneEntityData, context: ISerializeContext): Promise<SceneEntity> {
     if (!data.id) return Promise.reject(new SceneEntityException('No id provided!'));
 
     const entity = new SceneEntity(data.id);
-    entity.parent = data.parent;
     entity.type = data.type;
+    if (data.parent) entity.parent = data.parent;
     if (Array.isArray(data.components)) {
-      entity.components.set.apply(entity.components, data.components);
+      const comps = await Promise.all(data.components.map((comp) => deserialize(comp, entity, context)));
+      entity.components.set.apply(entity.components, comps);
     } else {
       console.warn(`[SceneEntity] Note: No components defined for importing entity ${entity.id}`);
     }
@@ -106,7 +104,7 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
   /**
    * The child entity ids.
    */
-  children: string[]= [];
+  children: string[] = [];
 
   /**
    * @inheritdoc
@@ -117,7 +115,6 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
    * @inheritdoc
    */
   readonly components!: SceneComponentCollection<SceneComponent>;
-
 
   /**
    * Creates a new scene entity.
@@ -135,13 +132,17 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
    *
    * @returns The exported data on success.
    */
-  async export(): Promise<SceneEntityData> {
+  async export(context: ISerializeContext): Promise<SceneEntityData> {
+    const serialized = (await Promise.all(this.components.map((comp) => serialize(comp, this, context)))).filter(
+      (it) => it !== null
+    ) as Partial<SceneComponent>[];
     const data: SceneEntityData = {
       id: this.id,
-      components: this.components.map(comp => cloneDeep(comp)),
+      components: serialized,
       parent: this.parent,
       type: this.type,
     };
+    if (data.parent === null) delete data.parent;
     return data;
   }
 }

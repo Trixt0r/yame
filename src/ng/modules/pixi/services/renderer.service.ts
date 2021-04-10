@@ -25,7 +25,7 @@ import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent, 
 import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { SceneComponentCollection } from 'common/scene/component.collection';
-import { maxBy } from 'lodash';
+import { each, maxBy } from 'lodash';
 import { SizeSceneComponent } from 'common/scene/component/size';
 
 const tempPoint = new Point();
@@ -195,6 +195,8 @@ export class PixiRendererService implements ISceneRenderer {
             if (!isClone) {
               child.transform.updateTransform(self.scene.transform);
               self.updateComponents(entity.components, child);
+            } else {
+              entity.components.remove(isClone);
             }
             // Make sure the new display object gets added to the correct parent
             const parentContainer = self.getContainer(entity.parent);
@@ -203,12 +205,14 @@ export class PixiRendererService implements ISceneRenderer {
             if (!isClone) {
               transformTo(child, parentContainer);
               self.updateComponents(entity.components, child);
+            } else {
+              entity.components.remove(isClone);
             }
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
           entities.forEach(entity => {
-            const children = self.sceneService.getChildren(entity.id, true);
+            const children = self.sceneService.getChildren(entity.id, true).filter(it => entities.find(e => e.id !== it.id));
             if (children.length > 0) engine.entities.remove.apply(engine.entities, children);
             const container = self.pixiContainers[entity.id];
             if (container?.parent) {
@@ -223,6 +227,13 @@ export class PixiRendererService implements ISceneRenderer {
             delete self.pixiContainers[entity.id];
           });
         },
+      onClearedEntities() {
+        each(self.pixiContainers, container => {
+          container?.removeChildren(0, container.children.length);
+          if (container?.parent) container.parent.removeChild(container);
+        });
+        self.pixiContainers = { };
+      }
       });
     });
   }

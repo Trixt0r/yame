@@ -22,4 +22,15 @@ export class DialogProvider extends ElectronProvider {
     });
   }
 
+  async save(options: Electron.SaveDialogOptions): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const id = uniqueId('dialog-');
+      this.ipc.send('dialog:save', options, id);
+      this.ipc.once(`dialog:save:${id}`, (event: IpcRendererEvent, dialog: { filePath: string }) => {
+        if (dialog && dialog.filePath) resolve(dialog.filePath);
+        else reject(new DialogProviderException('No files chosen'));
+      });
+    });
+  }
+
 }

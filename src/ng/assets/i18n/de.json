@@ -16,10 +16,14 @@
     },
     "loading": "Lade Assets...",
     "addSource": "Quelle hinzufügen",
+    "addResourceGroup": "Gruppe hinzufügen",
     "type": {
       "image": "Bild"
     },
-    "imageDimensions": "Abmessungen"
+    "imageDimensions": "Abmessungen",
+    "source": {
+      "local": "Lokaler Ordner"
+    }
   },
   "sidebar": {
     "hierarchy": {
@@ -32,7 +36,7 @@
     "transformation.position": "Position",
     "transformation.size": "Größe",
     "transformation.rotation": "Rotation",
-    "transformation.skew": "Schiefe",
+    "transformation.skew": "Neigung",
     "transformation.pivot": "Drehpunkt",
     "sprite": "Sprite",
     "sprite.texture": "Textur",

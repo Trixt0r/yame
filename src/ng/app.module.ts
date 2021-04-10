@@ -20,12 +20,13 @@ import { HotkeyState } from 'ng/states/hotkey.state';
 import { AssetModule } from './modules/asset/asset.module';
 import { CameraModule } from './modules/camera/camera.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
+import { EditorState } from './states/editor.state';
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    NgxsModule.forRoot([HotkeyState]),
+    NgxsModule.forRoot([EditorState, HotkeyState]),
     MaterialModule,
     UtilsModule,
     SceneModule,

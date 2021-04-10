@@ -3,14 +3,14 @@ import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { SceneAssetConverterService } from './converter.service';
 import { CreateEntity, SortEntity, DeleteEntity } from '../states/actions/entity.action';
-import { SceneEntity, createTransformationComponents } from 'common/scene';
+import { SceneEntity, createTransformationComponents, SceneEntityData } from 'common/scene';
 import { Observable, from, of, Subscription } from 'rxjs';
 import { SceneState } from '../states/scene.state';
 import { flatMap } from 'rxjs/operators';
 import { SceneComponent } from '../components/scene/scene.component';
+import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 
 export interface ISceneRenderer {
-
   /**
    * The scene component reference.
    * Use it to visualize your rendered data.
@@ -37,7 +37,7 @@ export interface ISceneRenderer {
    * @param y The y coordinate.
    * @return { { x: number, y: number } } The coordinates in scene space.
    */
-  projectToScene(x: number, y: number): { x: number, y: number };
+  projectToScene(x: number, y: number): { x: number; y: number };
 
   /**
    * Creates a preview at the given coordinates from the given asset.
@@ -72,27 +72,28 @@ export interface ISceneRenderer {
  * Renderer which does nothing.
  */
 export class NoopRenderer implements ISceneRenderer {
-
   component!: SceneComponent;
 
   sceneService!: SceneService;
 
-  projectToScene(x: number, y: number) { return { x, y }; }
+  projectToScene(x: number, y: number) {
+    return { x, y };
+  }
 
-  setSize(width: number, height: number) { }
+  setSize(width: number, height: number) {}
 
-  createPreview(x: number, y: number, asset: Asset): void { }
+  createPreview(x: number, y: number, asset: Asset): void {}
 
-  updatePreview(x: number, y: number) { }
+  updatePreview(x: number, y: number) {}
 
-  removePreview() { };
+  removePreview() {}
 
-  dispose() { };
+  dispose() {}
 }
 
 export const YAME_RENDERER = new InjectionToken<ISceneRenderer>('Yame Renderer', {
   providedIn: 'root',
-  factory: () => new NoopRenderer()
+  factory: () => new NoopRenderer(),
 });
 
 export interface ISceneRendererComponent<T extends HTMLElement> {
@@ -100,84 +101,86 @@ export interface ISceneRendererComponent<T extends HTMLElement> {
 }
 
 @Component({
-  template: `<canvas></canvas>`
+  template: `<canvas></canvas>`,
 })
 export class NoopSceneRendererComponent implements ISceneRendererComponent<HTMLCanvasElement> {
-  constructor(public readonly ref: ElementRef<HTMLCanvasElement>) { }
+  constructor(public readonly ref: ElementRef<HTMLCanvasElement>) {}
 }
 
-export const YAME_RENDERER_COMPONENT = new InjectionToken<Type<ISceneRendererComponent<HTMLElement>>>('Yame Renderer Component', {
-  providedIn: 'root',
-  factory: () => NoopSceneRendererComponent
-});
+export const YAME_RENDERER_COMPONENT = new InjectionToken<Type<ISceneRendererComponent<HTMLElement>>>(
+  'Yame Renderer Component',
+  {
+    providedIn: 'root',
+    factory: () => NoopSceneRendererComponent,
+  }
+);
 
 /**
  * The scene service provides an interface to access entities in the scene and the renderer.
  */
 @Injectable({ providedIn: 'root' })
 export class SceneService {
-
   protected _entities: SceneEntity[] = [];
-  protected idMapping: { [key: string]: SceneEntity } = { };
-  protected childDeepMapping: { [key: string]: SceneEntity[] } = { };
-  protected childFlatMapping: { [key: string]: SceneEntity[] } = { };
+  protected idMapping: { [key: string]: SceneEntity } = {};
+  protected childDeepMapping: { [key: string]: SceneEntity[] } = {};
+  protected childFlatMapping: { [key: string]: SceneEntity[] } = {};
   protected subs: Subscription[] = [];
-
 
   constructor(
     @Inject(YAME_RENDERER) public readonly renderer: ISceneRenderer,
     @Inject(YAME_RENDERER_COMPONENT) public readonly rendererComponent: Type<ISceneRendererComponent<HTMLElement>>,
     protected store: Store,
     protected actions: Actions,
-    protected converter: SceneAssetConverterService) {
-      renderer.sceneService = this;
-      const collectUpdates = (entity: SceneEntity, target: string[]) => {
-        let parent = this.getEntity(entity.parent);
-        while (parent) {
-          if (target.indexOf(parent.id) < 0) target.push(parent.id);
-          parent = parent.parent ? this.getEntity(parent.parent) : null;
-        }
-      };
+    protected converter: SceneAssetConverterService
+  ) {
+    renderer.sceneService = this;
+    const collectUpdates = (entity: SceneEntity, target: string[]) => {
+      let parent = this.getEntity(entity.parent);
+      while (parent) {
+        if (target.indexOf(parent.id) < 0) target.push(parent.id);
+        parent = parent.parent ? this.getEntity(parent.parent) : null;
+      }
+    };
 
-      const updateEntities = (ids: string[]) => {
-        ids.forEach(id => {
-          this.childDeepMapping[id] = this._getChildren(id, true);
-          this.childFlatMapping[id] = this._getChildren(id, false);
-        });
-      };
+    const updateEntities = (ids: string[]) => {
+      ids.forEach((id) => {
+        this.childDeepMapping[id] = this._getChildren(id, true);
+        this.childFlatMapping[id] = this._getChildren(id, false);
+      });
+    };
 
-      this.subs.push(actions.pipe(ofActionSuccessful(CreateEntity, DeleteEntity))
-        .subscribe((action: CreateEntity | DeleteEntity) => {
-          this._entities = this.store.snapshot().scene.entities.slice() as SceneEntity[];
-          const updates: string[] = [];
-          if (action instanceof CreateEntity) {
-            action.created.forEach(entity => {
-              this.idMapping[entity.id] = entity;
-              this.childDeepMapping[entity.id] = this._getChildren(entity.id, true);
-              this.childFlatMapping[entity.id] = this._getChildren(entity.id, false);
-              collectUpdates(entity, updates);
-            });
-          } else {
-            action.deleted.forEach(it => {
-              const entity = this.idMapping[it.id];
-              if (!entity) return;
-              collectUpdates(entity, updates);
-              delete this.idMapping[it.id];
-              delete this.childDeepMapping[it.id];
-              delete this.childFlatMapping[it.id];
-            });
-          }
-          updateEntities(updates);
-        }));
     this.subs.push(
-      actions.pipe(ofActionSuccessful(SortEntity))
-        .subscribe(() => {
-          this._entities = this.store.snapshot().scene.entities.slice();
-          this.entities.forEach(it => {
-            this.childDeepMapping[it.id] = this._getChildren(it.id, true);
-            this.childFlatMapping[it.id] = this._getChildren(it.id, false);
+      actions.pipe(ofActionSuccessful(CreateEntity, DeleteEntity)).subscribe((action: CreateEntity | DeleteEntity) => {
+        this._entities = this.store.snapshot().scene.entities.slice() as SceneEntity[];
+        const updates: string[] = [];
+        if (action instanceof CreateEntity) {
+          action.created.forEach((entity) => {
+            this.idMapping[entity.id] = entity;
+            this.childDeepMapping[entity.id] = this._getChildren(entity.id, true);
+            this.childFlatMapping[entity.id] = this._getChildren(entity.id, false);
+            collectUpdates(entity, updates);
           });
-        })
+        } else {
+          action.deleted.forEach((it) => {
+            const entity = this.idMapping[it.id];
+            if (!entity) return;
+            collectUpdates(entity, updates);
+            delete this.idMapping[it.id];
+            delete this.childDeepMapping[it.id];
+            delete this.childFlatMapping[it.id];
+          });
+        }
+        updateEntities(updates);
+      })
+    );
+    this.subs.push(
+      actions.pipe(ofActionSuccessful(SortEntity)).subscribe(() => {
+        this._entities = this.store.snapshot().scene.entities.slice();
+        this.entities.forEach((it) => {
+          this.childDeepMapping[it.id] = this._getChildren(it.id, true);
+          this.childFlatMapping[it.id] = this._getChildren(it.id, false);
+        });
+      })
     );
   }
 
@@ -205,13 +208,10 @@ export class SceneService {
    */
   protected _getChildren(entityOrId: string | SceneEntity, deep: boolean = true): SceneEntity[] {
     const id = entityOrId instanceof SceneEntity ? entityOrId.id : entityOrId;
-    let children = this._entities.filter(entity => entity.parent === id);
+    let children = this._entities.filter((entity) => entity.parent === id);
     if (deep) {
-      children.slice().forEach(it => {
-        children = [
-          ...children,
-          ...this._getChildren(it.id),
-        ];
+      children.slice().forEach((it) => {
+        children = [...children, ...this._getChildren(it.id)];
       });
     }
     return children;
@@ -243,9 +243,9 @@ export class SceneService {
   createEntity(x: number, y: number, asset?: Asset): Observable<SceneEntity> {
     const hasAsset = asset && asset instanceof Asset;
     const obs = hasAsset ? from(this.converter.get(asset as Asset)) : of([]);
-    const parent = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
+    const parent = this.store.selectSnapshot((state) => state.select).isolated as SceneEntity;
     const re = obs.pipe(
-      flatMap(data => {
+      flatMap((data) => {
         const entity = new SceneEntity();
         if (parent) entity.parent = parent.id;
         const comps = createTransformationComponents();
@@ -271,9 +271,11 @@ export class SceneService {
    * @return An observable, you can subscribe to.
    */
   addEntity(x: number, y: number, asset?: Asset): Observable<SceneState> {
-    return this.createEntity(x, y, asset).pipe(flatMap(entity => {
-      return this.store.dispatch(new CreateEntity(entity));
-    }));
+    return this.createEntity(x, y, asset).pipe(
+      flatMap((entity) => {
+        return this.store.dispatch(new CreateEntity(entity));
+      })
+    );
   }
 
   /**
@@ -286,7 +288,7 @@ export class SceneService {
     if (entity === null || entity === void 0) return void 0;
     const id = entity instanceof SceneEntity ? entity.id : entity;
     const re = this.idMapping[id];
-    if (!re) return this.store.selectSnapshot(state => state.scene.entities).find((it: SceneEntity) => it.id === id);
+    if (!re) return this.store.selectSnapshot((state) => state.scene.entities).find((it: SceneEntity) => it.id === id);
     return re;
   }
 
@@ -347,7 +349,58 @@ export class SceneService {
    * Disposes this service and its dependencies.
    */
   dispose(): void {
-    this.subs.forEach(sub => sub.unsubscribe());
+    this.subs.forEach((sub) => sub.unsubscribe());
     this.renderer.dispose();
+  }
+
+  /**
+   * Exports the current scene entities as plain objects in the given context.
+   *
+   * @param context Any export context.
+   */
+  async export(context: ISerializeContext): Promise<SceneEntityData[]> {
+    const entities = await Promise.all(this.entities.map((entity) => entity.export(context)));
+
+    const getParentCount = (entity: SceneEntityData) => {
+      let parent = entity.parent;
+      let count = 0;
+      while (parent) {
+        ++count;
+        const found = entities.find((it) => it.id === parent);
+        parent = found ? found.parent : null;
+      }
+      return count;
+    };
+    entities.sort((a, b) => getParentCount(a) - getParentCount(b));
+
+    return entities;
+  }
+
+  /**
+   * Imports the given entities in the given context.
+   *
+   * @param entities Scene entity data to import into the scene.
+   * @param context Any import context.
+   */
+  async import(entities: SceneEntityData[], context: ISerializeContext): Promise<SceneEntity[]> {
+    const newEntities = await Promise.all(
+      entities.map(async (data) => {
+        const entity = await SceneEntity.import(data, context);
+        entity.components.set({ id: 'copy-descriptor', type: 'copy-data', ref: entity.id });
+        return entity;
+      })
+    );
+    const getParentCount = (entity: SceneEntity) => {
+      let parent = entity.parent;
+      let count = 0;
+      while (parent) {
+        ++count;
+        const found = newEntities.find((it) => it.id === parent);
+        parent = found ? found.parent : null;
+      }
+      return count;
+    };
+    newEntities.sort((a, b) => getParentCount(a) - getParentCount(b));
+    return newEntities;
   }
 }

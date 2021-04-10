@@ -3,6 +3,7 @@ import { Collection, Engine } from '@trixt0r/ecs';
 import { ofActionSuccessful, Actions } from '@ngxs/store';
 import { CreateEntity, DeleteEntity, SortEntity, UpdateEntity } from '../states/actions/entity.action';
 import { SceneEntity } from 'common/scene';
+import { ResetScene } from '../states/actions/scene.action';
 
 interface EngineOptions {
   delta?: number;
@@ -23,8 +24,8 @@ export class EngineService {
 
   constructor(actions: Actions) {
     this.engine = new Engine();
-    actions.pipe(ofActionSuccessful(CreateEntity, DeleteEntity, UpdateEntity , SortEntity))
-      .subscribe((action: CreateEntity | DeleteEntity | UpdateEntity | SortEntity) => {
+    actions.pipe(ofActionSuccessful(CreateEntity, DeleteEntity, UpdateEntity , SortEntity, ResetScene))
+      .subscribe((action: CreateEntity | DeleteEntity | UpdateEntity | SortEntity | ResetScene) => {
         if (action instanceof CreateEntity)
           this.engine.entities.add.apply(this.engine.entities, action.created);
         else if (action instanceof DeleteEntity)
@@ -33,6 +34,8 @@ export class EngineService {
           (this.engine.entities as Collection<SceneEntity>).sort((a: SceneEntity, b: SceneEntity) => {
             return Math.sign((a.components.byId('index')?.index as number) - (b.components.byId('index')?.index as number));
           });
+        else if (action instanceof ResetScene)
+          this.engine.entities.clear();
         this.run();
       });
   }

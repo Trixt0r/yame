@@ -5,9 +5,10 @@ import { SceneComponent, SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
 import { Dispatcher, Component, Collection } from '@trixt0r/ecs';
 import { SceneService } from '../services/scene.service';
-import { Select } from './actions/select.action';
-import { PushHistory } from './actions/history.action';
+import { Isolate, Select, Unselect } from './actions/select.action';
+import { PushHistory, ResetHistory } from './actions/history.action';
 import { Injectable } from '@angular/core';
+import { ResetScene } from './actions/scene.action';
 
 /**
  * Interface representing the scene state.
@@ -247,18 +248,19 @@ export class SceneState {
   @Action(DeleteEntity)
   removeEntity(ctx: StateContext<ISceneState>, action: DeleteEntity) {
     const state = ctx.getState();
-    const toRemove = Array.isArray(action.id) ? action.id : [action.id];
     const entities = state.entities.slice();
+    const idsToRemove = Array.isArray(action.id) ? action.id : [action.id];
     const entitiesToRemove: SceneEntity[] = [];
-    toRemove.slice().forEach((id) => {
-      this.service.getChildren(id).forEach((it) => toRemove.push(it.id));
-    });
-    toRemove.forEach((id) => {
-      const idx = entities.findIndex((entity) => entity.id === id);
-      if (idx < 0) return console.warn(`[SceneState] No entity found for id ${id}`);
-      const entity = state.entities[idx];
 
-      const parentEntity = state.entities.find((it) => it.id === entity.parent);
+    idsToRemove.slice().forEach(id => {
+      this.service.getChildren(id).forEach((it) => idsToRemove.push(it.id));
+    });
+    idsToRemove.forEach(id => {
+      const idx = entities.findIndex(entity => entity.id === id);
+      if (idx < 0) return console.warn(`[SceneState] No entity found for id ${id}`);
+
+      const entity = entities[idx];
+      const parentEntity = state.entities.find(it => it.id === entity.parent);
       if (parentEntity) {
         const childIdx = parentEntity.children.indexOf(id);
         if (childIdx >= 0) parentEntity.children.splice(childIdx, 1);
@@ -270,7 +272,7 @@ export class SceneState {
     ctx.patchState({ entities });
     if (action.persist)
       this.store.dispatch(
-        new PushHistory([new CreateEntity(action.deleted, [], false)], [new DeleteEntity(toRemove, [], false)])
+        new PushHistory([new CreateEntity(action.deleted, [], false)], [new DeleteEntity(idsToRemove, [], false)])
       );
   }
 
@@ -327,7 +329,7 @@ export class SceneState {
           });
         },
       });
-      entity.components.set.apply(entity.components, newData.components);
+      entity.components.set.apply(entity.components, newData.components as SceneComponent[]);
       entity.components.removeListener(listenerIdx);
 
       // Updated the parent relation, if necessary.
@@ -376,7 +378,7 @@ export class SceneState {
           // new Unselect([], [], false),
           new Select(
             data.map(it => it.id).filter(id => id !== 'select') as string[],
-            cloneDeep((data.find(it => it.id === 'select') || { components: [] }).components),
+            cloneDeep((data.find(it => it.id === 'select') || { components: [] }).components as SceneComponent[]),
             false,
             true
           ),
@@ -451,5 +453,12 @@ export class SceneState {
     return entities.sort((a, b) => {
       return Math.sign((a.components.byId('index')?.index as number) - (b.components.byId('index')?.index as number));
     });
+  }
+
+  @Action(ResetScene)
+  reset(ctx: StateContext<ISceneState>, action: ResetScene) {
+    return this.store.dispatch([new Unselect(void 0, void 0, false), new Isolate(null, false), new ResetHistory()])
+            .toPromise()
+            .then(() => ctx.setState({ settings: { }, entities: [] }));
   }
 }

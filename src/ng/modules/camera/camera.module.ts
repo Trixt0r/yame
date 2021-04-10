@@ -94,7 +94,7 @@ import { CameraState } from './states/camera.state';
                 options: [
                   { value: 0.01, label: '1%' },
                   { value: 0.02, label: '2%' },
-                  { value: 0.03, label: '2%' },
+                  { value: 0.03, label: '3%' },
                   { value: 0.04, label: '4%' },
                   { value: 0.05, label: '5%' },
                   { value: 0.1, label: '10%' },
