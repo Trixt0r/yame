@@ -3,7 +3,6 @@ import { HotkeyService } from 'ng/services/hotkey.service';
 import { Injectable, NgZone } from '@angular/core';
 
 export interface Shortcut {
-
   /**
    * The unique id of the shortcut.
    */
@@ -27,17 +26,17 @@ export interface Shortcut {
 
 export class Keydown {
   static readonly type = '[Hotkey] Keydown';
-  constructor(public readonly shortcut: Shortcut, public readonly event: KeyboardEvent) { }
+  constructor(public readonly shortcut: Shortcut, public readonly event: KeyboardEvent) {}
 }
 
 export class Keyup {
   static readonly type = '[Hotkey] Keyup';
-  constructor(public readonly shortcut: Shortcut, public readonly event: KeyboardEvent) { }
+  constructor(public readonly shortcut: Shortcut, public readonly event: KeyboardEvent) {}
 }
 
 export class AddShortcut {
   static readonly type = '[Hotkey] Add shortcut';
-  constructor(public readonly shortcut: Shortcut) { }
+  constructor(public readonly shortcut: Shortcut) {}
 }
 
 export interface IHotkeyState {
@@ -49,22 +48,56 @@ export interface IHotkeyState {
   defaults: {
     shortcuts: [
       {
+        id: 'save',
+        label: 'Save',
+        keys: [`${HotkeyService.commandOrControl}.s`],
+      },
+      {
+        id: 'save.as',
+        label: 'Save',
+        keys: [`${HotkeyService.commandOrControl}.shift.s`],
+      },
+      {
+        id: 'open',
+        label: 'Open',
+        keys: [`${HotkeyService.commandOrControl}.o`],
+      },
+      {
         id: 'undo',
         label: 'Undo',
-        keys: ['control.z', 'meta.z']
+        keys: [`${HotkeyService.commandOrControl}.z`],
       },
       {
         id: 'redo',
         label: 'Redo',
-        keys: ['control.y', 'meta.y', 'meta.shift.z']
-      }
-    ]
+        keys: [`${HotkeyService.commandOrControl}.y`, 'meta.shift.z'],
+      },
+      {
+        id: 'copy',
+        label: 'Copy',
+        keys: [`${HotkeyService.commandOrControl}.c`],
+      },
+      {
+        id: 'paste',
+        label: 'Paste',
+        keys: [`${HotkeyService.commandOrControl}.v`],
+      },
+      {
+        id: 'cut',
+        label: 'Cut',
+        keys: [`${HotkeyService.commandOrControl}.x`],
+      },
+      {
+        id: 'remove',
+        label: 'Remove',
+        keys: ['delete', 'backspace'],
+      },
+    ],
   },
 })
 @Injectable()
 export class HotkeyState implements NgxsOnInit {
-
-  constructor(protected hotkeys: HotkeyService, protected store: Store, protected zone: NgZone) { }
+  constructor(protected hotkeys: HotkeyService, protected store: Store, protected zone: NgZone) {}
 
   /**
    * Registers the given shortcut via the hotkey service.
@@ -73,10 +106,12 @@ export class HotkeyState implements NgxsOnInit {
    */
   protected registerShortcut(shortcut: Shortcut): void {
     this.zone.runOutsideAngular(() => {
-      this.hotkeys.register({ keys: shortcut.keys, event: 'keydown' })
-                  .subscribe(event => this.store.dispatch(new Keydown(shortcut, event)));
-      this.hotkeys.register({ keys: shortcut.keys, event: 'keyup' })
-                  .subscribe(event => this.store.dispatch(new Keyup(shortcut, event)));
+      this.hotkeys
+        .register({ keys: shortcut.keys, event: 'keydown' })
+        .subscribe((event) => this.store.dispatch(new Keydown(shortcut, event)));
+      this.hotkeys
+        .register({ keys: shortcut.keys, event: 'keyup' })
+        .subscribe((event) => this.store.dispatch(new Keyup(shortcut, event)));
     });
   }
 
@@ -84,7 +119,7 @@ export class HotkeyState implements NgxsOnInit {
    * @inheritdoc
    */
   ngxsOnInit(ctx?: StateContext<IHotkeyState>) {
-    ctx?.getState().shortcuts.forEach(it => {
+    ctx?.getState().shortcuts.forEach((it) => {
       if (!it.keys) return;
       this.registerShortcut(it);
     });
@@ -97,5 +132,4 @@ export class HotkeyState implements NgxsOnInit {
     this.registerShortcut(action.shortcut);
     ctx.patchState({ shortcuts });
   }
-
 }

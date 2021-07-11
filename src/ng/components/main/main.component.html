@@ -1,4 +1,3 @@
 <yame-toolbar [open]="true" [height]="sceneHeight"></yame-toolbar>
-<!-- <yame-pixi #pixi pixiCamera pixiGrid></yame-pixi> -->
 <yame-scene [height]="sceneHeight" [width]="width - toolbar?.width" [style.left]="toolbar?.width + 'px'"></yame-scene>
 <yame-asset-panel property="top" (sizeUpdated)="onAssetSizeUpdated($event)" [minVal]="150"></yame-asset-panel>

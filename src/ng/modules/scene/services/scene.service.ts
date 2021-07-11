@@ -9,6 +9,8 @@ import { SceneState } from '../states/scene.state';
 import { flatMap } from 'rxjs/operators';
 import { SceneComponent } from '../components/scene/scene.component';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
+import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
+import { ResetScene } from '../states/actions/scene.action';
 
 export interface ISceneRenderer {
   /**
@@ -402,5 +404,18 @@ export class SceneService {
     };
     newEntities.sort((a, b) => getParentCount(a) - getParentCount(b));
     return newEntities;
+  }
+
+  @OnWrite('entities')
+  async write(context: ISerializeContext): Promise<SceneEntityData[]> {
+    return this.export(context);
+  }
+
+  @OnRead('entities')
+  async read(data: SceneEntityData[], context: ISerializeContext): Promise<SceneEntity[]> {
+    const entities = await this.import(data, context);
+    await this.store.dispatch(new ResetScene()).toPromise();
+    await this.store.dispatch(new CreateEntity(entities)).toPromise();
+    return entities;
   }
 }

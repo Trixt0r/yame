@@ -2,7 +2,7 @@ import { PixiRendererService } from '../services/renderer.service';
 import { System } from '@trixt0r/ecs';
 import Camera from '../utils/camera';
 import { Point, Rectangle } from 'pixi.js';
-import { Actions, ofActionDispatched, ofActionSuccessful, Select } from '@ngxs/store';
+import { Actions, ofActionDispatched, ofActionSuccessful, Select, Store } from '@ngxs/store';
 import { Observable, Subscription } from 'rxjs';
 import { Keydown, Keyup } from 'ng/states/hotkey.state';
 import { CameraState } from 'ng/modules/camera/states/camera.state';
@@ -112,7 +112,7 @@ export class PixiCameraSystem extends System {
     return this.prevPos !== null;
   }
 
-  constructor(protected service: PixiRendererService, protected actions: Actions, priority?: number) {
+  constructor(protected service: PixiRendererService, protected actions: Actions, protected store: Store, priority?: number) {
     super(priority);
     this.camera = new Camera();
     this.camera.attach(service.scene);
@@ -175,7 +175,7 @@ export class PixiCameraSystem extends System {
       this.camera.maxZoom = zoom.max ?? this.camera.maxZoom;
       this.camera.zoomStep = zoom.step ?? this.camera.zoomStep;
       this.camera.zoom = zoom.value;
-      this.service.store.dispatch(new UpdateCameraPosition(this.camera.position as IPoint));
+      this.store.dispatch(new UpdateCameraPosition(this.camera.position as IPoint));
     });
     this.cameraPosition$.subscribe((pos) => (this.camera.position = pos));
     this.actions.pipe(ofActionDispatched(ZoomCameraToPosition)).subscribe((action: ZoomCameraToPosition) => {
@@ -188,10 +188,10 @@ export class PixiCameraSystem extends System {
         target: this.camera.targetPosition,
         value: this.camera.zoom,
       };
-      this.service.store.dispatch(new UpdateCameraZoom(zoom));
+      this.store.dispatch(new UpdateCameraZoom(zoom));
     });
     this.actions.pipe(ofActionDispatched(MoveCameraToPosition)).subscribe((action: MoveCameraToPosition) => {
-      this.service.store.dispatch(
+      this.store.dispatch(
         new UpdateCameraPosition(
           action.global ? this.service.stage!.toLocal(action.position) : action.position
         )
@@ -256,7 +256,7 @@ export class PixiCameraSystem extends System {
       y: heightDiff - (stageBounds.y + heightDiff / 2)
     };
 
-    await this.service.store.dispatch(new UpdateCameraZoom({ value, step })).toPromise();
+    await this.store.dispatch(new UpdateCameraZoom({ value, step })).toPromise();
   }
 
   /**
@@ -296,10 +296,10 @@ export class PixiCameraSystem extends System {
         this.camera.position!.x + event.deltaX * (2 - this.camera.zoom),
         this.camera.position!.y + event.deltaY * (2 - this.camera.zoom)
       );
-      this.service.store.dispatch(new MoveCameraToPosition(tmpPos, false));
+      this.store.dispatch(new MoveCameraToPosition(tmpPos, false));
     } else {
       if (this.moving && this.moveInitiator === MoveInitiator.WHEEL) this.end();
-      this.service.store.dispatch(
+      this.store.dispatch(
         new ZoomCameraToPosition(event.deltaY < 0 ? this.camera.maxZoom : this.camera.minZoom, this.service.mouse)
       );
     }
@@ -336,6 +336,6 @@ export class PixiCameraSystem extends System {
     if (this.moveInitiator === MoveInitiator.KEYBOARD) event.stopImmediatePropagation();
     const pos = this.service.stage!.toLocal(this.service.mouse);
     tmpPos.set(this.camPos!.x + (pos.x - this.prevPos!.x), this.camPos!.y + (pos.y - this.prevPos!.y));
-    this.service.store.dispatch(new MoveCameraToPosition(tmpPos, false));
+    this.store.dispatch(new MoveCameraToPosition(tmpPos, false));
   }
 }

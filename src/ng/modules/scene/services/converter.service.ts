@@ -1,7 +1,6 @@
 import { Asset } from 'common/asset';
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken } from '@angular/core';
 import { SceneComponent } from 'common/scene';
-import { Type } from 'common/type';
 import { SceneConverterException } from '../exceptions/converter.service.exception';
 
 /**
@@ -44,15 +43,14 @@ export class SceneAssetConverterService {
   }
 
   /**
-   * Creates a scene component from the given asset and resolves it.
+   * Creates scene components from the given asset and resolves them.
    *
-   * @param asset The asset to create the scene component for.
-   * @returns A promise which resolves the created scene component.
+   * @param asset The asset to create the scene components for.
    */
-  get(asset: Asset): Promise<SceneComponent[]> {
-    if (!this.has(asset))
-      return Promise.reject(new SceneConverterException(`Asset of type '${asset.type}' is not supported`));
-    return converters[asset.type].execute(asset);
+  async get(asset: Asset): Promise<SceneComponent[]> {
+    if (!this.has(asset)) throw new SceneConverterException(`Asset of type '${asset.type}' is not supported`);
+    const converter = converters[asset.type];
+    return converter.execute(asset);
   }
 
   /**
@@ -62,22 +60,7 @@ export class SceneAssetConverterService {
    * @returns Whether a converter for the given asset exists.
    */
   has(asset: Asset): boolean {
-    return !!converters[asset.type] && typeof converters[asset.type] === 'object' && !!converters[asset.type].execute;
+    const converter = converters[asset.type];
+    return !!converter && ((typeof converter === 'object' && !!converter.execute) || typeof converter === 'function');
   }
-}
-
-/**
- * Registers a scene asset converter.
- * You should use the method to register your asset converters,
- * so converting assets to scene component will work as expected.
- *
- * @param type The type(s) for which the asset converter will be used
- * @returns A converter function, which converts the given type(s) to scene components.
- */
-export function SceneAssetConverter<T extends Type<ISceneAssetConverter>>(type: string | string[]): Function {
-  return (converter: T) => {
-    const types = Array.isArray(type) ? type : [type];
-    const instance = new converter();
-    types.forEach(assetType => SceneAssetConverterService.register(assetType, instance));
-  };
 }

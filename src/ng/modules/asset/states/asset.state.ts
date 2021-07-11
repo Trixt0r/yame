@@ -22,6 +22,10 @@ import { Injectable, Type } from '@angular/core';
 import { IResource } from 'common/interfaces/resource';
 import { IAssetPreviewComponent } from '../directives/preview.directive';
 import { IAssetDetailsComponent } from '../directives/details.directive';
+import { IFileState } from 'ng/states/editor.state';
+import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
+import { PlatformPath } from 'path';
+import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
 
 /**
  * Preview components to initialize initially.
@@ -238,17 +242,36 @@ export class AssetState implements NgxsOnInit {
     return found;
   }
 
+  /**
+   * Returns the asset for the given uniform resource identifier.
+   *
+   * @param uri The uniform resource identifier.
+   * @return The found asset.
+   */
   getAssetForUri(uri: string): Asset | undefined {
     const state = this.store.snapshot().assets as IAssetState;
     return state.assets.find((it) => it.resource.uri === uri);
   }
 
+  /**
+   * Returns the asset for the given identifier.
+   *
+   * @param id The asset identifier.
+   * @return The found asset.
+   */
   getAssetById(id: string): Asset | undefined {
     const state = this.store.snapshot().assets as IAssetState;
     return state.assets.find((it) => it.id === id);
   }
 
-  getChildren(asset: Asset, deep = true) {
+  /**
+   * Returns the children for the given asset.
+   *
+   * @param asset The parent asset.
+   * @param deep Whether to recursively search children if the children.
+   * @return The found children
+   */
+  getChildren(asset: Asset, deep = true): Asset[] {
     let children: Asset[] = [];
     const state = this.store.snapshot().assets as IAssetState;
     asset.children.forEach((id) => {
@@ -262,25 +285,25 @@ export class AssetState implements NgxsOnInit {
   }
 
   @Action(AddAssetsSource)
-  addAssetsSource(ctx: StateContext<IAssetState>, action: AddAssetsSource) {
+  addAssetsSource(ctx: StateContext<IAssetState>, action: AddAssetsSource): void {
     const sources = ctx.getState().sources.slice();
     const found = sources.find((it) => it.type === action.source.type);
     if (found) return console.warn(`[Assets] Asset source with type '${found.type}' is already registered.`);
     sources.push(action.source);
-    return ctx.patchState({ sources });
+    ctx.patchState({ sources });
   }
 
   @Action(RemoveAssetsSource)
-  removeAssetsSource(ctx: StateContext<IAssetState>, action: RemoveAssetsSource) {
+  removeAssetsSource(ctx: StateContext<IAssetState>, action: RemoveAssetsSource): void {
     const sources = ctx.getState().sources.slice();
     const idx = sources.findIndex((it) => it.type === action.type);
     if (idx < 0) return console.warn(`[Assets] Asset source with type '${action.type}' is not registered.`);
     sources.splice(idx, 1);
-    return ctx.patchState({ sources });
+    ctx.patchState({ sources });
   }
 
   @Action(AddAsset)
-  addAsset(ctx: StateContext<IAssetState>, action: AddAsset) {
+  addAsset(ctx: StateContext<IAssetState>, action: AddAsset): void {
     const assets = ctx.getState().assets.slice();
     const toAdd = Array.isArray(action.asset) ? action.asset : [action.asset];
     const newAssets = toAdd.filter((asset) => {
@@ -290,11 +313,11 @@ export class AssetState implements NgxsOnInit {
     });
     if (newAssets.length === 0) return;
     newAssets.forEach((it) => assets.push(it));
-    return ctx.patchState({ assets });
+    ctx.patchState({ assets });
   }
 
   @Action(RemoveAsset)
-  removeAsset(ctx: StateContext<IAssetState>, action: RemoveAsset) {
+  removeAsset(ctx: StateContext<IAssetState>, action: RemoveAsset): void {
     const state = ctx.getState();
     const assets = state.assets.slice();
     const toRemove = Array.isArray(action.id) ? action.id : [action.id];
@@ -315,11 +338,11 @@ export class AssetState implements NgxsOnInit {
         assets.splice(idx, 1);
       }
     });
-    return ctx.patchState(patch);
+    ctx.patchState(patch);
   }
 
   @Action(UpdateAsset)
-  updateAsset(ctx: StateContext<IAssetState>, action: UpdateAsset) {
+  updateAsset(ctx: StateContext<IAssetState>, action: UpdateAsset): void {
     const assets = ctx.getState().assets.slice();
     const toUpdate = Array.isArray(action.asset) ? action.asset : [action.asset];
     toUpdate.forEach((update) => {
@@ -327,11 +350,11 @@ export class AssetState implements NgxsOnInit {
       if (!found) return console.warn(`[Asset] Asset with ${update.id} does not exist`);
       merge(found, update);
     });
-    return ctx.patchState({ assets });
+    ctx.patchState({ assets });
   }
 
   @Action(LoadAssetResource)
-  async loadAssetResource(ctx: StateContext<IAssetState>, action: LoadAssetResource) {
+  async loadAssetResource(ctx: StateContext<IAssetState>, action: LoadAssetResource): Promise<void> {
     const resource = action.resource;
     if (resource.loaded && !action.force) {
       ctx.patchState({ scanningResource: null });
@@ -357,37 +380,37 @@ export class AssetState implements NgxsOnInit {
   }
 
   @Action(ScanResource)
-  scanResource(ctx: StateContext<IAssetState>, action: ScanResource) {
+  scanResource(ctx: StateContext<IAssetState>, action: ScanResource): void {
     if (ctx.getState().scanningResource === action.uri) return;
     ctx.patchState({ scanningResource: action.uri });
   }
 
   @Action(SelectAssetGroup)
-  selectAssetGroup(ctx: StateContext<IAssetState>, action: SelectAssetGroup) {
+  selectAssetGroup(ctx: StateContext<IAssetState>, action: SelectAssetGroup): void {
     if (ctx.getState().selectedGroup?.id === action.asset.id) return;
     ctx.patchState({ selectedGroup: action.asset });
   }
 
   @Action(UnselectAssetGroup)
-  unselectAssetGroup(ctx: StateContext<IAssetState>, action: UnselectAssetGroup) {
+  unselectAssetGroup(ctx: StateContext<IAssetState>): void {
     if (!ctx.getState().selectedGroup) return;
     ctx.patchState({ selectedGroup: null });
   }
 
   @Action(SelectAsset)
-  selectAsset(ctx: StateContext<IAssetState>, action: SelectAsset) {
+  selectAsset(ctx: StateContext<IAssetState>, action: SelectAsset): void {
     if (ctx.getState().selectedGroup?.id === action.asset.id) return;
     ctx.patchState({ selectedAsset: action.asset });
   }
 
   @Action(UnselectAsset)
-  unselectAsset(ctx: StateContext<IAssetState>, action: UnselectAsset) {
+  unselectAsset(ctx: StateContext<IAssetState>): void {
     if (!ctx.getState().selectedAsset) return;
     ctx.patchState({ selectedAsset: null });
   }
 
   @Action(RegisterAssetIcon)
-  registerAssetIcon(ctx: StateContext<IAssetState>, action: RegisterAssetIcon) {
+  registerAssetIcon(ctx: StateContext<IAssetState>, action: RegisterAssetIcon): void {
     const currentUi = ctx.getState().ui;
     const icons: { [icon: string]: string } = {};
     action.types.forEach((it) => (icons[it] = action.icon));
@@ -397,7 +420,7 @@ export class AssetState implements NgxsOnInit {
   }
 
   @Action(RegisterAssetTypeLabel)
-  registerAssetTypeLabel(ctx: StateContext<IAssetState>, action: RegisterAssetTypeLabel) {
+  registerAssetTypeLabel(ctx: StateContext<IAssetState>, action: RegisterAssetTypeLabel): void {
     const currentUi = ctx.getState().ui;
     const labels: { [label: string]: string } = {};
     action.types.forEach((it) => (labels[it] = action.label));
@@ -407,7 +430,40 @@ export class AssetState implements NgxsOnInit {
   }
 
   @Action(ResetAssets)
-  reset(ctx: StateContext<IAssetState>, action: ResetAssets) {
+  reset(ctx: StateContext<IAssetState>, action: ResetAssets): void {
     ctx.patchState({ assets: [], selectedAsset: null, selectedGroup: null, scanningResource: null });
+  }
+
+  @OnWrite('assets')
+  async write(context: ISerializeContext) {
+    const uri = context.uri;
+    const protocol = context.protocol;
+    const assetState = this.store.selectSnapshot((state) => state.assets) as IAssetState;
+    const path = (global as any).require('path') as PlatformPath;
+    return assetState.assets
+      .filter((asset) => !asset.parent)
+      .map((asset) => ({
+        id: './' + path.relative(path.dirname(uri), asset.id.replace(protocol, '')).replace(/\\/g, '/'),
+        resource: {
+          uri: './' + path.relative(path.dirname(uri), asset.resource.uri.replace(protocol, '')).replace(/\\/g, '/'),
+          source: asset.resource.source,
+        },
+      }));
+  }
+
+  @OnRead('assets')
+  async read(data: Asset[], context: ISerializeContext) {
+    const uri = context.uri;
+    const protocol = context.protocol;
+    const path = (global as any).require('path') as PlatformPath;
+    const scans = data.map(
+      (asset) =>
+        new ScanResource(
+          path.resolve(path.dirname(uri), asset.resource.uri.replace(protocol, '')),
+          asset.resource.source
+        )
+    );
+    await this.store.dispatch(new ResetAssets());
+    return this.store.dispatch(scans).toPromise();
   }
 }

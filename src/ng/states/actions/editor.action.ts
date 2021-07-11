@@ -1,5 +1,5 @@
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
-import { IFileState, IFileStateProcessor } from '../editor.state';
+import { IFileState, IFileSerializer } from '../editor.state';
 
 export class AddEditorFile {
   static readonly type = '[Editor] Add file';
@@ -16,22 +16,26 @@ export class RemoveEditorFile {
   constructor(public readonly file?: string | IFileState) { }
 }
 
-export class AddEditorFileProcessor {
+export class AddEditorFileSerializer {
   static readonly type = '[Editor] Add file processor';
-  constructor(public readonly fileProcessor: IFileStateProcessor) { }
+  constructor(public readonly fileProcessor: IFileSerializer) { }
 }
 
 export class RemoveEditorFileProcessor {
   static readonly type = '[Editor] Remove file processor';
-  constructor(public readonly fileProcessor: string | IFileStateProcessor) { }
+  constructor(public readonly fileProcessor: string | IFileSerializer) { }
 }
 
-export class SaveEditorFile {
+export class SaveEditorFile<T = unknown> {
   static readonly type = '[Editor] Save file';
-  constructor(public readonly context: ISerializeContext) { }
+  constructor(public readonly context: ISerializeContext<T>) { }
+}
+export class LoadEditorFile<T = unknown> {
+  static readonly type = '[Editor] Load file';
+  constructor(public readonly context: ISerializeContext<T>) { }
 }
 
-export class LoadEditorFile {
+export class OpenEditorFile {
   static readonly type = '[Editor] Open file';
-  constructor(public readonly data: { [key: string]: unknown }, public readonly context: ISerializeContext) { }
+  constructor(public uri: string, public protocol: string, public source: string) { }
 }

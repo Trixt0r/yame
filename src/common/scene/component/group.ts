@@ -4,7 +4,6 @@ import { SceneComponent } from '../component';
  * The group component can hold a group of components, i.e. an array of their ids.
  */
 export interface GroupSceneComponent extends SceneComponent {
-
   /**
    * The ids of the members.
    */
@@ -42,7 +41,7 @@ export function createGroupComponent(id: string, members: string[] = [], group?:
     id,
     members,
     type: 'group',
-    group
+    group,
   };
 }
 
@@ -54,13 +53,19 @@ export function createGroupComponent(id: string, members: string[] = [], group?:
  * @param source A list of all components.
  * @param [recursive=false] Whether to recursively search also in group components.
  */
-export function getMemberComponents<T extends SceneComponent>(component: GroupSceneComponent, source: readonly T[], recursive = false) {
+export function getMemberComponents<T extends SceneComponent>(
+  component: GroupSceneComponent,
+  source: readonly T[],
+  recursive = false
+) {
   const memberComponents: SceneComponent[] = [];
-  source.forEach(it => {
+  source.forEach((it) => {
     if (it.group === component.id) {
       memberComponents.push(it);
       if (recursive && it.type === 'group')
-        getMemberComponents(it as unknown as GroupSceneComponent, source, true).forEach(comp => memberComponents.push(comp));
+        getMemberComponents(it as unknown as GroupSceneComponent, source, true).forEach((comp) =>
+          memberComponents.push(comp)
+        );
     }
   });
   return memberComponents;

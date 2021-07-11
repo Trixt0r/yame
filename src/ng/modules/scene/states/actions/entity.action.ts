@@ -49,4 +49,28 @@ export class DeleteEntity {
   constructor(public id: string | string[], public deleted: SceneEntity[] = [], public persist = true) {}
 }
 
+/**
+ * Copies a single entity or a list of entities, if they exist in the store.
+ */
+export class CopyEntity {
+  static readonly type = '[Scene] Copy entity';
+  constructor(public id: string | string[]) { }
+}
+
+/**
+ * Cuts a single entity or a list of entities, if they exist in the store.
+ */
+export class CutEntity {
+  static readonly type = '[Scene] Cut entity';
+  constructor(public id: string | string[]) { }
+}
+
+/**
+ * Pastes the currently copied data, if they exist in the store.
+ */
+export class PasteData {
+  static readonly type = '[Scene] Paste data';
+  constructor() { }
+}
+
 export type EntityAction = CreateEntity | UpdateEntity | CloneEntity | SortEntity | DeleteEntity;

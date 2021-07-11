@@ -1,6 +1,5 @@
 import { DirectoryProviderException } from '../exception/providers/directory.exception';
 import { ElectronProvider } from '../electron.provider';
-import { uniqueId } from 'lodash';
 import { IpcRendererEvent } from 'electron/main';
 import { IResource } from 'common/interfaces/resource';
 

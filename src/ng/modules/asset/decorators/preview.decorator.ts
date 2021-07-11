@@ -1,7 +1,6 @@
-import { Type } from '@angular/core';
+import { Type, } from '@angular/core';
 import { IAssetPreviewComponent } from '../directives/preview.directive';
 import { AssetState } from '../states/asset.state';
-
 
 /**
  * Registers an asset preview component for the given types.

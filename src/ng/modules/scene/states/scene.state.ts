@@ -1,6 +1,15 @@
 import { cloneDeep, flattenDeep, flatten, ListOfRecursiveArraysOrValues } from 'lodash';
-import { State, Action, StateContext, Store, Selector } from '@ngxs/store';
-import { CreateEntity, DeleteEntity, UpdateEntity, SortEntity, CloneEntity } from './actions/entity.action';
+import { State, Action, StateContext, Store, Selector, Actions, ofActionSuccessful } from '@ngxs/store';
+import {
+  CreateEntity,
+  DeleteEntity,
+  UpdateEntity,
+  SortEntity,
+  CloneEntity,
+  CopyEntity,
+  CutEntity,
+  PasteData,
+} from './actions/entity.action';
 import { SceneComponent, SceneEntity, SceneEntityData } from 'common/scene';
 import { SceneComponentCollectionListener } from 'common/scene/component.collection';
 import { Dispatcher, Component, Collection } from '@trixt0r/ecs';
@@ -9,6 +18,8 @@ import { Isolate, Select, Unselect } from './actions/select.action';
 import { PushHistory, ResetHistory } from './actions/history.action';
 import { Injectable } from '@angular/core';
 import { ResetScene } from './actions/scene.action';
+import { Keydown } from 'ng/states/hotkey.state';
+import { v4 } from 'uuid';
 
 /**
  * Interface representing the scene state.
@@ -18,6 +29,11 @@ export interface ISceneState {
    * All entities in the scene.
    */
   entities: SceneEntity[];
+
+  /**
+   * A list of copied data.
+   */
+  copied: SceneEntityData[];
 
   /**
    * Any settings for the scene.
@@ -50,19 +66,42 @@ function move<T>(array: (T | undefined)[], index: number, newIndex: number) {
   name: 'scene',
   defaults: {
     entities: [],
+    copied: [],
     settings: {},
   },
 })
 @Injectable()
 export class SceneState {
-
   /**
    * Returns all current entities in the scene.
    */
   @Selector()
-  static entities(state: ISceneState) { return state.entities; }
+  static entities(state: ISceneState) {
+    return state.entities;
+  }
 
-  constructor(public store: Store, public service: SceneService) {}
+  constructor(public store: Store, public service: SceneService, actions: Actions) {
+    actions.pipe(ofActionSuccessful(Keydown)).subscribe(async (action: Keydown) => {
+      switch (action.shortcut.id) {
+        case 'cut':
+          store.dispatch(new CutEntity(store.snapshot().select.entities));
+          break;
+        case 'copy':
+          const ids = store.snapshot().select.entities.slice();
+          const comps = store.snapshot().select.components.slice();
+          await store.dispatch(new Unselect(ids, [], false)).toPromise();
+          await store.dispatch(new CopyEntity(ids)).toPromise();
+          store.dispatch(new Select(ids, comps, false));
+          break;
+        case 'paste':
+          store.dispatch(new PasteData());
+          break;
+        case 'remove':
+          store.dispatch(new DeleteEntity(store.snapshot().select.entities));
+          break;
+      }
+    });
+  }
 
   /**
    * Returns cloned entities for the given data.
@@ -72,7 +111,7 @@ export class SceneState {
    */
   protected getCloneEntities(cloneData: { id: string; index: number; parent?: string | null }[]): SceneEntity[] {
     return flattenDeep(
-      cloneData.map(it => {
+      cloneData.map((it) => {
         const source = this.service.getEntity(it.id);
         if (!source) return null;
         const entity = new SceneEntity();
@@ -84,7 +123,7 @@ export class SceneState {
         (entity.components.byId('name') as SceneComponent).string += ' clone';
         entity.components.add({ id: 'copy-descriptor', type: 'copy-data', ref: entity.id });
         entity.type = source.type;
-        entity.parent = it.parent as (string | null);
+        entity.parent = it.parent as string | null;
         if (source.children) {
           const re = this.getCloneEntities(source.children.map((id, index) => ({ id, index, parent: entity.id })));
           entity.children = re.map((child) => child.id);
@@ -93,7 +132,7 @@ export class SceneState {
           return entity;
         }
       }) as ListOfRecursiveArraysOrValues<SceneEntity | null | undefined>
-    ).filter(it => it instanceof SceneEntity) as SceneEntity[];
+    ).filter((it) => it instanceof SceneEntity) as SceneEntity[];
   }
 
   /**
@@ -208,7 +247,7 @@ export class SceneState {
 
       // If no name is set, set one, based on the type and sibling count
       if (!entity.components.byId('name')) {
-        const sameTypeCount = siblings[entity.parent as string].filter(it => it.type === entity.type).length;
+        const sameTypeCount = siblings[entity.parent as string].filter((it) => it.type === entity.type).length;
         entity.components.add({ id: 'name', type: 'name', string: `${entity.type} ${sameTypeCount + 1}` });
       }
 
@@ -252,15 +291,15 @@ export class SceneState {
     const idsToRemove = Array.isArray(action.id) ? action.id : [action.id];
     const entitiesToRemove: SceneEntity[] = [];
 
-    idsToRemove.slice().forEach(id => {
+    idsToRemove.slice().forEach((id) => {
       this.service.getChildren(id).forEach((it) => idsToRemove.push(it.id));
     });
-    idsToRemove.forEach(id => {
-      const idx = entities.findIndex(entity => entity.id === id);
+    idsToRemove.forEach((id) => {
+      const idx = entities.findIndex((entity) => entity.id === id);
       if (idx < 0) return console.warn(`[SceneState] No entity found for id ${id}`);
 
       const entity = entities[idx];
-      const parentEntity = state.entities.find(it => it.id === entity.parent);
+      const parentEntity = state.entities.find((it) => it.id === entity.parent);
       if (parentEntity) {
         const childIdx = parentEntity.children.indexOf(id);
         if (childIdx >= 0) parentEntity.children.splice(childIdx, 1);
@@ -322,9 +361,9 @@ export class SceneState {
           hasChanges = true;
           if (!resort) resort = !!update.find((it) => it.id === 'index');
           if (!dataBefore) return;
-          update.forEach(comp => {
+          update.forEach((comp) => {
             if (!comps) return;
-            const found = comps.find(it => it.id === comp.id);
+            const found = comps.find((it) => it.id === comp.id);
             if (found && oldData) oldData.components.push(found);
           });
         },
@@ -358,7 +397,7 @@ export class SceneState {
     }
     if (!action.persist) return;
     const select = this.store.snapshot().select;
-    if (select.entities && select.entities.length > 0 && !dataBefore?.find(it => it.id === 'select')) {
+    if (select.entities && select.entities.length > 0 && !dataBefore?.find((it) => it.id === 'select')) {
       dataBefore?.unshift({ id: 'select', components: cloneDeep(select.components) });
     }
     this.store.dispatch(
@@ -367,8 +406,8 @@ export class SceneState {
           new UpdateEntity(dataBefore as Partial<SceneEntityData>, 'Reverse update', false),
           // new Unselect([], [], false),
           new Select(
-            dataBefore?.map(it => it.id).filter(id => id !== 'select') as string[],
-            dataBefore?.find(it => it.id === 'select')?.components as SceneComponent[],
+            dataBefore?.map((it) => it.id).filter((id) => id !== 'select') as string[],
+            dataBefore?.find((it) => it.id === 'select')?.components as SceneComponent[],
             false,
             true
           ),
@@ -377,8 +416,8 @@ export class SceneState {
           new UpdateEntity(cloneDeep(data), action.message, false),
           // new Unselect([], [], false),
           new Select(
-            data.map(it => it.id).filter(id => id !== 'select') as string[],
-            cloneDeep((data.find(it => it.id === 'select') || { components: [] }).components as SceneComponent[]),
+            data.map((it) => it.id).filter((id) => id !== 'select') as string[],
+            cloneDeep((data.find((it) => it.id === 'select') || { components: [] }).components as SceneComponent[]),
             false,
             true
           ),
@@ -399,7 +438,7 @@ export class SceneState {
     const entitiesToCreate = this.getCloneEntities(entitiesToClone);
 
     return ctx.dispatch(new CreateEntity(entitiesToCreate)).subscribe(() => {
-      const data = entitiesToCreate.map(it => {
+      const data = entitiesToCreate.map((it) => {
         const old = it.components.byId('index')?.index as number;
         (it.components.byId('index') as SceneComponent).index = -1;
         return { id: it.id, index: old, parent: it.parent };
@@ -417,7 +456,7 @@ export class SceneState {
   @Action(SortEntity)
   sortEntity(ctx: StateContext<ISceneState>, action: SortEntity) {
     const actionData = Array.isArray(action.data) ? action.data : [action.data];
-    const oldData = actionData.map(it => {
+    const oldData = actionData.map((it) => {
       const entity = this.service.getEntity(it.id);
       if (!entity) return it;
       return {
@@ -427,7 +466,7 @@ export class SceneState {
         oldParent: it.parent,
       };
     });
-    const data = flatten(actionData.map(it => this.updateIndices(it.id, it.index, it.parent)));
+    const data = flatten(actionData.map((it) => this.updateIndices(it.id, it.index, it.parent)));
     if (action.persist)
       this.store.dispatch(
         new PushHistory(
@@ -456,9 +495,60 @@ export class SceneState {
   }
 
   @Action(ResetScene)
-  reset(ctx: StateContext<ISceneState>, action: ResetScene) {
-    return this.store.dispatch([new Unselect(void 0, void 0, false), new Isolate(null, false), new ResetHistory()])
-            .toPromise()
-            .then(() => ctx.setState({ settings: { }, entities: [] }));
+  async reset(ctx: StateContext<ISceneState>, action: ResetScene) {
+    await this.store
+      .dispatch([new Unselect(void 0, void 0, false), new Isolate(null, false), new ResetHistory()])
+      .toPromise();
+    ctx.setState({ settings: {}, copied: [], entities: [] });
+  }
+
+  @Action(CopyEntity)
+  async copy(ctx: StateContext<ISceneState>, action: CopyEntity) {
+    const ids = Array.isArray(action.id) ? action.id : [action.id];
+    const allEntities = ctx.getState().entities;
+
+    // Get only those copied entities & their deep children list
+    const entities = allEntities.filter((it) => ids.indexOf(it.id) >= 0);
+    const expCtx = { source: 'copy', protocol: 'file:///', uri: '' };
+    const toCopy = entities.reduce((prev, it) => [...prev, ...this.service.getChildren(it, true)], entities);
+
+    // Export the plain scene data
+    const data = await Promise.all(toCopy.map((it) => it.export(expCtx)));
+    data.forEach((it, i) => {
+      it.components.push({ id: 'copy-descriptor', type: 'copy-data', ref: it.id });
+      const name = it.components.find((it) => it.id === 'name');
+      if (name) name.string += ' clone';
+      else it.components.push({ id: 'name', type: 'name', string: `${it.type} ${i + 1}` });
+    });
+
+    ctx.patchState({ copied: data });
+  }
+
+  @Action(CutEntity)
+  async cut(ctx: StateContext<ISceneState>, action: CutEntity) {
+    const ids = Array.isArray(action.id) ? action.id : [action.id];
+    await ctx.dispatch(new Unselect(ids)).toPromise();
+    await ctx.dispatch(new CopyEntity(ids)).toPromise();
+    ctx.dispatch(new DeleteEntity(ids, [], true));
+  }
+
+  @Action(PasteData)
+  async paste(ctx: StateContext<ISceneState>) {
+    const copied = cloneDeep(ctx.getState().copied);
+    const impCtx = { source: 'copy', protocol: 'file:///', uri: '' };
+
+    copied.forEach((it) => (it.id = v4()));
+
+    // Fix the parent relations
+    copied.forEach((it) => {
+      if (!it.parent) return;
+      const entity = copied.find(
+        (d) => (d.components.find((c) => c.id === 'copy-descriptor') as any).ref === it.parent
+      );
+      it.parent = entity ? entity.id : this.store.snapshot().select.isolated?.id ?? null;
+    });
+
+    const entities = await Promise.all(copied.map((data) => SceneEntity.import(data, impCtx)));
+    return ctx.dispatch(new CreateEntity(entities));
   }
 }

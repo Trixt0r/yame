@@ -10,17 +10,21 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { RegisterTool } from './states/actions/toolbar.action';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { FormsModule } from '@angular/forms';
+import { AddShortcut } from 'ng/states/hotkey.state';
+import { HotkeyService } from 'ng/services/hotkey.service';
 
 @NgModule({
   imports: [CommonModule, MaterialModule, OverlayModule, FormsModule, NgxsModule.forFeature([ToolbarState])],
   declarations: [ToolbarComponent, DefaultToolComponent, ToolDirective],
   exports: [ToolbarComponent],
   providers: [
-    SelectionToolService,
     {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, tool: SelectionToolService) => () => {
-        store.dispatch(new RegisterTool(tool));
+        store.dispatch([
+          new RegisterTool(tool),
+          new AddShortcut({ id: 'select.all', label: 'Select all', keys: [`${HotkeyService.commandOrControl}.a`] })
+        ]);
       },
       deps: [Store, SelectionToolService],
       multi: true,

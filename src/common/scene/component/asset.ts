@@ -36,7 +36,7 @@ export function createAssetComponent(id: string, asset?: string, group?: string)
 registerIO({
   type: 'asset',
 
-  async serialize(comp: AssetSceneComponent, entity, ctx) {
+  async serialize(comp: AssetSceneComponent, _entity, ctx) {
     if (ctx.uri)
       return {
         asset:

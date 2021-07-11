@@ -1,5 +1,5 @@
 import { Actions, Store } from '@ngxs/store';
-import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { NgModule, APP_INITIALIZER, Inject } from '@angular/core';
 import { YAME_RENDERER, YAME_RENDERER_COMPONENT, EngineService, SceneModule } from 'ng/modules/scene';
 import { PixiRendererService } from './services/renderer.service';
 import { PixiRendererComponent } from './components/renderer.component';
@@ -20,16 +20,23 @@ import { PixiForegroundSystem } from './systems/foreground.system';
 import { PixiRenderingSystem } from './systems/rendering.system';
 import { PixiTransformationSystem } from './systems/transformation.system';
 import { AddShortcut } from 'ng/states/hotkey.state';
+import { HotkeyService } from 'ng/services/hotkey.service';
+
 /**
  * Sets up all necessary systems for rendering entities in the scene.
  *
  * @param renderer The pixi renderer service.
  * @param engineService The engine service.
  */
-export function setupSystems(renderer: PixiRendererService, engineService: EngineService, store: Store, actions : Actions): () => void {
+export function setupSystems(
+  renderer: PixiRendererService,
+  engineService: EngineService,
+  store: Store,
+  actions: Actions
+): () => void {
   return () => {
     engineService.engine.systems.add(new PixiGridSystem(renderer, 0));
-    engineService.engine.systems.add(new PixiCameraSystem(renderer, actions, 1));
+    engineService.engine.systems.add(new PixiCameraSystem(renderer, actions, store, 1));
     engineService.engine.systems.add(new PixiSpriteSystem(renderer, 2));
     engineService.engine.systems.add(new PixiBackdropSystem(renderer, 3));
     engineService.engine.systems.add(new PixiTransformationSystem(renderer, 10));
@@ -40,9 +47,8 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
     engineService.engine.addListener({
       onErrorBySystem: (error, system) => {
         console.error(error, system);
-      }
+      },
     });
-
 
     store.dispatch([
       new AddShortcut({
@@ -53,7 +59,12 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
       new AddShortcut({
         id: 'selection.resize',
         label: 'Resize selection',
-        keys: ['control.arrowleft', 'control.arrowright', 'control.arrowup', 'control.arrowdown'],
+        keys: [
+          `${HotkeyService.commandOrControl}.arrowleft`,
+          `${HotkeyService.commandOrControl}.arrowright`,
+          `${HotkeyService.commandOrControl}.arrowup`,
+          `${HotkeyService.commandOrControl}.arrowdown`,
+        ],
       }),
       new AddShortcut({
         id: 'selection.rotate',
@@ -63,7 +74,12 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
       new AddShortcut({
         id: 'selection.skew',
         label: 'Skew selection',
-        keys: ['control.shift.arrowleft', 'control.shift.arrowright', 'control.shift.arrowup', 'control.shift.arrowdown'],
+        keys: [
+          `${HotkeyService.commandOrControl}.shift.arrowleft`,
+          `${HotkeyService.commandOrControl}.shift.arrowright`,
+          `${HotkeyService.commandOrControl}.shift.arrowup`,
+          `${HotkeyService.commandOrControl}.shift.arrowdown`,
+        ],
       }),
       new AddShortcut({
         id: 'selection.pivot',
@@ -73,29 +89,24 @@ export function setupSystems(renderer: PixiRendererService, engineService: Engin
       new AddShortcut({
         id: 'camera.move',
         label: 'Move camera',
-        keys: ['space']
-      })
+        keys: ['space'],
+      }),
     ]);
   };
 }
 
 @NgModule({
   declarations: [PixiRendererComponent],
-  imports: [
-    SceneModule
-  ],
+  imports: [SceneModule],
   providers: [
     {
       provide: YAME_RENDERER,
-      useClass: PixiRendererService,
+      useClass: PixiRendererService
     },
     {
       provide: YAME_RENDERER_COMPONENT,
-      useValue: PixiRendererComponent,
+      useValue: PixiRendererComponent
     },
-    PixiSelectionService,
-    PixiSelectionContainerService,
-    PixiSelectionRendererService,
     {
       provide: APP_INITIALIZER,
       useFactory: setupSystems,

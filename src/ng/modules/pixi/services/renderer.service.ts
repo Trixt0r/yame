@@ -4,6 +4,8 @@ import {
   EngineService,
   SortEntity,
   SceneService,
+  CopyEntity,
+  YAME_RENDERER,
 } from '../../scene';
 import { Asset } from 'common/asset';
 import {
@@ -19,19 +21,23 @@ import {
   Renderer,
   Ticker,
 } from 'pixi.js';
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, Optional, SkipSelf } from '@angular/core';
 import { Subject } from 'rxjs';
 import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent, SceneEntityType } from 'common/scene';
-import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
+import { Actions, ofActionCompleted, ofActionSuccessful, Store } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { SceneComponentCollection } from 'common/scene/component.collection';
-import { each, maxBy } from 'lodash';
+import { cloneDeep, each, maxBy } from 'lodash';
 import { SizeSceneComponent } from 'common/scene/component/size';
+import { OnBeforeAction } from 'ng/modules/onbefore-plugin/onbefore.plugin';
+import { take } from 'rxjs/operators';
 
 const tempPoint = new Point();
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class PixiRendererService implements ISceneRenderer {
+  public static readonly injectionToken = YAME_RENDERER;
+
   /**
    * Internal scene component reference.
    */
@@ -117,7 +123,6 @@ export class PixiRendererService implements ISceneRenderer {
 
   constructor(
     public readonly engineService: EngineService,
-    public readonly store: Store,
     public readonly actions: Actions,
     public readonly zone: NgZone
   ) {
@@ -128,7 +133,7 @@ export class PixiRendererService implements ISceneRenderer {
       actions.pipe(ofActionSuccessful(SortEntity)).subscribe((action: SortEntity) => {
         const data = Array.isArray(action.data) ? action.data : [action.data];
         const parents: string[] = [];
-        data.forEach(it => {
+        data.forEach((it) => {
           if (it.parent === it.oldParent) return;
           const container = this.getContainer(it.id);
           if (!container) return;
@@ -182,7 +187,7 @@ export class PixiRendererService implements ISceneRenderer {
       const self = this;
       engine.addListener({
         onAddedEntities(...entities: SceneEntity[]) {
-          entities.forEach(entity => {
+          entities.forEach((entity) => {
             const child = new Container();
             child.name = entity.id;
             child.sortableChildren = true;
@@ -211,8 +216,10 @@ export class PixiRendererService implements ISceneRenderer {
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
-          entities.forEach(entity => {
-            const children = self.sceneService.getChildren(entity.id, true).filter(it => entities.find(e => e.id !== it.id));
+          entities.forEach((entity) => {
+            const children = self.sceneService
+              .getChildren(entity.id, true)
+              .filter((it) => entities.find((e) => e.id !== it.id));
             if (children.length > 0) engine.entities.remove.apply(engine.entities, children);
             const container = self.pixiContainers[entity.id];
             if (container?.parent) {
@@ -227,13 +234,13 @@ export class PixiRendererService implements ISceneRenderer {
             delete self.pixiContainers[entity.id];
           });
         },
-      onClearedEntities() {
-        each(self.pixiContainers, container => {
-          container?.removeChildren(0, container.children.length);
-          if (container?.parent) container.parent.removeChild(container);
-        });
-        self.pixiContainers = { };
-      }
+        onClearedEntities() {
+          each(self.pixiContainers, (container) => {
+            container?.removeChildren(0, container.children.length);
+            if (container?.parent) container.parent.removeChild(container);
+          });
+          self.pixiContainers = {};
+        },
       });
     });
   }
@@ -443,5 +450,30 @@ export class PixiRendererService implements ISceneRenderer {
     if (pivot) container.pivot.copyFrom(pivot);
     container.transform.updateLocalTransform();
     if (container.parent) container.transform.updateTransform(container.parent.transform);
+  }
+
+  @OnBeforeAction(CopyEntity)
+  handleCopy(_state: unknown, action: CopyEntity): void {
+    const ids = Array.isArray(action.id) ? action.id : [action.id];
+
+    const compsBefore: { [id: string]: SceneComponent[] } = {};
+
+    ids.forEach((id) => {
+      const entity = this.sceneService.getEntity(id);
+      const container = this.getContainer(id);
+      if (!entity || !container) return;
+
+      compsBefore[id] = entity.components.map((it) => cloneDeep(it));
+      transformTo(container, this.scene);
+      this.updateComponents(entity.components, container);
+    });
+
+    this.actions.pipe(ofActionCompleted(CopyEntity), take(1)).subscribe(() => {
+      ids.forEach((id) => {
+        const entity = this.sceneService.getEntity(id);
+        if (!entity) return;
+        entity.components.set(...compsBefore[id]);
+      });
+    });
   }
 }

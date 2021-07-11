@@ -44,7 +44,14 @@
               "@trixt0r/ecs",
               "uuid",
               "es6-promise-polyfill"
-            ]
+            ],
+            "aot": true,
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": true,
+            "sourceMap": true,
+            "optimization": true,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -60,7 +67,6 @@
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
-              "vendorChunk": true,
               "buildOptimizer": true,
               "budgets": [
                 {
@@ -70,7 +76,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",

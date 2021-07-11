@@ -1,11 +1,10 @@
 import { Tool } from '../tool';
 import { Injectable } from '@angular/core';
-import { Graphics, Container } from 'pixi.js';
-import { Store } from '@ngxs/store';
+import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { Select, Unselect, SceneService } from 'ng/modules/scene';
 import { SceneComponent, SceneEntity, SceneEntityType } from 'common/scene';
-import { HotkeyService } from 'ng/services/hotkey.service';
+import { Keydown } from 'ng/states/hotkey.state';
 
 /**
  *
@@ -35,9 +34,6 @@ export class SelectionToolService extends Tool {
    */
   readonly handlers: any[] = [];
 
-  // Protected fields, needed to render and handle mouse events
-  protected stage!: Container;
-  protected graphics = new Graphics();
   protected down = false;
 
   // Context bound mouse event handler.
@@ -54,24 +50,16 @@ export class SelectionToolService extends Tool {
 
   handledByExternal = false;
 
-  /**
-   * The graphics which render the rectangle following the mouse.
-   */
-  get selectionGraphics(): Graphics {
-    return this.graphics;
-  }
 
-  constructor(protected store: Store, protected scene: SceneService, hotkeys: HotkeyService) {
+  constructor(protected store: Store, protected scene: SceneService, actions: Actions) {
     super('edit', 'edit', 0);
     this.initFunctions();
 
-    hotkeys.register({ keys: ['control.a', 'meta.a'] }).subscribe(() => {
-      this.store.dispatch(
-        new Select(
-          scene.entities.filter(it => it.type !== SceneEntityType.Layer && this.isSelectable(it)).map(it => it.id),
-          []
-        )
-      );
+    actions.pipe(ofActionSuccessful(Keydown)).subscribe((action: Keydown) => {
+      if (action.shortcut.id !== 'select.all') return;
+      const all = scene.entities.filter((it) => it.type !== SceneEntityType.Layer && this.isSelectable(it)).map((it) => it.id);
+      if (all.length === 0) return;
+      this.store.dispatch(new Select(all, []));
     });
   }
 

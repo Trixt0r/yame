@@ -3,7 +3,6 @@ import { AbstractTypeComponent, AbstractInputEvent } from '../abstract';
 import { PointInputComponent } from 'ng/modules/utils';
 import { IPoint } from 'common/math';
 import { SizeSceneComponent } from 'common/scene/component/size';
-import { IPointData } from 'pixi.js';
 import { PointSceneComponent } from 'common/scene';
 import { cloneDeep } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
@@ -28,7 +27,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
   /**
    * Internal transformed value data.
    */
-  protected val?: IPointData;
+  protected val?: IPoint;
 
   /**
    * The current value.
@@ -77,7 +76,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
    */
   ngOnChanges() {
     if (this.component?.mixed) {
-      this.val = { x: '', y: '' } as unknown as IPointData;
+      this.val = { x: '', y: '' } as unknown as IPoint;
     } else {
       const transformed = this.transform(this.component) as SizeSceneComponent;
       this.val = transformed ? { x: transformed.width, y: transformed.height } : { x: 0, y: 0 };

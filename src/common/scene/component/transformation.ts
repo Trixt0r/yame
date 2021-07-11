@@ -176,10 +176,7 @@ registerIO({
     'transformation-group'
   ],
 
-  async serialize(comp, entity, ctx) {
-    return null;
-  },
-  async deserialize(data: Partial<PointSceneComponent | RangeSceneComponent | SizeSceneComponent>, entity, ctx) {
+  async deserialize(data: Partial<PointSceneComponent | RangeSceneComponent | SizeSceneComponent>) {
     switch (data.type) {
       case 'transformation-group':
         return createTransformationComponent(data.id, data.group);

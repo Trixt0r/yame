@@ -1,8 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { Action, NgxsOnInit, Selector, State, StateContext, Store } from '@ngxs/store';
-import { AddEditorFile, AddEditorFileProcessor, LoadEditorFile, RemoveEditorFile, RemoveEditorFileProcessor, SaveEditorFile, SetEditorFile } from './actions/editor.action';
+import {
+  AddEditorFile,
+  AddEditorFileSerializer,
+  LoadEditorFile,
+  RemoveEditorFile,
+  RemoveEditorFileProcessor,
+  SaveEditorFile,
+  SetEditorFile,
+} from './actions/editor.action';
 import * as uuid from 'uuid';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
+import { getSerializerClasses, META_SERIALIZER_KEY } from 'ng/decorators/serializer.decorator';
 
 /**
  * Represents the state of an editor file.
@@ -45,12 +54,11 @@ export interface IFileState<T = unknown> {
 }
 
 /**
- * A file processor is capable of serializing or deserializing editor data to or from files.
+ * A file serializer is capable of serializing/deserializing editor data to/from files.
  */
-export interface IFileStateProcessor {
-
+export interface IFileSerializer {
   /**
-   * The key under which the data will be stored or read from.
+   * The key under which the data will be written to or read from.
    */
   key: string;
 
@@ -60,7 +68,7 @@ export interface IFileStateProcessor {
    * @param fileState The file state reference.
    * @param context Any serialize context.
    */
-  serialize(fileState: IFileState, context: ISerializeContext): Promise<unknown>;
+  write?(context: ISerializeContext & { fileState: IFileState }): Promise<unknown>;
 
   /**
    * Deserializes the given data, which was read from the `key` this processor defines.
@@ -68,7 +76,7 @@ export interface IFileStateProcessor {
    * @param fileState The file state reference, containing the serialized data.
    * @param context Any deserialize context.
    */
-  deserialize(fileState: IFileState, context: ISerializeContext): Promise<unknown>;
+  read?<T>(data: T, context: ISerializeContext & { fileState: IFileState }): Promise<unknown>;
 }
 
 /**
@@ -88,7 +96,7 @@ export interface IEditorState {
   /**
    * A list of file processors.
    */
-  fileProcessors: IFileStateProcessor[];
+  fileProcessors: IFileSerializer[];
 }
 
 @State<IEditorState>({
@@ -101,12 +109,41 @@ export interface IEditorState {
 })
 @Injectable()
 export class EditorState implements NgxsOnInit {
+  constructor(protected store: Store, protected injector: Injector) {}
 
-  // @Selector()
+  /**
+   * Decorates the serializer instances, with their registered metadata.
+   */
+  protected decorateSerializerInstances(): void {
+    const actions = getSerializerClasses()
+      .map((clazz) => {
+        const meta = clazz[META_SERIALIZER_KEY];
+        if (!meta.key) return null; // keyless serializers are not supported.
 
-  constructor(protected store: Store) { }
+        const instance = this.injector.get(clazz) as any;
+        if (!instance) return null;
 
-  ngxsOnInit(ctx: StateContext<IEditorState>) {
+        const serializer: IFileSerializer = { key: meta.key! };
+        if (instance[meta.writeMethod!])
+          serializer.write = function () {
+            return instance[meta.writeMethod!].apply(instance, arguments);
+          };
+        if (instance[meta.readMethod!])
+          serializer.read = function () {
+            return instance[meta.readMethod!].apply(instance, arguments);
+          };
+        return new AddEditorFileSerializer(serializer);
+      })
+      .filter((action) => !!action);
+
+    this.store.dispatch(actions);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  ngxsOnInit(ctx: StateContext<IEditorState>): void {
+    this.decorateSerializerInstances();
     ctx.dispatch(new AddEditorFile());
   }
 
@@ -159,11 +196,11 @@ export class EditorState implements NgxsOnInit {
     }
   }
 
-  @Action(AddEditorFileProcessor)
-  addProcessor(ctx: StateContext<IEditorState>, action: AddEditorFileProcessor) {
+  @Action(AddEditorFileSerializer)
+  addProcessor(ctx: StateContext<IEditorState>, action: AddEditorFileSerializer) {
     const state = ctx.getState();
     const key = action.fileProcessor.key;
-    const found = state.fileProcessors.find(it => it.key === key);
+    const found = state.fileProcessors.find((it) => it.key === key);
     if (found) return console.error(`[EditorState] File processor with key "${key}" already exists.`);
     const fileProcessors = state.fileProcessors.slice();
     fileProcessors.push(action.fileProcessor);
@@ -174,7 +211,7 @@ export class EditorState implements NgxsOnInit {
   removeProcessor(ctx: StateContext<IEditorState>, action: RemoveEditorFileProcessor) {
     const state = ctx.getState();
     const key = typeof action.fileProcessor === 'string' ? action.fileProcessor : action.fileProcessor.key;
-    const idx = state.fileProcessors.findIndex(it => it.key === key);
+    const idx = state.fileProcessors.findIndex((it) => it.key === key);
     if (idx < 0) return console.error(`[EditorState] File processor with key "${key}" not found.`);
     const fileProcessors = state.fileProcessors.slice();
     fileProcessors.splice(idx, 1);
@@ -184,7 +221,7 @@ export class EditorState implements NgxsOnInit {
   @Action(SaveEditorFile)
   saveFile(ctx: StateContext<IEditorState>, action: SaveEditorFile) {
     const state = ctx.getState();
-    const processors = state.fileProcessors;
+    const processors = state.fileProcessors.filter((it) => !!it.write) as Pick<IFileSerializer, 'write' | 'key'>[];
     const currentFile = state.currentFile;
     if (!currentFile) throw new Error(`[Editor] No current file present.`);
     if (currentFile.uri || action.context.as) currentFile.uri = action.context.uri!;
@@ -192,11 +229,15 @@ export class EditorState implements NgxsOnInit {
     currentFile.saving = true;
 
     ctx.patchState({ currentFile });
-    const data: { [key: string]: unknown } = { };
+    const data: { [key: string]: unknown } = {};
+    action.context.data = data;
+    const context = { ...action.context, fileState: currentFile };
     // Note, that async/await is not used since it causes race condition issues with store.dispatch
-    return Promise.all(processors.map(async processor => {
-      return data[processor.key] = await processor.serialize(currentFile, action.context);
-    })).finally(() => {
+    return Promise.all(
+      processors.map(async (processor) => {
+        return (data[processor.key] = await processor.write!(context));
+      })
+    ).finally(() => {
       currentFile.data = data;
       currentFile.saving = false;
       ctx.patchState({ currentFile });
@@ -208,20 +249,24 @@ export class EditorState implements NgxsOnInit {
     const state = ctx.getState();
     const currentFile = state.currentFile;
     if (!currentFile) throw new Error(`[Editor] No current file present.`);
-    return ctx.dispatch(new RemoveEditorFile(currentFile.id)).toPromise()
-            .then(() => ctx.dispatch(new AddEditorFile()).toPromise())
-            .then(async () => {
-              const state = ctx.getState();
-              const processors = state.fileProcessors;
-              const currentFile = state.currentFile;
-              currentFile!.data = action.data;
-              currentFile!.uri = action.context.uri;
-              currentFile!.loading = true;
+    return ctx
+      .dispatch(new RemoveEditorFile(currentFile.id))
+      .toPromise()
+      .then(() => ctx.dispatch(new AddEditorFile()).toPromise())
+      .then(async () => {
+        const state = ctx.getState();
+        const processors = state.fileProcessors.filter((it) => !!it.read) as Pick<IFileSerializer, 'read' | 'key'>[];
+        const currentFile = state.currentFile!;
+        currentFile.data = action.context.data;
+        currentFile.uri = action.context.uri;
+        currentFile.loading = true;
+        const context = { ...action.context, fileState: currentFile };
 
-              await Promise.all(processors.map(async processor => {
-                return await processor.deserialize(currentFile!, action.context);
-              }));
-            });
-    // if (currentFile.uri || action.context.saveAs) currentFile.uri = action.context.uri!;
+        await Promise.all(
+          processors.map(async (processor) => {
+            return await processor.read!((currentFile.data as any)[processor.key], context);
+          })
+        );
+      });
   }
 }

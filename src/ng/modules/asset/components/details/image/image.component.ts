@@ -1,5 +1,6 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation } from '@angular/core';
 import { Asset } from 'common/asset';
+import { AssetDetailsComponent } from '../../../decorators/details.decorator';
 import { IAssetDetailsComponent } from '../../../directives/details.directive';
 
 @Component({
@@ -7,6 +8,7 @@ import { IAssetDetailsComponent } from '../../../directives/details.directive';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+@AssetDetailsComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
 export class ImageAssetDetailsComponent implements IAssetDetailsComponent, AfterViewInit {
 
   /**
@@ -28,6 +30,4 @@ export class ImageAssetDetailsComponent implements IAssetDetailsComponent, After
     };
     img.src = this.asset.resource.uri;
   }
-
-
 }

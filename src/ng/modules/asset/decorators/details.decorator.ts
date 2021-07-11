@@ -10,7 +10,7 @@ import { AssetState } from '../states/asset.state';
  * @returns A function, which adds the given component to the internal registry.
  */
 export function AssetDetailsComponent(...types: string[]): Function {
-  return (component: Type<IAssetDetailsComponent>) => {
+  return function decorator(component: Type<IAssetDetailsComponent>): void {
     AssetState._initDetailsComponent(component, ...types);
   };
 }

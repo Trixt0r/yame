@@ -101,7 +101,7 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
 
   constructor(
     protected store: Store,
-    protected translate: TranslateService,
+    public translate: TranslateService,
     protected cdr: ChangeDetectorRef,
     protected zone: NgZone,
     actions: Actions

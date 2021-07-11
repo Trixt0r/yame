@@ -21,12 +21,14 @@ import { AssetModule } from './modules/asset/asset.module';
 import { CameraModule } from './modules/camera/camera.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { EditorState } from './states/editor.state';
+import { NgxsOnBeforePluginModule } from './modules/onbefore-plugin/onbefore-plugin.module';
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     NgxsModule.forRoot([EditorState, HotkeyState]),
+    NgxsOnBeforePluginModule.forRoot(),
     MaterialModule,
     UtilsModule,
     SceneModule,
@@ -40,7 +42,6 @@ import { EditorState } from './states/editor.state';
     PixiModule,
   ],
   declarations: [AppComponent, MainComponent],
-  providers: [CursorService],
   bootstrap: [AppComponent],
 })
 export class AppModule { }

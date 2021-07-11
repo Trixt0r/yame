@@ -10,7 +10,6 @@ import { SceneEntity } from './entity';
  * Note, that an io processor can process multiple component data.
  */
 export interface IOProcessor {
-
   /**
    * The component id(s) to be matched.
    */
@@ -29,7 +28,7 @@ export interface IOProcessor {
    * @param context Any context.
    * @return Resolves a plain object for being written to a resource.
    */
-  serialize<T>(component: SceneComponent, entity: SceneEntity, context: ISerializeContext): Promise<T | null>;
+  serialize?<T>(component: SceneComponent, entity: SceneEntity, context: ISerializeContext): Promise<T | null>;
 
   /**
    * Deserializes the given component data into an actual component.
@@ -39,7 +38,7 @@ export interface IOProcessor {
    * @param context Any context.
    * @return Resolves a component for being used by the entity component system.
    */
-  deserialize<I extends Partial<SceneComponent>>(
+  deserialize?<I extends Partial<SceneComponent>>(
     data: I,
     entity: SceneEntity,
     ctx: ISerializeContext
@@ -53,7 +52,7 @@ const inputOutput: IOProcessor[] = [];
  *
  * @param comp The partial component data to be matched by an io processor.
  */
-function ioFilter(comp: Partial<SceneComponent>) {
+function ioFilter(comp: Partial<SceneComponent>): (io: IOProcessor) => boolean {
   return (io: IOProcessor) => {
     if (Array.isArray(io.id) && io.id.indexOf(comp.id!) >= 0) return true;
     if (
@@ -61,7 +60,7 @@ function ioFilter(comp: Partial<SceneComponent>) {
       (io.type.indexOf(comp.type!) >= 0 || (comp.extends && io.type.indexOf(comp.extends) >= 0))
     )
       return true;
-    return io.id === comp.id || io.type === comp.type || (comp.extends && io.type === comp.extends);
+    return !!(io.id === comp.id || io.type === comp.type || (comp.extends && io.type === comp.extends));
   };
 }
 
@@ -105,9 +104,14 @@ export async function serialize<T extends SceneComponent>(
   context: ISerializeContext
 ): Promise<Partial<T> | null> {
   if (comp.markedForDelete) return null;
-  let re = (omitForSerialization(comp) as unknown) as T;
+  let re = omitForSerialization(comp) as unknown as T;
   const inputOutputs = inputOutput.filter(ioFilter(comp));
-  const processed = await Promise.all(inputOutputs.map((it) => it.serialize(comp, entity, context)));
+  const processed = await Promise.all(
+    inputOutputs.map(async (it) => {
+      if (typeof it.serialize !== 'function') return null;
+      return await it.serialize(comp, entity, context);
+    })
+  );
   return merge.apply(_, [re, ...processed]);
 }
 
@@ -126,7 +130,12 @@ export async function deserialize<I extends Partial<SceneComponent>, T extends S
 ): Promise<T> {
   let comp = cloneDeep(data);
   const inputOutputs = inputOutput.filter(ioFilter(data));
-  const processed = await Promise.all(inputOutputs.map((it) => it.deserialize(comp, entity, context)));
+  const processed = await Promise.all(
+    inputOutputs.map(async (it) => {
+      if (typeof it.deserialize !== 'function') return null;
+      return await it.deserialize(comp, entity, context);
+    })
+  );
   return merge.apply(_, [comp, ...processed]);
 }
 
@@ -135,4 +144,6 @@ export async function deserialize<I extends Partial<SceneComponent>, T extends S
  *
  * @param io The processor
  */
-export function registerIO(io: IOProcessor): void { inputOutput.push(io); }
+export function registerIO(io: IOProcessor): void {
+  inputOutput.push(io);
+}

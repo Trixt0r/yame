@@ -3,6 +3,7 @@ import { EventManager } from '@angular/platform-browser';
 import { Observable, merge, Subscriber } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 import { mergeAll } from 'rxjs/operators';
+import isMac from 'common/is.mac';
 
 export interface HotkeyOptions {
   element: HTMLElement;
@@ -13,6 +14,14 @@ export interface HotkeyOptions {
 @Injectable({ providedIn: 'root' })
 export class HotkeyService {
 
+  /**
+   * Shortcut for supporting command and control keys.
+   */
+  static readonly commandOrControl = `${(isMac() ? 'meta' : 'control')}`
+
+  /**
+   * Default settings for registering an event handler.
+   */
   defaults: Partial<HotkeyOptions> = {
     element: this.document.body,
     event: 'keydown'

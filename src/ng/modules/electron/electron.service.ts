@@ -15,7 +15,7 @@ interface ElectronProviders {
  * @export
  * @class ElectronService
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ElectronService {
 
   private providers: ElectronProviders = { };
@@ -29,28 +29,28 @@ export class ElectronService {
   }
 
   /**
-   * Registers an electron provider.
-   * Registering means creating an instance of the electron provider class and storing it in the internal cache.
+   * Registers electron providers.
+   * Registering means creating an instance of the electron provider class and storing it in the internal registry.
    *
-   * @param clazz The class of the electron provider.
+   * @param types The types to register.
    */
-  registerProvider<T extends ElectronProvider>(clazz: Type<T>): ElectronService {
-    if (this.providers[clazz.name])
-      throw new ElectronProviderAlreadyRegistered(clazz);
-    this.providers[clazz.name] = new clazz(this);
-    return this;
+  registerProvider(...types: Type<ElectronProvider>[]): void {
+    types.forEach(type => {
+      if (this.providers[type.name]) throw new ElectronProviderAlreadyRegistered(type);
+      this.providers[type.name] = new type(this);
+    });
   }
 
   /**
+   * Returns the provider instance for the given type.
    *
-   *
-   * @param clazz
+   * @param type
    * @return The instance for the given provider class.
    */
-  getProvider<T extends ElectronProvider>(clazz: Type<T>): T {
-    if (!this.providers[clazz.name])
-      throw new ElectronProviderNotFound(clazz);
-    return <T>this.providers[clazz.name];
+  getProvider<T extends ElectronProvider>(type: Type<T>): T {
+    if (!this.providers[type.name])
+      throw new ElectronProviderNotFound(type);
+    return <T>this.providers[type.name];
   }
 
 }

@@ -15,7 +15,7 @@ import { registerLocaleData } from '@angular/common';
 import { Select, Store } from '@ngxs/store';
 import { SettingsState } from '../preferences/states/settings.state';
 import { Observable } from 'rxjs';
-import { InitDefaultSettingsValue, UpdateSettingsValue } from '../preferences/states/actions/settings.action';
+import { InitDefaultSettingsValue } from '../preferences/states/actions/settings.action';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -82,13 +82,7 @@ export class UtilsModule {
   async setLang(lng: string) {
     await this.translate.use(lng).toPromise();
     try {
-      const localeResults = await Promise.all([
-        import(`@angular/common/locales/${lng}`)
-          .catch(error => console.warn('[Utils] Could not load angular locales ', error)),
-        import(`@angular/common/locales/extra/${lng}`)
-          .catch(error => console.warn('[Utils] Could not load angular locale extras ', error))
-      ]);
-      if (localeResults.length > 0) registerLocaleData(localeResults[0].default, localeResults[1]?.default);
+      await import (`@angular/common/locales/global/${lng}`);
     } catch(error) {
       console.warn('[Utils] Could not load navigator language', error);
     }
