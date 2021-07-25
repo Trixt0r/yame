@@ -155,9 +155,13 @@ export class OnBeforePlugin implements NgxsPlugin {
     let error: unknown;
     return from(
       Promise.all(proms)
-        .catch((err) => (error = abortOnError === true ? err : null))
+        .catch((err) => {
+          error = abortOnError === true ? err : null;
+          if (!error) console.warn(err);
+        })
         .then(() => {
           if (!error) return next(state, action);
+          else console.error(error);
         })
     );
   }

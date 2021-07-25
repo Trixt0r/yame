@@ -8,16 +8,22 @@ import { System } from '@trixt0r/ecs';
 import { Actions, ofActionDispatched, Store } from '@ngxs/store';
 import { Subscription } from 'rxjs';
 import { cloneDeep, merge } from 'lodash';
-import { SceneService, YAME_RENDERER, DeleteEntity, UpdateEntity, Select, Unselect, Input, Isolate } from 'ng/modules/scene';
+import {
+  SceneService,
+  YAME_RENDERER,
+  DeleteEntity,
+  UpdateEntity,
+  Select,
+  Unselect,
+  Input,
+  Isolate,
+} from 'ng/modules/scene';
 
 const globalTopLeft = new Point();
 const globalBottomRight = new Point();
 
 class SelectInteractionSystem extends System {
-  constructor(
-    private service: PixiRendererService,
-    priority?: number
-  ) {
+  constructor(private service: PixiRendererService, priority?: number) {
     super(priority);
   }
 
@@ -136,13 +142,16 @@ export class PixiSelectionService {
 
       selectionTool.end$.subscribe(() => {
         if (containerService.isHandling) return;
-        const entities = scene.entities.filter(it => selectionTool.isSelectable(it) && this.contains(it));
+        const entities = scene.entities.filter((it) => selectionTool.isSelectable(it) && this.contains(it));
         if (entities.length === 0) {
           (this.service.stage?.getChildByName('foreground') as Container).removeChild(graphics);
           this.service.engineService.run();
           return;
         }
-        selectionTool.dispatchSelect(entities.map(it => it.id), []);
+        selectionTool.dispatchSelect(
+          entities.map((it) => it.id),
+          []
+        );
       });
 
       actions.pipe(ofActionDispatched(DeleteEntity)).subscribe((action: DeleteEntity) => {
@@ -163,8 +172,12 @@ export class PixiSelectionService {
           const reset = action.persist || (collection.length === 0 && !action.persist);
           if (!reset) service.applyComponents(collection, containerService.container);
           containerService.select(
-            scene.entities.filter(it => {
-              return selectionTool.isSelectable(it, true) && it.type !== SceneEntityType.Layer && action.entities.indexOf(it.id) >= 0;
+            scene.entities.filter((it) => {
+              return (
+                selectionTool.isSelectable(it, true) &&
+                it.type !== SceneEntityType.Layer &&
+                action.entities.indexOf(it.id) >= 0
+              );
             }),
             false,
             reset
@@ -173,12 +186,12 @@ export class PixiSelectionService {
         } else {
           const entities = action.entities || [];
           if (entities.length === 0) containerService.unselect();
-          else containerService.unselect(scene.entities.filter(it => entities.indexOf(it.id) >= 0));
+          else containerService.unselect(scene.entities.filter((it) => entities.indexOf(it.id) >= 0));
         }
         (this.service.stage?.getChildByName('foreground') as Container).removeChild(graphics);
         const actionComponents = [] as SceneComponent[];
-        containerService.components.forEach(comp => {
-          const found = action.components.find(it => comp.id === it.id);
+        containerService.components.forEach((comp) => {
+          const found = action.components.find((it) => comp.id === it.id);
           if (found) actionComponents.push(merge(found, comp));
           else actionComponents.push(comp);
         });
@@ -196,14 +209,18 @@ export class PixiSelectionService {
           acts.forEach((act) => {
             if (!(act instanceof UpdateEntity)) return;
             const data = Array.isArray(act.data) ? act.data : [act.data];
-            const found = data.find(it => it.id === 'select');
+            const found = data.find((it) => it.id === 'select');
             const components = found ? found.components : null;
-            if (!components || !components.find(comp => comp.id!.indexOf('transformation') >= 0)) return;
+            if (!components || !components.find((comp) => comp.id!.indexOf('transformation') >= 0)) return;
             containerService.updateDispatched$.next(act);
             containerService.components.set.apply(containerService.components, components as SceneComponent[]);
             containerService.applyComponents();
             if (action instanceof Input) act.data = containerService.updateEntities(false);
-            else containerService.dispatchUpdate.apply(containerService, containerService.components.elements as SceneComponent[]);
+            else
+              containerService.dispatchUpdate.apply(
+                containerService,
+                containerService.components.elements as SceneComponent[]
+              );
             this.store.snapshot().select.components = cloneDeep(containerService.components.elements.slice());
             changed = true;
           });
@@ -249,7 +266,11 @@ export class PixiSelectionService {
     stage.toGlobal(this.topLeft, globalTopLeft);
     stage.toGlobal(this.bottomRight, globalBottomRight);
     const bounds = this.service.getShape(entity.id);
-    if (this.service.containsPoint(entity.id, globalTopLeft) || this.service.containsPoint(entity.id, globalBottomRight)) return true;
+    if (
+      this.service.containsPoint(entity.id, globalTopLeft) ||
+      this.service.containsPoint(entity.id, globalBottomRight)
+    )
+      return true;
     if (!bounds) return false;
     const rect = this.rectangle;
     const container = this.service.getContainer(entity.id);
@@ -274,7 +295,7 @@ export class PixiSelectionService {
    * Handles the double click event, i.e. focuses the double clicked group.
    */
   onDoubleClick(): void {
-    const found = this.containerService.entities.find(it => this.service.containsPoint(it.id, this.service.mouse));
+    const found = this.containerService.entities.find((it) => this.service.containsPoint(it.id, this.service.mouse));
     if (found && found.children.length > 0) this.store.dispatch(new Isolate(found));
     else if (!found) this.store.dispatch(new Isolate(null));
   }

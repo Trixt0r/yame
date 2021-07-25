@@ -20,6 +20,7 @@ import { Injectable } from '@angular/core';
 import { ResetScene } from './actions/scene.action';
 import { Keydown } from 'ng/states/hotkey.state';
 import { v4 } from 'uuid';
+import { ISelectState } from './select.state';
 
 /**
  * Interface representing the scene state.
@@ -88,10 +89,7 @@ export class SceneState {
           break;
         case 'copy':
           const ids = store.snapshot().select.entities.slice();
-          const comps = store.snapshot().select.components.slice();
-          await store.dispatch(new Unselect(ids, [], false)).toPromise();
           await store.dispatch(new CopyEntity(ids)).toPromise();
-          store.dispatch(new Select(ids, comps, false));
           break;
         case 'paste':
           store.dispatch(new PasteData());
@@ -509,13 +507,13 @@ export class SceneState {
 
     // Get only those copied entities & their deep children list
     const entities = allEntities.filter((it) => ids.indexOf(it.id) >= 0);
-    const expCtx = { source: 'copy', protocol: 'file:///', uri: '' };
     const toCopy = entities.reduce((prev, it) => [...prev, ...this.service.getChildren(it, true)], entities);
 
     // Export the plain scene data
+    const expCtx = { source: 'copy', protocol: 'file:///', uri: '' };
     const data = await Promise.all(toCopy.map((it) => it.export(expCtx)));
     data.forEach((it, i) => {
-      it.components.push({ id: 'copy-descriptor', type: 'copy-data', ref: it.id });
+      it.components.push({ id: 'copy-descriptor', type: 'copy-data', ref: it.id, root: ids.indexOf(it.id) >= 0 });
       const name = it.components.find((it) => it.id === 'name');
       if (name) name.string += ' clone';
       else it.components.push({ id: 'name', type: 'name', string: `${it.type} ${i + 1}` });
@@ -536,16 +534,20 @@ export class SceneState {
   async paste(ctx: StateContext<ISceneState>) {
     const copied = cloneDeep(ctx.getState().copied);
     const impCtx = { source: 'copy', protocol: 'file:///', uri: '' };
+    const isolated = (this.store.snapshot().select as ISelectState).isolated;
 
     copied.forEach((it) => (it.id = v4()));
 
     // Fix the parent relations
     copied.forEach((it) => {
-      if (!it.parent) return;
-      const entity = copied.find(
-        (d) => (d.components.find((c) => c.id === 'copy-descriptor') as any).ref === it.parent
-      );
-      it.parent = entity ? entity.id : this.store.snapshot().select.isolated?.id ?? null;
+      const parent = it.parent
+        ? copied.find((d) => d.components.find((c) => c.id === 'copy-descriptor')!.ref === it.parent)
+        : null;
+      it.parent = parent ? parent.id : isolated?.id ?? null;
+    });
+
+    copied.forEach((it) => {
+      it.components.find((c) => c.id === 'copy-descriptor')!.pasted = it.parent === isolated?.id || !it.parent;
     });
 
     const entities = await Promise.all(copied.map((data) => SceneEntity.import(data, impCtx)));

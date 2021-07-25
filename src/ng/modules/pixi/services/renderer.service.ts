@@ -6,6 +6,11 @@ import {
   SceneService,
   CopyEntity,
   YAME_RENDERER,
+  Unselect,
+  Select,
+  PasteData,
+  ISceneState,
+  ISelectState,
 } from '../../scene';
 import { Asset } from 'common/asset';
 import {
@@ -21,10 +26,10 @@ import {
   Renderer,
   Ticker,
 } from 'pixi.js';
-import { Injectable, NgZone, Optional, SkipSelf } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent, SceneEntityType } from 'common/scene';
-import { Actions, ofActionCompleted, ofActionSuccessful, Store } from '@ngxs/store';
+import { Actions, ofActionCompleted, ofActionSuccessful } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
 import { SceneComponentCollection } from 'common/scene/component.collection';
 import { cloneDeep, each, maxBy } from 'lodash';
@@ -207,12 +212,10 @@ export class PixiRendererService implements ISceneRenderer {
             const parentContainer = self.getContainer(entity.parent);
             if (!parentContainer || parentContainer === self.scene) return;
             parentContainer.addChild(child);
-            if (!isClone) {
-              transformTo(child, parentContainer);
-              self.updateComponents(entity.components, child);
-            } else {
-              entity.components.remove(isClone);
-            }
+            if (isClone && !isClone.pasted) return;
+            child.transform.updateTransform(self.scene.transform);
+            transformTo(child, parentContainer);
+            self.updateComponents(entity.components, child);
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
@@ -453,27 +456,64 @@ export class PixiRendererService implements ISceneRenderer {
   }
 
   @OnBeforeAction(CopyEntity)
-  handleCopy(_state: unknown, action: CopyEntity): void {
+  async handleCopy(state: { select: ISelectState }, action: CopyEntity): Promise<void> {
+    const select = state.select;
     const ids = Array.isArray(action.id) ? action.id : [action.id];
+    const comps = select.components.slice();
+    const selectedIds = select.entities.slice();
+    const pos: Partial<PointSceneComponent> = { x: 0, y: 0 };
+    if (selectedIds.length > 0) {
+      await this.sceneService.store.dispatch(new Unselect(selectedIds, [], false)).toPromise();
+      Object.assign(pos, select.components.find((c) => c.id === 'transformation.position') as PointSceneComponent);
+    }
 
     const compsBefore: { [id: string]: SceneComponent[] } = {};
 
+    // Transform each entity to the scene realm
     ids.forEach((id) => {
       const entity = this.sceneService.getEntity(id);
       const container = this.getContainer(id);
       if (!entity || !container) return;
 
       compsBefore[id] = entity.components.map((it) => cloneDeep(it));
+      container.transform.updateTransform(container.parent.transform);
+
       transformTo(container, this.scene);
+      // container.transform.updateTransform(this.scene.transform);
       this.updateComponents(entity.components, container);
+
+      // Add an offset component for pasting at the right position
+      const x = container.position.x - pos.x!;
+      const y = container.position.y - pos.y!;
+      const offset = entity.components.byId('position.offset');
+      if (offset) entity.components.remove(offset);
+      entity.components.add({ x, y, id: 'position.offset', type: 'position.offset', i: id });
     });
 
+    // Restore the old component values, as soon as the action is done
     this.actions.pipe(ofActionCompleted(CopyEntity), take(1)).subscribe(() => {
       ids.forEach((id) => {
         const entity = this.sceneService.getEntity(id);
         if (!entity) return;
+        entity.components.remove(...entity.components.filter((it) => it.id === 'position.offset'));
         entity.components.set(...compsBefore[id]);
       });
+      if (selectedIds.length > 0) this.sceneService.store.dispatch(new Select(selectedIds, comps, false));
+    });
+  }
+
+  @OnBeforeAction(PasteData)
+  async handlePaste(state: { scene: ISceneState }): Promise<void> {
+    const copied = state.scene.copied;
+    const projected = this.projectToScene(this.mouse.x, this.mouse.y);
+    copied.forEach((copy) => {
+      if (!copy.components.find((c) => c.id === 'copy-descriptor')?.root) return;
+      const position = copy.components.find((c) => c.id === 'transformation.position') as PointSceneComponent;
+      if (!position) return;
+      const offset = copy.components.find((c) => c.id === 'position.offset') as PointSceneComponent;
+      if (!offset) return;
+      position.x = projected.x + offset.x;
+      position.y = projected.y + offset.y;
     });
   }
 }

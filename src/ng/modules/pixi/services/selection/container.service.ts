@@ -11,7 +11,6 @@ import { UpdateComponents, UpdateEntity, YAME_RENDERER } from 'ng/modules/scene'
 
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionContainerService {
-
   /**
    * Whether events are currently being handled or not.
    */
@@ -26,7 +25,7 @@ export class PixiSelectionContainerService {
 
   protected updateComponentsAction = new UpdateComponents([]);
 
-  protected cachedComponentValues: { [key: string]: SceneComponent[] } = { };
+  protected cachedComponentValues: { [key: string]: SceneComponent[] } = {};
 
   protected tmpTransform = new Transform();
   protected tmpContainer = new Container();
@@ -61,7 +60,7 @@ export class PixiSelectionContainerService {
   constructor(
     @Inject(YAME_RENDERER) public readonly pixi: PixiRendererService,
     protected selection: SelectionToolService,
-    protected store: Store,
+    protected store: Store
   ) {
     this.container.name = 'selection-container';
     this.update$.subscribe(() => this.updateComponents());
@@ -76,9 +75,9 @@ export class PixiSelectionContainerService {
    */
   beginHandling(ref: unknown, ...args: unknown[]): void {
     if (this.handling) throw new Error('beginHandling has already been called. endHandling has to be called before!');
-    this.cachedComponentValues = { };
+    this.cachedComponentValues = {};
     this.cachedComponentValues.select = cloneDeep(this.components.elements.slice());
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity) => {
       this.cachedComponentValues[entity.id] = cloneDeep(entity.components.elements.slice());
     });
     this.handlerRef = ref;
@@ -97,9 +96,7 @@ export class PixiSelectionContainerService {
   endHandling(ref: unknown, ...args: unknown[]) {
     if (!this.handling) throw new Error('beginHandling has to be called before!');
     if (ref !== this.handlerRef)
-      throw new Error(
-        'You are not allowed to call this,' + ' since the handling was not started by the given reference'
-      );
+      throw new Error('You are not allowed to call this, since the handling was not started by the given reference');
     this.handlerRef = null;
     this.handling = false;
     this.handleEnd$.next(args);
@@ -112,10 +109,10 @@ export class PixiSelectionContainerService {
   updateComponents(): void {
     this.components.clear();
     const comps = [] as SceneComponent[];
-    const ids: { [ id: string ]: { comp: SceneComponent, entities: SceneEntity[] } } = { };
+    const ids: { [id: string]: { comp: SceneComponent; entities: SceneEntity[] } } = {};
     const idsOrder = [] as string[];
-    this.entities.forEach(entity => {
-      entity.components.forEach(comp => {
+    this.entities.forEach((entity) => {
+      entity.components.forEach((comp) => {
         if (!ids[comp.id]) {
           ids[comp.id] = { comp: comp, entities: [] };
           idsOrder.push(comp.id);
@@ -125,11 +122,11 @@ export class PixiSelectionContainerService {
       });
     });
 
-    idsOrder.forEach(key => {
+    idsOrder.forEach((key) => {
       if (key === this.comp.id) return;
       const data = ids[key];
       if (data.entities.length !== this.entities.length) return;
-      const notEqual = !!data.entities.find(it => !isEqual(it.components.byId(key), data.comp));
+      const notEqual = !!data.entities.find((it) => !isEqual(it.components.byId(key), data.comp));
       const mixed = key.indexOf('transformation') < 0 && notEqual;
       const comp = merge({}, data.comp, { mixed }) as SceneComponent;
       if (!comp.mixed) delete comp.mixed;
@@ -169,7 +166,7 @@ export class PixiSelectionContainerService {
       this.container.interactive = true;
       this.container.parent.addChild(this.tmpContainer);
       this.tmpContainer.transform.updateTransform(this.container.parent.transform);
-      this.entities.forEach(entity => {
+      this.entities.forEach((entity) => {
         const container = this.pixi.getContainer(entity.id);
         if (!container) return;
         const parent = this.pixi.getContainer(entity.parent) || this.pixi.scene;
@@ -185,7 +182,7 @@ export class PixiSelectionContainerService {
         const pivotY = bounds.y + bounds.height / 2;
         this.container.parent.toLocal(new Point(pivotX, pivotY), this.container, this.container.position);
         this.container.pivot.set(pivotX, pivotY);
-        this.entities.forEach(entity => {
+        this.entities.forEach((entity) => {
           const container = this.pixi.getContainer(entity.id);
           if (!container) return;
           const parent = this.pixi.getContainer(entity.parent) || this.pixi.scene;
@@ -232,7 +229,7 @@ export class PixiSelectionContainerService {
   select(entities: SceneEntity[], silent = false, reset = true) {
     const added: SceneEntity[] = [];
 
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity) => {
       const child = this.pixi.getContainer(entity.id);
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
       if (child) {
@@ -276,10 +273,10 @@ export class PixiSelectionContainerService {
    */
   unselect(entities: SceneEntity[] = this.entities.slice(), silent = false): SceneEntity[] {
     if (this.handling) this.endHandling(this.currentHandler);
-    const toRemove = entities.filter(child => this.entities.indexOf(child) >= 0);
+    const toRemove = entities.filter((child) => this.entities.indexOf(child) >= 0);
     const hadOnlyOne = this.entities.length === 1;
     const first = this.entities[0];
-    entities.forEach(entity => {
+    entities.forEach((entity) => {
       if (toRemove.indexOf(entity) < 0)
         return console.warn(
           `[SelectionContainer] You are trying to remove a child ${entity.id} which is not part of this container!`
@@ -322,14 +319,14 @@ export class PixiSelectionContainerService {
     const hadOnlyOne = this.entities.length === 1;
     const first = this.entities[0];
     const data: Partial<SceneEntityData>[] = [];
-    const componentsBefore: { [id: string]: SceneComponentCollection<SceneComponent> } = { };
+    const componentsBefore: { [id: string]: SceneComponentCollection<SceneComponent> } = {};
     data.push({ id: 'select', components: cloneDeep(this.components.elements) as SceneComponent[] });
     this.container.transform.updateTransform(this.container.parent.transform);
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity) => {
       const child = this.pixi.getContainer(entity.id);
       if (!child) return;
       child.transform.updateTransform(this.container.transform);
-      componentsBefore[entity.id] = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
+      componentsBefore[entity.id] = new SceneComponentCollection(entity.components.map((it) => cloneDeep(it)));
       this.pixi.updateComponents(componentsBefore[entity.id], child);
       // Restore the internal relation
       const parentContainer = this.pixi.getContainer(entity.parent) || this.pixi.scene;
@@ -337,9 +334,12 @@ export class PixiSelectionContainerService {
       // And apply the proper transformation values
       if (hadOnlyOne && entity === first) child.pivot.copyFrom(this.container.pivot);
       transformTo(child, parentContainer);
-      const comps = new SceneComponentCollection(entity.components.map(it => cloneDeep(it)));
+      const comps = new SceneComponentCollection(entity.components.map((it) => cloneDeep(it)));
       this.pixi.updateComponents(comps, child);
-      data.push({ id: entity.id, components: comps.filter(comp => comp.id !== this.comp.id && comp.mixed === void 0) });
+      data.push({
+        id: entity.id,
+        components: comps.filter((comp) => comp.id !== this.comp.id && comp.mixed === void 0),
+      });
       if (dispatch) entity.components.set.apply(entity.components, this.cachedComponentValues[entity.id]);
     });
 
@@ -353,7 +353,7 @@ export class PixiSelectionContainerService {
       });
     }
 
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity) => {
       const container = this.pixi.getContainer(entity.id);
       if (!container) return;
       this.container.addChild(container);

@@ -50,14 +50,15 @@ export class SelectionToolService extends Tool {
 
   handledByExternal = false;
 
-
   constructor(protected store: Store, protected scene: SceneService, actions: Actions) {
     super('edit', 'edit', 0);
     this.initFunctions();
 
     actions.pipe(ofActionSuccessful(Keydown)).subscribe((action: Keydown) => {
       if (action.shortcut.id !== 'select.all') return;
-      const all = scene.entities.filter((it) => it.type !== SceneEntityType.Layer && this.isSelectable(it)).map((it) => it.id);
+      const all = scene.entities
+        .filter((it) => it.type !== SceneEntityType.Layer && this.isSelectable(it))
+        .map((it) => it.id);
       if (all.length === 0) return;
       this.store.dispatch(new Select(all, []));
     });
@@ -84,7 +85,7 @@ export class SelectionToolService extends Tool {
     const parent = entity.parent ? this.scene.getEntity(entity.parent) : null;
     const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
     return isolated
-      ? entity.parent === isolated.id
+      ? this.scene.getChildren(isolated).some((it) => it.id === entity.id)
       : !entity.parent || isOnLayer || (fromHierarchy && entity.type !== SceneEntityType.Layer);
   }
 

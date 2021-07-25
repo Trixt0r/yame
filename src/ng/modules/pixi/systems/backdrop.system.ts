@@ -57,6 +57,8 @@ export class PixiBackdropSystem extends System {
     this.active = true;
     service.scene.addChild(this.container);
     this.container.transform.updateTransform(this.scene.transform);
+
+    // Move the isolated container to the front
     const container = service.getContainer(isolated.id);
     if (container && container.parent !== this.scene) {
       container.transform.updateTransform(container.parent.transform);
@@ -71,6 +73,7 @@ export class PixiBackdropSystem extends System {
       }
     }
 
+    // Move inactive entities to the backdrop
     const children = service.sceneService.getChildren(isolated, true);
     service.sceneService.entities.forEach(it => {
       if (it.id === isolated.id || children.indexOf(it) >= 0 || it.parent) return;
@@ -94,6 +97,7 @@ export class PixiBackdropSystem extends System {
     const service = this.service;
     this.active = true;
 
+    // Move backdrop entities back
     (this.container.children as Container[]).slice().forEach((child: Container) => {
       if (!child.name) return;
       const entity = service.sceneService.getEntity(child.name);
@@ -107,6 +111,7 @@ export class PixiBackdropSystem extends System {
     });
     this.scene.updateTransform();
 
+    // Move isolated entity back to original position
     if (this.isolated) {
       const child = service.getContainer(this.isolated.id);
       if (child) {

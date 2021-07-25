@@ -1,5 +1,5 @@
 import { merge, isEqual, cloneDeep } from 'lodash';
-import { ComponentCollection, CollectionListener } from '@trixt0r/ecs';
+import { ComponentCollection, CollectionListener, Dispatcher } from '@trixt0r/ecs';
 import { SceneComponent } from './component';
 import { GroupSceneComponent, getMemberComponents } from './component/group';
 
@@ -13,7 +13,6 @@ export interface SceneComponentCollectionListener extends CollectionListener<Sce
 }
 
 export class SceneComponentCollection<T extends SceneComponent = SceneComponent> extends ComponentCollection<T> {
-
   /**
    * Returns the component with the given id.
    *
@@ -21,7 +20,7 @@ export class SceneComponentCollection<T extends SceneComponent = SceneComponent>
    * @return The found component or `undefined`.
    */
   byId(id: string): SceneComponent | undefined {
-    return this.find(comp => comp.id === id);
+    return this.find((comp) => comp.id === id);
   }
 
   /**
@@ -43,7 +42,7 @@ export class SceneComponentCollection<T extends SceneComponent = SceneComponent>
    */
   getValue<T>(id: string, key = 'value', dflt?: T): T | undefined {
     const comp = this.byId(id);
-    return comp ? comp[key] === void 0 ? dflt : comp[key] as T : dflt;
+    return comp ? (comp[key] === void 0 ? dflt : (comp[key] as T)) : dflt;
   }
 
   /**
@@ -66,14 +65,14 @@ export class SceneComponentCollection<T extends SceneComponent = SceneComponent>
     const toUpdate: T[] = [];
     for (let i = 0, l = components.length; i < l; i++) {
       const comp = components[i];
-      const found = comp.id ? this.find(it => it.id === comp.id) : this.find(it => it.type === comp.type);
+      const found = comp.id ? this.find((it) => it.id === comp.id) : this.find((it) => it.type === comp.type);
       if (!found && comp.markedForDelete !== true) toAdd.push(cloneDeep(comp));
       else if (found && comp.markedForDelete === true) {
         if (found.type === 'group') {
-          this.getChildren(found as unknown as GroupSceneComponent).forEach(it => toRemove.push(it as T));
+          this.getChildren(found as unknown as GroupSceneComponent).forEach((it) => toRemove.push(it as T));
         }
         if (found.group) {
-          const group = this.find(g => g.id === found.group);
+          const group = this.find((g) => g.id === found.group);
           if (group) {
             const members = (group as unknown as GroupSceneComponent).members;
             if (Array.isArray(members)) {
@@ -88,14 +87,11 @@ export class SceneComponentCollection<T extends SceneComponent = SceneComponent>
         toUpdate.push(found);
       }
     }
-    if (toAdd.length > 0)
-      this.add.apply(this, toAdd);
+    if (toAdd.length > 0) this.add.apply(this, toAdd);
     if (toUpdate.length > 0) {
       this.updatedFrozenObjects();
-      (this as any).dispatch.apply(this, ['onUpdated', ...toUpdate]);
+      (this as Dispatcher<any>).dispatch.apply(this, ['onUpdated', ...toUpdate]);
     }
-    if (toRemove.length > 0)
-      this.remove.apply(this, toRemove);
+    if (toRemove.length > 0) this.remove.apply(this, toRemove);
   }
-
 }

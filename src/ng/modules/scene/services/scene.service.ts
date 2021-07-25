@@ -130,9 +130,8 @@ export class SceneService {
 
   constructor(
     @Inject(YAME_RENDERER) public readonly renderer: ISceneRenderer,
-    @Inject(YAME_RENDERER_COMPONENT) public readonly rendererComponent: Type<ISceneRendererComponent<HTMLElement>>,
-    protected store: Store,
-    protected actions: Actions,
+    public readonly store: Store,
+    public readonly actions: Actions,
     protected converter: SceneAssetConverterService
   ) {
     renderer.sceneService = this;
