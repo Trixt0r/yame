@@ -3,7 +3,6 @@ export { YamePlugin } from '../common/plugin';
 export { Pubsub } from '../common/pubsub';
 export { AppModule } from './app.module';
 export { ElectronModule } from './modules/electron/electron.module';
-// export { MaterialModule } from './modules/material.module';
 export { PluginModule } from './modules/plugin/plugin.module';
 export { SidebarModule } from './modules/sidebar/sidebar.module';
 export { UtilsModule } from './modules/utils/utils.module';

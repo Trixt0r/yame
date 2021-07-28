@@ -5,7 +5,6 @@ import { MainComponent } from './components/main/main.component';
 
 // Modules
 import { SidebarModule } from './modules/sidebar/sidebar.module';
-import { MaterialModule } from './modules/material.module';
 import { ElectronModule } from './modules/electron/electron.module';
 import { UtilsModule } from './modules/utils';
 
@@ -29,7 +28,6 @@ import { NgxsOnBeforePluginModule } from './modules/onbefore-plugin/onbefore-plu
     BrowserAnimationsModule,
     NgxsModule.forRoot([EditorState, HotkeyState]),
     NgxsOnBeforePluginModule.forRoot(),
-    MaterialModule,
     UtilsModule,
     SceneModule,
     PluginModule,
@@ -44,4 +42,4 @@ import { NgxsOnBeforePluginModule } from './modules/onbefore-plugin/onbefore-plu
   declarations: [AppComponent, MainComponent],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

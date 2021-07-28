@@ -1,7 +1,6 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideAsDecorated, UtilsModule } from '../utils';
-import { MaterialModule } from '../material.module';
 import { DndModule } from 'ng2-dnd';
 import { AssetItemsComponent } from './components/items/items.component';
 import { AssetPanelComponent } from './components/panel/panel.component';
@@ -16,12 +15,27 @@ import { AssetDetailsDirective } from './directives/details.directive';
 import { AssetState } from './states/asset.state';
 import { ImageAssetPreviewComponent } from './components';
 import { ImageAssetDetailsComponent } from './components/details/image/image.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   imports: [
     BrowserModule,
     UtilsModule,
-    MaterialModule,
+    MatIconModule,
+    MatCardModule,
+    MatTabsModule,
+    MatDividerModule,
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatSidenavModule,
+    MatButtonModule,
     NgBytesPipeModule,
     TreeModule.forRoot(),
     DndModule.forRoot(),

@@ -4,7 +4,6 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { SidebarComponent } from './components/sidebar.component';
 import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { UtilsModule } from '../utils';
-import { MaterialModule } from '../material.module';
 import { HierarchyComponent } from './components/hierarchy/hierarchy.component';
 import { SelectionComponent } from './components/selection/selection.component';
 import { NgRoundPipeModule } from 'angular-pipes';
@@ -40,12 +39,17 @@ import { InputTypeComponent } from './components/selection/types/input/input.com
 import { PointTypeComponent } from './components/selection/types/point/point.component';
 import { RangeTypeComponent } from './components/selection/types/range/range.component';
 import { TranslateService } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   imports: [
     BrowserModule,
     UtilsModule,
-    MaterialModule,
     NgRoundPipeModule,
     FormsModule,
     ReactiveFormsModule,
@@ -55,9 +59,14 @@ import { TranslateService } from '@ngx-translate/core';
     DndModule,
     MatSelectModule,
     MatDialogModule,
+    MatIconModule,
+    MatMenuModule,
+    MatExpansionModule,
+    MatSliderModule,
+    MatInputModule,
+    MatButtonModule,
     ScrollingModule,
     TreeModule.forRoot(),
-    // TranslateModule.forRoot(),
   ],
   declarations: [
     SidebarComponent,
@@ -93,7 +102,12 @@ import { TranslateService } from '@ngx-translate/core';
   ],
 })
 export class SidebarModule {
-  constructor(components: SceneComponentsService, entityTypes: EntityTypeService, compService: SceneComponentService, translate: TranslateService) {
+  constructor(
+    components: SceneComponentsService,
+    entityTypes: EntityTypeService,
+    compService: SceneComponentService,
+    translate: TranslateService
+  ) {
     components.registerCategory({
       id: 'general',
       items: ['general.string', 'general.number', 'general.point', 'general.size', 'general.color', 'general.range'],
@@ -109,9 +123,24 @@ export class SidebarModule {
     });
 
     components.registerItem({ id: 'group', type: 'group', icon: 'filter_none', label: 'componentLabel.group' });
-    components.registerItem({ id: 'general.string', type: 'string', icon: 'text_fields', label: 'componentLabel.string' });
-    components.registerItem({ id: 'general.number', type: 'number', icon: 'short_text', label: 'componentLabel.number' });
-    components.registerItem({ id: 'general.range', type: 'range', icon: 'linear_scale', label: 'componentLabel.range' });
+    components.registerItem({
+      id: 'general.string',
+      type: 'string',
+      icon: 'text_fields',
+      label: 'componentLabel.string',
+    });
+    components.registerItem({
+      id: 'general.number',
+      type: 'number',
+      icon: 'short_text',
+      label: 'componentLabel.number',
+    });
+    components.registerItem({
+      id: 'general.range',
+      type: 'range',
+      icon: 'linear_scale',
+      label: 'componentLabel.range',
+    });
     components.registerItem({
       id: 'general.point',
       type: 'point',
@@ -139,7 +168,7 @@ export class SidebarModule {
       id: 'asset.any',
       type: 'asset',
       icon: 'insert_drive_file',
-      label: 'componentLabel.anyAsset'
+      label: 'componentLabel.anyAsset',
     });
 
     components.registerItem({

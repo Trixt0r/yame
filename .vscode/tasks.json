@@ -1,26 +1,13 @@
 {
-    "version": "0.1.0",
-    "command": "cmd",
-    "args": ["/C"],
-    "isShellCommand": true,
-    "showOutput": "always",
-    "suppressTaskName": true,
-    "tasks": [
-        {
-            "taskName": "yame run",
-            "args": ["npm run electron"]
-        },
-        {
-            "taskName": "yame dev",
-            "args": ["npm start"]
-        },
-        {
-            "taskName": "yame package win32",
-            "args": ["npm run electron:win32 && explorer ${workspaceRoot}\\builds"]
-        },
-        {
-            "taskName": "yame package win64",
-            "args": ["npm run electron:win64 && explorer ${workspaceRoot}\\builds"]
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "ng.watch",
+      "group": "none",
+      "problemMatcher": [],
+      "label": "npm watch",
+      "detail": "ng build --outputPath=out/ng --watch"
+    }
+  ]
 }

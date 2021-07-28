@@ -3,35 +3,31 @@ import { Tool, IToolComponent } from '../tool';
 import { DefaultToolComponent } from '../components/tool/default/default.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolDirective } from './tool.directive';
-// import { MaterialModule } from '../../material.module';
 import { ToolbarService } from '../service';
 import { By } from '@angular/platform-browser';
 
 @Component({
-  template: `<div [toolHost]='tool'></div>`
+  template: `<div [toolHost]="tool"></div>`,
 })
-class TestToolComponent implements IToolComponent{
+class TestToolComponent implements IToolComponent {
   tool!: Tool;
 }
 
 @NgModule({
-  entryComponents: [
-    DefaultToolComponent,
-  ],
+  entryComponents: [DefaultToolComponent],
 })
-class TestModule { }
+class TestModule {}
 
 describe('ToolDirective', () => {
-
   let comp: TestToolComponent;
   let fixture: ComponentFixture<TestToolComponent>;
   let directive: ToolDirective;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [MaterialModule, TestModule],
+      imports: [TestModule],
       declarations: [TestToolComponent, DefaultToolComponent, ToolDirective],
-      providers: [ ToolbarService ]
+      providers: [ToolbarService],
     }).compileComponents();
     fixture = TestBed.createComponent(TestToolComponent);
     comp = fixture.componentInstance;
@@ -56,7 +52,7 @@ describe('ToolDirective', () => {
 
     it('should call the render method if the tool changed', () => {
       let spy = spyOn(directive, 'render');
-      directive.ngOnChanges({ tool: { } });
+      directive.ngOnChanges({ tool: {} });
       expect(spy.calls.any()).toBe(true, 'render() has not been called');
     });
   });

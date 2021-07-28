@@ -1,8 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSliderModule } from '@angular/material/slider';
 import { NgxsModule, Store } from '@ngxs/store';
-import { MaterialModule } from '../material.module';
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { UtilsModule } from '../utils';
 import { PreferencesMenuComponent } from './components/menu/menu.component';
@@ -20,7 +25,18 @@ import { PreferencesState } from './states/preferences.state';
 import { SettingsState } from './states/settings.state';
 
 @NgModule({
-  imports: [CommonModule, UtilsModule, FormsModule, MaterialModule, NgxsModule.forFeature([PreferencesState, SettingsState])],
+  imports: [
+    CommonModule,
+    UtilsModule,
+    FormsModule,
+    MatListModule,
+    MatSliderModule,
+    MatSelectModule,
+    MatIconModule,
+    MatCardModule,
+    MatMenuModule,
+    NgxsModule.forFeature([PreferencesState, SettingsState]),
+  ],
   declarations: [
     PreferencesMenuComponent,
     SettingsComponent,
@@ -42,7 +58,12 @@ import { SettingsState } from './states/settings.state';
             { id: 'general', label: 'preferences.settings.section.general', icon: 'web', position: 0 },
           ]),
           new AddSettingsOption([
-            { id: 'autoSave', label: 'preferences.settings.option.autoSave', component: SettingsToggleComponent, section: 'general' },
+            {
+              id: 'autoSave',
+              label: 'preferences.settings.option.autoSave',
+              component: SettingsToggleComponent,
+              section: 'general',
+            },
             {
               section: 'general',
               id: 'language',
@@ -51,17 +72,16 @@ import { SettingsState } from './states/settings.state';
               componentSettings: {
                 options: [
                   { value: 'en', label: 'English' },
-                  { value: 'de', label: 'Deutsch' }
-                ]
-              }
-            }
-          ])
-        ])
+                  { value: 'de', label: 'Deutsch' },
+                ],
+              },
+            },
+          ]),
+        ]);
       },
-      deps: [ Store ],
+      deps: [Store],
       multi: true,
     },
   ],
 })
-export class PreferencesModule {
-}
+export class PreferencesModule {}

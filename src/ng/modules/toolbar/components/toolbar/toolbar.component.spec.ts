@@ -3,46 +3,32 @@ import { NgModule, SimpleChange } from '@angular/core';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ToolbarComponent } from './toolbar.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-// import { MaterialModule } from '../../../material.module';
 import { Tool } from '../../tool';
 import { By } from '@angular/platform-browser';
 import { ToolDirective } from '../../directives/tool.directive';
 
-
 @NgModule({
-  entryComponents: [
-    DefaultToolComponent,
-  ],
+  entryComponents: [DefaultToolComponent],
 })
-class TestModule { }
+class TestModule {}
 
 describe('ToolbarComponent', () => {
-
   let comp: ToolbarComponent;
   let fixture: ComponentFixture<ToolbarComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        ToolDirective,
-        ToolbarComponent,
-        DefaultToolComponent
-      ],
-      imports: [
-        NoopAnimationsModule,
-        // MaterialModule,
-        TestModule
-      ],
-      providers: [ ToolbarService ]
+      declarations: [ToolDirective, ToolbarComponent, DefaultToolComponent],
+      imports: [NoopAnimationsModule, TestModule],
+      providers: [ToolbarService],
     }).compileComponents();
-  fixture = TestBed.createComponent(ToolbarComponent);
-  comp = fixture.componentInstance;
-  service = TestBed.get(ToolbarService);
-  service.register(new Tool('edit', 'edit'));
+    fixture = TestBed.createComponent(ToolbarComponent);
+    comp = fixture.componentInstance;
+    service = TestBed.get(ToolbarService);
+    service.register(new Tool('edit', 'edit'));
   });
 
   describe('initial', () => {
-
     it('should have a content div with a mat list and a toggler', () => {
       fixture.detectChanges();
       let content = fixture.debugElement.query(By.css('.content'));
@@ -59,7 +45,6 @@ describe('ToolbarComponent', () => {
     it('should be closed', () => {
       expect(comp.open).toBe(false, 'Toolbar is opened');
     });
-
   });
 
   describe('tools', () => {
@@ -69,8 +54,9 @@ describe('ToolbarComponent', () => {
       expect(content.children.length).toBe(1, 'Tool is not displayed');
     });
 
-    it('should display new registered tools', done => {
-      service.register(new Tool('settings', 'settings'))
+    it('should display new registered tools', (done) => {
+      service
+        .register(new Tool('settings', 'settings'))
         .then(() => {
           fixture.detectChanges();
           let content = fixture.debugElement.query(By.css('mat-nav-list'));
@@ -100,8 +86,8 @@ describe('ToolbarComponent', () => {
   });
 
   describe('state', () => {
-    it('should start opening itself if the open flag gets switched to true', done => {
-      let handler = { fn: function() { } };
+    it('should start opening itself if the open flag gets switched to true', (done) => {
+      let handler = { fn: function () {} };
       let spy = spyOn(handler, 'fn');
       comp.opening.subscribe(handler.fn);
       comp.open = true;
@@ -114,8 +100,8 @@ describe('ToolbarComponent', () => {
       });
     });
 
-    it('should be opened after setting the open flag to true', done => {
-      let handler = { fn: function() { } };
+    it('should be opened after setting the open flag to true', (done) => {
+      let handler = { fn: function () {} };
       let spy = spyOn(handler, 'fn');
       comp.opened.subscribe(handler.fn);
       comp.open = true;
@@ -128,8 +114,8 @@ describe('ToolbarComponent', () => {
       });
     });
 
-    it('should start closing itself if the open flag gets switched to true', done => {
-      let handler = { fn: function() { } };
+    it('should start closing itself if the open flag gets switched to true', (done) => {
+      let handler = { fn: function () {} };
       let spy = spyOn(handler, 'fn');
       comp.closing.subscribe(handler.fn);
       comp.open = false;
@@ -142,8 +128,8 @@ describe('ToolbarComponent', () => {
       });
     });
 
-    it('should be closed after setting the open flag to true', done => {
-      let handler = { fn: function() { } };
+    it('should be closed after setting the open flag to true', (done) => {
+      let handler = { fn: function () {} };
       let spy = spyOn(handler, 'fn');
       comp.closed.subscribe(handler.fn);
       comp.open = false;
@@ -160,5 +146,4 @@ describe('ToolbarComponent', () => {
   afterAll(() => {
     document.body.removeChild(fixture.componentRef.location.nativeElement);
   });
-
 });

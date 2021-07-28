@@ -12,13 +12,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import {
-  IAssetsSource,
-  LoadAssetResource,
-  LoadFromAssetsSource,
-  RemoveAsset,
-  ScanResource,
-} from '../../states/actions/asset.action';
+import { IAssetsSource, LoadFromAssetsSource, RemoveAsset, ScanResource } from '../../states/actions/asset.action';
 import { AssetState } from '../../states/asset.state';
 import { Observable, Subject } from 'rxjs';
 import { filter, mergeMap, reduce, take, takeUntil } from 'rxjs/operators';
@@ -116,11 +110,16 @@ export class AssetGroupsComponent implements OnDestroy, OnChanges {
         return this.groups.filter((it) => it.parent === uri).map(this.mapAssetToTreeNode.bind(this));
       const current = await this.loading$.pipe(take(1)).toPromise();
       if (current === uri) {
-        await this.loading$.pipe(filter(val => val === null)).toPromise();
+        await this.loading$.pipe(filter((val) => val === null)).toPromise();
         return this.groups.filter((it) => it.parent === uri).map(this.mapAssetToTreeNode.bind(this));
       }
       this.store.dispatch(new ScanResource(node.data.asset.resource.uri, node.data.asset.resource.source));
-      await this.loading$.pipe(take(2), reduce(() => null, null)).toPromise();
+      await this.loading$
+        .pipe(
+          take(2),
+          reduce(() => null, null)
+        )
+        .toPromise();
       return this.groups.filter((it) => it.parent === uri).map(this.mapAssetToTreeNode.bind(this));
     },
   };

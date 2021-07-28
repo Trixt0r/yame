@@ -2,17 +2,33 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { CommonModule } from '@angular/common';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSliderModule } from '@angular/material/slider';
 import { NgxsModule, Store } from '@ngxs/store';
-import { MaterialModule } from '../material.module';
 import { SettingsSelectionComponent } from '../preferences/components/settings/types/selection/selection.component';
-import { AddSettingsOption, AddSettingsSection, InitDefaultSettingsValue, UpdateSettingsValue } from '../preferences/states/actions/settings.action';
+import {
+  AddSettingsOption,
+  AddSettingsSection,
+  InitDefaultSettingsValue,
+} from '../preferences/states/actions/settings.action';
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { CameraTool } from './camera.tool';
 import { CameraToolComponent } from './components/tool/tool.component';
 import { CameraState } from './states/camera.state';
 
 @NgModule({
-  imports: [CommonModule, OverlayModule, FormsModule, MaterialModule, NgxsModule.forFeature([CameraState])],
+  imports: [
+    CommonModule,
+    OverlayModule,
+    FormsModule,
+    MatSliderModule,
+    MatIconModule,
+    MatCardModule,
+    MatButtonModule,
+    NgxsModule.forFeature([CameraState]),
+  ],
   declarations: [CameraToolComponent],
   providers: [
     {
@@ -40,9 +56,13 @@ import { CameraState } from './states/camera.state';
                 options: [
                   { value: 1, label: 'preferences.settings.option.camera.moveTypeOptions.mmb', icon: 'mouse' },
                   { value: 2, label: 'preferences.settings.option.camera.moveTypeOptions.rmb', icon: 'mouse' },
-                  { value: -1, label: 'preferences.settings.option.camera.moveTypeOptions.trackpad', icon: 'video_label' }
-                ]
-              }
+                  {
+                    value: -1,
+                    label: 'preferences.settings.option.camera.moveTypeOptions.trackpad',
+                    icon: 'video_label',
+                  },
+                ],
+              },
             },
             {
               section: 'camera',
@@ -57,15 +77,15 @@ import { CameraState } from './states/camera.state';
                   { value: 0.04, label: '4%' },
                   { value: 0.05, label: '5%' },
                   { value: 0.075, label: '7.5%' },
-                  { value: 0.10, label: '10%' },
+                  { value: 0.1, label: '10%' },
                   { value: 0.125, label: '12.5%' },
                   { value: 0.15, label: '15%' },
                   { value: 0.175, label: '17.5%' },
-                  { value: 0.20, label: '20%' },
+                  { value: 0.2, label: '20%' },
                   { value: 0.225, label: '22.5%' },
                   { value: 0.25, label: '25%' },
-                ]
-              }
+                ],
+              },
             },
             {
               section: 'camera',
@@ -82,8 +102,8 @@ import { CameraState } from './states/camera.state';
                   { value: 4, label: '400%' },
                   { value: 4.5, label: '450%' },
                   { value: 5, label: '500%' },
-                ]
-              }
+                ],
+              },
             },
             {
               section: 'camera',
@@ -101,9 +121,9 @@ import { CameraState } from './states/camera.state';
                   { value: 0.15, label: '15%' },
                   { value: 0.25, label: '25%' },
                   { value: 0.5, label: '50%' },
-                ]
-              }
-            }
+                ],
+              },
+            },
           ]),
         ]);
       },

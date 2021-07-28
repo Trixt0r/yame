@@ -1,9 +1,7 @@
 import { DefaultToolComponent } from './default.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialModule } from '../../../../material.module';
 import { Tool } from '../../../tool';
 import { By } from '@angular/platform-browser';
-
 
 describe('DefaultToolComponent', () => {
   let comp: DefaultToolComponent;
@@ -11,7 +9,6 @@ describe('DefaultToolComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [MaterialModule],
       declarations: [DefaultToolComponent],
     }).compileComponents();
     fixture = TestBed.createComponent(DefaultToolComponent);

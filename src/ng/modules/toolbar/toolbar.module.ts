@@ -1,5 +1,4 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
-import { MaterialModule } from '../material.module';
 import { CommonModule } from '@angular/common';
 import { ToolDirective } from './directives/tool.directive';
 import { DefaultToolComponent } from './components/tool/default/default.component';
@@ -12,9 +11,20 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { FormsModule } from '@angular/forms';
 import { AddShortcut } from 'ng/states/hotkey.state';
 import { HotkeyService } from 'ng/services/hotkey.service';
+import { MatRippleModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  imports: [CommonModule, MaterialModule, OverlayModule, FormsModule, NgxsModule.forFeature([ToolbarState])],
+  imports: [
+    CommonModule,
+    OverlayModule,
+    FormsModule,
+    MatRippleModule,
+    MatListModule,
+    MatIconModule,
+    NgxsModule.forFeature([ToolbarState]),
+  ],
   declarations: [ToolbarComponent, DefaultToolComponent, ToolDirective],
   exports: [ToolbarComponent],
   providers: [
@@ -23,7 +33,7 @@ import { HotkeyService } from 'ng/services/hotkey.service';
       useFactory: (store: Store, tool: SelectionToolService) => () => {
         store.dispatch([
           new RegisterTool(tool),
-          new AddShortcut({ id: 'select.all', label: 'Select all', keys: [`${HotkeyService.commandOrControl}.a`] })
+          new AddShortcut({ id: 'select.all', label: 'Select all', keys: [`${HotkeyService.commandOrControl}.a`] }),
         ]);
       },
       deps: [Store, SelectionToolService],

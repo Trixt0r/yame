@@ -23,16 +23,17 @@
     "build.common": "tsc -p src/common/tsconfig.app.json",
     "build.electron": "tsc -p src/main/tsconfig.app.json && lnfs node_modules out/node_modules --type junction && copyfiles package.json config.json out",
     "build.electron.prod": "tsc -p src/main/tsconfig.app.json --outDir dist && copyfiles package.json config.json dist && cd dist && npm install --prod && cd ..",
-    "build": "ng build --outputPath=out/ng && npm run build:electron",
-    "build.prod": "ng build --configuration production --outputPath=dist/ng && npm run build:electron:prod",
+    "build.ng.prod": "ng build --configuration production --outputPath=dist/ng",
+    "build": "ng build --outputPath=out/ng && npm run build.electron",
+    "build.prod": "npm run build.ng.prod && npm run build.electron.prod",
     "editor": "npm run build && npm run electron",
-    "editor.prod": "npm run build:prod && npm run electron:prod",
+    "editor.prod": "npm run build.prod && npm run electron:prod",
     "electron": "electron ./out",
     "electron.prod": "electron ./dist",
-    "electron.linux": "npm run build:prod && node package.js --asar --platform=linux --arch=x64",
-    "electron.win32": "npm run build:prod && node package.js --asar --platform=win32 --arch=ia32",
-    "electron.win64": "npm run build:prod && node package.js --asar --platform=win32 --arch=x64",
-    "electron.mac": "npm run build:prod && node package.js --asar --platform=darwin --arch=x64",
+    "electron.linux": "npm run build.prod && node package.js --asar --platform=linux --arch=x64",
+    "electron.win32": "npm run build.prod && node package.js --asar --platform=win32 --arch=ia32",
+    "electron.win64": "npm run build.prod && node package.js --asar --platform=win32 --arch=x64",
+    "electron.mac": "npm run build.prod && node package.js --asar --platform=darwin --arch=x64",
     "test": "npm run test:common && npm run test:electron && npm run test:ng",
     "test.ng": "ng test",
     "test.common": "jasmine-ts \"./src/common/**/*.spec.ts\"",
@@ -151,5 +152,14 @@
     "constants": false,
     "electron": false,
     "module": "module"
-  }
+  },
+  "browserslist": [
+    "last 1 Chrome version",
+    "last 1 Firefox version",
+    "last 2 Edge major versions",
+    "last 2 Safari major versions",
+    "last 2 iOS major versions",
+    "Firefox ESR",
+    "not IE 11"
+  ]
 }
