@@ -7,9 +7,7 @@ import {
   OnChanges,
   OnDestroy,
   SimpleChanges,
-  ViewChild,
 } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
 import { TranslateService } from '@ngx-translate/core';
 import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
 import { Asset } from 'common/asset';
@@ -53,11 +51,6 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
   @Select(AssetState.selectedAsset) asset$!: Observable<Asset>;
 
   @Select(AssetState.scanningResource) loading$!: Observable<string>;
-
-  /**
-   * Material drawer reference.
-   */
-  @ViewChild(MatDrawer) drawer!: MatDrawer;
 
   /**
    * A list of all currently available assets.
@@ -123,7 +116,7 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
           });
       });
 
-      this.loading$.pipe(takeUntil(this.destroy$)).subscribe(loading => {
+      this.loading$.pipe(takeUntil(this.destroy$)).subscribe((loading) => {
         this.loading = this.group?.id === loading;
         this.updateAssets();
         cdr.markForCheck();
@@ -152,7 +145,7 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
    * @return The icon name.
    */
   getIcon(asset: Asset): string {
-    return this.icons[asset.type] || 'insert_drive_file';
+    return this.icons[asset.type] || 'file';
   }
 
   /**
@@ -190,8 +183,7 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
     if (!changes.group) return;
     if (this.group && !this.group.resource.loaded)
       this.store.dispatch(new ScanResource(this.group.resource.uri, this.group.resource.source));
-    else
-      this.updateAssets();
+    else this.updateAssets();
   }
 
   /**

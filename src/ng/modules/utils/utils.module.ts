@@ -11,7 +11,6 @@ import { NumberDirective } from './directives/number.directive';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { registerLocaleData } from '@angular/common';
 import { Select, Store } from '@ngxs/store';
 import { SettingsState } from '../preferences/states/settings.state';
 import { Observable } from 'rxjs';
@@ -33,17 +32,11 @@ export function createTranslateLoader(http: HttpClient) {
       loader: {
         provide: TranslateLoader,
         useFactory: createTranslateLoader,
-        deps: [HttpClient]
-      }
+        deps: [HttpClient],
+      },
     }),
   ],
-  declarations: [
-    ResizableComponent,
-    PointInputComponent,
-    NestedMenuItemComponent,
-    NumberDirective,
-    ColorPipe
-  ],
+  declarations: [ResizableComponent, PointInputComponent, NestedMenuItemComponent, NumberDirective, ColorPipe],
   exports: [
     HttpClientModule,
     TranslateModule,
@@ -60,18 +53,17 @@ export function createTranslateLoader(http: HttpClient) {
         const lng = translate.getBrowserLang();
         store.dispatch(new InitDefaultSettingsValue('language', lng));
       },
-      deps: [ Store, TranslateService ],
+      deps: [Store, TranslateService],
       multi: true,
-    }
-  ]
+    },
+  ],
 })
 export class UtilsModule {
-
   @Select(SettingsState.value('language')) language$!: Observable<string>;
 
   constructor(protected translate: TranslateService, zone: NgZone) {
     translate.setDefaultLang('en');
-    zone.runOutsideAngular(() => this.language$.subscribe(lng => this.setLang(lng)) );
+    zone.runOutsideAngular(() => this.language$.subscribe((lng) => this.setLang(lng)));
   }
 
   /**
@@ -82,8 +74,8 @@ export class UtilsModule {
   async setLang(lng: string) {
     await this.translate.use(lng).toPromise();
     try {
-      await import (`@angular/common/locales/global/${lng}`);
-    } catch(error) {
+      await import(`@angular/common/locales/global/${lng}`);
+    } catch (error) {
       console.warn('[Utils] Could not load navigator language', error);
     }
   }

@@ -34,17 +34,9 @@
                 "output": "/assets"
               }
             ],
-            "styles": [
-              "src/ng/style.scss"
-            ],
+            "styles": ["node_modules/ng-zorro-antd/ng-zorro-antd.dark.min.css", "src/ng/style.scss"],
             "scripts": [],
-            "allowedCommonJsDependencies": [
-              "common/require",
-              "lodash",
-              "@trixt0r/ecs",
-              "uuid",
-              "es6-promise-polyfill"
-            ],
+            "allowedCommonJsDependencies": ["common/require", "lodash", "@trixt0r/ecs", "uuid", "es6-promise-polyfill"],
             "aot": true,
             "vendorChunk": true,
             "extractLicenses": false,
@@ -103,9 +95,7 @@
             "polyfills": "src/ng/polyfills.ts",
             "tsConfig": "src/ng/tsconfig.spec.json",
             "karmaConfig": "src/ng/karma.conf.js",
-            "styles": [
-              "src/ng/style.scss"
-            ],
+            "styles": ["src/ng/style.scss"],
             "scripts": [],
             "assets": [
               "src/ng/favicon.ico",
@@ -120,13 +110,8 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/ng/tsconfig.app.json",
-              "src/ng/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": ["src/ng/tsconfig.app.json", "src/ng/tsconfig.spec.json"],
+            "exclude": ["**/node_modules/**"]
           }
         }
       }
@@ -152,9 +137,7 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": "e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "exclude": ["**/node_modules/**"]
           }
         }
       }

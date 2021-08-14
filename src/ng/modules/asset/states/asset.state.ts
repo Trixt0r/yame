@@ -19,10 +19,9 @@ import {
 } from './actions/asset.action';
 import { merge } from 'lodash';
 import { Injectable, Type } from '@angular/core';
-import { IResource } from 'common/interfaces/resource';
+import { IResource, IResourceGroup } from 'common/interfaces/resource';
 import { IAssetPreviewComponent } from '../directives/preview.directive';
 import { IAssetDetailsComponent } from '../directives/details.directive';
-import { IFileState } from 'ng/states/editor.state';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 import { PlatformPath } from 'path';
 import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
@@ -112,7 +111,7 @@ export interface IAssetState {
         origin: 'file:///',
         type: 'local',
         label: 'asset.source.local',
-        icon: 'folder_open',
+        icon: 'folder-open',
       },
     ],
   },
@@ -139,8 +138,8 @@ export class AssetState implements NgxsOnInit {
    * Returns all assets of type 'groups'.
    */
   @Selector()
-  static groups(state: IAssetState) {
-    return state.assets.filter((asset) => asset.type === 'group');
+  static groups(state: IAssetState): Asset<IResourceGroup>[] {
+    return state.assets.filter((asset) => asset.type === 'group') as Asset<IResourceGroup>[];
   }
 
   @Selector()

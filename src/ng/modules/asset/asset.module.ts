@@ -15,28 +15,49 @@ import { AssetDetailsDirective } from './directives/details.directive';
 import { AssetState } from './states/asset.state';
 import { ImageAssetPreviewComponent } from './components';
 import { ImageAssetDetailsComponent } from './components/details/image/image.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatButtonModule } from '@angular/material/button';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTreeModule } from 'ng-zorro-antd/tree';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzResultModule } from 'ng-zorro-antd/result';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import {
+  FolderAddOutline,
+  FolderOpenOutline,
+  FolderOutline,
+  DeleteOutline,
+  FileImageOutline,
+  FileOutline,
+  QuestionCircleOutline,
+} from '@ant-design/icons-angular/icons';
 
 @NgModule({
   imports: [
     BrowserModule,
     UtilsModule,
-    MatIconModule,
-    MatCardModule,
-    MatTabsModule,
-    MatDividerModule,
-    MatProgressSpinnerModule,
-    MatMenuModule,
-    MatSidenavModule,
-    MatButtonModule,
+    NzIconModule.forRoot([
+      FolderAddOutline,
+      FolderOpenOutline,
+      FolderOutline,
+      DeleteOutline,
+      FileImageOutline,
+      FileOutline,
+      QuestionCircleOutline,
+    ]),
+    NzButtonModule,
+    NzDropDownModule,
+    NzTreeModule,
+    NzCardModule,
+    NzLayoutModule,
+    NzTabsModule,
+    NzDividerModule,
+    NzResultModule,
     NgBytesPipeModule,
+    NzSpinModule,
     TreeModule.forRoot(),
     DndModule.forRoot(),
     NgxsModule.forFeature([AssetState]),
@@ -58,7 +79,7 @@ import { MatButtonModule } from '@angular/material/button';
       provide: APP_INITIALIZER,
       useFactory: (store: Store) => () => {
         store.dispatch([
-          new RegisterAssetIcon('image', ['png', 'gif', 'jpg', 'jpeg', 'svg']),
+          new RegisterAssetIcon('file-image', ['png', 'gif', 'jpg', 'jpeg', 'svg']),
           new RegisterAssetTypeLabel('asset.type.image', ['png', 'gif', 'jpg', 'jpeg', 'svg']),
         ]);
       },

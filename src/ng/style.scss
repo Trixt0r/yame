@@ -1,7 +1,8 @@
 @import '~angular-tree-component/dist/angular-tree-component.css';
 @import '~@angular/material/prebuilt-themes/pink-bluegrey.css';
 @import '~ng2-dnd/bundles/style.css';
-@import "~@ng-select/ng-select/themes/material.theme.css";
+@import '~@ng-select/ng-select/themes/material.theme.css';
+@import '~ng-zorro-antd/ng-zorro-antd.dark.min.css';
 @import './styles/material-icons.scss';
 @import './styles/utils.scss';
 @import './variables.scss';
@@ -14,13 +15,6 @@ body {
   color: white;
   margin: 0;
 }
-
-// h1 {
-//   color: #369;
-//   font-family: Arial, Helvetica, sans-serif;
-//   font-size: 250%;
-// }
-
 
 ::-webkit-scrollbar {
   width: 4px;
@@ -70,7 +64,10 @@ body {
   margin: 8px 0 !important;
 }
 
-.mat-form-field-appearance-legacy.mat-form-field-can-float .mat-input-server:focus+.mat-form-field-label-wrapper .mat-form-field-label,
+.mat-form-field-appearance-legacy.mat-form-field-can-float
+  .mat-input-server:focus
+  + .mat-form-field-label-wrapper
+  .mat-form-field-label,
 .mat-form-field-appearance-legacy.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
   font-size: 12px;
   transform: translateY(-1.28125em);
@@ -125,7 +122,7 @@ mat-form-field:not(.mat-focused) .mat-form-field-appearance-legacy .mat-form-fie
   background: none;
   box-shadow: none;
   &::before {
-    background: rgba(255, 255, 255, .04);
+    background: rgba(255, 255, 255, 0.04);
   }
 }
 
@@ -153,7 +150,8 @@ tree-node-wrapper {
     position: relative;
     padding-left: $tree-node-toggle-size;
     width: 100%;
-    .toggle-btn, .node-icon {
+    .toggle-btn,
+    .node-icon {
       position: absolute;
       left: 0;
       top: 50%;
@@ -178,7 +176,9 @@ tree-node-wrapper {
     }
   }
 
-  .node-name { float: left; }
+  .node-name {
+    float: left;
+  }
   .inline-actions-wrapper {
     float: right;
     overflow: hidden;
@@ -195,7 +195,8 @@ tree-node-wrapper {
       }
     }
   }
-  &:hover, &.changed {
+  &:hover,
+  &.changed {
     .inline-actions {
       opacity: inherit;
       transform: none;
@@ -243,7 +244,8 @@ tree-node-wrapper {
 tree-node > div.disabled {
   color: #666666;
   tree-node-wrapper {
-    &:hover, &.changed {
+    &:hover,
+    &.changed {
       .inline-actions {
         transform: translateX(100%);
         opacity: 0;
@@ -254,7 +256,8 @@ tree-node > div.disabled {
 tree-node > div.isolated {
   color: white;
   tree-node-wrapper {
-    &:hover, &.changed {
+    &:hover,
+    &.changed {
       .inline-actions {
         opacity: inherit;
         transform: none;
@@ -263,10 +266,12 @@ tree-node > div.isolated {
   }
 }
 
-
-.ng-select.custom, .ng-select.custom.ng-select-focused {
-
-  .ng-select-container, .ng-clear-wrapper, .ng-arrow-wrapper .ng-arrow, .ng-input input {
+.ng-select.custom,
+.ng-select.custom.ng-select-focused {
+  .ng-select-container,
+  .ng-clear-wrapper,
+  .ng-arrow-wrapper .ng-arrow,
+  .ng-input input {
     color: white;
   }
 
@@ -280,11 +285,10 @@ tree-node > div.isolated {
 
   .ng-select-container .ng-value-container .ng-placeholder {
     background-color: #424242;
-    color: rgba($color: white, $alpha: 1.0);
+    color: rgba($color: white, $alpha: 1);
   }
 }
 .ng-select.custom.ng-select-focused {
-
   .ng-select-container.ng-appearance-outline:after {
     border-color: rgba($color: white, $alpha: 0.5);
   }
@@ -292,9 +296,11 @@ tree-node > div.isolated {
 
 .ng-dropdown-panel .ng-dropdown-panel-items {
   background: #424242;
-  font-family: Roboto, "Helvetica New", sans-serif;
+  font-family: Roboto, 'Helvetica New', sans-serif;
   color: white;
-  .ng-option, .ng-option.ng-option-marked, .ng-option.ng-option-disabled {
+  .ng-option,
+  .ng-option.ng-option-marked,
+  .ng-option.ng-option-disabled {
     color: white;
     &.ng-option-selected {
       color: white;
@@ -308,7 +314,7 @@ tree-node > div.isolated {
 }
 
 .titlebar {
-  font: 400 12px/28px Roboto, "Helvetica New", sans-serif;
+  font: 400 12px/28px Roboto, 'Helvetica New', sans-serif;
 
   &.inactive {
     opacity: 0.5;

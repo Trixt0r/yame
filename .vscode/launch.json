@@ -17,7 +17,8 @@
         "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
       },
       "args": ["--remote-debugging-port=9223", "."],
-      "outputCapture": "std"
+      "outputCapture": "std",
+      "preLaunchTask": "ng.watch"
     },
     {
       "name": "Electron: Renderer",
@@ -31,7 +32,8 @@
   "compounds": [
     {
       "name": "Electron: All",
-      "configurations": ["Electron: Main", "Electron: Renderer"]
+      "configurations": ["Electron: Main", "Electron: Renderer"],
+      "preLaunchTask": "ng.watch"
     }
   ]
 }

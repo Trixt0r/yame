@@ -1,63 +1,67 @@
 <div class="tree-wrapper">
-  <tree-root #tree
-            *ngIf="groupNodes.length > 0"
-            [nodes]="groupNodes"
-            [options]="options"
-            (activate)="onActivate($event)"
-            (deactivate)="onDeactivate($event)">
-    <ng-template #loadingTemplate>
-      <div class="text-center fill full">
-        <mat-spinner [diameter]="16"></mat-spinner>
+  <nz-tree
+    [nzData]="nodes"
+    nzBlockNode
+    nzAsyncData
+    [nzSelectedKeys]="this.group ? [this.group.id] : []"
+    [nzTreeTemplate]
+    (nzClick)="onNzClick($event)"
+    (nzExpandChange)="onNzExpandChange($event)"
+    [nzTreeTemplate]="nzTreeTemplate"
+  >
+    <ng-template #nzTreeTemplate let-node let-group="origin.group">
+      <div class="pull-left text-left" [class.root]="!group.parent" [class.fill-100]="!!group.parent">
+        <div class="pull-left inline-block icon-wrapper">
+          <i nz-icon [nzType]="getIcon(group)" nzTheme="outline"></i>
+        </div>
+        <div class="node-title pull-right text-ellipsis inline-block">{{ node.title }}</div>
       </div>
-    </ng-template>
-    <ng-template #treeNodeTemplate let-node let-index="index">
-      <button *ngIf="!node.isLeaf"
-              class="toggle-btn"
-              mat-icon-button
-              disableRipple
-              [attr.aria-label]="'toggle ' + node.id"
-              (click)="$event.preventDefault(); $event.stopPropagation(); node.toggleExpanded()">
-        <mat-icon>{{ node.isExpanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
-      </button>
-      <mat-icon class="node-icon mat-icon-rtl-mirror">{{ getIcon(node.data.asset) }}</mat-icon>
-      <h5 class="mat-h5 node-name">{{ node.data.name }}</h5>
-      <div *ngIf="!node.data.asset.parent" class="inline-actions-wrapper">
+      <div *ngIf="!group.parent" class="pull-right inline-actions-wrapper">
         <div class="inline-actions inline">
-          <button mat-icon-button (click)="removeSource($event, node.data)">
-            <mat-icon>delete</mat-icon>
+          <button
+            nz-button
+            nzShape="circle"
+            nzType="text"
+            nzSize="small"
+            class="no-margin"
+            (click)="removeSource($event, group)"
+          >
+            <i nz-icon nzType="delete"></i>
           </button>
         </div>
       </div>
     </ng-template>
-  </tree-root>
-  <div *ngIf="groupNodes.length === 0" class="empty text-center">
-    <div class="inline-block">
-      <span class="vert-align-middle table-cell"><mat-icon>error</mat-icon></span>
-      <span class="mat-caption padding-left-8 vert-align-middle table-cell">{{ 'asset.notFound.source' | translate }}</span>
-    </div>
-  </div>
+  </nz-tree>
 </div>
 
-
-<button *ngIf="assetSources.length === 1"
-        mat-raised-button
-        [attr.aria-label]="'asset.addResourceGroup' | translate"
-        (click)="addFromSource(assetSources[0])">
-  <mat-icon>library_add</mat-icon>
+<button
+  *ngIf="assetSources.length === 1"
+  nz-button
+  nzType="primary"
+  [attr.aria-label]="'asset.addResourceGroup' | translate"
+  (click)="addFromSource(assetSources[0])"
+>
+  <i nz-icon nzType="folder-add" nzTheme="outline"></i>
   <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
 </button>
 
-<button *ngIf="assetSources.length > 1"
-        mat-raised-button
-        [attr.aria-label]="'asset.addResourceGroup' | translate"
-        [matMenuTriggerFor]="menu">
-  <mat-icon>library_add</mat-icon>
+<button
+  *ngIf="assetSources.length > 1"
+  nz-button
+  nzType="primary"
+  nz-dropdown
+  nzTrigger="click"
+  [nzDropdownMenu]="menu"
+>
+  <i nz-icon nzType="folder-add" nzTheme="outline"></i>
   <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
 </button>
 
-<mat-menu #menu="matMenu">
-  <button *ngFor="let source of assetSources" mat-menu-item (click)="addFromSource(source)">
-    <mat-icon *ngIf="source.icon">{{ source.icon }}</mat-icon>
-    <span>{{ ('asset.source.' + source.type) | translate }}</span>
-  </button>
-</mat-menu>
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <li *ngFor="let source of assetSources" nz-menu-item (click)="addFromSource(source)">
+      <i nz-icon *ngIf="source.icon" [nzType]="source.icon" nzTheme="outline"></i>
+      <span class="margin-left-4">{{ 'asset.source.' + source.type | translate }}</span>
+    </li>
+  </ul>
+</nz-dropdown-menu>

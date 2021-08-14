@@ -1,100 +1,132 @@
-<mat-drawer-container class="fill-height">
-  <div *ngIf="!group || (group && group.resource.loaded && !assets.length)" class="no-items">
-    <div class ="fill half relative text-right inline-block border-box padding-left-8 padding-right-16 padding-vert-32">
-      <mat-icon class="sign">not_interested</mat-icon>
-      <mat-icon class="bg front">folder</mat-icon>
-      <mat-icon class="bg back right">description</mat-icon>
-      <mat-icon class="bg back left">image</mat-icon>
-    </div>
-    <div class="fill half text-left inline-block border-box vert-align-top relative">
-      <div class="absolute vert-center padding-right-16 border-box">
-        <h3 class="mat-h3 no-margin-bottom">{{ 'asset.notFound.assets.title' | translate }}</h3>
-        <span *ngIf="!group" class="mat-caption no-margin-top">{{ 'asset.notFound.assets.hint' | translate }}</span>
-      </div>
-    </div>
-  </div>
+<nz-layout class="fill-height">
+  <nz-layout>
+    <nz-content class="relative">
+      <nz-result
+        *ngIf="!group || (group && group.resource.loaded && !assets.length)"
+        nzIcon="question-circle-o"
+        [nzTitle]="'asset.notFound.assets.title' | translate"
+        [nzSubTitle]="!group ? ('asset.notFound.assets.hint' | translate) : null"
+      >
+      </nz-result>
 
-  <div *ngIf="loading" class="text-center fill-height relative">
-    <div class="absolute vert-center fill-width">
-      <div class="inline-block text-center">
-        <mat-spinner [diameter]="64"></mat-spinner>
+      <div *ngIf="loading" class="text-center fill-height relative">
+        <div class="absolute vert-center fill-width">
+          <div class="inline-block text-center">
+            <ng-template #indicatorTemplate>
+              <i nz-icon nzType="loading" class="font-size-32"></i>
+            </ng-template>
+            <nz-spin nzSimple [nzIndicator]="indicatorTemplate"></nz-spin>
+          </div>
+          <h4 nz-typography class="opacity-50 margin-top-16">{{ 'asset.loading' | translate }}</h4>
+        </div>
       </div>
-      <h4 class="mat-h4 opacity-50 margin-top-16">{{ 'asset.loading' | translate }}</h4>
-    </div>
-  </div>
 
-  <mat-drawer mode="side" position="end" [opened]="!!selectedAsset">
+      <div *ngIf="!loading" class="cards padding-bottom-4 flex wrap">
+        <ng-container *ngFor="let asset of assets">
+          <nz-card
+            nzHoverable
+            [nzCover]="coverTemplate"
+            dnd-draggable
+            [dragEnabled]="true"
+            [dragData]="asset"
+            (dragstart)="onDragStart($event)"
+            (click)="toggleAsset(asset)"
+            class="margin-4"
+            [class.selected]="asset.id === selectedAsset?.id"
+          >
+            <i nz-icon [nzType]="getIcon(asset)" nzTheme="outline"></i>
+            <nz-card-meta
+              class="inline-block padding-0 vert-align-sub margin-left-4 fill-75"
+              [nzDescription]="asset.resource.name"
+            ></nz-card-meta>
+          </nz-card>
+          <ng-template #coverTemplate>
+            <div class="preview">
+              <div class="fill-width fill-height relative">
+                <ng-template [yameAssetPreview]="asset"></ng-template>
+              </div>
+            </div>
+          </ng-template>
+        </ng-container>
+      </div>
+    </nz-content>
+  </nz-layout>
+  <nz-sider
+    [nzBreakpoint]="0"
+    [nzCollapsedWidth]="0"
+    [nzCollapsible]="true"
+    [nzTrigger]="null"
+    [nzCollapsed]="!selectedAsset"
+    [nzWidth]="300"
+  >
     <ng-container *ngIf="selectedAsset">
-      <h2 class="mat-h2 margin-bottom-4">
-        <mat-icon inline class="inline vert-align-top">{{ getIcon(selectedAsset) }}</mat-icon>
-        <div class="name margin-left-16">{{ selectedAsset.resource.name }}</div>
-        <button mat-icon-button class="pull-right" (click)="toggleAsset(selectedAsset)">
-          <mat-icon>close</mat-icon>
+      <div class="ant-drawer-header">
+        <i nz-icon [nzType]="getIcon(selectedAsset)" class="inline"></i>
+        <div class="ant-drawer-title inline margin-left-8" [innerText]="selectedAsset.resource.name"></div>
+        <button
+          (click)="toggleAsset(selectedAsset)"
+          aria-label="Close"
+          class="ant-drawer-close"
+          style="--scroll-bar: 0px"
+        >
+          <i nz-icon nzType="close"></i>
         </button>
-      </h2>
-      <mat-tab-group mat-align-tabs="center">
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon class="absolute">info</mat-icon>
+      </div>
+      <nz-tabset nzCentered>
+        <nz-tab [nzTitle]="titleTemplate">
+          <ng-template #titleTemplate>
+            <i nz-icon nzType="info-circle"></i>
             <span>{{ 'asset.details.title' | translate }}</span>
           </ng-template>
-          <div class="preview"
-                dnd-draggable
-                [dragEnabled]="true"
-                [dragData]="selectedAsset"
-                (dragstart)="onDragStart($event)">
+          <div
+            class="preview"
+            dnd-draggable
+            [dragEnabled]="true"
+            [dragData]="selectedAsset"
+            (dragstart)="onDragStart($event)"
+          >
             <div class="fill-width fill-height relative">
               <ng-container [yameAssetPreview]="selectedAsset"></ng-container>
             </div>
           </div>
-          <mat-divider></mat-divider>
-          <div class="details margin-top-16">
+          <nz-divider class="no-margin-bottom margin-top-16"></nz-divider>
+          <div class="details margin-top-4 padding-8">
             <div class="row">
-              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.type' | translate }}</div>
-              <div class="col fill-66 text-left mat-caption">{{ getLabel(selectedAsset) | translate }}</div>
-            </div>
-            <div class="row" *ngIf="selectedAsset?.resource.size !== undefined">
-              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.size' | translate }}</div>
-              <div class="col fill-66 text-left mat-caption">
-                {{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.type' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ getLabel(selectedAsset) | translate }}</b>
               </div>
             </div>
-            <div class="row" *ngIf="selectedAsset?.resource.created !== undefined">
-              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.created' | translate }}</div>
-              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.created | date : 'medium' : undefined : translate.currentLang }}</div>
+            <div class="row" *ngIf="selectedAsset.resource.size !== undefined">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.size' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)</b>
+              </div>
             </div>
-            <div class="row" *ngIf="selectedAsset?.resource.changed !== undefined">
-              <div class="col fill-33 text-left mat-caption opacity-90">{{ 'asset.details.modified' | translate }}</div>
-              <div class="col fill-66 text-left mat-caption">{{ selectedAsset?.resource.changed | date : 'medium' : undefined : translate.currentLang }}</div>
+            <div class="row" *ngIf="selectedAsset.resource.created !== undefined">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.created' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ selectedAsset.resource.created | date: 'medium':undefined:translate.currentLang }}</b>
+              </div>
+            </div>
+            <div class="row" *ngIf="selectedAsset.resource.changed !== undefined">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.modified' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ selectedAsset?.resource.changed | date: 'medium':undefined:translate.currentLang }}</b>
+              </div>
             </div>
             <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
           </div>
-        </mat-tab>
-      </mat-tab-group>
+        </nz-tab>
+      </nz-tabset>
     </ng-container>
-  </mat-drawer>
-
-  <div *ngIf="!loading" class="cards padding-bottom-4 flex wrap">
-    <mat-card *ngFor="let asset of assets"
-              dnd-draggable
-              [dragEnabled]="true"
-              [dragData]="asset"
-              (dragstart)="onDragStart($event)"
-              (click)="toggleAsset(asset)"
-              class="margin-4"
-              [class.mat-elevation-z8]="selectedAsset?.id === asset.id"
-              [class.selected]="selectedAsset?.id === asset.id">
-      <div class="preview">
-        <div class="fill-width fill-height relative">
-          <ng-template [yameAssetPreview]="asset"></ng-template>
-        </div>
-      </div>
-      <mat-divider></mat-divider>
-      <mat-card-content>
-        <mat-icon inline class="inline">{{ getIcon(asset) }}</mat-icon>
-        <span class="mat-caption vert-align-bottom margin-left-8">{{ asset.resource.name }}</span>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-</mat-drawer-container>
+  </nz-sider>
+</nz-layout>
