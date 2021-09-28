@@ -45,8 +45,7 @@ import { enableProdMode } from '@angular/core';
 import { environment } from '../environments';
 import { PluginManager } from './modules/plugin/plugin.manager';
 
-if (environment.production)
-  enableProdMode();
+if (environment.production) enableProdMode();
 
 /**
  * Initializes the angular app.
@@ -54,15 +53,12 @@ if (environment.production)
  * @returns {Promise<any>}
  */
 function initNg(): Promise<any> {
-  return import('./app.module')
-    .then(module => {
-      return platformBrowserDynamic()
-        .bootstrapModule(module.AppModule)
-        .then(componentRef => Pubsub.emit('ready', componentRef))
-    });
+  return import('./app.module').then((module) => {
+    return platformBrowserDynamic()
+      .bootstrapModule(module.AppModule)
+      .then((componentRef) => Pubsub.emit('ready', componentRef));
+  });
 }
 
 const pluginManager = new PluginManager();
-pluginManager.initialize()
-  .then(initNg)
-  .catch(initNg);
+pluginManager.initialize().then(initNg).catch(initNg);

@@ -1,9 +1,11 @@
 <div class="resizer"></div>
-<yame-hierarchy #hierarchy [selected]="selectedEntities"></yame-hierarchy>
-<yame-selection #selection
-                 class="mat-elevation-z12"
-                 [property]="'top'"
-                 [minVal]="100"
-                 [selected]="selected"
-                 (sizeUpdated)="onSizeUpdated()">
+<yame-hierarchy #hierarchy></yame-hierarchy>
+<yame-selection
+  #selection
+  class="mat-elevation-z12"
+  [property]="'top'"
+  [minVal]="100"
+  [selected]="selected"
+  (sizeUpdated)="onSizeUpdated()"
+>
 </yame-selection>

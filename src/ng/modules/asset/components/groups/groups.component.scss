@@ -34,6 +34,8 @@ yame-asset-groups {
     nz-tree-node.ant-tree-treenode {
       padding: 0;
       margin-bottom: 4px;
+      user-select: none;
+      overflow: hidden;
       transition: all 0.3s, border 0s, line-height 0s, box-shadow 0s;
       &:hover {
         background-color: rgba(255, 255, 255, 0.08);

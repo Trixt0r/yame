@@ -6,13 +6,13 @@
   "configurations": [
     {
       "name": "Electron: Main",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "cwd": "${workspaceFolder}/out",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
       "windows": {
         "name": "Launch",
-        "type": "node",
+        "type": "pwa-node",
         "request": "launch",
         "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
       },

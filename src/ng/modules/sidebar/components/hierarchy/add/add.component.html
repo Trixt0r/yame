@@ -1,5 +1,13 @@
-<button mat-icon-button aria-label="Add entity" (click)="$event.stopPropagation()" [matMenuTriggerFor]="addObject.childMenu">
-  <mat-icon>add</mat-icon>
+<button
+  nz-button
+  nzShape="circle"
+  nzType="text"
+  nzSize="small"
+  aria-label="Add entity"
+  (click)="$event.stopPropagation()"
+  [matMenuTriggerFor]="addObject.childMenu"
+>
+  <i nz-icon nzType="plus"></i>
 </button>
 
 <nested-menu-item #addObject [items]="items" (selected)="onSelected($event.id)"></nested-menu-item>

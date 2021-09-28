@@ -1,43 +1,45 @@
-
 <div #header class="header">
-  <h4 class="mat-h4">{{ 'sidebar.hierarchy.title' | translate }}</h4>
+  <h4>{{ 'sidebar.hierarchy.title' | translate }}</h4>
   <div class="btn-group">
     <yame-add-entity></yame-add-entity>
   </div>
 </div>
 
-<tree-root #tree
-          [nodes]="nodes"
-          [options]="options"
-          (activate)="onActivate($event)"
-          (deactivate)="onDeactivate($event)"
-          (moveNode)="onMoveNode($event)"
-          (copyNode)="onCopyNode($event)">
-  <ng-template #treeNodeTemplate let-node let-index="index">
-    <button *ngIf="!node.isLeaf"
-            class="toggle-btn"
-            mat-icon-button
-            disableRipple
-            [attr.aria-label]="'toggle ' + node.id"
-            (click)="$event.preventDefault(); $event.stopPropagation(); node.toggleExpanded()">
-      <mat-icon>{{ node.isExpanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
-    </button>
-    <div *ngIf="isolated && isolated === node.id" class="isolated"></div>
-    <mat-icon class="node-icon mat-icon-rtl-mirror"> {{ getIcon(node.data, node.isExpanded) }} </mat-icon>
-    <h5 class="mat-h5 node-name">{{ node.data.name }}</h5>
-    <div class="inline-actions-wrapper">
-      <div class="inline-actions">
-        <yame-add-entity *ngIf="canHaveChildren(node.data)" class="embedded" [parent]="node.id"></yame-add-entity>
-        <button mat-icon-button (click)="toggleVisibility($event, node.data)">
-          <mat-icon>{{ isVisible(node.data) ? 'visibility' : 'visibility_off' }}</mat-icon>
+<nz-tree
+  #tree
+  nzBlockNode
+  nzDraggable
+  [nzData]="nodes"
+  [nzTreeTemplate]="nzTreeTemplate"
+  [nzMultiple]="true"
+  [nzBeforeDrop]="nzBeforeDrop"
+  [nzSelectedKeys]="selectedKeys"
+  (nzDblClick)="onNzDblClick($event)"
+  (nzClick)="onNzClick($event)"
+  (nzOnDrop)="onNzDrop($event)"
+  (nzOnDragStart)="onNzDragStart($event)"
+>
+  <ng-template #nzTreeTemplate let-node let-origin="origin" let-entity="origin.entity">
+    <div *ngIf="isolated && isolated === node.key" class="isolated"></div>
+    <div class="pull-left text-left">
+      <div class="inline-block icon-wrapper">
+        <i nz-icon [nzType]="getIcon(origin)"></i>
+      </div>
+      <div class="node-title pull-right text-ellipsis inline-block">{{ node.title }}</div>
+    </div>
+    <div class="inline-actions-wrapper pull-right">
+      <div class="inline-actions inline">
+        <yame-add-entity *ngIf="canHaveChildren(origin)" class="embedded" [parent]="origin.key"></yame-add-entity>
+        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="toggleVisibility($event, origin)">
+          <i nz-icon [nzType]="isVisible(origin) ? 'eye' : 'eye-invisible'"></i>
         </button>
-        <button mat-icon-button (click)="toggleLock($event, node.data)">
-          <mat-icon>{{ isLocked(node.data) ? 'lock' : 'lock_open' }}</mat-icon>
+        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="toggleLock($event, origin)">
+          <i nz-icon [nzType]="isLocked(origin) ? 'lock' : 'unlock'"></i>
         </button>
-        <button mat-icon-button (click)="removeEntity($event, node.data)">
-          <mat-icon>delete</mat-icon>
+        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="removeEntity($event, origin)">
+          <i nz-icon nzType="delete"></i>
         </button>
       </div>
     </div>
   </ng-template>
-</tree-root>
+</nz-tree>

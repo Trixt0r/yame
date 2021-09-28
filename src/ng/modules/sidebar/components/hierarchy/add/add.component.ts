@@ -13,7 +13,6 @@ import { capitalize, isNil } from 'lodash';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddEntityComponent implements AfterViewInit {
-
   /**
    * The items to display in the menu.
    */
@@ -24,20 +23,7 @@ export class AddEntityComponent implements AfterViewInit {
    */
   @Input() parent?: string;
 
-  constructor(protected entityTypes: EntityTypeService) { }
-
-  // /**
-  //  * The items, which are not categorized.
-  //  */
-  // get entityItems(): string[] {
-  //   const items: EntityTypeItem[] = [];
-  //   this.entityTypes.items.forEach(item => {
-  //     const categories = this.entityTypes.getCategories(item);
-  //     if (categories.length > 0) return;
-  //     items.push(item);
-  //   });
-  //   return items;
-  // }
+  constructor(protected entityTypes: EntityTypeService) {}
 
   /**
    * Initializes the items to render.
@@ -47,7 +33,7 @@ export class AddEntityComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const items: NavItem[] = [];
     const entityTypeCategories = this.entityTypes.categories;
-    const flatList: NavItem[] = entityTypeCategories.map(category => {
+    const flatList: NavItem[] = entityTypeCategories.map((category) => {
       return {
         id: category.id,
         label: category.label,
@@ -56,40 +42,45 @@ export class AddEntityComponent implements AfterViewInit {
       };
     });
 
-    flatList.forEach(item => {
-      const sceneCategory = entityTypeCategories.find(it => item.id === it.id);
+    flatList.forEach((item) => {
+      const sceneCategory = entityTypeCategories.find((it) => item.id === it.id);
       if (!sceneCategory) return;
       if (sceneCategory.categories) {
         const categories = sceneCategory.categories || [];
-        item.children = flatList.filter(it => categories?.indexOf(it.id) >= 0);
+        item.children = flatList.filter((it) => categories?.indexOf(it.id) >= 0);
       }
-      if (!sceneCategory.parent)
-        items.push(item);
+      if (!sceneCategory.parent) items.push(item);
     });
 
-    this.entityTypes.items.forEach(item => {
+    this.entityTypes.items.forEach((item) => {
       const entityTypeItem = {
         id: item.id,
         icon: item.icon,
         label: item.label,
       };
-      const categories = entityTypeCategories.filter(it => it.items.indexOf(item.id) >= 0);
+      const categories = entityTypeCategories.filter((it) => it.items.indexOf(item.id) >= 0);
       if (categories.length === 0) {
         if (!entityTypeItem.label)
-          entityTypeItem.label = item.id.split(/\.|_|-/g).map(str => capitalize(str)).join(' ');
+          entityTypeItem.label = item.id
+            .split(/\.|_|-/g)
+            .map((str) => capitalize(str))
+            .join(' ');
         items.push(entityTypeItem);
       } else {
-        categories.forEach(it => {
-          const navItem = flatList.find(it => it.id === it.id);
+        categories.forEach((it) => {
+          const navItem = flatList.find((it) => it.id === it.id);
           const child = Object.assign({}, entityTypeItem);
           if (!child.label)
-            child.label = item.id.split(/\.|_|-/g).filter(str => it.id !== str).map(str => capitalize(str)).join(' ');
+            child.label = item.id
+              .split(/\.|_|-/g)
+              .filter((str) => it.id !== str)
+              .map((str) => capitalize(str))
+              .join(' ');
           navItem?.children?.push(child);
         });
       }
     });
-    this.items = items.filter(it => {
-
+    this.items = items.filter((it) => {
       if (it.id === 'layer' && this.parent) return false;
 
       return isNil(it.children) || (it.children && it.children.length > 0);
@@ -105,5 +96,4 @@ export class AddEntityComponent implements AfterViewInit {
   onSelected(id: string): void {
     this.entityTypes.addEntity(id, this.parent);
   }
-
 }

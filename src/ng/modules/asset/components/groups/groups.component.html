@@ -4,7 +4,6 @@
     nzBlockNode
     nzAsyncData
     [nzSelectedKeys]="this.group ? [this.group.id] : []"
-    [nzTreeTemplate]
     (nzClick)="onNzClick($event)"
     (nzExpandChange)="onNzExpandChange($event)"
     [nzTreeTemplate]="nzTreeTemplate"
@@ -12,7 +11,7 @@
     <ng-template #nzTreeTemplate let-node let-group="origin.group">
       <div class="pull-left text-left" [class.root]="!group.parent" [class.fill-100]="!!group.parent">
         <div class="pull-left inline-block icon-wrapper">
-          <i nz-icon [nzType]="getIcon(group)" nzTheme="outline"></i>
+          <i nz-icon [nzType]="getIcon(group)"></i>
         </div>
         <div class="node-title pull-right text-ellipsis inline-block">{{ node.title }}</div>
       </div>
@@ -41,7 +40,7 @@
   [attr.aria-label]="'asset.addResourceGroup' | translate"
   (click)="addFromSource(assetSources[0])"
 >
-  <i nz-icon nzType="folder-add" nzTheme="outline"></i>
+  <i nz-icon nzType="folder-add"></i>
   <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
 </button>
 
@@ -53,14 +52,14 @@
   nzTrigger="click"
   [nzDropdownMenu]="menu"
 >
-  <i nz-icon nzType="folder-add" nzTheme="outline"></i>
+  <i nz-icon nzType="folder-add"></i>
   <span class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
 </button>
 
 <nz-dropdown-menu #menu="nzDropdownMenu">
   <ul nz-menu>
     <li *ngFor="let source of assetSources" nz-menu-item (click)="addFromSource(source)">
-      <i nz-icon *ngIf="source.icon" [nzType]="source.icon" nzTheme="outline"></i>
+      <i nz-icon *ngIf="source.icon" [nzType]="source.icon"></i>
       <span class="margin-left-4">{{ 'asset.source.' + source.type | translate }}</span>
     </li>
   </ul>

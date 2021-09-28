@@ -5,7 +5,6 @@ import { DndModule } from 'ng2-dnd';
 import { AssetItemsComponent } from './components/items/items.component';
 import { AssetPanelComponent } from './components/panel/panel.component';
 import { AssetGroupsComponent } from './components/groups/groups.component';
-import { TreeModule } from 'angular-tree-component';
 import { AssetPreviewDirective } from './directives/preview.directive';
 import { DefaultAssetPreviewComponent } from './components/previews/default/default.component';
 import { NgxsModule, Store } from '@ngxs/store';
@@ -25,29 +24,12 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import {
-  FolderAddOutline,
-  FolderOpenOutline,
-  FolderOutline,
-  DeleteOutline,
-  FileImageOutline,
-  FileOutline,
-  QuestionCircleOutline,
-} from '@ant-design/icons-angular/icons';
 
 @NgModule({
   imports: [
     BrowserModule,
     UtilsModule,
-    NzIconModule.forRoot([
-      FolderAddOutline,
-      FolderOpenOutline,
-      FolderOutline,
-      DeleteOutline,
-      FileImageOutline,
-      FileOutline,
-      QuestionCircleOutline,
-    ]),
+    NzIconModule,
     NzButtonModule,
     NzDropDownModule,
     NzTreeModule,
@@ -58,7 +40,6 @@ import {
     NzResultModule,
     NgBytesPipeModule,
     NzSpinModule,
-    TreeModule.forRoot(),
     DndModule.forRoot(),
     NgxsModule.forFeature([AssetState]),
   ],

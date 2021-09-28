@@ -29,7 +29,6 @@ import { EditComponentComponent, EditComponentDialogComponent } from './componen
 import { SceneComponentService } from 'ng/modules/scene';
 import { AddEntityComponent } from './components/hierarchy/add/add.component';
 import { EntityTypeService } from './services/entity-type.service';
-import { TreeModule } from 'angular-tree-component';
 import { createSizeComponent } from 'common/scene/component/size';
 import { SizeTypeComponent } from './components/selection/types/size/size.component';
 import { NumberTypeComponent } from './components/selection/types/number/number.component';
@@ -45,6 +44,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { NzTreeModule } from 'ng-zorro-antd/tree';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @NgModule({
   imports: [
@@ -66,7 +68,9 @@ import { MatButtonModule } from '@angular/material/button';
     MatInputModule,
     MatButtonModule,
     ScrollingModule,
-    TreeModule.forRoot(),
+    NzTreeModule,
+    NzButtonModule,
+    NzIconModule,
   ],
   declarations: [
     SidebarComponent,
