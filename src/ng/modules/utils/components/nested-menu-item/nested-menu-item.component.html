@@ -1,19 +1,25 @@
-<mat-menu #childMenu [overlapTrigger]="false">
-  <span *ngFor="let child of items">
-    <!-- Handle branch node menu items -->
-    <span *ngIf="child.children && child.children.length > 0">
-      <button mat-menu-item color="primary" [matMenuTriggerFor]="menu.childMenu">
-        <mat-icon>{{child.icon}}</mat-icon>
-        <span>{{ child.label | translate}}</span>
-      </button>
-      <nested-menu-item #menu [items]="child.children" (selected)="select($event)"></nested-menu-item>
-    </span>
-    <!-- Handle leaf node menu items -->
-    <span *ngIf="!child.children || child.children.length === 0">
-      <button mat-menu-item (click)="select(child)">
-        <mat-icon>{{child.icon}}</mat-icon>
-        <span>{{child.label | translate}}</span>
-      </button>
-    </span>
-  </span>
-</mat-menu>
+<ng-template #list let-items="items">
+  <ul>
+    <li *ngFor="let it of items">
+      <ng-container *ngTemplateOutlet="item; context: { item: it }"></ng-container>
+    </li>
+  </ul>
+</ng-template>
+
+<ng-template #item let-item="item">
+  <li *ngIf="item.children?.length" nz-submenu [nzTitle]="item.label | translate" [nzIcon]="item.icon">
+    <ng-container *ngTemplateOutlet="list; context: { items: item.children }"></ng-container>
+  </li>
+  <li *ngIf="!item.children?.length" nz-menu-item (click)="select(item)">
+    <i nz-icon [nzType]="item.icon"></i>
+    <span class="margin-left-8">{{ item.label | translate }}</span>
+  </li>
+</ng-template>
+
+<nz-dropdown-menu #menu nzTrigger="click">
+  <ul nz-menu>
+    <ng-container *ngFor="let it of items">
+      <ng-container *ngTemplateOutlet="item; context: { item: it }"> </ng-container>
+    </ng-container>
+  </ul>
+</nz-dropdown-menu>

@@ -1,11 +1,13 @@
 <button
+  nz-dropdown
   nz-button
+  nzTrigger="click"
   nzShape="circle"
   nzType="text"
   nzSize="small"
   aria-label="Add entity"
   (click)="$event.stopPropagation()"
-  [matMenuTriggerFor]="addObject.childMenu"
+  [nzDropdownMenu]="addObject.menu"
 >
   <i nz-icon nzType="plus"></i>
 </button>

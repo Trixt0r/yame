@@ -5,7 +5,7 @@ import { ColorPipe } from './pipes/color.pipe';
 import { PointInputComponent } from './components/point-input/point-input.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NestedMenuItemComponent } from './components/nested-menu-item/nested-menu-item.component';
-import { MatMenuModule } from '@angular/material/menu';
+// import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { NumberDirective } from './directives/number.directive';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -15,6 +15,8 @@ import { Select, Store } from '@ngxs/store';
 import { SettingsState } from '../preferences/states/settings.state';
 import { Observable } from 'rxjs';
 import { InitDefaultSettingsValue } from '../preferences/states/actions/settings.action';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -24,8 +26,10 @@ export function createTranslateLoader(http: HttpClient) {
   imports: [
     BrowserModule,
     FormsModule,
-    MatMenuModule,
+    // MatMenuModule,
     MatIconModule,
+    NzDropDownModule,
+    NzIconModule,
     ReactiveFormsModule,
     HttpClientModule,
     TranslateModule.forRoot({

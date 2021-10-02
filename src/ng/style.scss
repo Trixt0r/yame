@@ -145,3 +145,7 @@ mat-form-field:not(.mat-focused) .mat-form-field-appearance-legacy .mat-form-fie
     opacity: 0.5;
   }
 }
+
+li[nz-submenu] [nz-submenu-title] i[nz-icon] + span {
+  margin-left: 8px;
+}
