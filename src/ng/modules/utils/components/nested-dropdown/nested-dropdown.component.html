@@ -1,0 +1,16 @@
+<ng-container *ngFor="let it of items">
+  <li *ngIf="hasChildren(it)" nz-submenu [nzTitle]="tpl">
+    <ng-template #tpl>
+      <i nz-icon [nzType]="it.icon"></i>
+      <span class="margin-left-8">{{ it.label! | translate }}</span>
+    </ng-template>
+    <ul>
+      <nested-dropdown [items]="it.children" (selected)="selected.emit($event)"></nested-dropdown>
+    </ul>
+  </li>
+
+  <li *ngIf="!hasChildren(it)" nz-menu-item (click)="selected.emit(it)">
+    <i nz-icon [nzType]="it.icon"></i>
+    <span class="margin-left-8">{{ it.label! | translate }}</span>
+  </li>
+</ng-container>

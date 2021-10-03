@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, OnChanges, AfterViewInit, Input } from '@angular/core';
-import { NavItem } from 'ng/modules/utils/components/nested-menu-item/nested-menu-item.component';
+import { Component, ChangeDetectionStrategy, AfterViewInit, Input } from '@angular/core';
+import { NavItem } from 'ng/modules/utils/components/nested-dropdown/nested-dropdown.component';
 import { EntityTypeService } from 'ng/modules/sidebar/services/entity-type.service';
 import { capitalize, isNil } from 'lodash';
 

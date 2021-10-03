@@ -6,10 +6,13 @@
   nzType="text"
   nzSize="small"
   aria-label="Add entity"
-  (click)="$event.stopPropagation()"
-  [nzDropdownMenu]="addObject.menu"
+  [nzDropdownMenu]="menu"
 >
   <i nz-icon nzType="plus"></i>
 </button>
 
-<nested-menu-item #addObject [items]="items" (selected)="onSelected($event.id)"></nested-menu-item>
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <nested-dropdown [items]="items" (selected)="onSelected($event.id)"></nested-dropdown>
+  </ul>
+</nz-dropdown-menu>

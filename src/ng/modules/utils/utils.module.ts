@@ -4,8 +4,7 @@ import { ResizableComponent } from './component/resizable';
 import { ColorPipe } from './pipes/color.pipe';
 import { PointInputComponent } from './components/point-input/point-input.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NestedMenuItemComponent } from './components/nested-menu-item/nested-menu-item.component';
-// import { MatMenuModule } from '@angular/material/menu';
+import { NestedDropdownComponent } from './components/nested-dropdown/nested-dropdown.component';
 import { MatIconModule } from '@angular/material/icon';
 import { NumberDirective } from './directives/number.directive';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -26,7 +25,6 @@ export function createTranslateLoader(http: HttpClient) {
   imports: [
     BrowserModule,
     FormsModule,
-    // MatMenuModule,
     MatIconModule,
     NzDropDownModule,
     NzIconModule,
@@ -40,13 +38,13 @@ export function createTranslateLoader(http: HttpClient) {
       },
     }),
   ],
-  declarations: [ResizableComponent, PointInputComponent, NestedMenuItemComponent, NumberDirective, ColorPipe],
+  declarations: [ResizableComponent, PointInputComponent, NestedDropdownComponent, NumberDirective, ColorPipe],
   exports: [
     HttpClientModule,
     TranslateModule,
     ResizableComponent,
     PointInputComponent,
-    NestedMenuItemComponent,
+    NestedDropdownComponent,
     NumberDirective,
     ColorPipe,
   ],
@@ -54,7 +52,7 @@ export function createTranslateLoader(http: HttpClient) {
     {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, translate: TranslateService) => () => {
-        const lng = translate.getBrowserLang();
+        const lng = translate.getBrowserLang() ?? navigator.language;
         store.dispatch(new InitDefaultSettingsValue('language', lng));
       },
       deps: [Store, TranslateService],

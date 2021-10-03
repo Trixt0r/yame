@@ -180,7 +180,6 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
         if (action.entity) {
           const node = this.nodes.find((_) => _.key === action.entity?.id);
           if (node) node.expanded = true;
-          console.log(node, node?.expanded);
         }
         this.cdr.markForCheck();
       });
