@@ -68,7 +68,7 @@ export class AddEntityComponent implements AfterViewInit {
         items.push(entityTypeItem);
       } else {
         categories.forEach((it) => {
-          const navItem = flatList.find((it) => it.id === it.id);
+          const navItem = flatList.find((_) => _.id === it.id);
           const child = Object.assign({}, entityTypeItem);
           if (!child.label)
             child.label = item.id

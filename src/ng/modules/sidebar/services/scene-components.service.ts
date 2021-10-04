@@ -10,7 +10,6 @@ import { SceneComponentService } from 'ng/modules/scene';
  * Type definition of a scene type component.
  */
 export interface SceneType<T extends AbstractTypeComponent> extends Type<T> {
-
   /**
    * The type the component represents.
    */
@@ -68,7 +67,6 @@ export type factoryFn = (entities: (string | SceneEntity)[], type: string, group
  * Definition for a registry item.
  */
 export interface SceneComponentItem {
-
   /**
    * The global unique id.
    */
@@ -96,14 +94,13 @@ export interface SceneComponentItem {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SceneComponentsService {
-
   /**
    * Internal map of component classes.
    */
-  protected typeComponents: SceneTypeComponentsRegistry = { };
+  protected typeComponents: SceneTypeComponentsRegistry = {};
 
   protected _types: string[] = [];
 
@@ -160,7 +157,7 @@ export class SceneComponentsService {
   }
 
   registerItem(item: SceneComponentItem): void {
-    const found = this.sceneComponentItems.find(it => it.id === item.id);
+    const found = this.sceneComponentItems.find((it) => it.id === item.id);
     if (found) return;
     this.sceneComponentItems.push(item);
   }
@@ -170,7 +167,7 @@ export class SceneComponentsService {
    * @param category
    */
   registerCategory(category: SceneComponentCategory): void {
-    const found = this.sceneComponentCategories.find(it => it.id === category.id);
+    const found = this.sceneComponentCategories.find((it) => it.id === category.id);
     if (found) return;
     this.sceneComponentCategories.push(category);
   }
@@ -180,8 +177,8 @@ export class SceneComponentsService {
    *
    * @param id
    */
-  getItem(id: string): SceneComponentItem |undefined {
-    return this.sceneComponentItems.find(it => it.id === id);
+  getItem(id: string): SceneComponentItem | undefined {
+    return this.sceneComponentItems.find((it) => it.id === id);
   }
 
   /**
@@ -202,7 +199,7 @@ export class SceneComponentsService {
     const item = typeof itemOrId === 'string' ? this.getItem(itemOrId) : itemOrId;
     if (!item) return [];
     const id = item.id;
-    return this.sceneComponentCategories.filter(category => category.items.indexOf(id) >= 0);
+    return this.sceneComponentCategories.filter((category) => category.items.indexOf(id) >= 0);
   }
 
   /**
@@ -211,7 +208,8 @@ export class SceneComponentsService {
    * @param category
    */
   getItems(category: string | SceneComponentCategory): string[] {
-    const sceneCategory = typeof category === 'string' ? this.sceneComponentCategories.find(it => it.id === category) : category;
+    const sceneCategory =
+      typeof category === 'string' ? this.sceneComponentCategories.find((it) => it.id === category) : category;
     if (!sceneCategory) return [];
     return sceneCategory.items.slice();
   }
@@ -226,7 +224,9 @@ export class SceneComponentsService {
   canSceneComponentBeAddedToGroup(group: GroupSceneComponent, itemOrId: string | SceneComponentItem): boolean {
     const item = typeof itemOrId === 'string' ? this.getItem(itemOrId) : itemOrId;
     if (!item) throw new SceneComponentsServiceException('Scene component item not found ' + itemOrId);
-    return this.components.canTypeBeAddedToGroup(item.type, group) && this.components.canIdBeAddedToGroup(item.id, group);
+    return (
+      this.components.canTypeBeAddedToGroup(item.type, group) && this.components.canIdBeAddedToGroup(item.id, group)
+    );
   }
 
   /**
@@ -243,9 +243,10 @@ export class SceneComponentsService {
     if (group && !this.canSceneComponentBeAddedToGroup(group, item))
       throw new SceneComponentsServiceException(`Adding item ${itemId} to group ${group.id} is not permitted.`);
     const type = item.type;
-    const newComp = typeof item.factory === 'function' ?
-                      item.factory(entities, type, group) :
-                      createComponent(this.components.generateComponentId(entities, type), type);
+    const newComp =
+      typeof item.factory === 'function'
+        ? item.factory(entities, type, group)
+        : createComponent(this.components.generateComponentId(entities, type), type);
     return this.components.add(entities, newComp, group);
   }
 
@@ -257,7 +258,11 @@ export class SceneComponentsService {
    * @param old The old component config.
    * @return An observable, finishing on successful entity update.
    */
-  updateSceneComponent(entities: (string | SceneEntity)[], component: SceneComponent, old: SceneComponent): Observable<any> {
+  updateSceneComponent(
+    entities: (string | SceneEntity)[],
+    component: SceneComponent,
+    old: SceneComponent
+  ): Observable<any> {
     return this.components.update(entities, component, old);
   }
 

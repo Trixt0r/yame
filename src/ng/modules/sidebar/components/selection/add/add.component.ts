@@ -88,8 +88,8 @@ export class AddSceneComponentButtonComponent implements OnChanges {
         items.push(componentItem);
       } else {
         categories.forEach((it) => {
-          const navItem = flatList.find((it) => it.id === it.id);
-          const child = Object.assign({}, componentItem);
+          const navItem = flatList.find((_) => _.id === it.id);
+          const child = { ...componentItem };
           if (!child.label)
             child.label = item.id
               .split(/\.|_|-/g)
@@ -101,7 +101,7 @@ export class AddSceneComponentButtonComponent implements OnChanges {
         });
       }
     });
-    this.items = items.filter((it) => isNil(it.children) || (it.children && it.children.length > 0));
+    this.items = items.filter((it) => !it.children || it.children.length);
   }
 
   /**
