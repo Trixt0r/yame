@@ -1,0 +1,14 @@
+<yame-type-label class="margin-bottom-8" [component]="component" [entities]="entities"></yame-type-label>
+<input
+  #input
+  nz-input
+  [disabled]="disabled"
+  [placeholder]="placeholder"
+  [value]="component?.mixed ? '' : (number | round: decimal)"
+  yameNumber
+  (yameNumberInput)="onUpdate({ currentTarget: { value: $event.value } })"
+  (change)="onUpdate($event)"
+/>
+<button nz-button *ngIf="component?.removable" nzShape="circle" nzType="text" nzSize="small" (click)="onRemove($event)">
+  <i nz-icon nzType="delete"></i>
+</button>

@@ -1,0 +1,132 @@
+<nz-layout class="fill-height">
+  <nz-layout>
+    <nz-content class="relative">
+      <nz-result
+        *ngIf="!group || (group && group.resource.loaded && !assets.length)"
+        nzIcon="question-circle-o"
+        [nzTitle]="'asset.notFound.assets.title' | translate"
+        [nzSubTitle]="!group ? ('asset.notFound.assets.hint' | translate) : null"
+      >
+      </nz-result>
+
+      <div *ngIf="loading" class="text-center fill-height relative">
+        <div class="absolute vert-center fill-width">
+          <div class="inline-block text-center">
+            <ng-template #indicatorTemplate>
+              <i nz-icon nzType="loading" class="font-size-32"></i>
+            </ng-template>
+            <nz-spin nzSimple [nzIndicator]="indicatorTemplate"></nz-spin>
+          </div>
+          <h4 nz-typography class="opacity-50 margin-top-16">{{ 'asset.loading' | translate }}</h4>
+        </div>
+      </div>
+
+      <div *ngIf="!loading" class="cards padding-bottom-4 flex wrap">
+        <ng-container *ngFor="let asset of assets">
+          <nz-card
+            nzHoverable
+            [nzCover]="coverTemplate"
+            dnd-draggable
+            [dragEnabled]="true"
+            [dragData]="asset"
+            (dragstart)="onDragStart($event)"
+            (click)="toggleAsset(asset)"
+            class="margin-4"
+            [class.selected]="asset.id === selectedAsset?.id"
+          >
+            <i nz-icon [nzType]="getIcon(asset)"></i>
+            <nz-card-meta
+              class="inline-block padding-0 vert-align-sub margin-left-4 fill-75"
+              [nzDescription]="asset.resource.name"
+            ></nz-card-meta>
+          </nz-card>
+          <ng-template #coverTemplate>
+            <div class="preview">
+              <div class="fill-width fill-height relative">
+                <ng-template [yameAssetPreview]="asset"></ng-template>
+              </div>
+            </div>
+          </ng-template>
+        </ng-container>
+      </div>
+    </nz-content>
+  </nz-layout>
+  <nz-sider
+    [nzBreakpoint]="0"
+    [nzCollapsedWidth]="0"
+    [nzCollapsible]="true"
+    [nzTrigger]="null"
+    [nzCollapsed]="!selectedAsset"
+    [nzWidth]="300"
+  >
+    <ng-container *ngIf="selectedAsset">
+      <div class="ant-drawer-header">
+        <i nz-icon [nzType]="getIcon(selectedAsset)" class="inline"></i>
+        <div class="ant-drawer-title inline margin-left-8" [innerText]="selectedAsset.resource.name"></div>
+        <button
+          (click)="toggleAsset(selectedAsset)"
+          aria-label="Close"
+          class="ant-drawer-close"
+          style="--scroll-bar: 0px"
+        >
+          <i nz-icon nzType="close"></i>
+        </button>
+      </div>
+      <nz-tabset nzCentered>
+        <nz-tab [nzTitle]="titleTemplate">
+          <ng-template #titleTemplate>
+            <i nz-icon nzType="info-circle"></i>
+            <span>{{ 'asset.details.title' | translate }}</span>
+          </ng-template>
+          <div
+            class="preview"
+            dnd-draggable
+            [dragEnabled]="true"
+            [dragData]="selectedAsset"
+            (dragstart)="onDragStart($event)"
+          >
+            <div class="fill-width fill-height relative">
+              <ng-container [yameAssetPreview]="selectedAsset"></ng-container>
+            </div>
+          </div>
+          <nz-divider class="no-margin-bottom margin-top-16"></nz-divider>
+          <div class="details margin-top-4 padding-8">
+            <div class="row">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.type' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ getLabel(selectedAsset) | translate }}</b>
+              </div>
+            </div>
+            <div class="row" *ngIf="selectedAsset.resource.size !== undefined">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.size' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)</b>
+              </div>
+            </div>
+            <div class="row" *ngIf="selectedAsset.resource.created !== undefined">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.created' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ selectedAsset.resource.created | date: 'medium':undefined:translate.currentLang }}</b>
+              </div>
+            </div>
+            <div class="row" *ngIf="selectedAsset.resource.changed !== undefined">
+              <div nz-typography class="col fill-33 text-left opacity-90">
+                <b>{{ 'asset.details.modified' | translate }}</b>
+              </div>
+              <div nz-typography class="col fill-66 text-left">
+                <b>{{ selectedAsset?.resource.changed | date: 'medium':undefined:translate.currentLang }}</b>
+              </div>
+            </div>
+            <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
+          </div>
+        </nz-tab>
+      </nz-tabset>
+    </ng-container>
+  </nz-sider>
+</nz-layout>

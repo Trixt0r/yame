@@ -1,0 +1,60 @@
+yame-component-type-color {
+  display: block;
+
+  sketch-picker {
+    width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+
+    .presentation input {
+      border: 1px solid #434343 !important;
+      color: #ffffffd9 !important;
+      background: transparent !important;
+      height: 28px !important;
+      font-size: 14px !important;
+      transition: border-color 0.3s;
+
+      &:hover {
+        border-color: #165996 !important;
+        border-right-width: 1px !important;
+      }
+    }
+
+    color-presets-component {
+      border-top: 1px solid #434343 !important;
+    }
+  }
+
+  .inline-block.header {
+    width: calc(100% - 24px);
+  }
+
+  .preview-wrapper {
+    position: relative !important;
+    display: inline-block;
+    transition: all ease-in-out 50ms;
+  }
+
+  .preview {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 10px;
+    transform: translate(-50%, -50%);
+  }
+
+  .preview.bg {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==);
+    background-position: left center;
+    background-color: lightgray;
+  }
+
+  .ant-collapse-header {
+    padding: 4px !important;
+    .anticon.ant-collapse-arrow {
+      vertical-align: text-top;
+    }
+  }
+}

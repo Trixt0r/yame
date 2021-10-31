@@ -1,0 +1,12 @@
+yame-component-type-group {
+  .ant-collapse-header {
+    padding: 4px !important;
+    .anticon.ant-collapse-arrow {
+      vertical-align: text-top;
+    }
+  }
+
+  yame-type-label {
+    width: calc(100% - 48px);
+  }
+}

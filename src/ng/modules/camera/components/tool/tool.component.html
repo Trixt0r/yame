@@ -1,0 +1,21 @@
+<mat-card class="camera-tool content mat-elevation-z8 no-padding">
+  <button mat-icon-button (click)="onZoomCameraOut()">
+    <mat-icon>crop_free</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="selectedEntities.length === 0" (click)="onZoomCameraToSelection()">
+    <mat-icon>center_focus_strong</mat-icon>
+  </button>
+  <button mat-icon-button [disabled]="value <= cameraZoom.min" (click)="onZoomOut()">
+    <mat-icon>zoom_out</mat-icon>
+  </button>
+  <mat-slider thumbLabel class="margin-bottom-16"
+              [value]="value"
+              [step]="cameraZoom.step"
+              [max]="cameraZoom.max"
+              [min]="cameraZoom.min"
+              [displayWith]="formatLabel"
+              (input)="onUpdate($event)"></mat-slider>
+  <button mat-icon-button [disabled]="value >= cameraZoom.max" (click)="onZoomIn()">
+    <mat-icon>zoom_in</mat-icon>
+  </button>
+</mat-card>

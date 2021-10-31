@@ -1,0 +1,74 @@
+:host {
+  @extend div !optional;
+  padding: 0 !important;
+  position: relative;
+}
+
+nz-layout {
+  background: none;
+}
+
+.no-items {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+
+  opacity: 0.5;
+
+  .fill.half.text-left {
+    height: 110px;
+  }
+}
+
+nz-sider {
+  overflow-y: auto;
+
+  .preview {
+    height: 192px;
+    max-height: 50%;
+  }
+
+  .details {
+    .row {
+      .col {
+        vertical-align: top;
+        padding: 4px 8px;
+        &:first-child {
+          padding-left: 0;
+        }
+        box-sizing: border-box;
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .ant-card-body {
+    padding: 4px;
+  }
+  .ant-card-meta-description {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
+.cards {
+  height: calc(100% - 8px);
+  overflow-y: auto;
+  align-content: flex-start;
+  nz-card {
+    height: 92px;
+    width: 92px;
+    padding: 4px;
+    background-color: #1f1f1f;
+    .preview {
+      height: 56px;
+      overflow: hidden;
+    }
+    &.selected {
+      background-color: #11263c;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+@import '../../../../../variables.scss';
+
+:host.embedded {
+  button {
+    height: 100%;
+    line-height: inherit;
+    width: $tree-inline-btn-size;
+    mat-icon {
+      font-size: $tree-icon-font-size;
+    }
+  }
+}

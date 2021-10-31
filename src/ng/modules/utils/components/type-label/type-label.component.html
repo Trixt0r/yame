@@ -1,0 +1,9 @@
+<span *ngIf="!component?.editable">{{ label }}</span>
+<input
+  *ngIf="component?.editable"
+  nz-input
+  nzBorderless
+  [value]="label"
+  (change)="onChange($event)"
+  (click)="$event.preventDefault(); $event.stopPropagation()"
+/>

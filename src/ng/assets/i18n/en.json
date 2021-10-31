@@ -1,0 +1,92 @@
+{
+  "asset": {
+    "notFound": {
+      "assets": {
+        "title": "No assets found",
+        "hint": "Add an asset source and select it"
+      },
+      "source": "Asset source not found"
+    },
+    "details": {
+      "title": "Details",
+      "type": "Type",
+      "size": "Size",
+      "created": "Created",
+      "modified": "Modified"
+    },
+    "loading": "Loading assets...",
+    "addSource": "Add source",
+    "addResourceGroup": "Add resource group",
+    "type": {
+      "image": "Image"
+    },
+    "imageDimensions": "Dimensions",
+    "source": {
+      "local": "Local folder"
+    }
+  },
+  "sidebar": {
+    "hierarchy": {
+      "title": "Hierarchy"
+    }
+  },
+  "component": "Component",
+  "componentLabel": {
+    "transformation": "Transformation",
+    "transformation.position": "Position",
+    "transformation.size": "Size",
+    "transformation.rotation": "Rotation",
+    "transformation.skew": "Skew",
+    "transformation.pivot": "Pivot",
+    "sprite": "Sprite",
+    "sprite.texture": "Texture",
+    "sprite.color": "Color",
+    "number": "Number",
+    "string": "String",
+    "range": "Range",
+    "general": "General",
+    "group": "Group",
+    "asset": "Asset",
+    "anyAsset": "Any",
+    "texture": "Texture"
+  },
+  "entityLabel": {
+    "entity": "Entity",
+    "group": "Group",
+    "layer": "Layer"
+  },
+  "editComponent": {
+    "title": "Edit ID",
+    "label": "ID",
+    "inUse": "This ID is already in use",
+    "reserved": "This ID is reserved",
+    "required": "An ID is <strong>required</strong>"
+  },
+  "preferences": {
+    "settings": {
+      "title": "Settings",
+      "section": {
+        "general": "General",
+        "camera": "Camera",
+        "keyboardShortcuts": "Keyboard Shortcuts",
+        "language": "Language"
+      },
+      "option": {
+        "autoSave": "Auto save",
+        "camera": {
+          "moveType": "Move with",
+          "moveTypeOptions": {
+            "mmb": "Middle mouse button",
+            "rmb": "Right mouse button",
+            "trackpad": "Track pad (recommended for laptops)"
+          },
+          "zoomStep": "Increase zoom by",
+          "zoomMax": "Maximum zoom",
+          "zoomMin": "Minimum zoom"
+        }
+      }
+    }
+  },
+  "save": "Save",
+  "cancel": "Cancel"
+}

@@ -1,0 +1,12 @@
+<div class="resizer"></div>
+<nz-collapse class="padding-bottom-4">
+  <ng-container
+    class="margin-bottom-4"
+    [yameSceneComponents]="components"
+    [yameSceneComponentsEntities]="entities"
+    [yameSelectState]="selected"
+    (yameSceneComponentsInput)="onInput($event)"
+    (yameSceneComponentsRemove)="onRemove($event)"
+  ></ng-container>
+</nz-collapse>
+<yame-add-component class="padding-hor-32" [entities]="entities"></yame-add-component>

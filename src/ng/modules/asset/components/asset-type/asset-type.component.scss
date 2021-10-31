@@ -1,0 +1,25 @@
+yame-component-type-asset {
+  position: relative;
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+
+  button[nz-button] {
+    position: absolute;
+    top: 0;
+    right: 4px;
+  }
+}
+
+.asset-name {
+  margin-left: 28px;
+}
+.asset-preview {
+  max-height: 20px;
+  max-width: 20px;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}

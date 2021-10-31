@@ -1,0 +1,43 @@
+:host:not(.embedded) {
+  mat-form-field, .slider-container {
+    box-sizing: border-box;
+    padding-left: 8px;
+  }
+}
+
+:host {
+  width: 100%;
+  display: block;
+}
+
+.wrapper {
+  display: inline-block;
+}
+
+.wrapper, input, mat-form-field, label, .slider-container {
+  margin: 0 4px;
+  &.full {
+    width: 100%;
+  }
+  &.threequarter {
+    width: 75%;
+  }
+  &.half {
+    width: 50%;
+  }
+  &.quarter {
+    width: 25%;
+  }
+
+  mat-slider {
+    width: 100%;
+  }
+}
+
+.mat-input-element {
+  padding: 0 4px !important;
+}
+
+.mat-icon-button mat-icon {
+  font-size: 1.125em;
+}

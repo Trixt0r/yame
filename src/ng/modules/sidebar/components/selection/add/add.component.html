@@ -1,0 +1,10 @@
+<button nz-dropdown nzTrigger="click" nz-button nzType="primary" class="fill-width" [nzDropdownMenu]="menu">
+  <i nz-icon nzType="appstore-add"></i>
+  <span class="margin-left-4">{{ 'component' | translate }}</span>
+</button>
+
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <nested-dropdown [items]="items" (selected)="onSelected($event.id)"></nested-dropdown>
+  </ul>
+</nz-dropdown-menu>

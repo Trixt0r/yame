@@ -1,0 +1,18 @@
+<button
+  nz-dropdown
+  nz-button
+  nzTrigger="click"
+  nzShape="circle"
+  nzType="text"
+  nzSize="small"
+  aria-label="Add entity"
+  [nzDropdownMenu]="menu"
+>
+  <i nz-icon nzType="plus"></i>
+</button>
+
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <nested-dropdown [items]="items" (selected)="onSelected($event.id)"></nested-dropdown>
+  </ul>
+</nz-dropdown-menu>

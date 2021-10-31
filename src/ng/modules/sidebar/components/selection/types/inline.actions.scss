@@ -1,0 +1,28 @@
+mat-form-field, .slider-container {
+  &.editable, &.removable {
+    width: calc(100% - 48px) !important;
+  }
+
+  &.editable.removable {
+    width: calc(100% - 88px) !important;
+  }
+
+  &.slider-container.editable.removable {
+    width: calc(100% - 96px) !important;
+  }
+}
+
+// :host {
+//   button.mat-icon-button {
+//     position: absolute;
+//     bottom: 10px;
+//   }
+
+//   button.edit {
+//     right: 40px;
+//   }
+
+//   button.remove {
+//     right: 0;
+//   }
+// }

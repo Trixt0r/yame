@@ -1,0 +1,78 @@
+@import '../../../../variables.scss';
+
+$tree-node-toggle-size: $tree-indent-size;
+$tree-node-icon-size: $tree-indent-size + 8px;
+$icon-width: 24px;
+
+:host {
+  display: block;
+}
+
+yame-hierarchy {
+  .header {
+    display: inline-block;
+    width: calc(100% - #{$resizer-size});
+    h4 {
+      float: left;
+      margin: 0 0 4px 0;
+      padding: 0 12px 0 0;
+    }
+    .btn-group {
+      float: right;
+    }
+  }
+
+  .isolated {
+    position: absolute;
+    left: -100%;
+    bottom: 0;
+    width: 200%;
+    height: 100%;
+    z-index: -1;
+    background-color: #095cb5;
+  }
+
+  .inline-actions-wrapper {
+    min-width: unset;
+    .inline-actions {
+      float: right;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all ease-in-out 100ms;
+    }
+  }
+
+  nz-tree {
+    overflow: auto;
+  }
+
+  nz-tree-node.ant-tree-treenode {
+    padding: 0 !important;
+    margin-bottom: 4px;
+    overflow: hidden;
+    user-select: none;
+    transition: all 0.3s, border 0s, line-height 0s, box-shadow 0s;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+    &.ant-tree-treenode-selected {
+      background-color: #11263c;
+    }
+    &.ant-tree-treenode-selected,
+    &:hover {
+      .inline-actions {
+        transform: none;
+        opacity: inherit;
+      }
+    }
+    .ant-tree-node-content-wrapper:hover {
+      background: unset;
+    }
+  }
+  .ant-tree-node-content-wrapper {
+    min-width: 0;
+  }
+  .icon-wrapper {
+    width: $icon-width;
+  }
+}

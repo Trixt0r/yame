@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out",
+    "module": "commonjs",
+    "target": "es2019",
+    "baseUrl": "../",
+    "sourceRoot": "./",
+    "types": [
+      "node",
+      "electron"
+    ]
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts",
+    "dist",
+    "out",
+    "app-builds",
+    "node_modules"
+  ]
+}

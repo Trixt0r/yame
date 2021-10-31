@@ -1,0 +1,61 @@
+$toggler-width: 15px;
+$toggle-type: ease-in;
+$toggle-speed: 100ms;
+
+:host {
+  background: #303030;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 75%;
+  transition: $toggle-type $toggle-speed transform;
+  box-shadow: rgba(0, 0, 0, 0.3) 3px -3px 5px 1px,
+              rgba(0, 0, 0, 0.25) 6px -5px 10px 0px,
+                rgba(0, 0, 0, 0.2) 1px -9px 18px 0px;
+  user-select: none;
+
+  .content {
+    width: calc(100% - #{$toggler-width});
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    mat-nav-list {
+      padding-bottom: 8px;
+      mat-list-item {
+        padding: 0;
+        &.active { background: #505050; }
+      }
+      &.clickers {
+        padding-bottom: 0;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: calc(100% - #{$toggler-width});
+      }
+    }
+  }
+
+  .toggler {
+    position: absolute;
+    cursor: pointer;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: $toggler-width;
+    background: none;
+    box-shadow: rgba(0, 0, 0, 0.3) -1px 0px 5px -1px,
+                rgba(0, 0, 0, 0.25) -3px 0px 10px 0px,
+                  rgba(0, 0, 0, 0.2) -1px 0px 18px 0px;
+
+    mat-icon {
+      position: absolute;
+      top: 50%;
+      height: $toggler-width;
+      pointer-events: none;
+      transform: rotate(90deg);
+      transform-origin: 50% 50%;
+    }
+  }
+}

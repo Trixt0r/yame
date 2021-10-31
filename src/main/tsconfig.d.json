@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "outDir": "../../typings",
+    "noEmitOnError": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "target": "es6",
+    "baseUrl": "../",
+    "types": [
+      "node"
+    ]
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts",
+    "dist",
+    "app-builds",
+    "node_modules"
+  ]
+}

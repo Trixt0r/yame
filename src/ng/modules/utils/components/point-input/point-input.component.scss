@@ -1,0 +1,15 @@
+point-input {
+  display: block;
+
+  nz-form-item {
+    margin-bottom: 8px !important;
+  }
+
+  nz-input-group {
+    border-radius: 0 !important;
+  }
+
+  .ant-input-group-addon {
+    user-select: none;
+  }
+}

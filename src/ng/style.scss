@@ -1,0 +1,53 @@
+@import '~@angular/material/prebuilt-themes/pink-bluegrey.css';
+@import '~ng2-dnd/bundles/style.css';
+@import '~ng-zorro-antd/ng-zorro-antd.dark.min.css';
+@import './styles/material-icons.scss';
+@import './styles/utils.scss';
+@import './variables.scss';
+
+body {
+  background: #303030;
+  color: white;
+  margin: 0;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+*:focus {
+  outline: none;
+}
+
+.dnd-drag-start,
+.dnd-drag-enter,
+.dnd-drag-over {
+  transform: initial;
+  opacity: initial;
+  border: none;
+}
+
+.preferences-menu {
+  margin-left: 64px;
+}
+
+.titlebar {
+  font: 400 12px/28px Roboto, 'Helvetica New', sans-serif;
+
+  &.inactive {
+    opacity: 0.5;
+  }
+}
+
+li[nz-submenu] [nz-submenu-title] i[nz-icon] + span {
+  margin-left: 8px;
+}

@@ -1,0 +1,32 @@
+<yame-type-label class="margin-bottom-8" [component]="component" [entities]="entities"></yame-type-label>
+<nz-select
+  class="fill full"
+  nzShowSearch
+  nzAllowClear
+  dnd-droppable
+  [nzCustomTemplate]="previewTpl"
+  [nzPlaceHolder]="component?.mixed ? getLabel() + ' ' + placeholder : getLabel()"
+  [nzDropdownRender]="loadingTpl"
+  [(ngModel)]="selected"
+  (nzScrollToBottom)="onScrollToEnd()"
+  (nzOpenChange)="updateAssetBuffer()"
+  (onDropSuccess)="onDrop($event)"
+>
+  <nz-option nzCustomContent *ngFor="let asset of assetBuffer" [nzValue]="asset.id" [nzLabel]="asset.resource.label">
+    <img class="asset-preview" [src]="asset.resource.uri" />
+    <span class="asset-name">{{ asset.resource.label }}</span>
+  </nz-option>
+</nz-select>
+
+<ng-template #previewTpl let-selected>
+  <img class="asset-preview" [src]="selected.nzValue" />
+  <span class="asset-name">{{ selected.nzLabel }}</span>
+</ng-template>
+
+<ng-template #loadingTpl>
+  <nz-spin *ngIf="loading"></nz-spin>
+</ng-template>
+
+<button nz-button *ngIf="component?.removable" nzShape="circle" nzType="text" nzSize="small" (click)="onRemove($event)">
+  <i nz-icon nzType="delete"></i>
+</button>

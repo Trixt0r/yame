@@ -1,22 +1,32 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "sourceMap": true,
-        "outDir": "app",
-        "rootDir": "src",
-        "sourceRoot": "src",
-        "baseUrl": "src",
-        "experimentalDecorators": true
-    },
-    "exclude": [
-        "app",
-        "builds",
-        "bundle",
-        "css",
-        "less",
-        "lib",
-        "node_modules",
-        "templates"
-    ]
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "outDir": "./out",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "es2017",
+    "module": "es2020",
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "paths": {
+      "common/*": ["./common/*"]
+    }
+  },
+  "exclude": [
+    "app-builds",
+    "dist",
+    "out",
+    "node_modules"
+  ]
 }

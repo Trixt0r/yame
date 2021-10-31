@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out",
+    "module": "commonjs",
+    "target": "esnext",
+    "baseUrl": "src",
+    "sourceRoot": "./",
+    "types": []
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts",
+    "dist",
+    "out",
+    "app-builds",
+    "node_modules"
+  ]
+}
