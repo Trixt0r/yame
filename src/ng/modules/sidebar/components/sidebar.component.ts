@@ -87,7 +87,7 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
     public ref: ElementRef,
     protected store: Store,
     protected zone: NgZone,
-    protected cdr: ChangeDetectorRef,
+    protected cdr: ChangeDetectorRef
   ) {
     super(ref, zone);
     this.maxVal = window.innerWidth - SidebarComponent.WIDTH_SUB;
@@ -119,11 +119,11 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
    * @inheritdoc
    */
   ngAfterViewInit(): void {
-    this.selectionSub = this.selection$.subscribe(data => {
+    this.selectionSub = this.selection$.subscribe((data) => {
       this.selected = data;
       this.selectedEntities = this.selected.entities;
       this.hasSelections = this.selectedEntities.length > 0;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
     this.updateValue(this.clampValue(SidebarComponent.DEFAULT_SIZE));
     this.selection.updateValue(this.selection.clampValue(window.innerHeight * 0.25));

@@ -14,10 +14,10 @@ import { MenuService, NzIsMenuInsideDropDownToken, NzSubmenuService } from 'ng-z
   templateUrl: './add.component.html',
   styleUrls: ['./add.component.scss'],
   host: {
-    class: 'relative fill-width padding-vert-4',
+    class: 'block relative fill-width padding-vert-4',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
+  viewProviders: [
     MenuService,
     NzSubmenuService,
     {

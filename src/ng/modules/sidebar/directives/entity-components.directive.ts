@@ -150,7 +150,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    */
   setUpPool(): void {
     const types = this.service.types;
-    types.forEach(type => {
+    types.forEach((type) => {
       if (!EntityComponentsDirective.componentRefPool[type]) EntityComponentsDirective.componentRefPool[type] = [];
       const pool = EntityComponentsDirective.componentRefPool[type];
       const compType = this.service.getTypeComponent(type);
@@ -166,9 +166,9 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    */
   ngAfterViewInit(): void {
     const types = this.service.types;
-    types.forEach(type => {
+    types.forEach((type) => {
       if (!EntityComponentsDirective.componentRefPool[type]) return;
-      EntityComponentsDirective.componentRefPool[type].forEach(ref => {
+      EntityComponentsDirective.componentRefPool[type].forEach((ref) => {
         const idx = this.viewContainerRef.indexOf(ref.hostView);
         if (idx >= 0) this.viewContainerRef.detach(idx);
       });
@@ -199,7 +199,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
     const comps: SceneComponentRef[] = [];
     if (this.components) {
       let insertCnt = 0;
-      this.components.forEach(component => {
+      this.components.forEach((component) => {
         if (component.hidden) return;
         let identifier = component.id ? component.id : component.type;
         let compType = this.service.getTypeComponent(identifier);
@@ -222,7 +222,11 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
         } else {
           componentRef = this.obtainComponentRef(identifier) as SceneComponentRef;
           if (!componentRef) {
-            componentRef = this.createComponent(this.componentFactoryResolver.resolveComponentFactory(compType), void 0, insertCnt++);
+            componentRef = this.createComponent(
+              this.componentFactoryResolver.resolveComponentFactory(compType),
+              void 0,
+              insertCnt++
+            );
           } else {
             this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
           }
@@ -237,7 +241,9 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
         componentRef.instance.entities = this.entities;
         componentRef.instance.selectState = this.selectState;
         if (typeof (componentRef.instance as any).ngOnChanges === 'function')
-          (componentRef.instance as any).ngOnChanges({ component: new SimpleChange(previous, component, previous === void 0) });
+          (componentRef.instance as any).ngOnChanges({
+            component: new SimpleChange(previous, component, previous === void 0),
+          });
         componentRef.changeDetectorRef.detectChanges();
         this.setUpSubs(componentRef);
         comps.push(componentRef);
@@ -256,7 +262,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   detachCachedComponentRefs(attached: SceneComponentRef[]): ViewRef[] {
     const detached: ViewRef[] = [];
     const keys = Object.keys(EntityComponentsDirective.componentRefCache);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.indexOf(this.cachePrefix) < 0) return;
       if (!EntityComponentsDirective.componentRefCache.hasOwnProperty(key)) return;
       const cached = EntityComponentsDirective.componentRefCache[key];
@@ -278,11 +284,15 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   setUpSubs(componentRef: SceneComponentRef): void {
     this.removeSubs(componentRef);
     EntityComponentsDirective.componentRefSubs.set(componentRef, [
-      componentRef.instance.updateEvent.subscribe((event: AbstractInputEvent) => this.yameSceneComponentsInput.emit(event)),
-      componentRef.instance.removeEvent.subscribe((event: AbstractRemoveEvent) => this.yameSceneComponentsRemove.emit(event)),
+      componentRef.instance.updateEvent.subscribe((event: AbstractInputEvent) =>
+        this.yameSceneComponentsInput.emit(event)
+      ),
+      componentRef.instance.removeEvent.subscribe((event: AbstractRemoveEvent) =>
+        this.yameSceneComponentsRemove.emit(event)
+      ),
       this.componentsUpdate.subscribe((components: SceneComponent[]) => {
-        if (! componentRef.instance.component) return;
-        const found = components.find(it => it.id === componentRef.instance?.component?.id);
+        if (!componentRef.instance.component) return;
+        const found = components.find((it) => it.id === componentRef.instance?.component?.id);
         if (found) {
           merge(componentRef.instance.component, found);
           componentRef.changeDetectorRef.markForCheck();
@@ -300,6 +310,6 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
   removeSubs(componentRef: SceneComponentRef): void {
     const subs = EntityComponentsDirective.componentRefSubs.get(componentRef);
     if (!subs || subs.length === 0) return;
-    subs.forEach(sub => sub.unsubscribe());
+    subs.forEach((sub) => sub.unsubscribe());
   }
 }

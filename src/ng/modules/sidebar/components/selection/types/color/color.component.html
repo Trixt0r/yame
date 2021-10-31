@@ -1,18 +1,23 @@
-<div class="half">
-  <mat-expansion-panel>
-    <mat-expansion-panel-header [class.editable]="component?.editable" [class.removable]="component?.removable">
-      <h5 class="mat-h5">{{ component?.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</h5>
-      <div class="preview-wrapper">
+<nz-collapse-panel [nzHeader]="header" [nzActive]="expanded">
+  <ng-template #header>
+    <div class="inline-block header">
+      <yame-type-label class="fill-60" [component]="component" [entities]="entities"></yame-type-label>
+      <div
+        class="preview-wrapper"
+        [class.fill-20]="component?.removable"
+        [class.vert-align-middle]="component?.removable"
+        [class.fill-33]="!component?.removable"
+        [class.vert-align-super]="!component?.removable"
+      >
         <span class="preview bg"></span>
         <span class="preview" [style.background-color]="rgbaString"></span>
       </div>
-      <div class="inline-actions">
-        <yame-edit-component *ngIf="component?.editable" [entities]="entities" [component]="component"></yame-edit-component>
-        <button *ngIf="component?.removable" mat-icon-button (click)="onRemove($event)">
-          <mat-icon>delete</mat-icon>
+      <div *ngIf="component?.removable" class="inline-actions inline pull-right">
+        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="onRemove($event)">
+          <i nz-icon nzType="delete"></i>
         </button>
       </div>
-    </mat-expansion-panel-header>
-    <sketch-picker [control]="control"></sketch-picker>
-  </mat-expansion-panel>
-</div>
+    </div>
+  </ng-template>
+  <sketch-picker [control]="control"></sketch-picker>
+</nz-collapse-panel>

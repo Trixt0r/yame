@@ -4,7 +4,6 @@ import { SceneComponent } from '../component';
  * The range component can hold any number in the configured range.
  */
 export interface RangeSceneComponent extends SceneComponent {
-
   /**
    * The current value.
    */
@@ -28,7 +27,7 @@ export interface RangeSceneComponent extends SceneComponent {
   /**
    * Ticks to display in the gui.
    */
-  ticks?: number;
+  ticks?: number | { [key: string]: string };
 }
 
 export function createRangeComponent(id: string, value: number, group?: string): RangeSceneComponent {

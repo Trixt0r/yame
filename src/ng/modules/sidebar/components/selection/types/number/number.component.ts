@@ -1,25 +1,25 @@
-import { Component, ChangeDetectionStrategy, ViewChild, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ViewChild,
+  OnChanges,
+  SimpleChanges,
+  ViewEncapsulation,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { AbstractTypeComponent } from '../abstract';
-import { NumberSceneComponent, SceneComponent } from 'common/scene';
-import { MatInput } from '@angular/material/input';
+import { NumberSceneComponent } from 'common/scene';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
+  selector: 'yame-component-type-number',
   templateUrl: './number.component.html',
   styleUrls: ['../style.scss', '../inline.actions.scss', './number.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'relative fill full block'
-  },
+  encapsulation: ViewEncapsulation.None,
 })
 export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneComponent> implements OnChanges {
-
   static readonly type: string = 'number';
-
-  /**
-   * The input reference.
-   */
-  @ViewChild(MatInput) input!: MatInput;
 
   /**
    * The value for rounding values.
@@ -30,19 +30,19 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
    * THe current number value.
    */
   get number(): number | string {
-    return typeof this.component?.number === 'number' ? this.transform(this.component.number) as number : 0;
+    return typeof this.component?.number === 'number' ? (this.transform(this.component.number) as number) : 0;
   }
 
-  constructor(protected translate: TranslateService) {
+  constructor(protected translate: TranslateService, protected cdr: ChangeDetectorRef) {
     super(translate);
   }
 
   /**
    * @inheritdoc
    */
-  onUpdate(event: any): void {
+  onUpdate(event: unknown): void {
     if (!this.component) return;
-    const val: string | number = event.currentTarget.value;
+    const val: string | number = ((event as InputEvent).currentTarget as HTMLInputElement)!.value;
     this.component.number = this.reverse(typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val) as number;
     delete this.component.mixed;
     return super.onUpdate(event);
@@ -52,7 +52,7 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
    * @inheritdoc
    */
   onExternalUpdate(): void {
-    if (this.input) this.input.stateChanges.next();
+    // if (this.input) this.input.stateChanges.next();
   }
 
   /**
@@ -60,6 +60,6 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
    */
   ngOnChanges(changes: SimpleChanges) {
     if (!changes.component) return;
-    if (this.input) this.input.stateChanges.next();
+    this.cdr.markForCheck();
   }
 }

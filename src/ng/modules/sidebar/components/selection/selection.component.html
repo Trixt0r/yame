@@ -1,11 +1,12 @@
 <div class="resizer"></div>
-<div class="flex wrap">
-  <mat-accordion multi style="width: 100%">
-    <ng-container [yameSceneComponents]="components"
-                  [yameSceneComponentsEntities]="entities"
-                  [yameSelectState]="selected"
-                  (yameSceneComponentsInput)="onInput($event)"
-                  (yameSceneComponentsRemove)="onRemove($event)"></ng-container>
-  </mat-accordion>
-  <yame-add-component class="padding-hor-32" [entities]="entities"></yame-add-component>
-</div>
+<nz-collapse class="padding-bottom-4">
+  <ng-container
+    class="margin-bottom-4"
+    [yameSceneComponents]="components"
+    [yameSceneComponentsEntities]="entities"
+    [yameSelectState]="selected"
+    (yameSceneComponentsInput)="onInput($event)"
+    (yameSceneComponentsRemove)="onRemove($event)"
+  ></ng-container>
+</nz-collapse>
+<yame-add-component class="padding-hor-32" [entities]="entities"></yame-add-component>

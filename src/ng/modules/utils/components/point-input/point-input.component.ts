@@ -1,4 +1,15 @@
-import { Component, OnDestroy, Optional, Self, ElementRef, Input, ChangeDetectionStrategy, EventEmitter, Output } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  Optional,
+  Self,
+  ElementRef,
+  Input,
+  ChangeDetectionStrategy,
+  EventEmitter,
+  Output,
+  ViewEncapsulation,
+} from '@angular/core';
 import { ControlValueAccessor, NgControl, FormGroup, FormBuilder } from '@angular/forms';
 import { MatFormFieldControl } from '@angular/material/form-field';
 import { Subject } from 'rxjs';
@@ -25,15 +36,14 @@ import { isNil } from 'lodash';
   selector: 'point-input',
   templateUrl: 'point-input.component.html',
   styleUrls: ['./point-input.component.scss'],
-  providers: [{provide: MatFormFieldControl, useExisting: PointInputComponent}],
   host: {
     '[id]': 'id',
     '[attr.aria-describedby]': 'describedBy',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
-export class PointInputComponent implements ControlValueAccessor, MatFormFieldControl<IPoint>, OnDestroy {
-
+export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   /**
    * The next component input id.
    */
@@ -88,14 +98,18 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
    * @inheritdoc
    */
   get empty() {
-    const { value: { x, y } } = this.parts;
+    const {
+      value: { x, y },
+    } = this.parts;
     return (isNil(x) || x === '') && (y === '' || isNil(y));
   }
 
   /**
    * @inheritdoc
    */
-  get shouldLabelFloat() { return this.focused || !this.empty; }
+  get shouldLabelFloat() {
+    return this.focused || !this.empty;
+  }
 
   /**
    * Input event triggered by number directive.
@@ -116,7 +130,9 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
    * @inheritdoc
    */
   @Input()
-  get placeholder(): string { return this._placeholder; }
+  get placeholder(): string {
+    return this._placeholder;
+  }
 
   /**
    * @inheritdoc
@@ -135,7 +151,9 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
    * @inheritdoc
    */
   @Input()
-  get required(): boolean { return this._required; }
+  get required(): boolean {
+    return this._required;
+  }
 
   /**
    * @inheritdoc
@@ -154,7 +172,9 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
    * @inheritdoc
    */
   @Input()
-  get disabled(): boolean { return this._disabled; }
+  get disabled(): boolean {
+    return this._disabled;
+  }
 
   /**
    * @inheritdoc
@@ -175,7 +195,9 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
    */
   @Input()
   get value(): IPoint | null {
-    const { value: { x, y } } = this.parts;
+    const {
+      value: { x, y },
+    } = this.parts;
     const xValid = typeof x === 'number' || (typeof x === 'string' && x.length > 0);
     const yValid = typeof y === 'number' || (typeof y === 'string' && y.length > 0);
     if (xValid && yValid) {
@@ -201,14 +223,14 @@ export class PointInputComponent implements ControlValueAccessor, MatFormFieldCo
     formBuilder: FormBuilder,
     private _focusMonitor: FocusMonitor,
     private _elementRef: ElementRef<HTMLElement>,
-    @Optional() @Self() public ngControl: NgControl) {
-
+    @Optional() @Self() public ngControl: NgControl
+  ) {
     this.parts = formBuilder.group({
       x: 0,
       y: 0,
     });
 
-    _focusMonitor.monitor(_elementRef, true).subscribe(origin => {
+    _focusMonitor.monitor(_elementRef, true).subscribe((origin) => {
       if (this.focused && !origin) {
         this.onTouched();
       }

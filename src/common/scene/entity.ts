@@ -114,7 +114,9 @@ export class SceneEntity extends AbstractEntity<SceneComponent> {
   /**
    * @inheritdoc
    */
-  readonly components!: SceneComponentCollection<SceneComponent>;
+  get components(): SceneComponentCollection<SceneComponent> {
+    return this._components;
+  }
 
   /**
    * Creates a new scene entity.

@@ -16,6 +16,9 @@ import { Observable } from 'rxjs';
 import { InitDefaultSettingsValue } from '../preferences/states/actions/settings.action';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { TypeLabelComponent } from './components';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -27,6 +30,8 @@ export function createTranslateLoader(http: HttpClient) {
     FormsModule,
     MatIconModule,
     NzDropDownModule,
+    NzInputModule,
+    NzFormModule,
     NzIconModule,
     ReactiveFormsModule,
     HttpClientModule,
@@ -38,7 +43,14 @@ export function createTranslateLoader(http: HttpClient) {
       },
     }),
   ],
-  declarations: [ResizableComponent, PointInputComponent, NestedDropdownComponent, NumberDirective, ColorPipe],
+  declarations: [
+    ResizableComponent,
+    PointInputComponent,
+    NestedDropdownComponent,
+    NumberDirective,
+    ColorPipe,
+    TypeLabelComponent,
+  ],
   exports: [
     HttpClientModule,
     TranslateModule,
@@ -47,6 +59,7 @@ export function createTranslateLoader(http: HttpClient) {
     NestedDropdownComponent,
     NumberDirective,
     ColorPipe,
+    TypeLabelComponent,
   ],
   providers: [
     {

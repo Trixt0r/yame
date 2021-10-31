@@ -1,5 +1,12 @@
-import { Component, OnChanges, SimpleChanges, ChangeDetectionStrategy, ChangeDetectorRef, NgZone } from '@angular/core';
-import { AbstractTypeComponent } from '../abstract';
+import {
+  Component,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  NgZone,
+  ViewEncapsulation,
+} from '@angular/core';
 import { AssetSceneComponent as AssetComponent } from 'common/scene/component/asset';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from 'common/asset';
@@ -9,11 +16,15 @@ import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ScanResource } from 'ng/modules/asset/states/actions/asset.action';
 import { TranslateService } from '@ngx-translate/core';
+import { AbstractTypeComponent } from 'ng/modules/sidebar/components/selection/types/abstract';
 
+// TODO: use tree select instead of list
 @Component({
-  templateUrl: 'asset.component.html',
-  styleUrls: ['../style.scss', 'asset.component.scss'],
+  selector: 'yame-component-type-asset',
+  templateUrl: 'asset-type.component.html',
+  styleUrls: ['asset-type.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeComponent<T> implements OnChanges {
   static readonly type: string = 'asset';
@@ -23,6 +34,9 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   protected allAssets: Asset[] = [];
 
+  /**
+   * Whether assets are being loaded or not.
+   */
   loading = false;
 
   /**
@@ -30,9 +44,11 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   currentIndex: number = 0;
 
+  /**
+   * The list of assets which is displayed.
+   */
   assetBuffer: Asset[] = [];
 
-  bufferSize = 25;
   bufferThreshold = 10;
 
   @Select(AssetState.assets) assets$!: Observable<Asset[]>;
@@ -63,7 +79,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     };
     this.component.asset = asset ? id : null;
     delete this.component.mixed;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
     this.updateEvent.emit(data);
   }
 
@@ -84,36 +100,30 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
           if (idx >= 0) this.assetBuffer.splice(idx, 1);
         });
         this.updateAssetBuffer();
-        this.cdr.markForCheck();
       });
     });
   }
 
   /**
    * Updates the asset buffer.
-   *
-   * @param initial Indicates whether a full initial load should be done.
    */
-  updateAssetBuffer(initial = false) {
-    if (initial) this.assetBuffer = [];
-    const filtered = this.allAssets.filter((it) => this.checkType(it));
-    const length = this.assetBuffer.length;
-    let idx = initial ? filtered.findIndex((it) => it.id === this.selected) : length + this.bufferSize;
-    idx = Math.max(Math.min(length + this.bufferSize, filtered.length), idx + 1);
-    this.assetBuffer = this.assetBuffer.concat(filtered.slice(length, idx));
+  updateAssetBuffer(): void {
+    this.assetBuffer = this.allAssets.filter((it) => this.checkType(it));
+    this.cdr.markForCheck();
+    if (this.assetBuffer.length < this.bufferThreshold) this.loadMoreAssets();
   }
 
   /**
    * Loads assets, which were not loaded yet.
    */
-  loadMoreAssets() {
+  loadMoreAssets(): void {
     const notLoaded = this.allAssets.find((it) => it.type === 'group' && !it.resource.loaded);
-    if (notLoaded) {
-      this.loading = true;
-      this.store
-        .dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source))
-        .subscribe(() => (this.loading = false));
-    }
+    if (!notLoaded) return;
+    this.loading = true;
+    this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source)).subscribe(() => {
+      this.loading = false;
+      this.cdr.markForCheck();
+    });
   }
 
   /**
@@ -146,8 +156,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   onDrop(data: DragDropData): void {
     if (!this.checkType(data.dragData)) return;
     this.selected = data.dragData.id;
-    this.updateAssetBuffer(true);
-    this.cdr.detectChanges();
+    this.updateAssetBuffer();
   }
 
   /**
@@ -155,7 +164,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   onExternalUpdate(): void {
     if (this.component?.mixed) {
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     } else {
       this.selected = this.component?.asset;
     }
@@ -187,7 +196,6 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     if (!changes.component) return;
     if (this.component?.mixed) return;
     this.selected = this.component?.asset;
-    this.updateAssetBuffer(true);
-    this.cdr.markForCheck();
+    this.updateAssetBuffer();
   }
 }

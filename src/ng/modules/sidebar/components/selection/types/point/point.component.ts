@@ -1,4 +1,11 @@
-import { Component, ViewChild, ChangeDetectionStrategy, OnChanges } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ChangeDetectionStrategy,
+  OnChanges,
+  ViewEncapsulation,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { AbstractTypeComponent, AbstractInputEvent } from '../abstract';
 import { PointSceneComponent } from 'common/scene/component/point';
 import { PointInputComponent } from 'ng/modules/utils';
@@ -6,15 +13,13 @@ import { IPoint } from 'common/math';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
+  selector: 'yame-component-type-point',
   templateUrl: './point.component.html',
   styleUrls: ['../style.scss', '../inline.actions.scss', './point.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'relative fill full block'
-  },
+  encapsulation: ViewEncapsulation.None,
 })
 export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponent> implements OnChanges {
-
   static readonly type: string = 'point';
 
   /**
@@ -29,7 +34,7 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
     return this.component?.mixed ? { x: '', y: '' } : this.transform(this.component) || { x: 0, y: 0 };
   }
 
-  constructor(protected translate: TranslateService) {
+  constructor(protected translate: TranslateService, protected cdr: ChangeDetectorRef) {
     super(translate);
   }
 
@@ -44,7 +49,7 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
     delete this.component.mixed;
     const data: AbstractInputEvent<PointSceneComponent> = {
       originalEvent: event,
-      component: this.component
+      component: this.component,
     };
     this.updateEvent.emit(data);
   }
@@ -61,6 +66,6 @@ export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponen
    * @inheritdoc
    */
   ngOnChanges() {
-    this.input.stateChanges.next();
+    this.cdr.markForCheck();
   }
 }

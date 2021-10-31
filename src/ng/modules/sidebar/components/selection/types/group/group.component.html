@@ -1,17 +1,18 @@
-<mat-expansion-panel [expanded]="expanded">
-  <mat-expansion-panel-header>
-    <h5 class="mat-h5">{{ getLabel() }}</h5>
-    <div class="inline-actions">
-      <yame-edit-component *ngIf="component?.editable" [entities]="entities" [component]="component"></yame-edit-component>
-      <button *ngIf="component?.removable" mat-icon-button (click)="onRemove($event)">
-        <mat-icon>delete</mat-icon>
+<nz-collapse-panel [nzActive]="expanded" [nzHeader]="header">
+  <ng-template #header>
+    <yame-type-label [component]="component" [entities]="entities"></yame-type-label>
+    <div *ngIf="component?.removable" class="inline-actions inline pull-right">
+      <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="onRemove($event)">
+        <i nz-icon nzType="delete"></i>
       </button>
     </div>
-  </mat-expansion-panel-header>
-  <ng-container [yameSceneComponents]="components"
-                [yameSceneComponentsEntities]="entities"
-                [yameSelectState]="selectState"
-                (yameSceneComponentsInput)="onUpdate($event)"
-                (yameSceneComponentsRemove)="onRemovedComponent($event)"></ng-container>
+  </ng-template>
+  <ng-container
+    [yameSceneComponents]="components"
+    [yameSceneComponentsEntities]="entities"
+    [yameSelectState]="selectState"
+    (yameSceneComponentsInput)="onUpdate($event)"
+    (yameSceneComponentsRemove)="onRemovedComponent($event)"
+  ></ng-container>
   <yame-add-component *ngIf="canAddComponents" [entities]="entities" [component]="component"></yame-add-component>
-</mat-expansion-panel>
+</nz-collapse-panel>

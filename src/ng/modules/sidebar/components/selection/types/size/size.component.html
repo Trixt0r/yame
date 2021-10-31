@@ -1,15 +1,19 @@
-<mat-form-field class="full"
-                [class.editable]="component?.editable"
-                [class.removable]="component?.removable">
-  <point-input
-    #input
-    (input)="onUpdate($event)"
-    [value]="value"
-    [placeholder]="component?.mixed ? getLabel() + ' ' + placeholder : getLabel()"
-    [disabled]="disabled"
-  ></point-input>
-</mat-form-field>
-<yame-edit-component *ngIf="component?.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
-<button *ngIf="component?.removable" mat-icon-button class="remove" (click)="onRemove($event)">
-  <mat-icon>delete</mat-icon>
+<yame-type-label class="margin-bottom-8" [component]="component" [entities]="entities"></yame-type-label>
+<point-input
+  #input
+  (input)="onUpdate($event)"
+  [value]="value"
+  [placeholder]="component?.mixed ? getLabel() + ' ' + placeholder : getLabel()"
+  [disabled]="disabled"
+></point-input>
+<button
+  *ngIf="component?.removable"
+  nz-button
+  nzShape="circle"
+  nzType="text"
+  nzSize="small"
+  class="remove absolute"
+  (click)="onRemove($event)"
+>
+  <i nz-icon nzType="delete"></i>
 </button>

@@ -17,8 +17,8 @@ export function provideAsDecorated(...values: unknown[]): ValueProvider {
   return {
     provide: DECORATOR_TOKEN,
     useValue: values,
-    multi: true
-  }
+    multi: true,
+  };
 }
 
 export { ResizableComponent } from './component/resizable';

@@ -1,0 +1,16 @@
+yame-component-type-point {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0 8px;
+  margin-bottom: 4px;
+
+  .remove {
+    top: 0;
+    right: 4px;
+  }
+
+  yame-type-label {
+    width: calc(100% - 24px);
+  }
+}

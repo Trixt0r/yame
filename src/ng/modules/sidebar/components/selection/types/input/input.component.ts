@@ -1,35 +1,39 @@
 import { AbstractTypeComponent } from '../abstract';
-import { Component, ChangeDetectionStrategy, OnChanges, ViewChild, SimpleChanges, SimpleChange } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  OnChanges,
+  SimpleChanges,
+  ViewEncapsulation,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { SceneComponent, StringSceneComponent } from 'common/scene';
-import { MatInput } from '@angular/material/input';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
+  selector: 'yame-component-type-string',
   templateUrl: './input.component.html',
-  styleUrls: ['../style.scss', '../inline.actions.scss', './input.component.scss'],
+  styleUrls: ['../style.scss', './input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'relative fill full block'
-  },
+  encapsulation: ViewEncapsulation.None,
 })
-export class InputTypeComponent<T extends SceneComponent = SceneComponent> extends AbstractTypeComponent<T> implements OnChanges {
-
+export class InputTypeComponent<T extends SceneComponent = SceneComponent>
+  extends AbstractTypeComponent<T>
+  implements OnChanges
+{
   static readonly type: string = 'string';
 
-  /**
-   * The input reference.
-   */
-  @ViewChild(MatInput) input!: MatInput;
-
-  constructor(protected translate: TranslateService) {
+  constructor(protected translate: TranslateService, protected cdr: ChangeDetectorRef) {
     super(translate);
   }
 
   /**
    * @inheritdoc
    */
-  onUpdate(event: any): void {
-    (this.component as unknown as StringSceneComponent).string = this.reverse(event.currentTarget.value) as string;
+  onUpdate(event: InputEvent): void {
+    if (!this.component) return super.onUpdate(event);
+    const comp = this.component as unknown as StringSceneComponent;
+    comp.string = this.reverse((event.currentTarget as HTMLInputElement)!.value) as string;
     delete this.component?.mixed;
     return super.onUpdate(event);
   }
@@ -38,7 +42,7 @@ export class InputTypeComponent<T extends SceneComponent = SceneComponent> exten
    * @inheritdoc
    */
   onExternalUpdate(): void {
-    if (this.input) this.input.stateChanges.next();
+    this.cdr.markForCheck();
   }
 
   /**
@@ -46,6 +50,6 @@ export class InputTypeComponent<T extends SceneComponent = SceneComponent> exten
    */
   ngOnChanges(changes: SimpleChanges) {
     if (!changes.component) return;
-    if (this.input) this.input.stateChanges.next();
+    this.cdr.markForCheck();
   }
 }

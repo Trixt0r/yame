@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { SidebarComponent } from './components/sidebar.component';
 import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { UtilsModule } from '../utils';
@@ -19,7 +18,6 @@ import { AddSceneComponentButtonComponent } from './components/selection/add/add
 import {
   createPointComponent,
   createColorComponent,
-  createAssetComponent,
   SceneEntity,
   createTransformationComponents,
   SceneEntityType,
@@ -32,21 +30,20 @@ import { EntityTypeService } from './services/entity-type.service';
 import { createSizeComponent } from 'common/scene/component/size';
 import { SizeTypeComponent } from './components/selection/types/size/size.component';
 import { NumberTypeComponent } from './components/selection/types/number/number.component';
-import { AssetTypeComponent } from './components/selection/types/asset/asset.component';
 import { ColorTypeComponent } from './components/selection/types/color/color.component';
 import { InputTypeComponent } from './components/selection/types/input/input.component';
 import { PointTypeComponent } from './components/selection/types/point/point.component';
 import { RangeTypeComponent } from './components/selection/types/range/range.component';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatSliderModule } from '@angular/material/slider';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSliderModule } from 'ng-zorro-antd/slider';
 
 @NgModule({
   imports: [
@@ -57,14 +54,10 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     ReactiveFormsModule,
     BrowserAnimationsModule,
     ColorPickerModule,
-    NgSelectModule,
     DndModule,
     MatSelectModule,
     MatDialogModule,
     MatIconModule,
-    MatMenuModule,
-    MatExpansionModule,
-    MatSliderModule,
     MatInputModule,
     MatButtonModule,
     ScrollingModule,
@@ -72,6 +65,9 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     NzButtonModule,
     NzDropDownModule,
     NzIconModule,
+    NzCollapseModule,
+    NzInputModule,
+    NzSliderModule,
   ],
   declarations: [
     SidebarComponent,
@@ -85,7 +81,6 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     PointTypeComponent,
     SizeTypeComponent,
     GroupTypeComponent,
-    AssetTypeComponent,
     AddSceneComponentButtonComponent,
     AddEntityComponent,
     EditComponentComponent,
@@ -103,23 +98,16 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     PointTypeComponent,
     SizeTypeComponent,
     GroupTypeComponent,
-    AssetTypeComponent,
   ],
 })
 export class SidebarModule {
   constructor(components: SceneComponentsService, entityTypes: EntityTypeService, compService: SceneComponentService) {
+    // TODO: Refactor this with ngxs state
     components.registerCategory({
       id: 'general',
       items: ['general.string', 'general.number', 'general.point', 'general.size', 'general.color', 'general.range'],
       label: 'componentLabel.general',
       icon: 'more',
-    });
-
-    components.registerCategory({
-      id: 'asset',
-      items: ['asset.any', 'asset.texture', 'asset.sound', 'asset.music'],
-      label: 'componentLabel.asset',
-      icon: 'inbox',
     });
 
     components.registerItem({ id: 'group', type: 'group', icon: 'group', label: 'componentLabel.group' });
@@ -164,27 +152,7 @@ export class SidebarModule {
       factory: (entities, type, group) => createColorComponent(compService.generateComponentId(entities, type)),
     });
 
-    components.registerItem({
-      id: 'asset.any',
-      type: 'asset',
-      icon: 'file-unknown',
-      label: 'componentLabel.anyAsset',
-    });
-
-    components.registerItem({
-      id: 'asset.texture',
-      type: 'asset',
-      icon: 'file-image',
-      label: 'componentLabel.texture',
-      factory: (entities, type, group) => {
-        const component = createAssetComponent(compService.generateComponentId(entities, type));
-        component.allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
-        return component;
-      },
-    });
-
-    components.registerTypeComponent(InputTypeComponent);
-    components.registerTypeComponent(AssetTypeComponent);
+    components.registerTypeComponent(InputTypeComponent as any);
     components.registerTypeComponent(NumberTypeComponent as any);
     components.registerTypeComponent(ColorTypeComponent as any);
     components.registerTypeComponent(RangeTypeComponent as any);
@@ -192,6 +160,7 @@ export class SidebarModule {
     components.registerTypeComponent(SizeTypeComponent as any);
     components.registerTypeComponent(GroupTypeComponent as any);
 
+    // TODO: Refactor this with ngxs state
     entityTypes.registerItem({
       id: 'entity',
       type: 'entity',

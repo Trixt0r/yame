@@ -1,0 +1,10 @@
+yame-type-label {
+  display: inline-block;
+
+  input.ant-input {
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}

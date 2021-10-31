@@ -1,19 +1,30 @@
 import { AbstractTypeComponent, AbstractRemoveEvent } from '../abstract';
-import { Component, ChangeDetectorRef, OnChanges, ChangeDetectionStrategy, ViewChild } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  OnChanges,
+  ChangeDetectionStrategy,
+  ViewChild,
+  ViewEncapsulation,
+} from '@angular/core';
 import { Store } from '@ngxs/store';
 import { GroupSceneComponent, SceneComponent } from 'common/scene';
 import { SceneComponentsService } from 'ng/modules/sidebar/services/scene-components.service';
 import { EntityComponentsDirective } from 'ng/modules/sidebar/directives/entity-components.directive';
 import { takeUntil } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
+import { NzCollapseComponent } from 'ng-zorro-antd/collapse';
 
 @Component({
+  selector: 'yame-component-type-group',
   templateUrl: `./group.component.html`,
   styleUrls: ['../style.scss', './group.component.scss'],
   host: {
-    class: 'full block',
+    class: 'full block margin-bottom-4',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  viewProviders: [NzCollapseComponent],
 })
 export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponent> implements OnChanges {
   static readonly type: string = 'group';
@@ -48,7 +59,7 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
   ) {
     super(translate);
     this.destroy$.next();
-    this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe(comps => this.onExternalUpdate(comps));
+    this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe((comps) => this.onExternalUpdate(comps));
   }
 
   /**
@@ -79,11 +90,9 @@ export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponen
    * @inheritdoc
    */
   ngOnChanges() {
-    this.components =
-      this.selectState && this.selectState.components
-        ? this.selectState.components.filter(it => it.group === this.component?.id)
-        : [];
-    this.canAddComponents = !!this.sceneComponents.items.find(item => {
+    const { components } = this.selectState ?? { components: [] };
+    this.components = components.filter((it) => it.group === this.component?.id);
+    this.canAddComponents = !!this.sceneComponents.items.some((item) => {
       if (this.component) return this.sceneComponents.canSceneComponentBeAddedToGroup(this.component, item);
       return false;
     });

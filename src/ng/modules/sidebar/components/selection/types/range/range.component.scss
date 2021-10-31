@@ -1,40 +1,16 @@
-:host ::ng-deep .mat-form-field-label {
-  margin-left: 0;
-}
-:host ::ng-deep .mat-slider {
-  padding: 0 !important;
-}
-:host ::ng-deep .mat-slider-horizontal .mat-slider-wrapper {
-  left: 0 !important;
-  right: 0 !important;
-  top: 15px !important;
-}
+yame-type-component-range {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0 8px;
+  margin-bottom: 4px;
 
-:host ::ng-deep .mat-form-field-label {
-  font-size: 12px !important;
-  transform: scale(1) !important;
-}
-
-.slider-container {
-
-  margin: 0 8px;
-
-  .mat-form-field-label {
-    position: initial;
-    display: block;
-    font: normal normal 400 normal 16px / 18px Roboto, "Helvetica New", sans-serif;
-    transform: scale(0.8);
+  .remove {
+    top: 0;
+    right: 4px;
   }
 
-  label {
-    margin-bottom: 4px;
+  yame-type-label {
+    width: calc(100% - 24px);
   }
-
-  mat-slider, label {
-    margin-left: -4px
-  }
-}
-
-.edit, .remove {
-  vertical-align: text-bottom;
 }

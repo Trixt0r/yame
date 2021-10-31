@@ -1,4 +1,11 @@
-import { Component, ViewChild, ChangeDetectionStrategy, OnChanges } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ChangeDetectionStrategy,
+  OnChanges,
+  ViewEncapsulation,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { AbstractTypeComponent, AbstractInputEvent } from '../abstract';
 import { PointInputComponent } from 'ng/modules/utils';
 import { IPoint } from 'common/math';
@@ -8,15 +15,13 @@ import { cloneDeep } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
+  selector: 'yame-component-type-size',
   templateUrl: './size.component.html',
   styleUrls: ['../style.scss', '../inline.actions.scss', './size.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'relative fill full block'
-  },
+  encapsulation: ViewEncapsulation.None,
 })
 export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent> implements OnChanges {
-
   static readonly type: string = 'size';
 
   /**
@@ -36,7 +41,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
     return this.val;
   }
 
-  constructor(protected translate: TranslateService) {
+  constructor(protected translate: TranslateService, protected cdr: ChangeDetectorRef) {
     super(translate);
   }
 
@@ -48,7 +53,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
     const reversed = this.reverse(this.input.value) as IPoint;
     this.component.width = reversed.x;
     this.component.height = reversed.y;
-    let scale = this.selectState.components.find(comp => comp.type === 'scale') as PointSceneComponent;
+    let scale = this.selectState.components.find((comp) => comp.type === 'scale') as PointSceneComponent;
     if (!scale) return;
     scale = cloneDeep(scale);
     if (this.component.localWidth !== 0) scale.x = this.component.width / this.component.localWidth;
@@ -58,7 +63,7 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
     delete this.component.mixed;
     const data: AbstractInputEvent<PointSceneComponent> = {
       originalEvent: event,
-      component: scale
+      component: scale,
     };
     this.updateEvent.emit(data as any);
   }
@@ -81,6 +86,6 @@ export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent>
       const transformed = this.transform(this.component) as SizeSceneComponent;
       this.val = transformed ? { x: transformed.width, y: transformed.height } : { x: 0, y: 0 };
     }
-    this.input.stateChanges.next();
+    this.cdr.markForCheck();
   }
 }

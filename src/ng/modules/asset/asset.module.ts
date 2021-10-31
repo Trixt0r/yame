@@ -12,7 +12,7 @@ import { NgBytesPipeModule } from 'angular-pipes';
 import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
 import { AssetDetailsDirective } from './directives/details.directive';
 import { AssetState } from './states/asset.state';
-import { ImageAssetPreviewComponent } from './components';
+import { AssetTypeComponent, ImageAssetPreviewComponent } from './components';
 import { ImageAssetDetailsComponent } from './components/details/image/image.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -24,10 +24,16 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { FormsModule } from '@angular/forms';
+import { SceneComponentsService } from '../sidebar/services/scene-components.service';
+import { createAssetComponent } from 'common/scene';
+import { SceneComponentService } from '../scene';
 
 @NgModule({
   imports: [
     BrowserModule,
+    FormsModule,
     UtilsModule,
     NzIconModule,
     NzButtonModule,
@@ -40,6 +46,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     NzResultModule,
     NgBytesPipeModule,
     NzSpinModule,
+    NzSelectModule,
     DndModule.forRoot(),
     NgxsModule.forFeature([AssetState]),
   ],
@@ -52,6 +59,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     ImageAssetDetailsComponent,
     AssetPreviewDirective,
     AssetDetailsDirective,
+    AssetTypeComponent,
   ],
   exports: [AssetItemsComponent, AssetGroupsComponent, AssetPanelComponent, AssetPreviewDirective],
   providers: [
@@ -69,4 +77,34 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     },
   ],
 })
-export class AssetModule {}
+export class AssetModule {
+  constructor(components: SceneComponentsService, compService: SceneComponentService) {
+    components.registerCategory({
+      id: 'asset',
+      items: ['asset.any', 'asset.texture', 'asset.sound', 'asset.music'],
+      label: 'componentLabel.asset',
+      icon: 'inbox',
+    });
+
+    components.registerItem({
+      id: 'asset.any',
+      type: 'asset',
+      icon: 'file-unknown',
+      label: 'componentLabel.anyAsset',
+    });
+
+    components.registerItem({
+      id: 'asset.texture',
+      type: 'asset',
+      icon: 'file-image',
+      label: 'componentLabel.texture',
+      factory: (entities, type, group) => {
+        const component = createAssetComponent(compService.generateComponentId(entities, type));
+        component.allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
+        return component;
+      },
+    });
+
+    components.registerTypeComponent(AssetTypeComponent);
+  }
+}

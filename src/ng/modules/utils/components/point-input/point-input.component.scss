@@ -1,13 +1,15 @@
-.point-input-container {
-  display: flex;
-}
-.point-input-element {
-  border: none;
-  background: none;
-  padding: 0;
-  outline: none;
-  font: inherit;
-  text-align: center;
-  width: 50%;
-  color: currentColor;
+point-input {
+  display: block;
+
+  nz-form-item {
+    margin-bottom: 8px !important;
+  }
+
+  nz-input-group {
+    border-radius: 0 !important;
+  }
+
+  .ant-input-group-addon {
+    user-select: none;
+  }
 }

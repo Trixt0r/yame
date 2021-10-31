@@ -1,73 +1,71 @@
 import { AbstractTypeComponent } from '../abstract';
-import { Component, ChangeDetectionStrategy, ViewChild, OnChanges, ChangeDetectorRef } from '@angular/core';
-import { RangeSceneComponent, SceneComponent } from 'common/scene';
-import { MatSlider, MatSliderChange } from '@angular/material/slider';
+import { Component, ChangeDetectionStrategy, OnChanges, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { RangeSceneComponent } from 'common/scene';
 import { TranslateService } from '@ngx-translate/core';
+import { NzMarks } from 'ng-zorro-antd/slider';
 
 @Component({
+  selector: 'yame-type-component-range',
   templateUrl: './range.component.html',
   styleUrls: ['../style.scss', '../inline.actions.scss', './range.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'relative fill full block'
-  },
+  encapsulation: ViewEncapsulation.None,
 })
 export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponent> implements OnChanges {
-
   static readonly type: string = 'range';
-
-  /**
-   * The slider reference.
-   */
-  @ViewChild(MatSlider) slider!: MatSlider;
 
   /**
    * The minimal allowed value.
    */
   get min(): number {
-    return this.component?.min as number || 0;
+    return (this.component?.min as number) || 0;
   }
 
   /**
    * The maximum allowed value.
    */
   get max(): number {
-    return this.component?.max as number || 100;
+    return (this.component?.max as number) || 100;
   }
 
   /**
    * The step value.
    */
   get step(): number {
-    return this.component?.step as number || 1;
+    return (this.component?.step as number) || 1;
   }
 
   /**
    * The ticks value.
    */
-  get ticks(): number | 'auto' {
-    return this.component?.ticks ? this.component.ticks as number | 'auto' : 0;
+  get ticks(): NzMarks | null {
+    if (!this.component?.ticks) return null;
+    if (typeof this.component.ticks === 'number') {
+      const marks: NzMarks = {};
+      for (let i = this.min; i <= this.max; i += this.component.ticks) marks[i] = String(i);
+      return marks;
+    }
+    return this.component.ticks;
+  }
+
+  set value(value: number) {
+    if (!this.component) return;
+    this.component.value = this.reverse(value) as number;
+    delete this.component.mixed;
+    super.onUpdate({});
   }
 
   /**
    * The current value.
    */
   get value(): number {
-    return !this.component?.mixed && typeof this.component?.value === 'number' ? this.transform(this.component.value) as number : 0;
+    return !this.component?.mixed && typeof this.component?.value === 'number'
+      ? (this.transform(this.component.value) as number)
+      : 0;
   }
 
   constructor(protected translate: TranslateService, private cdr: ChangeDetectorRef) {
     super(translate);
-  }
-
-  /**
-   * @inheritdoc
-   */
-  onUpdate(event: any): void {
-    if (!this.component) return;
-    this.component.value = this.reverse(event.value) as number;
-    delete this.component.mixed;
-    return super.onUpdate(event);
   }
 
   /**
@@ -81,11 +79,6 @@ export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponen
    * @inheritdoc
    */
   ngOnChanges() {
-    if (!this.slider) return;
-    const change = new MatSliderChange();
-    change.value = this.value;
-    this.slider.change.emit(change);
     this.cdr.markForCheck();
   }
-
 }

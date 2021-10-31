@@ -1,4 +1,4 @@
-<div class="slider-container full inline-block"
+<!-- <div class="slider-container full inline-block"
       [class.editable]="component?.editable"
       [class.removable]="component?.removable">
   <label class="mat-form-field-label">{{ component?.mixed ? getLabel() + ' ' + placeholder : getLabel() }}</label>
@@ -17,4 +17,18 @@
 <yame-edit-component *ngIf="component?.editable" class="edit" [entities]="entities" [component]="component"></yame-edit-component>
 <button *ngIf="component?.removable" mat-icon-button class="remove" (click)="onRemove($event)">
   <mat-icon>delete</mat-icon>
+</button> -->
+<yame-type-label class="margin-bottom-8" [component]="component" [entities]="entities"></yame-type-label>
+<nz-slider [nzMax]="max" [nzMin]="min" [nzDisabled]="disabled" [nzStep]="step" [nzMarks]="ticks" [(ngModel)]="value">
+</nz-slider>
+<button
+  *ngIf="component?.removable"
+  nz-button
+  nzShape="circle"
+  nzType="text"
+  nzSize="small"
+  class="remove absolute"
+  (click)="onRemove($event)"
+>
+  <i nz-icon nzType="delete"></i>
 </button>

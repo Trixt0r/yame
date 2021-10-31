@@ -1,69 +1,60 @@
-:host ::ng-deep sketch-picker {
-  width: 100%;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-}
+yame-component-type-color {
+  display: block;
 
-.preview-wrapper {
-  position: relative !important;
-  width: calc(100% - 64px);
-  margin-left: 16px;
-  transition: all ease-in-out 50ms;
-}
+  sketch-picker {
+    width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 
-.preview {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100%;
-  height: 10px;
-  transform: translate(-50%, -50%);
-}
-.preview.bg {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==);
-  background-position: left center;
-}
+    .presentation input {
+      border: 1px solid #434343 !important;
+      color: #ffffffd9 !important;
+      background: transparent !important;
+      height: 28px !important;
+      font-size: 14px !important;
+      transition: border-color 0.3s;
 
-mat-expansion-panel-header {
-
-  position: relative;
-
-  .inline-actions {
-    position: absolute;
-    top: 0;
-    right: 32px;
-    max-height: 100%;
-    transform: translate(50%, -4px);
-    opacity: 0;
-    transition: all ease-in-out 50ms;
-    .mat-icon-button {
-      line-height: inherit;
-      mat-icon {
-        font-size: 1.125em;
+      &:hover {
+        border-color: #165996 !important;
+        border-right-width: 1px !important;
       }
+    }
+
+    color-presets-component {
+      border-top: 1px solid #434343 !important;
     }
   }
 
-  &:hover .inline-actions {
-    opacity: inherit;
-    transform: translate(0, -4px);
+  .inline-block.header {
+    width: calc(100% - 24px);
   }
 
-  &.editable:hover .preview-wrapper,
-  &.removable:hover .preview-wrapper,
-  &.mat-expanded.editable .preview-wrapper,
-  &.mat-expanded.removable .preview-wrapper {
-    width: calc(100% - 124px);
-  }
-  &.editable.removable:hover .preview-wrapper,
-  &.mat-expanded.editable.removable .preview-wrapper {
-    width: calc(100% - 144px);
+  .preview-wrapper {
+    position: relative !important;
+    display: inline-block;
+    transition: all ease-in-out 50ms;
   }
 
-  &.mat-expanded .inline-actions,
-  &.mat-expanded:hover {
-    opacity: inherit;
-    transform: translate(0, 0);
+  .preview {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 10px;
+    transform: translate(-50%, -50%);
+  }
+
+  .preview.bg {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZhw1gGGYhAGBZIA/nYDCgBDAm9BGDWAAJyRCgLaBCAAgXwixzAS0pgAAAABJRU5ErkJggg==);
+    background-position: left center;
+    background-color: lightgray;
+  }
+
+  .ant-collapse-header {
+    padding: 4px !important;
+    .anticon.ant-collapse-arrow {
+      vertical-align: text-top;
+    }
   }
 }
