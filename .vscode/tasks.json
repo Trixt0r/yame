@@ -3,11 +3,36 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "ng.watch",
+      "script": "start",
       "group": "none",
-      "label": "ng.watch",
+      "label": "start",
       "isBackground": true,
-      "detail": "Runs the angular watch task in the background",
+      "detail": "Starts development mode",
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+          }
+        }
+      ]
+    },
+    {
+      "type": "npm",
+      "script": "watch",
+      "group": "none",
+      "label": "watch",
+      "isBackground": true,
+      "detail": "Watches for main and renderer changes and reloads",
       "problemMatcher": [
         {
           "pattern": [

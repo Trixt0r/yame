@@ -18,7 +18,7 @@
   "scripts": {
     "ng": "ng",
     "lint": "ng lint",
-    "start": "npm run build && npm run watch",
+    "start": "npm run build.electron && npm run ng.watch",
     "watch": "concurrently --kill-others \"webpack --mode development --watch\" \"tsc -p src/main/tsconfig.app.json -w\" \"npm run electron\"",
     "build.common": "tsc -p src/common/tsconfig.app.json",
     "build.electron": "tsc -p src/main/tsconfig.app.json && lnfs node_modules out/node_modules --type junction && copyfiles package.json config.json out",

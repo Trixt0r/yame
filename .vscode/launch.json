@@ -18,7 +18,7 @@
       },
       "args": ["--remote-debugging-port=9223", "."],
       "outputCapture": "std",
-      "preLaunchTask": "ng.watch"
+      "preLaunchTask": "start"
     },
     {
       "name": "Electron: Renderer",
@@ -33,7 +33,7 @@
     {
       "name": "Electron: All",
       "configurations": ["Electron: Main", "Electron: Renderer"],
-      "preLaunchTask": "ng.watch"
+      "preLaunchTask": "start"
     }
   ]
 }
