@@ -18,7 +18,6 @@ export interface AbstractRemoveEvent<T extends SceneComponent = SceneComponent> 
 
 @Component({ template: '' })
 export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComponent> implements OnDestroy {
-
   static readonly type: string = 'abstract';
 
   /**
@@ -59,7 +58,12 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   /**
    * Emitted as soon as the component got destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
+
+  /**
+   * Emitted as soon as the component got detached.
+   */
+  protected detach$ = new Subject<void>();
 
   /**
    * Whether this component is disabled or not.
@@ -76,7 +80,6 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
     return this.component && this.component.mixed ? '(mixed)' : this.component.placeholder || '';
   }
 
-
   @HostBinding('class.embedded')
   get embedded(): boolean {
     return !!this.component?.group;
@@ -84,7 +87,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
 
   constructor(protected translate: TranslateService) {
     this.externalEvent.pipe(takeUntil(this.destroy$)).subscribe((comps: SceneComponent[]) => {
-      const found = comps.find(comp => comp.id === this.component?.id);
+      const found = comps.find((comp) => comp.id === this.component?.id);
       if (!found) return;
       this.onExternalUpdate(comps);
     });
@@ -99,7 +102,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
   onUpdate(event: any): void {
     const data: AbstractInputEvent<T> = {
       originalEvent: event,
-      component: this.component
+      component: this.component,
     };
     this.updateEvent.emit(data);
   }
@@ -124,7 +127,7 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    *
    * @param comps The updated components.
    */
-  onExternalUpdate(comps: SceneComponent[]): void { }
+  onExternalUpdate(comps: SceneComponent[]): void {}
 
   /**
    * Transforms the given value, based on the currently set component.
@@ -164,7 +167,21 @@ export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComp
    * @inheritdoc
    */
   ngOnDestroy(): void {
+    this.detach$.next();
+    this.detach$.complete();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Lifecycle hook called as soon as the component gets attached.
+   */
+  onAttach(): void {}
+
+  /**
+   * Lifecycle hook called as soon as the component gets detached.
+   */
+  onDetach(): void {
+    this.detach$.next();
   }
 }

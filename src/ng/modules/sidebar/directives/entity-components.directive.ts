@@ -170,7 +170,10 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
       if (!EntityComponentsDirective.componentRefPool[type]) return;
       EntityComponentsDirective.componentRefPool[type].forEach((ref) => {
         const idx = this.viewContainerRef.indexOf(ref.hostView);
-        if (idx >= 0) this.viewContainerRef.detach(idx);
+        if (idx >= 0) {
+          this.viewContainerRef.detach(idx);
+          ref.instance.onDetach();
+        }
       });
     });
   }
@@ -218,6 +221,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
         let cached = EntityComponentsDirective.componentRefCache[cacheKey];
         if (cached) {
           componentRef = cached.ref;
+          componentRef.instance.onDetach();
           this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
         } else {
           componentRef = this.obtainComponentRef(identifier) as SceneComponentRef;
@@ -228,6 +232,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
               insertCnt++
             );
           } else {
+            componentRef.instance.onDetach();
             this.viewContainerRef.insert(componentRef.hostView, insertCnt++);
           }
           cached = EntityComponentsDirective.componentRefCache[cacheKey] = {
@@ -235,11 +240,11 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
             index: this.viewContainerRef.indexOf(componentRef.hostView),
           };
         }
-        if (!(<any>componentRef).__tmp) (<any>componentRef).__tmp = v4();
         const previous = componentRef.instance.component;
         componentRef.instance.component = component;
         componentRef.instance.entities = this.entities;
         componentRef.instance.selectState = this.selectState;
+        componentRef.instance.onAttach();
         if (typeof (componentRef.instance as any).ngOnChanges === 'function')
           (componentRef.instance as any).ngOnChanges({
             component: new SimpleChange(previous, component, previous === void 0),
@@ -268,7 +273,8 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
       const cached = EntityComponentsDirective.componentRefCache[key];
       const idx = this.viewContainerRef.indexOf(cached.ref.hostView);
       if (idx < 0 || attached.indexOf(cached.ref) >= 0) return;
-      if (cached.ref) this.removeSubs(cached.ref);
+      cached.ref.instance.onDetach();
+      this.removeSubs(cached.ref);
       delete EntityComponentsDirective.componentRefCache[key];
       const ref = this.viewContainerRef.detach(idx);
       if (ref) detached.push(ref);

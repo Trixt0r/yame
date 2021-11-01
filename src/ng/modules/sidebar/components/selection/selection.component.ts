@@ -151,7 +151,7 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     }
     if (!this.previousData) {
       this.previousData = {
-        select: cloneDeep(this.store.snapshot().select.components)
+        select: cloneDeep(this.store.snapshot().select.components),
       };
       this.entities.forEach(
         (entity) =>
@@ -187,9 +187,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     else this.lastInputData?.push(cloneDeep(event.component as SceneComponent));
 
     inputData.unshift({ id: 'select', parent: null, components: this.lastInputData as SceneComponent[] });
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity) => {
       if (!this.previousData) return;
-      entity.components.set.apply(entity.components, this.previousData[entity.id])
+      entity.components.set.apply(entity.components, this.previousData[entity.id]);
     });
     this.updateAction.data = inputData as Partial<SceneEntityData>[];
     this.store.dispatch(new InputAction([this.updateAction], this));
@@ -221,7 +221,9 @@ export class SelectionComponent extends ResizableComponent implements OnChanges 
     if (changes.selected) this.updateFromStyle();
     const selected = this.selected;
     const ids = this.selected ? this.selected.entities : [];
-    this.entities = this.store.selectSnapshot((state) => state.scene.entities).filter((it: SceneEntity) => ids.indexOf(it.id) >= 0);
+    this.entities = this.store
+      .selectSnapshot((state) => state.scene.entities)
+      .filter((it: SceneEntity) => ids.indexOf(it.id) >= 0);
     this.initPreviousData(true);
     if (selected && selected.components) {
       this.components = selected.components.filter((it) => !it.group);

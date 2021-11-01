@@ -10,10 +10,10 @@ import {
 import { AssetSceneComponent as AssetComponent } from 'common/scene/component/asset';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from 'common/asset';
-import { AssetState } from 'ng/modules/asset/states/asset.state';
+import { AssetState, IAssetState } from 'ng/modules/asset/states/asset.state';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, first, take, takeUntil } from 'rxjs/operators';
 import { ScanResource } from 'ng/modules/asset/states/actions/asset.action';
 import { TranslateService } from '@ngx-translate/core';
 import { AbstractTypeComponent } from 'ng/modules/sidebar/components/selection/types/abstract';
@@ -54,6 +54,11 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   @Select(AssetState.assets) assets$!: Observable<Asset[]>;
 
   /**
+   * Stream for subscribing to the group loading state.
+   */
+  @Select(AssetState.scanningResource) loading$!: Observable<string>;
+
+  /**
    * The current asset instance.
    */
   get currentAsset(): Asset | null {
@@ -90,16 +95,36 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     protected store: Store
   ) {
     super(translate);
-    zone.runOutsideAngular(() => {
-      this.assets$.pipe(takeUntil(this.destroy$)).subscribe((assets) => {
-        this.allAssets = assets;
-        this.assetBuffer.slice().forEach((it) => {
-          const found = this.allAssets.find((asset) => asset.id === it.id);
-          if (found) return;
-          const idx = this.assetBuffer.indexOf(it);
-          if (idx >= 0) this.assetBuffer.splice(idx, 1);
-        });
+  }
+
+  /**
+   * @inheritdoc
+   */
+  onAttach(): void {
+    let waitingForResource = false;
+    this.zone.runOutsideAngular(() => {
+      this.assets$.pipe(takeUntil(this.detach$)).subscribe(async (assets) => {
+        this.allAssets = assets.slice();
+
+        if (waitingForResource) return;
+
+        // Wait for the current resource until it is loaded
+        waitingForResource = !!(await this.loading$.pipe(take(1)).toPromise());
+        if (waitingForResource) {
+          await this.loading$
+            .pipe(
+              filter((val) => val === null),
+              first()
+            )
+            .toPromise();
+          waitingForResource = false;
+        }
         this.updateAssetBuffer();
+      });
+
+      this.loading$.pipe(takeUntil(this.detach$)).subscribe(async (loading) => {
+        this.loading = !!loading;
+        this.cdr.markForCheck();
       });
     });
   }
@@ -108,9 +133,10 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    * Updates the asset buffer.
    */
   updateAssetBuffer(): void {
+    const before = this.assetBuffer.length;
     this.assetBuffer = this.allAssets.filter((it) => this.checkType(it));
     this.cdr.markForCheck();
-    if (this.assetBuffer.length < this.bufferThreshold) this.loadMoreAssets();
+    if (this.assetBuffer.length < this.bufferThreshold || before === this.assetBuffer.length) this.loadMoreAssets();
   }
 
   /**
@@ -119,11 +145,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   loadMoreAssets(): void {
     const notLoaded = this.allAssets.find((it) => it.type === 'group' && !it.resource.loaded);
     if (!notLoaded) return;
-    this.loading = true;
-    this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source)).subscribe(() => {
-      this.loading = false;
-      this.cdr.markForCheck();
-    });
+    this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source));
   }
 
   /**
