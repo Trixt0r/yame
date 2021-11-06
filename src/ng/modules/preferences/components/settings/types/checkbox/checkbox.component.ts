@@ -3,7 +3,6 @@ import { SettingsAbstractComponent } from '../abstract.component';
 
 @Component({
   templateUrl: 'checkbox.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsCheckboxComponent extends SettingsAbstractComponent<boolean> {
-}
+export class SettingsCheckboxComponent extends SettingsAbstractComponent<boolean> {}

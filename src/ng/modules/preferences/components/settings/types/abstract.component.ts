@@ -8,7 +8,6 @@ import { takeUntil } from 'rxjs/operators';
 
 @Component({ template: '' })
 export class SettingsAbstractComponent<T = unknown> implements ISettingsOptionComponent, OnDestroy, AfterViewInit {
-
   /**
    * The settings option to visualize.
    */
@@ -22,7 +21,7 @@ export class SettingsAbstractComponent<T = unknown> implements ISettingsOptionCo
   /**
    * Setting values mapping.
    */
-  values: ISettingsValues = { };
+  values: ISettingsValues = {};
 
   /**
    * The current setting value.
@@ -46,13 +45,13 @@ export class SettingsAbstractComponent<T = unknown> implements ISettingsOptionCo
    */
   protected destroy$ = new Subject();
 
-  constructor(protected cdr: ChangeDetectorRef, protected store: Store) { }
+  constructor(protected cdr: ChangeDetectorRef, protected store: Store) {}
 
   /**
    * @inheritdoc
    */
   ngAfterViewInit() {
-    this.values$.pipe(takeUntil(this.destroy$)).subscribe(values => {
+    this.values$.pipe(takeUntil(this.destroy$)).subscribe((values) => {
       if (this.values[this.option.id] === values[this.option.id]) return;
       this.values[this.option.id] = values[this.option.id];
       this.beforeChangeDetection$.next();
@@ -68,5 +67,4 @@ export class SettingsAbstractComponent<T = unknown> implements ISettingsOptionCo
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 }

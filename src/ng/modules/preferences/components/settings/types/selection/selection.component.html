@@ -1,15 +1,26 @@
-<mat-list-item>
-  <div class="fill-75">{{ option.label | translate }}</div>
-  <mat-select [(ngModel)]="value" class="fill-25" [placeholder]="option.componentSettings?.placeholder">
-    <mat-select-trigger>
-      <mat-icon *ngIf="currentOption?.icon" class="vert-align-sub">{{ currentOption?.icon }}</mat-icon>
-      <span class="vert-align-super" [class.margin-left-4]="currentOption?.icon">{{ (currentOption?.label ? currentOption?.label : (currentOption?.value ? currentOption?.value : currentOption)) | translate }}</span>
-    </mat-select-trigger>
-    <ng-container *ngIf="option.componentSettings?.options">
-      <mat-option *ngFor="let option of option.componentSettings?.options" [value]="option.value ? option.value : option">
-        <mat-icon *ngIf="option.icon">{{ option.icon }}</mat-icon>
-        {{ (option.label ? option.label : (option.value ? option.value : option)) | translate }}
-      </mat-option>
-    </ng-container>
-  </mat-select>
-</mat-list-item>
+<nz-select
+  class="fill full text-left"
+  [(ngModel)]="value"
+  [nzPlaceHolder]="option.componentSettings?.placeholder"
+  [nzCustomTemplate]="iconTpl"
+>
+  <ng-container *ngIf="option.componentSettings?.options">
+    <nz-option
+      *ngFor="let option of option.componentSettings?.options"
+      [nzValue]="option.value ? option.value : option"
+      nzCustomContent
+    >
+      <i *ngIf="option?.icon" nz-icon [nzType]="option?.icon"></i>
+      <span [class.margin-left-4]="option?.icon">{{
+        (option.label ? option.label : option.value ? option.value : option) | translate
+      }}</span>
+    </nz-option>
+  </ng-container>
+</nz-select>
+<ng-template #iconTpl let-selected>
+  <i *ngIf="currentOption?.icon" nz-icon [nzType]="currentOption?.icon"></i>
+  <span [class.margin-left-4]="currentOption?.icon">{{
+    (currentOption?.label ? currentOption?.label : currentOption?.value ? currentOption?.value : currentOption)
+      | translate
+  }}</span>
+</ng-template>

@@ -1,7 +1,1 @@
-<mat-list-item class="padding-top-8 padding-bottom-4" [style.height]="'52px'">
-  <div class="fill-75">{{ option.label | translate }}</div>
-  <mat-form-field class="fill-25">
-    <mat-label>{{ option.componentSettings?.placeholder }}</mat-label>
-    <input matInput [(ngModel)]="value">
-  </mat-form-field>
-</mat-list-item>
+<input nz-input [placeholder]="option.componentSettings?.placeholder" [(ngModel)]="value" />

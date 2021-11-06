@@ -3,6 +3,6 @@ import { SettingsAbstractComponent } from '../abstract.component';
 
 @Component({
   templateUrl: 'toggle.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsToggleComponent extends SettingsAbstractComponent<boolean> { }
+export class SettingsToggleComponent extends SettingsAbstractComponent<boolean> {}

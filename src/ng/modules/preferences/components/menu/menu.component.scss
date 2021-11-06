@@ -10,9 +10,10 @@ button.btn-trigger {
   cursor: pointer;
 }
 
-mat-icon.tool-icon {
+.tool-icon {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  font-size: 18px;
 }

@@ -1,6 +1,1 @@
-<mat-list-item>
-  <div class="fill-75">{{ option.label | translate }}</div>
-  <div class="text-right fill-25">
-  <mat-slide-toggle [(ngModel)]="value"></mat-slide-toggle>
-  </div>
-</mat-list-item>
+<nz-switch [ngModel]="value ?? false" (ngModelChange)="value = $event"></nz-switch>

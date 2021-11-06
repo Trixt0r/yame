@@ -1,12 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSliderModule } from '@angular/material/slider';
 import { NgxsModule, Store } from '@ngxs/store';
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { UtilsModule } from '../utils';
@@ -23,18 +17,32 @@ import { PreferencesTool } from './preferences.tool';
 import { AddSettingsOption, AddSettingsSection } from './states/actions/settings.action';
 import { PreferencesState } from './states/preferences.state';
 import { SettingsState } from './states/settings.state';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSliderModule } from 'ng-zorro-antd/slider';
 
 @NgModule({
   imports: [
     CommonModule,
     UtilsModule,
     FormsModule,
-    MatListModule,
-    MatSliderModule,
-    MatSelectModule,
-    MatIconModule,
-    MatCardModule,
-    MatMenuModule,
+    NzModalModule,
+    NzCardModule,
+    NzIconModule,
+    NzMenuModule,
+    NzListModule,
+    NzSelectModule,
+    NzCheckboxModule,
+    NzSwitchModule,
+    NzInputModule,
+    NzSliderModule,
     NgxsModule.forFeature([PreferencesState, SettingsState]),
   ],
   declarations: [
@@ -55,7 +63,7 @@ import { SettingsState } from './states/settings.state';
         store.dispatch(new RegisterTool(new PreferencesTool()));
         store.dispatch([
           new AddSettingsSection([
-            { id: 'general', label: 'preferences.settings.section.general', icon: 'web', position: 0 },
+            { id: 'general', label: 'preferences.settings.section.general', icon: 'home', position: 0 },
           ]),
           new AddSettingsOption([
             {

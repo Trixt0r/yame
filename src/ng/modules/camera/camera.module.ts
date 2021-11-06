@@ -43,7 +43,7 @@ import { CameraState } from './states/camera.state';
           new AddSettingsSection({
             id: 'camera',
             label: 'preferences.settings.section.camera',
-            icon: 'videocam',
+            icon: 'video-camera',
             position: 1,
           }),
           new AddSettingsOption([
@@ -54,12 +54,12 @@ import { CameraState } from './states/camera.state';
               component: SettingsSelectionComponent,
               componentSettings: {
                 options: [
-                  { value: 1, label: 'preferences.settings.option.camera.moveTypeOptions.mmb', icon: 'mouse' },
-                  { value: 2, label: 'preferences.settings.option.camera.moveTypeOptions.rmb', icon: 'mouse' },
+                  { value: 1, label: 'preferences.settings.option.camera.moveTypeOptions.mmb', icon: 'fa:mouse-solid' },
+                  { value: 2, label: 'preferences.settings.option.camera.moveTypeOptions.rmb', icon: 'fa:mouse-solid' },
                   {
                     value: -1,
                     label: 'preferences.settings.option.camera.moveTypeOptions.trackpad',
-                    icon: 'video_label',
+                    icon: 'fa:touchpad',
                   },
                 ],
               },

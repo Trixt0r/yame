@@ -1,5 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, ViewChild } from '@angular/core';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
 import { IToolComponent, Tool } from 'ng/modules/toolbar/tool';
 import { Observable, Subject } from 'rxjs';
@@ -13,7 +12,6 @@ import { PreferencesState } from '../../states/preferences.state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, OnDestroy {
-
   /**
    * @inheritdoc
    */
@@ -34,7 +32,7 @@ export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, 
    */
   protected destroy$ = new Subject();
 
-  constructor(protected cdr: ChangeDetectorRef, protected store: Store) { }
+  constructor(protected cdr: ChangeDetectorRef, protected store: Store) {}
 
   /**
    * Handles an option click.
@@ -43,14 +41,14 @@ export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, 
    */
   onClick(option: IPreferenceOption): void {
     if (!option.action) return console.warn('[Preferences] Option has no action', option);
-    this.store.dispatch(new option.action())
+    this.store.dispatch(new option.action());
   }
 
   /**
    * @inheritdoc
    */
   ngAfterViewInit(): void {
-    this.options$.pipe(takeUntil(this.destroy$)).subscribe(options => {
+    this.options$.pipe(takeUntil(this.destroy$)).subscribe((options) => {
       this.options = options;
       this.cdr.markForCheck();
     });

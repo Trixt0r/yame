@@ -1,44 +1,53 @@
-.sections {
-  float: left;
-  display: block;
-  box-sizing: border-box;
-  padding-bottom: 0;
-  width: 25%;
-  height: 100%;
-  overflow: hidden;
-  margin-right: 16px;
-  background: rgba(0, 0, 0, 0.25);
+yame-settings {
+  .sections {
+    float: left;
+    display: block;
+    box-sizing: border-box;
+    padding-bottom: 0;
+    width: 25%;
+    height: 100%;
+    overflow: hidden;
+    margin-right: 16px;
+    background: rgba(0, 0, 0, 0.25) !important;
 
-  .list-wrapper {
-    overflow: auto;
-    margin: 0 -16px;
-    padding-bottom: 8px;
-    mat-selection-list {
-      padding-top: 0;
-      mat-list-option {
-        mat-icon { transition: all ease-in 100ms; }
-        &.mat-list-single-selected-option {
-          mat-icon { color: #3388cc; }
+    .list-wrapper {
+      overflow: auto;
+      padding-bottom: 8px;
+      nz-list {
+        padding-top: 0;
+        nz-list-item {
+          nz-icon {
+            transition: all ease-in 100ms;
+          }
         }
       }
     }
-  }
-}
-.content {
-  float: right;
-  box-sizing: border-box;
-  width: calc(75% - 16px);
-  max-height: 100%;
-  overflow: auto;
-  padding: 16px;
-  padding-top: 0;
-  section {
-    mat-card {
+
+    .ant-card-body {
       padding: 0;
-      mat-list { padding: 0; }
     }
-    &:last-child {
-      min-height: calc(90vh - 60px); // margin bottom of card + height of header
+  }
+  .content {
+    float: right;
+    box-sizing: border-box;
+    width: calc(75% - 16px);
+    max-height: 100%;
+    overflow: auto;
+    padding: 16px;
+    padding-top: 0;
+    section {
+      &:last-child {
+        min-height: calc(80vh - 60px); // margin bottom of card + height of header
+      }
+      .ant-list-item-action li {
+        width: 100%;
+        overflow: hidden;
+        & > * {
+          display: inline-block;
+          width: 100%;
+          text-align: right;
+        }
+      }
     }
   }
 }

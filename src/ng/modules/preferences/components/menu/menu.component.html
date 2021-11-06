@@ -1,15 +1,3 @@
-
-<button class="btn-trigger"*ngIf="options.length === 1" (click)="onClick(options[0])">
-  <mat-icon class="tool-icon" mat-list-icon>{{ tool.icon }}</mat-icon>
+<button class="btn-trigger" *ngIf="options.length === 1" (click)="onClick(options[0])">
+  <i nz-icon [nzType]="tool.icon" class="tool-icon"></i>
 </button>
-
-<button class="btn-trigger" *ngIf="options.length > 1" [matMenuTriggerFor]="menu">
-  <mat-icon class="tool-icon" mat-list-icon>{{ tool.icon }}</mat-icon>
-</button>
-
-<mat-menu #menu="matMenu" [class]="'preferences-menu'" overlapTrigger>
-  <button *ngFor="let option of options" mat-menu-item (click)="onClick(option)">
-    <mat-icon *ngIf="option.icon">{{ option.icon }}</mat-icon>
-    <span>{{ option.label | translate }}</span>
-  </button>
-</mat-menu>

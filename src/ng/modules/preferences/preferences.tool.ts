@@ -2,7 +2,6 @@ import { Tool, ToolType } from '../toolbar/tool';
 import { PreferencesMenuComponent } from './components/menu/menu.component';
 
 export class PreferencesTool extends Tool {
-
   /**
    * @inheritdoc
    */
@@ -14,6 +13,6 @@ export class PreferencesTool extends Tool {
   readonly component = PreferencesMenuComponent;
 
   constructor() {
-    super('preferences', 'settings', 0);
+    super('preferences', 'setting', 0);
   }
 }
