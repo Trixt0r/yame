@@ -6,14 +6,13 @@ import { CameraToolComponent } from './components/tool/tool.component';
 
 @Injectable({ providedIn: 'root' })
 export class CameraTool extends Tool {
-
   /**
    * @inheritdoc
    */
   type = ToolType.CLICK;
 
   constructor(public store: Store) {
-    super('camera', 'videocam');
+    super('camera', 'video-camera');
   }
 
   /**

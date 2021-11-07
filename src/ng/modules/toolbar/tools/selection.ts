@@ -51,7 +51,7 @@ export class SelectionToolService extends Tool {
   handledByExternal = false;
 
   constructor(protected store: Store, protected scene: SceneService, actions: Actions) {
-    super('edit', 'edit', 0);
+    super('edit', 'select', 0);
     this.initFunctions();
 
     actions.pipe(ofActionSuccessful(Keydown)).subscribe((action: Keydown) => {

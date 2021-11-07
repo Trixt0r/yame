@@ -1,8 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy } from '@angular/core';
-import { MatSliderChange } from '@angular/material/slider';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  ViewEncapsulation,
+} from '@angular/core';
 import { Select, Store } from '@ngxs/store';
 import { IPoint } from 'common/math';
-import { SettingsState } from 'ng/modules/preferences/states/settings.state';
 import { SelectState } from 'ng/modules/scene';
 import { IToolComponent, Tool } from 'ng/modules/toolbar/tool';
 import { Observable, Subject } from 'rxjs';
@@ -12,9 +17,11 @@ import { UpdateCameraZoom, ZoomCameraOut, ZoomCameraToPosition } from '../../sta
 import { CameraState } from '../../states/camera.state';
 
 @Component({
+  selector: 'yame-camera-tool',
   templateUrl: 'tool.component.html',
   styleUrls: ['tool.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class CameraToolComponent implements IToolComponent, OnDestroy {
   /**
@@ -43,8 +50,12 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
   selectedEntities: string[] = [];
 
   /**
-   * the current ca
+   * The current camera zoom
    */
+  set value(value: number) {
+    this.update(value);
+  }
+
   get value(): number {
     return this.cameraZoom.value;
   }
@@ -54,17 +65,13 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
    */
   protected destroy$ = new Subject();
 
-  constructor(
-    protected store: Store,
-    protected cdr: ChangeDetectorRef,
-    protected zone: NgZone
-  ) {
+  constructor(protected store: Store, protected cdr: ChangeDetectorRef, protected zone: NgZone) {
     zone.runOutsideAngular(() => {
-      this.cameraZoom$.pipe(takeUntil(this.destroy$)).subscribe(zoom => {
+      this.cameraZoom$.pipe(takeUntil(this.destroy$)).subscribe((zoom) => {
         this.cameraZoom = zoom;
         cdr.markForCheck();
       });
-      this.selectedEntities$.pipe(takeUntil(this.destroy$)).subscribe(entities => {
+      this.selectedEntities$.pipe(takeUntil(this.destroy$)).subscribe((entities) => {
         this.selectedEntities = entities;
         cdr.markForCheck();
       });
@@ -81,7 +88,7 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
     this.store.dispatch([
       new UpdateCameraZoom({ step: Math.abs(this.cameraZoom.value - value) }),
       new ZoomCameraToPosition(value as number, this.getTargetPosition()),
-      new UpdateCameraZoom({ step })
+      new UpdateCameraZoom({ step }),
     ]);
   }
 
@@ -92,13 +99,6 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
    */
   formatLabel(value: number): string {
     return Math.round(value * 100) + '%';
-  }
-
-  /**
-   * Handles the update event.
-   */
-  onUpdate(event: MatSliderChange): void {
-    this.update(event.value as number);
   }
 
   /**

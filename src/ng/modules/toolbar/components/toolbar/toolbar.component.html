@@ -1,20 +1,19 @@
 <div class="content">
   <mat-nav-list dense>
-    <mat-list-item *ngFor="let tool of tools" (click)="activate(tool, $event)" [class.active]="(activeTool$ | async)?.id === tool.id">
-      <ng-template [yameTool]="tool">
-      </ng-template>
+    <mat-list-item
+      *ngFor="let tool of tools"
+      (click)="activate(tool, $event)"
+      [class.active]="(activeTool$ | async)?.id === tool.id"
+    >
+      <ng-template [yameTool]="tool"> </ng-template>
     </mat-list-item>
   </mat-nav-list>
   <mat-nav-list dense class="clickers">
     <mat-list-item *ngFor="let tool of clickers" (click)="activate(tool, $event)">
-      <ng-template [yameTool]="tool">
-      </ng-template>
+      <ng-template [yameTool]="tool"> </ng-template>
     </mat-list-item>
   </mat-nav-list>
 </div>
-<div mat-ripple
-      class="toggler"
-      (click)="toggle()"
-      [matRippleAnimation]="rippleAnimationConfig">
-  <mat-icon >{{ open ? 'arrow_drop_down' : 'arrow_drop_up' }}</mat-icon>
-</div>
+<button nz-button nzType="text" class="toggler" (click)="toggle()">
+  <i nz-icon [nzType]="open ? 'caret-left' : 'caret-right'"></i>
+</button>

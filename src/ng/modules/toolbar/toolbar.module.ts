@@ -11,18 +11,18 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { FormsModule } from '@angular/forms';
 import { AddShortcut } from 'ng/states/hotkey.state';
 import { HotkeyService } from 'ng/services/hotkey.service';
-import { MatRippleModule } from '@angular/material/core';
 import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @NgModule({
   imports: [
     CommonModule,
     OverlayModule,
     FormsModule,
-    MatRippleModule,
     MatListModule,
-    MatIconModule,
+    NzIconModule,
+    NzButtonModule,
     NgxsModule.forFeature([ToolbarState]),
   ],
   declarations: [ToolbarComponent, DefaultToolComponent, ToolDirective],

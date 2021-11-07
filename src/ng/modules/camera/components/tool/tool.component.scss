@@ -1,8 +1,9 @@
-mat-card {
-  padding: 0
-}
-
-::ng-deep .mat-slider-thumb-label {
-  width: 32px;
-  height: 32px;
+yame-camera-tool {
+  nz-slider {
+    min-width: 100px !important;
+    width: 15vw !important;
+    .ant-slider {
+      margin: 0 6px;
+    }
+  }
 }

@@ -12,7 +12,6 @@ import {
   ChangeDetectorRef,
   OnDestroy,
 } from '@angular/core';
-import { RippleAnimationConfig } from '@angular/material/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 import { Select, Store } from '@ngxs/store';
 import { ToolbarState } from '../../states/toolbar.state';
@@ -79,14 +78,6 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
   @Output('closed') closed = new EventEmitter();
 
   /**
-   * The ripple animation config for the toggle button.
-   */
-  rippleAnimationConfig: RippleAnimationConfig = {
-    enterDuration: 100,
-    exitDuration: 100,
-  };
-
-  /**
    * Selects the current active tool.
    */
   @Select(ToolbarState.activeTool) activeTool$!: Observable<Tool>;
@@ -107,7 +98,7 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
   clickers: Tool[] = [];
 
   get width(): number {
-    return this.open ? this.ref.nativeElement.clientWidth : 15;
+    return this.open ? this.ref.nativeElement.clientWidth : 18;
   }
 
   /**
@@ -117,8 +108,8 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
 
   constructor(public ref: ElementRef<HTMLElement>, public store: Store, cdr: ChangeDetectorRef) {
     this.tools$.pipe(takeUntil(this.destroy$)).subscribe((tools) => {
-      this.tools = tools.filter(it => it.type === ToolType.TOGGLE).sort((a, b) => a.position - b.position);
-      this.clickers = tools.filter(it => it.type === ToolType.CLICK).sort((a, b) => b.position - a.position);
+      this.tools = tools.filter((it) => it.type === ToolType.TOGGLE).sort((a, b) => a.position - b.position);
+      this.clickers = tools.filter((it) => it.type === ToolType.CLICK).sort((a, b) => b.position - a.position);
       cdr.markForCheck();
     });
   }

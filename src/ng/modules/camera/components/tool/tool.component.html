@@ -1,21 +1,22 @@
-<mat-card class="camera-tool content mat-elevation-z8 no-padding">
-  <button mat-icon-button (click)="onZoomCameraOut()">
-    <mat-icon>crop_free</mat-icon>
+<nz-card class="camera-tool content no-padding">
+  <button nz-button nzType="text" (click)="onZoomCameraOut()">
+    <i nz-icon nzType="expand"></i>
   </button>
-  <button mat-icon-button [disabled]="selectedEntities.length === 0" (click)="onZoomCameraToSelection()">
-    <mat-icon>center_focus_strong</mat-icon>
+  <button nz-button nzType="text" [disabled]="selectedEntities.length === 0" (click)="onZoomCameraToSelection()">
+    <i nz-icon nzType="compress"></i>
   </button>
-  <button mat-icon-button [disabled]="value <= cameraZoom.min" (click)="onZoomOut()">
-    <mat-icon>zoom_out</mat-icon>
+  <button nz-button nzType="text" [disabled]="value <= cameraZoom.min" (click)="onZoomOut()">
+    <i nz-icon nzType="zoom-out"></i>
   </button>
-  <mat-slider thumbLabel class="margin-bottom-16"
-              [value]="value"
-              [step]="cameraZoom.step"
-              [max]="cameraZoom.max"
-              [min]="cameraZoom.min"
-              [displayWith]="formatLabel"
-              (input)="onUpdate($event)"></mat-slider>
-  <button mat-icon-button [disabled]="value >= cameraZoom.max" (click)="onZoomIn()">
-    <mat-icon>zoom_in</mat-icon>
+  <nz-slider
+    class="inline-block"
+    [(ngModel)]="value"
+    [nzStep]="cameraZoom.step"
+    [nzMax]="cameraZoom.max"
+    [nzMin]="cameraZoom.min"
+    [nzTipFormatter]="formatLabel"
+  ></nz-slider>
+  <button nz-button nzType="text" [disabled]="value >= cameraZoom.max" (click)="onZoomIn()">
+    <i nz-icon nzType="zoom-in"></i>
   </button>
-</mat-card>
+</nz-card>

@@ -2,11 +2,11 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { CommonModule } from '@angular/common';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSliderModule } from '@angular/material/slider';
 import { NgxsModule, Store } from '@ngxs/store';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { SettingsSelectionComponent } from '../preferences/components/settings/types/selection/selection.component';
 import {
   AddSettingsOption,
@@ -23,10 +23,10 @@ import { CameraState } from './states/camera.state';
     CommonModule,
     OverlayModule,
     FormsModule,
-    MatSliderModule,
-    MatIconModule,
-    MatCardModule,
-    MatButtonModule,
+    NzCardModule,
+    NzSliderModule,
+    NzButtonModule,
+    NzIconModule,
     NgxsModule.forFeature([CameraState]),
   ],
   declarations: [CameraToolComponent],
