@@ -12,7 +12,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GroupTypeComponent } from './components/selection/types/group/group.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DndModule } from 'ng2-dnd';
-import { MatSelectModule } from '@angular/material/select';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { AddSceneComponentButtonComponent } from './components/selection/add/add.component';
 import {
@@ -22,8 +21,6 @@ import {
   createTransformationComponents,
   SceneEntityType,
 } from 'common/scene';
-import { MatDialogModule } from '@angular/material/dialog';
-import { EditComponentComponent, EditComponentDialogComponent } from './components/selection/edit/edit.component';
 import { SceneComponentService } from 'ng/modules/scene';
 import { AddEntityComponent } from './components/hierarchy/add/add.component';
 import { EntityTypeService } from './services/entity-type.service';
@@ -34,9 +31,6 @@ import { ColorTypeComponent } from './components/selection/types/color/color.com
 import { InputTypeComponent } from './components/selection/types/input/input.component';
 import { PointTypeComponent } from './components/selection/types/point/point.component';
 import { RangeTypeComponent } from './components/selection/types/range/range.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -55,11 +49,6 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
     BrowserAnimationsModule,
     ColorPickerModule,
     DndModule,
-    MatSelectModule,
-    MatDialogModule,
-    MatIconModule,
-    MatInputModule,
-    MatButtonModule,
     ScrollingModule,
     NzTreeModule,
     NzButtonModule,
@@ -83,8 +72,6 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
     GroupTypeComponent,
     AddSceneComponentButtonComponent,
     AddEntityComponent,
-    EditComponentComponent,
-    EditComponentDialogComponent,
   ],
   exports: [
     SidebarComponent,

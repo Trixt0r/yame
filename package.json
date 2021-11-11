@@ -65,7 +65,6 @@
     "@angular/compiler-cli": "^12.2.6",
     "@angular/core": "^12.2.6",
     "@angular/forms": "^12.2.6",
-    "@angular/material": "^12.1.0",
     "@angular/platform-browser": "^12.2.6",
     "@angular/platform-browser-dynamic": "^12.2.6",
     "@angular/router": "^12.2.6",

@@ -1,19 +1,12 @@
 <div class="content">
-  <mat-nav-list dense>
-    <mat-list-item
-      *ngFor="let tool of tools"
-      (click)="activate(tool, $event)"
-      [class.active]="(activeTool$ | async)?.id === tool.id"
-    >
+  <nz-radio-group [ngModel]="(activeTool$ | async)?.id" nzButtonStyle="solid">
+    <label nz-radio-button *ngFor="let tool of tools" [nzValue]="tool.id" (click)="activate(tool, $event)">
       <ng-template [yameTool]="tool"> </ng-template>
-    </mat-list-item>
-  </mat-nav-list>
-  <mat-nav-list dense class="clickers">
-    <mat-list-item *ngFor="let tool of clickers" (click)="activate(tool, $event)">
+    </label>
+  </nz-radio-group>
+  <div class="clickers">
+    <button nz-button nzType="text" class="fill full" *ngFor="let tool of clickers" (click)="activate(tool, $event)">
       <ng-template [yameTool]="tool"> </ng-template>
-    </mat-list-item>
-  </mat-nav-list>
+    </button>
+  </div>
 </div>
-<button nz-button nzType="text" class="toggler" (click)="toggle()">
-  <i nz-icon [nzType]="open ? 'caret-left' : 'caret-right'"></i>
-</button>

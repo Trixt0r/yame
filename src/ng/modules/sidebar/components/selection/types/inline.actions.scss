@@ -1,5 +1,6 @@
-mat-form-field, .slider-container {
-  &.editable, &.removable {
+.slider-container {
+  &.editable,
+  &.removable {
     width: calc(100% - 48px) !important;
   }
 
@@ -11,18 +12,3 @@ mat-form-field, .slider-container {
     width: calc(100% - 96px) !important;
   }
 }
-
-// :host {
-//   button.mat-icon-button {
-//     position: absolute;
-//     bottom: 10px;
-//   }
-
-//   button.edit {
-//     right: 40px;
-//   }
-
-//   button.remove {
-//     right: 0;
-//   }
-// }

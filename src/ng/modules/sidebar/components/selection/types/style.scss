@@ -1,5 +1,5 @@
 :host:not(.embedded) {
-  mat-form-field, .slider-container {
+  .slider-container {
     box-sizing: border-box;
     padding-left: 8px;
   }
@@ -14,7 +14,10 @@
   display: inline-block;
 }
 
-.wrapper, input, mat-form-field, label, .slider-container {
+.wrapper,
+input,
+label,
+.slider-container {
   margin: 0 4px;
   &.full {
     width: 100%;
@@ -28,16 +31,4 @@
   &.quarter {
     width: 25%;
   }
-
-  mat-slider {
-    width: 100%;
-  }
-}
-
-.mat-input-element {
-  padding: 0 4px !important;
-}
-
-.mat-icon-button mat-icon {
-  font-size: 1.125em;
 }

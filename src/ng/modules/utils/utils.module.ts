@@ -5,7 +5,6 @@ import { ColorPipe } from './pipes/color.pipe';
 import { PointInputComponent } from './components/point-input/point-input.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NestedDropdownComponent } from './components/nested-dropdown/nested-dropdown.component';
-import { MatIconModule } from '@angular/material/icon';
 import { NumberDirective } from './directives/number.directive';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -28,7 +27,6 @@ export function createTranslateLoader(http: HttpClient) {
   imports: [
     BrowserModule,
     FormsModule,
-    MatIconModule,
     NzDropDownModule,
     NzInputModule,
     NzFormModule,

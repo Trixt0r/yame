@@ -1,4 +1,13 @@
-import { Component, OnChanges, ElementRef, SimpleChanges, Input, ViewChild, AfterViewInit, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  OnChanges,
+  ElementRef,
+  SimpleChanges,
+  Input,
+  ViewChild,
+  AfterViewInit,
+  ViewContainerRef,
+} from '@angular/core';
 import { SceneService } from '../../services/scene.service';
 import { DragDropData } from 'ng2-dnd';
 import { SceneEntityData } from 'common/scene';
@@ -13,20 +22,15 @@ import { SceneAssetConverterService } from '../../services/converter.service';
   styleUrls: ['./scene.component.scss'],
 })
 export class SceneComponent implements OnChanges, AfterViewInit {
-
   /**
    * The view port width of the scene.
-   *
-   * @type {number}
    */
-  @Input('width') width!: number;
+  @Input() width!: number;
 
   /**
    * The view port height of the scene.
-   *
-   * @type {number}
    */
-  @Input('height') height!: number;
+  @Input() height!: number;
 
   /**
    * The wrapper element.
@@ -49,10 +53,12 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    */
   private dragLeft: boolean = true;
 
-  constructor(public readonly ref: ElementRef<HTMLElement>,
-              public readonly viewContainerRef: ViewContainerRef,
-              protected service: SceneService,
-              protected converter: SceneAssetConverterService) {
+  constructor(
+    public readonly ref: ElementRef<HTMLElement>,
+    public readonly viewContainerRef: ViewContainerRef,
+    protected service: SceneService,
+    protected converter: SceneAssetConverterService
+  ) {
     this.onResizeBind = this.onResize.bind(this);
   }
 
@@ -100,11 +106,14 @@ export class SceneComponent implements OnChanges, AfterViewInit {
   onDrop(event: DragDropData): void {
     const asset: Asset = event.dragData;
     const mouseEvent = event.mouseEvent;
-    const sub = this.service.addEntity(mouseEvent.offsetX, mouseEvent.offsetY, asset)
-      .pipe(catchError(error => {
-        console.log(error);
-        return of(null);
-      }))
+    const sub = this.service
+      .addEntity(mouseEvent.offsetX, mouseEvent.offsetY, asset)
+      .pipe(
+        catchError((error) => {
+          console.log(error);
+          return of(null);
+        })
+      )
       .subscribe(() => {
         this.onDragLeave(event);
         sub.unsubscribe();

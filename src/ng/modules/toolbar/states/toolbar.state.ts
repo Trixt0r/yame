@@ -73,7 +73,7 @@ export class ToolbarState {
         new ConnectionPositionPair(
           { originX: 'start', originY: 'center' },
           { overlayX: 'start', overlayY: 'center' },
-          64
+          48
         ),
       ]);
   }
