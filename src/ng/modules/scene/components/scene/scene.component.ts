@@ -128,7 +128,7 @@ export class SceneComponent implements OnChanges, AfterViewInit {
   async onDragEnter(event: DragDropData): Promise<SceneEntityData | void> {
     if (!this.dragLeft) {
       this.dragLeft = false;
-      return Promise.resolve();
+      return;
     }
     this.dragLeft = false;
     const asset: Asset = event.dragData;

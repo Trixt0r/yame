@@ -89,8 +89,6 @@ export class ToolbarState {
       tools.push(tool);
     });
     ctx.patchState({ tools });
-    if (!state.activeTool && tools.length > 0)
-      await ctx.dispatch(new ActivateTool(tools.filter((it) => it.type === ToolType.TOGGLE)[0])).toPromise();
   }
 
   @Action(ActivateTool)

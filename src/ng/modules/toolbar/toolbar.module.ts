@@ -14,7 +14,6 @@ import { HotkeyService } from 'ng/services/hotkey.service';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
-import { Tool } from './tool';
 
 @NgModule({
   imports: [

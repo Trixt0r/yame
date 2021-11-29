@@ -29,6 +29,8 @@ import { FormsModule } from '@angular/forms';
 import { SceneComponentsService } from '../sidebar/services/scene-components.service';
 import { createAssetComponent } from 'common/scene';
 import { SceneComponentService } from '../scene';
+import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
+import { AddToolService } from './tools/add.tool';
 
 @NgModule({
   imports: [
@@ -66,13 +68,14 @@ import { SceneComponentService } from '../scene';
     provideAsDecorated(ImageAssetPreviewComponent, ImageAssetDetailsComponent),
     {
       provide: APP_INITIALIZER,
-      useFactory: (store: Store) => () => {
+      useFactory: (store: Store, addTool: AddToolService) => () => {
         store.dispatch([
           new RegisterAssetIcon('file-image', ['png', 'gif', 'jpg', 'jpeg', 'svg']),
           new RegisterAssetTypeLabel('asset.type.image', ['png', 'gif', 'jpg', 'jpeg', 'svg']),
+          new RegisterTool(addTool),
         ]);
       },
-      deps: [Store],
+      deps: [Store, AddToolService],
       multi: true,
     },
   ],

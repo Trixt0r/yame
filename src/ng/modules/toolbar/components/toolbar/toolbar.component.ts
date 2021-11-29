@@ -12,6 +12,7 @@ import {
   ChangeDetectorRef,
   OnDestroy,
   ViewEncapsulation,
+  AfterViewInit,
 } from '@angular/core';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 import { Select, Store } from '@ngxs/store';
@@ -35,7 +36,7 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class ToolbarComponent implements OnChanges, OnDestroy {
+export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
   /**
    * The height of the toolbar.
    */
@@ -87,6 +88,15 @@ export class ToolbarComponent implements OnChanges, OnDestroy {
    */
   activate(tool: Tool, event: Event): void {
     this.store.dispatch(new ActivateTool(tool, event));
+  }
+
+  /**
+   * @inheritdoc
+   */
+  ngAfterViewInit(): void {
+    const tools = this.tools.filter((it) => it.type === ToolType.TOGGLE);
+    if (tools.length === 0) return;
+    this.store.dispatch(new ActivateTool(tools[0])).toPromise();
   }
 
   /**
