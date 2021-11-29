@@ -59,7 +59,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   protected onMouseMoveBind: (event: MouseEvent) => void;
   protected onMouseUpBind: (event: MouseEvent) => void;
 
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   /**
    * Creates an instance of ResizableComponent.
@@ -136,8 +136,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
       let diff = 0;
       if (this.isVer) diff = event.clientY - this.position.y;
       else diff = event.clientX - this.position.x;
-      if (this.property === 'bottom')
-        diff *= -1;
+      if (this.property === 'bottom') diff *= -1;
       // Add the difference and clamp
       const newVal = this.clampValue(this.clickedVal + diff);
       // Skip if nothing changed

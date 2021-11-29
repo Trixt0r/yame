@@ -22,13 +22,11 @@ import { DefaultAssetPreviewComponent } from '../components/previews/default/def
  * An interface for defining a component which is able to render a preview of a certain asset.
  */
 export interface IAssetPreviewComponent<T = unknown> {
-
   /**
    * The asset instance.
    */
   asset: Asset<T>;
 }
-
 
 /**
  * Directive for injecting a preview component for a certain asset.
@@ -37,7 +35,6 @@ export interface IAssetPreviewComponent<T = unknown> {
   selector: '[yameAssetPreview]',
 })
 export class AssetPreviewDirective implements OnChanges, OnDestroy {
-
   /**
    * The asset to render.
    */
@@ -51,12 +48,12 @@ export class AssetPreviewDirective implements OnChanges, OnDestroy {
   /**
    * A map of all preview components.
    */
-  previews: { [key: string]: Type<IAssetPreviewComponent> } = { };
+  previews: { [key: string]: Type<IAssetPreviewComponent> } = {};
 
   /**
    * Triggered when this directive gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(
     protected viewContainerRef: ViewContainerRef,
@@ -64,7 +61,7 @@ export class AssetPreviewDirective implements OnChanges, OnDestroy {
     protected zone: NgZone
   ) {
     this.zone.runOutsideAngular(() => {
-      this.previews$.pipe(takeUntil(this.destroy$)).subscribe(previews => this.previews = previews);
+      this.previews$.pipe(takeUntil(this.destroy$)).subscribe((previews) => (this.previews = previews));
     });
   }
 

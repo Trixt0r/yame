@@ -40,7 +40,7 @@ export class SettingsComponent implements AfterViewInit, OnDestroy {
   scrollingIntoSection = false;
   scrolledElement?: ElementRef<HTMLElement>;
 
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(protected store: Store, protected zone: NgZone, protected cdr: ChangeDetectorRef) {
     this.zone.runOutsideAngular(() => {

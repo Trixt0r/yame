@@ -14,19 +14,11 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2017",
-    "module": "es2020",
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "module": "esnext",
+    "lib": ["es2018", "dom"],
     "paths": {
       "common/*": ["./common/*"]
     }
   },
-  "exclude": [
-    "app-builds",
-    "dist",
-    "out",
-    "node_modules"
-  ]
+  "exclude": ["app-builds", "dist", "out", "node_modules"]
 }

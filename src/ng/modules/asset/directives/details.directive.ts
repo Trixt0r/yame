@@ -21,13 +21,11 @@ import { takeUntil } from 'rxjs/operators';
  * An interface for defining a component which is able to render a preview of a certain asset.
  */
 export interface IAssetDetailsComponent<T = unknown> {
-
   /**
    * The asset instance.
    */
   asset: Asset<T>;
 }
-
 
 /**
  * Directive for displaying further details for a certain asset.
@@ -36,7 +34,6 @@ export interface IAssetDetailsComponent<T = unknown> {
   selector: '[yameAssetDetails]',
 })
 export class AssetDetailsDirective implements OnChanges, OnDestroy {
-
   /**
    * The asset to render.
    */
@@ -50,12 +47,12 @@ export class AssetDetailsDirective implements OnChanges, OnDestroy {
   /**
    * A map of all details components.
    */
-  details: { [key: string]: Type<IAssetDetailsComponent> } = { };
+  details: { [key: string]: Type<IAssetDetailsComponent> } = {};
 
   /**
    * Triggered when this directive gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(
     protected viewContainerRef: ViewContainerRef,
@@ -63,7 +60,7 @@ export class AssetDetailsDirective implements OnChanges, OnDestroy {
     protected zone: NgZone
   ) {
     this.zone.runOutsideAngular(() => {
-      this.details$.pipe(takeUntil(this.destroy$)).subscribe(details => this.details = details);
+      this.details$.pipe(takeUntil(this.destroy$)).subscribe((details) => (this.details = details));
     });
   }
 

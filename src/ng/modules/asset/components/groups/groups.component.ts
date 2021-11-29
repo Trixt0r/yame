@@ -92,7 +92,7 @@ export class AssetGroupsComponent implements OnDestroy {
   /**
    * Subject which gets triggered as soon as this component gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(protected store: Store, protected zone: NgZone, protected cdr: ChangeDetectorRef) {
     zone.runOutsideAngular(() => {

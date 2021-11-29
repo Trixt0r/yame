@@ -70,7 +70,7 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
   /**
    * Triggered as soon as this component gets removed
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(public ref: ElementRef<HTMLElement>, public store: Store, cdr: ChangeDetectorRef) {
     this.tools$.pipe(takeUntil(this.destroy$)).subscribe((tools) => {

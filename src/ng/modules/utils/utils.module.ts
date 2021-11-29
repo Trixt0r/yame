@@ -64,6 +64,7 @@ export function createTranslateLoader(http: HttpClient) {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, translate: TranslateService) => () => {
         const lng = translate.getBrowserLang() ?? navigator.language;
+        console.log('here', lng);
         store.dispatch(new InitDefaultSettingsValue('language', lng));
       },
       deps: [Store, TranslateService],
@@ -85,9 +86,14 @@ export class UtilsModule {
    * @param lng
    */
   async setLang(lng: string) {
+    if (!lng) return;
     await this.translate.use(lng).toPromise();
     try {
-      await import(`@angular/common/locales/global/${lng}`);
+      await import(
+        /* webpackInclude: /(de|en|es|fr|it|nl|no|pl|pt-BR|pt|fi|sv|ko|ru|zh|zh-Hans|zh-Hant|ja)\.js/ */
+        /* webpackMode: "lazy-once" */
+        `/node_modules/@angular/common/locales/global/${lng}`
+      );
     } catch (error) {
       console.warn('[Utils] Could not load navigator language', error);
     }

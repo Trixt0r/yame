@@ -161,7 +161,7 @@ export class SelectionToolService extends Tool {
   /**
    * Finishes the selection.
    */
-  finish(event?: MouseEvent): void {
+  finish(event: MouseEvent): void {
     this.down = false;
     this.end$.next(event);
   }

@@ -90,7 +90,7 @@ export class AssetItemsComponent implements OnChanges, OnDestroy {
   /**
    * Subject which gets triggered as soon as this component gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(
     protected store: Store,

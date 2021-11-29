@@ -38,7 +38,7 @@ export class PixiSelectionContainerService {
   readonly handleEnd$ = new Subject<unknown[]>();
   readonly selected$ = new Subject<SceneEntity[]>();
   readonly unselected$ = new Subject<SceneEntity[]>();
-  readonly update$ = new Subject();
+  readonly update$ = new Subject<void>();
   readonly updateDispatched$ = new Subject<UpdateEntity>();
   readonly components = new SceneComponentCollection();
   readonly updateEntityAction = new UpdateEntity([], 'Container update');

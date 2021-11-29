@@ -120,7 +120,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
   /**
    * Emitted as soon as this component gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(
     protected scene: SceneService,

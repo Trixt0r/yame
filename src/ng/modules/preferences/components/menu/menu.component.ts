@@ -30,7 +30,7 @@ export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, 
   /**
    * Triggered as soon as this component gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(protected cdr: ChangeDetectorRef, protected store: Store) {}
 

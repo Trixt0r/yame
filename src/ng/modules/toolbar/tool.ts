@@ -24,7 +24,7 @@ export enum ToolType {
    * A clickable tool does not affect the currently active tool,
    * i.e. it activates itself, without deactivating the current active tool.
    */
-  CLICK = 1
+  CLICK = 1,
 }
 
 /**
@@ -32,7 +32,6 @@ export enum ToolType {
  * It can be either activated or deactivated.
  */
 export class Tool {
-
   /**
    * Internal reference count.
    */
@@ -46,12 +45,12 @@ export class Tool {
   /**
    * Triggered when this tool got activated.
    */
-  readonly activated$ = new Subject();
+  readonly activated$ = new Subject<void>();
 
   /**
    * Triggered when this tool got deactivated.
    */
-  readonly deactivated$ = new Subject();
+  readonly deactivated$ = new Subject<void>();
 
   /**
    * The component for this tool.
@@ -134,7 +133,7 @@ export class Tool {
    *
    * @param event The triggered DOM event, if any.
    */
-  protected async onActivate(event?: Event): Promise<any> { }
+  protected async onActivate(event?: Event): Promise<any> {}
 
   /**
    * Handler called during deactivation.
@@ -142,6 +141,5 @@ export class Tool {
    *
    * @param event The triggered DOM event, if any.
    */
-  protected async onDeactivate(event?: Event): Promise<any> { }
-
+  protected async onDeactivate(event?: Event): Promise<any> {}
 }

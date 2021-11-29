@@ -192,7 +192,7 @@ export class SettingsState implements NgxsOnInit {
   @Action(InitDefaultSettingsValue)
   initDefaultValue(ctx: StateContext<ISettingsState>, action: InitDefaultSettingsValue<unknown>) {
     const state = ctx.getState();
-    const values = Object.assign({}, state.values);
+    const values = { ...state.values };
     if (values[action.id] === void 0) {
       values[action.id] = action.value;
       ctx.setState({ ui: state.ui, values });

@@ -63,7 +63,7 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
   /**
    * Triggered when this component gets destroyed.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(protected store: Store, protected cdr: ChangeDetectorRef, protected zone: NgZone) {
     zone.runOutsideAngular(() => {

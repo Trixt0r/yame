@@ -20,7 +20,6 @@ export interface SelectionRendererConfig {
 }
 
 class SelectionRendererSystem extends System {
-
   constructor(private service: PixiSelectionRendererService, priority?: number) {
     super(priority);
   }
@@ -31,7 +30,6 @@ class SelectionRendererSystem extends System {
   process(options?: any): void {
     this.service.update(options && options.textureLoaded);
   }
-
 }
 
 /**
@@ -63,8 +61,8 @@ export class PixiSelectionRendererService {
 
   readonly graphics: Graphics = new Graphics();
 
-  readonly attached$ = new Subject();
-  readonly detached$ = new Subject();
+  readonly attached$ = new Subject<void>();
+  readonly detached$ = new Subject<void>();
   readonly update$ = new Subject<Rectangle>();
 
   readonly system: SelectionRendererSystem;
@@ -89,8 +87,7 @@ export class PixiSelectionRendererService {
       this.stage = this.service.stage;
       container.selected$.subscribe(() => this.attach());
       container.unselected$.subscribe(() => {
-        if (container.entities.length === 0)
-          this.detach();
+        if (container.entities.length === 0) this.detach();
       });
       container.update$.subscribe(() => {
         this.lastSizeUpdate.set(0, 0);
@@ -119,8 +116,14 @@ export class PixiSelectionRendererService {
    */
   update(force = false): void {
     if (!this.attached) return;
-    if (this.service.scene.position.x === this.lastPositionUpdate.x && this.service.scene.position.y === this.lastPositionUpdate.y &&
-        this.service.scene.scale.x === this.lastSizeUpdate.x && this.service.scene.scale.y === this.lastSizeUpdate.y && !force) return;
+    if (
+      this.service.scene.position.x === this.lastPositionUpdate.x &&
+      this.service.scene.position.y === this.lastPositionUpdate.y &&
+      this.service.scene.scale.x === this.lastSizeUpdate.x &&
+      this.service.scene.scale.y === this.lastSizeUpdate.y &&
+      !force
+    )
+      return;
     this.graphics.clear();
 
     const lineWidth = this.config?.line?.width;
@@ -133,7 +136,7 @@ export class PixiSelectionRendererService {
 
     if (this.container.entities.length > 1) {
       this.graphics.lineStyle(lineWidth, lineColor, (lineAlpha || 1) * 0.25);
-      this.container.entities.forEach(entity => this.drawBounds(entity));
+      this.container.entities.forEach((entity) => this.drawBounds(entity));
       this.graphics.drawShape(this.container.container.getBounds());
     }
 

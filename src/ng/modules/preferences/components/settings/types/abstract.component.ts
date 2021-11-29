@@ -38,12 +38,12 @@ export class SettingsAbstractComponent<T = unknown> implements ISettingsOptionCo
   /**
    * Stream for subscribing to future change detections.
    */
-  protected beforeChangeDetection$ = new Subject();
+  protected beforeChangeDetection$ = new Subject<void>();
 
   /**
    * Stream for listening to component destroy events.
    */
-  protected destroy$ = new Subject();
+  protected destroy$ = new Subject<void>();
 
   constructor(protected cdr: ChangeDetectorRef, protected store: Store) {}
 
