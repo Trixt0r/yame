@@ -7,8 +7,7 @@ import { ISceneRendererComponent, YAME_RENDERER_COMPONENT } from '../services/sc
 export class SceneRendererComponentDirective implements AfterViewInit {
   constructor(
     @Inject(YAME_RENDERER_COMPONENT) protected readonly rendererComponent: Type<ISceneRendererComponent<HTMLElement>>,
-    protected viewContainerRef: ViewContainerRef,
-    protected componentFactoryResolver: ComponentFactoryResolver
+    protected viewContainerRef: ViewContainerRef
   ) {}
 
   /**
@@ -17,9 +16,8 @@ export class SceneRendererComponentDirective implements AfterViewInit {
   ngAfterViewInit(): void {
     const compType = this.rendererComponent;
     if (!compType) return;
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
     this.viewContainerRef.clear();
-    const componentRef = this.viewContainerRef.createComponent(componentFactory);
+    const componentRef = this.viewContainerRef.createComponent(compType);
     componentRef.changeDetectorRef.detectChanges();
     componentRef.changeDetectorRef.detach();
   }

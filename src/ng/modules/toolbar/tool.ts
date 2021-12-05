@@ -58,6 +58,11 @@ export class Tool {
   readonly component: Type<IToolComponent> | null = null;
 
   /**
+   * The settings component for this tool.
+   */
+  readonly settingsComponent: Type<IToolComponent> | null = null;
+
+  /**
    * The type of this tool.
    */
   readonly type: ToolType = ToolType.TOGGLE;

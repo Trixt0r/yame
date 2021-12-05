@@ -64,7 +64,6 @@ export function createTranslateLoader(http: HttpClient) {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, translate: TranslateService) => () => {
         const lng = translate.getBrowserLang() ?? navigator.language;
-        console.log('here', lng);
         store.dispatch(new InitDefaultSettingsValue('language', lng));
       },
       deps: [Store, TranslateService],

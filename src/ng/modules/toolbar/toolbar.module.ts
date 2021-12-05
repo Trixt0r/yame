@@ -14,6 +14,9 @@ import { HotkeyService } from 'ng/services/hotkey.service';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
+import { UtilsModule } from '../utils';
 
 @NgModule({
   imports: [
@@ -23,6 +26,9 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
     NzIconModule,
     NzButtonModule,
     NzRadioModule,
+    NzCardModule,
+    NzLayoutModule,
+    UtilsModule,
     NgxsModule.forFeature([ToolbarState]),
   ],
   declarations: [ToolbarComponent, DefaultToolComponent, ToolDirective],

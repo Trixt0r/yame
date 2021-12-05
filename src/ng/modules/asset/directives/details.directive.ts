@@ -1,7 +1,6 @@
 import { Asset } from 'common/asset';
 
 import {
-  ComponentFactoryResolver,
   ComponentRef,
   Directive,
   Input,
@@ -54,11 +53,7 @@ export class AssetDetailsDirective implements OnChanges, OnDestroy {
    */
   protected destroy$ = new Subject<void>();
 
-  constructor(
-    protected viewContainerRef: ViewContainerRef,
-    protected componentFactoryResolver: ComponentFactoryResolver,
-    protected zone: NgZone
-  ) {
+  constructor(protected viewContainerRef: ViewContainerRef, protected zone: NgZone) {
     this.zone.runOutsideAngular(() => {
       this.details$.pipe(takeUntil(this.destroy$)).subscribe((details) => (this.details = details));
     });
@@ -74,8 +69,7 @@ export class AssetDetailsDirective implements OnChanges, OnDestroy {
     const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
     if (!compType) return null;
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
-    const componentRef = viewContainerRef.createComponent(componentFactory);
+    const componentRef = viewContainerRef.createComponent(compType);
     componentRef.instance.asset = this.asset;
     return componentRef;
   }

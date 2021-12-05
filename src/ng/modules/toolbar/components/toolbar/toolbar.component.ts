@@ -5,21 +5,17 @@ import {
   OnChanges,
   SimpleChanges,
   HostBinding,
-  HostListener,
-  Output,
-  EventEmitter,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   OnDestroy,
   ViewEncapsulation,
   AfterViewInit,
 } from '@angular/core';
-import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 import { Select, Store } from '@ngxs/store';
-import { ToolbarState } from '../../states/toolbar.state';
+import { IToolbarUISettings, ToolbarState } from '../../states/toolbar.state';
 import { Observable, Subject } from 'rxjs';
 import { Tool, ToolType } from '../../tool';
-import { ActivateTool } from '../../states/actions/toolbar.action';
+import { ActivateTool, UpdateToolbarUI } from '../../states/actions/toolbar.action';
 import { takeUntil } from 'rxjs/operators';
 
 /**
@@ -40,7 +36,7 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
   /**
    * The height of the toolbar.
    */
-  @Input('height') height: number = 0;
+  @Input() height = 0;
 
   /**
    * Selects the current active tool.
@@ -51,6 +47,16 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
    * Selects the current tools.
    */
   @Select(ToolbarState.tools) tools$!: Observable<Tool[]>;
+
+  /**
+   * Selects the current toolbar width.
+   */
+  @Select(ToolbarState.ui) ui$!: Observable<IToolbarUISettings>;
+
+  /**
+   * The currently activated tool.
+   */
+  activeTool?: Tool;
 
   /**
    * A list of current tools which can be toggled.
@@ -65,17 +71,42 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
   /**
    * The current toolbar width.
    */
-  width = 48;
+  get width(): number {
+    return this._width;
+  }
+
+  @Input() set width(width: number) {
+    this.store.dispatch(new UpdateToolbarUI({ width }));
+  }
+
+  get settingsCollapsed(): boolean {
+    return this._width <= this.minWidth;
+  }
+
+  readonly minWidth = 48;
+
+  readonly threshold = 150;
 
   /**
    * Triggered as soon as this component gets removed
    */
   protected destroy$ = new Subject<void>();
 
-  constructor(public ref: ElementRef<HTMLElement>, public store: Store, cdr: ChangeDetectorRef) {
+  @HostBinding('style.width.px')
+  private _width = 0;
+
+  constructor(public ref: ElementRef<HTMLElement>, public store: Store, private cdr: ChangeDetectorRef) {
     this.tools$.pipe(takeUntil(this.destroy$)).subscribe((tools) => {
       this.tools = tools.filter((it) => it.type === ToolType.TOGGLE).sort((a, b) => a.position - b.position);
       this.clickers = tools.filter((it) => it.type === ToolType.CLICK).sort((a, b) => b.position - a.position);
+      cdr.markForCheck();
+    });
+    this.activeTool$.pipe(takeUntil(this.destroy$)).subscribe((tool) => {
+      this.activeTool = tool;
+      this.cdr.markForCheck();
+    });
+    this.ui$.pipe(takeUntil(this.destroy$)).subscribe((ui) => {
+      this._width = ui.width;
       cdr.markForCheck();
     });
   }
@@ -87,6 +118,9 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
    * @param event The triggered DOM event.
    */
   activate(tool: Tool, event: Event): void {
+    if (this.activeTool?.id === tool.id) {
+      this.width = this.settingsCollapsed ? this.minWidth + this.threshold : this.minWidth;
+    }
     this.store.dispatch(new ActivateTool(tool, event));
   }
 

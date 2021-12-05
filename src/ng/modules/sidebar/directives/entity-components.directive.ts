@@ -2,7 +2,6 @@ import {
   Directive,
   Input,
   ViewContainerRef,
-  ComponentFactoryResolver,
   OnChanges,
   ComponentRef,
   EventEmitter,
@@ -10,9 +9,9 @@ import {
   SimpleChanges,
   AfterViewInit,
   OnInit,
-  ComponentFactory,
   SimpleChange,
   ViewRef,
+  Type,
 } from '@angular/core';
 import { SceneComponentsService } from '../services/scene-components.service';
 import { AbstractTypeComponent, AbstractInputEvent, AbstractRemoveEvent } from '../components/selection/types/abstract';
@@ -106,11 +105,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    */
   protected cachePrefix: string;
 
-  constructor(
-    private service: SceneComponentsService,
-    private viewContainerRef: ViewContainerRef,
-    private componentFactoryResolver: ComponentFactoryResolver
-  ) {
+  constructor(private service: SceneComponentsService, private viewContainerRef: ViewContainerRef) {
     this.cachePrefix = v4();
   }
 
@@ -121,11 +116,11 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
    * @param value Optional component.
    */
   protected createComponent(
-    componentFactory: ComponentFactory<AbstractTypeComponent>,
+    compType: Type<AbstractTypeComponent>,
     value?: SceneComponent,
     index?: number
   ): SceneComponentRef {
-    const componentRef = this.viewContainerRef.createComponent(componentFactory, index);
+    const componentRef = this.viewContainerRef.createComponent(compType, { index });
     if (value) componentRef.instance.component = value;
     return componentRef;
   }
@@ -155,9 +150,8 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
       const pool = EntityComponentsDirective.componentRefPool[type];
       const compType = this.service.getTypeComponent(type);
       if (!compType) return;
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(compType);
       const count = EntityComponentsDirective.poolSizePerType - pool.length;
-      for (let i = 0; i < count; i++) pool.push(this.createComponent(componentFactory, <any>{}));
+      for (let i = 0; i < count; i++) pool.push(this.createComponent(compType, <any>{}));
     });
   }
 
@@ -226,11 +220,7 @@ export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewIn
         } else {
           componentRef = this.obtainComponentRef(identifier) as SceneComponentRef;
           if (!componentRef) {
-            componentRef = this.createComponent(
-              this.componentFactoryResolver.resolveComponentFactory(compType),
-              void 0,
-              insertCnt++
-            );
+            componentRef = this.createComponent(compType, void 0, insertCnt++);
           } else {
             componentRef.instance.onDetach();
             this.viewContainerRef.insert(componentRef.hostView, insertCnt++);

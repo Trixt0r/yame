@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { SceneAssetConverterService, SceneService } from 'ng/modules/scene';
 import { Tool } from 'ng/modules/toolbar/tool';
-import { SelectionToolService } from 'ng/modules/toolbar/tools/selection';
 import { Observable, of } from 'rxjs';
 import { catchError, take, takeUntil } from 'rxjs/operators';
+import { AssetTreeComponent } from '../components';
 import { AssetState } from '../states/asset.state';
 
 @Injectable({ providedIn: 'root' })
 export class AddToolService extends Tool {
   private mouseLeft = true;
+
+  settingsComponent = AssetTreeComponent as any;
 
   @Select(AssetState.selectedAsset)
   private selectAsset$!: Observable<Asset>;
@@ -70,8 +72,8 @@ export class AddToolService extends Tool {
   async onActivate(): Promise<void> {
     delete this.selectedAsset;
     this.selectAsset$.pipe(takeUntil(this.deactivated$)).subscribe((asset) => {
-      console.log('asset', asset);
       this.selectedAsset = asset;
+      console.log(this.selectedAsset);
     });
 
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mouseenter', this.onMouseenter);

@@ -1,3 +1,2 @@
-<yame-toolbar [height]="sceneHeight"></yame-toolbar>
-<yame-scene [height]="sceneHeight" [width]="width - toolbar?.width" [style.left]="toolbar?.width + 'px'"></yame-scene>
-<yame-asset-panel property="top" (sizeUpdated)="onAssetSizeUpdated($event)" [minVal]="150"></yame-asset-panel>
+<yame-toolbar #toolbar></yame-toolbar>
+<yame-scene [width]="width - toolbar?.width" [style.left]="toolbar?.width + 'px'"></yame-scene>

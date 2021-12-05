@@ -1,14 +1,13 @@
-import { ComponentFactoryResolver, Directive, Input, OnChanges, SimpleChanges, Type, ViewContainerRef } from '@angular/core';
+import { Directive, Input, OnChanges, SimpleChanges, ViewContainerRef } from '@angular/core';
 import { ISettingsOption } from '../interfaces/settings-option.interface';
 
 @Directive({
-  selector: '[yameSettingOption]'
+  selector: '[yameSettingOption]',
 })
 export class SettingsOptionDirective implements OnChanges {
-
   @Input('yameSettingOption') settingsOption?: ISettingsOption;
 
-  constructor(protected vcr: ViewContainerRef, protected cfr: ComponentFactoryResolver) { }
+  constructor(protected vcr: ViewContainerRef) {}
 
   /**
    * @inheritdoc
@@ -17,10 +16,8 @@ export class SettingsOptionDirective implements OnChanges {
     if (!changes.settingsOption) return;
     this.vcr.clear();
     if (!this.settingsOption) return;
-    const factory = this.cfr.resolveComponentFactory(this.settingsOption.component);
-    const comp = this.vcr.createComponent(factory);
+    const comp = this.vcr.createComponent(this.settingsOption.component);
     comp.instance.option = this.settingsOption;
     comp.changeDetectorRef.markForCheck();
   }
-
 }

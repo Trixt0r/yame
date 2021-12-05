@@ -7,10 +7,30 @@ import {
 } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
-import { Action, Selector, State, StateContext } from '@ngxs/store';
+import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
 import { ToolbarException } from '../exception';
 import { Tool, ToolType } from '../tool';
-import { ActivateTool, DeactivateTool, RegisterTool, ShowToolbarOptions } from './actions/toolbar.action';
+import {
+  ActivateTool,
+  DeactivateTool,
+  RegisterTool,
+  ShowToolbarOptions,
+  UpdateToolbarUI,
+} from './actions/toolbar.action';
+
+export interface IToolbarUISettings {
+  /**
+   * The overall width of the toolbar.
+   */
+  width: number;
+
+  /**
+   * Whether the current tool's settings are collapsed or not.
+   */
+  collapsed: boolean;
+}
+
+const DEFAULT_TOOLBAR_WIDTH = 200;
 
 export interface IToolbarState {
   /**
@@ -22,6 +42,11 @@ export interface IToolbarState {
    * The currently activated tool.
    */
   activeTool: Tool | null;
+
+  /**
+   * GUI specific state.
+   */
+  ui: IToolbarUISettings;
 }
 
 @State<IToolbarState>({
@@ -29,6 +54,10 @@ export interface IToolbarState {
   defaults: {
     tools: [],
     activeTool: null,
+    ui: {
+      width: DEFAULT_TOOLBAR_WIDTH,
+      collapsed: true,
+    },
   },
 })
 @Injectable()
@@ -37,7 +66,7 @@ export class ToolbarState {
    * Returns the currently registered tools.
    */
   @Selector()
-  static tools(state: IToolbarState) {
+  static tools(state: IToolbarState): Tool[] {
     return state.tools;
   }
 
@@ -45,8 +74,13 @@ export class ToolbarState {
    * Returns the currently activated tool.
    */
   @Selector()
-  static activeTool(state: IToolbarState) {
+  static activeTool(state: IToolbarState): Tool | null {
     return state.activeTool;
+  }
+
+  @Selector()
+  static ui(state: IToolbarState): IToolbarUISettings {
+    return state.ui;
   }
 
   /**
@@ -54,7 +88,7 @@ export class ToolbarState {
    */
   overlayRef: OverlayRef;
 
-  constructor(public overlay: Overlay) {
+  constructor(protected overlay: Overlay, protected store: Store) {
     this.overlayRef = this.overlay.create({ hasBackdrop: true, backdropClass: '' });
     this.overlayRef.backdropClick().subscribe(() => {
       if (this.overlayRef.hasAttached()) this.overlayRef.detach();
@@ -73,13 +107,13 @@ export class ToolbarState {
         new ConnectionPositionPair(
           { originX: 'start', originY: 'center' },
           { overlayX: 'start', overlayY: 'center' },
-          48
+          this.store.snapshot().toolbar.ui.width
         ),
       ]);
   }
 
   @Action(RegisterTool)
-  async register(ctx: StateContext<IToolbarState>, action: RegisterTool) {
+  async register(ctx: StateContext<IToolbarState>, action: RegisterTool): Promise<void> {
     const state = ctx.getState();
     const tools = state.tools.slice();
     const toRegister = Array.isArray(action.tool) ? action.tool : [action.tool];
@@ -92,7 +126,7 @@ export class ToolbarState {
   }
 
   @Action(ActivateTool)
-  async activate(ctx: StateContext<IToolbarState>, action: ActivateTool) {
+  async activate(ctx: StateContext<IToolbarState>, action: ActivateTool): Promise<void> {
     const state = ctx.getState();
     const tools = state.tools;
     const id = typeof action.tool === 'string' ? action.tool : action.tool.id;
@@ -107,7 +141,7 @@ export class ToolbarState {
   }
 
   @Action(DeactivateTool)
-  async deactivate(ctx: StateContext<IToolbarState>, action: DeactivateTool) {
+  async deactivate(ctx: StateContext<IToolbarState>, action: DeactivateTool): Promise<void> {
     const state = ctx.getState();
     const activeTool = state.activeTool;
     if (!activeTool) return console.warn('[Toolbar] No tool active');
@@ -116,10 +150,16 @@ export class ToolbarState {
   }
 
   @Action(ShowToolbarOptions)
-  showOverlay(ctx: StateContext<IToolbarState>, action: ShowToolbarOptions) {
+  showOverlay(_ctx: StateContext<IToolbarState>, action: ShowToolbarOptions): void {
     if (action.origin) this.overlayRef.updatePositionStrategy(this.getPositionStrategy(action.origin));
     const portal = new ComponentPortal(action.component);
     if (this.overlayRef.hasAttached()) this.overlayRef.detach();
     this.overlayRef.attach(portal);
+  }
+
+  @Action(UpdateToolbarUI)
+  updateUI(ctx: StateContext<IToolbarState>, action: UpdateToolbarUI): void {
+    const ui = ctx.getState().ui;
+    ctx.patchState({ ui: { ...ui, ...action.properties } });
   }
 }

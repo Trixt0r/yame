@@ -1,12 +1,46 @@
-<div class="content">
-  <nz-radio-group [ngModel]="(activeTool$ | async)?.id" nzButtonStyle="solid">
-    <label nz-radio-button *ngFor="let tool of tools" [nzValue]="tool.id" (click)="activate(tool, $event)">
-      <ng-template [yameTool]="tool"> </ng-template>
-    </label>
-  </nz-radio-group>
-  <div class="clickers">
-    <button nz-button nzType="text" class="fill full" *ngFor="let tool of clickers" (click)="activate(tool, $event)">
-      <ng-template [yameTool]="tool"> </ng-template>
-    </button>
-  </div>
-</div>
+<nz-layout class="fill-height">
+  <nz-content>
+    <div class="content">
+      <nz-radio-group [ngModel]="activeTool?.id" nzButtonStyle="solid">
+        <label nz-radio-button *ngFor="let tool of tools" [nzValue]="tool.id" (click)="activate(tool, $event)">
+          <ng-template [yameTool]="tool"></ng-template>
+          <i
+            *ngIf="!settingsCollapsed && tool.id === activeTool?.id"
+            nz-icon
+            nzType="caret-right"
+            nzTheme="outline"
+          ></i>
+        </label>
+      </nz-radio-group>
+      <div class="clickers">
+        <button
+          nz-button
+          nzType="text"
+          class="fill full"
+          *ngFor="let tool of clickers"
+          (click)="activate(tool, $event)"
+        >
+          <ng-template [yameTool]="tool"> </ng-template>
+        </button>
+      </div>
+    </div>
+  </nz-content>
+
+  <nz-sider
+    [nzCollapsed]="settingsCollapsed"
+    nzCollapsedWidth="0"
+    [nzWidth]="width - minWidth"
+    class="fill-height no-padding"
+  >
+    <ng-container *ngComponentOutlet="activeTool?.settingsComponent"></ng-container>
+  </nz-sider>
+</nz-layout>
+
+<yame-resizable
+  #resizer
+  [property]="'left'"
+  [minVal]="minWidth"
+  [threshold]="threshold"
+  [value]="width"
+  (sizeUpdated)="width = $event"
+></yame-resizable>

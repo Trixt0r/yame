@@ -12,7 +12,7 @@ import { NgBytesPipeModule } from 'angular-pipes';
 import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
 import { AssetDetailsDirective } from './directives/details.directive';
 import { AssetState } from './states/asset.state';
-import { AssetTypeComponent, ImageAssetPreviewComponent } from './components';
+import { AssetTreeComponent, AssetTypeComponent, ImageAssetPreviewComponent } from './components';
 import { ImageAssetDetailsComponent } from './components/details/image/image.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -55,6 +55,7 @@ import { AddToolService } from './tools/add.tool';
   declarations: [
     AssetItemsComponent,
     AssetGroupsComponent,
+    AssetTreeComponent,
     AssetPanelComponent,
     DefaultAssetPreviewComponent,
     ImageAssetPreviewComponent,

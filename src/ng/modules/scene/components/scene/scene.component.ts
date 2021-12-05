@@ -7,6 +7,7 @@ import {
   ViewChild,
   AfterViewInit,
   ViewContainerRef,
+  HostListener,
 } from '@angular/core';
 import { SceneService } from '../../services/scene.service';
 import { DragDropData } from 'ng2-dnd';
@@ -27,10 +28,14 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    */
   @Input() width!: number;
 
-  /**
-   * The view port height of the scene.
-   */
-  @Input() height!: number;
+  // /**
+  //  * The view port height of the scene.
+  //  */
+  // @Input() height!: number;
+
+  get height(): number {
+    return this.ref.nativeElement.getBoundingClientRect().height;
+  }
 
   /**
    * The wrapper element.
@@ -79,10 +84,10 @@ export class SceneComponent implements OnChanges, AfterViewInit {
       changed = true;
     }
 
-    if (changes.height) {
-      this.ref.nativeElement.style.height = `${changes.height.currentValue}px`;
-      changed = true;
-    }
+    // if (changes.height) {
+    //   this.ref.nativeElement.style.height = `${changes.height.currentValue}px`;
+    //   changed = true;
+    // }
 
     if (changed) this.onResize();
   }
@@ -92,6 +97,7 @@ export class SceneComponent implements OnChanges, AfterViewInit {
    *
    * @returns {void}
    */
+  @HostListener('window:resize')
   onResize() {
     this.service.setSize(this.width, this.height);
   }

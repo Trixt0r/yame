@@ -23,9 +23,8 @@ import { Subject } from 'rxjs';
  * @class ResizableComponent
  */
 @Component({
-  moduleId: module.id.toString(),
-  templateUrl: 'resizable.html',
   selector: 'yame-resizable',
+  templateUrl: 'resizable.html',
   styles: ['div { width: 100%; height: 100%; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -54,6 +53,10 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() property!: string;
   @Input() minVal!: number;
   @Input() maxVal!: number;
+  @Input() threshold = 0;
+  @Input() set value(value: number) {
+    this.updateValue(value, false);
+  }
 
   protected onMouseDownBind: (event: MouseEvent) => void;
   protected onMouseMoveBind: (event: MouseEvent) => void;
@@ -171,11 +174,17 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
    * Updates the css property to the given value.
    *
    * @param val The new value.
+   * @param trigger Whether to trigger the event emitter.
    */
-  updateValue(val: number): void {
+  updateValue(val: number, trigger = true): void {
+    const diff = Math.abs(this.minVal - val);
+    if (diff < this.threshold) {
+      if (val >= this.minVal + this.threshold * 0.5) val = this.minVal + this.threshold;
+      else if (val < this.minVal + this.threshold * 0.5) val = this.minVal;
+    }
     this.propVal = val;
     this.ref.nativeElement.style[this.property] = `${val}px`;
-    this.sizeUpdated.emit(val);
+    if (trigger) this.sizeUpdated.emit(val);
   }
 
   /**

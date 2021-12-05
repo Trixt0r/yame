@@ -8,6 +8,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
+  HostBinding,
 } from '@angular/core';
 import { SceneComponent } from '../../modules/scene/components/scene/scene.component';
 import { AssetPanelComponent } from 'ng/modules/asset/components/panel/panel.component';
@@ -29,28 +30,26 @@ export class MainComponent implements AfterViewInit, OnChanges {
 
   @ViewChild(SceneComponent, { static: false }) scene!: SceneComponent;
   @ViewChild(ToolbarComponent, { static: false }) toolbar!: ToolbarComponent;
-  @ViewChild(AssetPanelComponent) assets!: AssetPanelComponent;
+  // @ViewChild(AssetPanelComponent) assets!: AssetPanelComponent;
   // @ViewChild(WorkspaceComponent, { static: false }) workspace!: WorkspaceComponent;
-
-  sceneHeight = 0;
 
   constructor(public ref: ElementRef, protected cdr: ChangeDetectorRef) {}
 
-  /**
-   * Handles the size update event of the workspace.
-   * @param {number} top The top value of the workspace.
-   * @returns {void}
-   */
-  onAssetSizeUpdated(top: number): void {
-    this.sceneHeight = top;
-    this.cdr.detectChanges();
-  }
+  // /**
+  //  * Handles the size update event of the workspace.
+  //  * @param {number} top The top value of the workspace.
+  //  * @returns {void}
+  //  */
+  // onAssetSizeUpdated(top: number): void {
+  //   this.sceneHeight = top;
+  //   this.cdr.detectChanges();
+  // }
 
   /**
    * @inheritdoc
    */
   ngAfterViewInit() {
-    this.assets.updateValue(this.assets.clampValue(MainComponent.DEFAULT_SIZE));
+    // this.assets.updateValue(this.assets.clampValue(MainComponent.DEFAULT_SIZE));
   }
 
   /**
@@ -59,7 +58,7 @@ export class MainComponent implements AfterViewInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.width) {
       this.ref.nativeElement.style.width = `${changes.width.currentValue}px`;
-      if (this.assets) this.assets.onResize();
+      // if (this.assets) this.assets.onResize();
     }
   }
 }
