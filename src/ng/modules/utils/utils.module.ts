@@ -1,6 +1,5 @@
 import { APP_INITIALIZER, NgModule, NgZone } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ResizableComponent } from './component/resizable';
 import { ColorPipe } from './pipes/color.pipe';
 import { PointInputComponent } from './components/point-input/point-input.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -17,7 +16,7 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { TypeLabelComponent } from './components';
+import { ResizableComponent, TypeLabelComponent } from './components';
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');

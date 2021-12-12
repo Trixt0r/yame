@@ -1,5 +1,8 @@
 {
   "asset": {
+    "explorer": {
+      "title": "Assets"
+    },
     "notFound": {
       "assets": {
         "title": "Keine Assets gefunden",

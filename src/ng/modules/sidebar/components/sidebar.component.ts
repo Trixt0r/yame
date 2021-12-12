@@ -8,7 +8,7 @@ import {
   OnDestroy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { ResizableComponent } from '../../utils/component/resizable';
+import { ResizableComponent } from '../../utils/components/resizable/resizable';
 import { HierarchyComponent } from './hierarchy/hierarchy.component';
 import { SelectionComponent } from './selection/selection.component';
 import { Store, Select } from '@ngxs/store';

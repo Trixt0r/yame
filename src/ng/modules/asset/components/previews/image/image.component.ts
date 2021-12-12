@@ -10,8 +10,7 @@ import { IAssetPreviewComponent } from '../../../directives/preview.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @AssetPreviewComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
-export class ImageAssetPreviewComponent implements IAssetPreviewComponent {
-
+export class AssetImagePreviewComponent implements IAssetPreviewComponent {
   /**
    * @inheritdoc
    */

@@ -15,7 +15,7 @@ import { Select } from '@ngxs/store';
 import { AssetState } from '../states/asset.state';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DefaultAssetPreviewComponent } from '../components/previews/default/default.component';
+import { AssetDefaultPreviewComponent } from '../components/previews/default/default.component';
 
 /**
  * An interface for defining a component which is able to render a preview of a certain asset.
@@ -66,7 +66,7 @@ export class AssetPreviewDirective implements OnChanges, OnDestroy {
    * @return The created component reference or `null` if no component found for the current group.
    */
   render(): ComponentRef<IAssetPreviewComponent> | null {
-    const compType = this.previews[this.asset.type] || DefaultAssetPreviewComponent;
+    const compType = this.previews[this.asset.type] || AssetDefaultPreviewComponent;
     const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
     if (!compType) return null;

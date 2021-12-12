@@ -21,7 +21,9 @@ export function provideAsDecorated(...values: unknown[]): ValueProvider {
   };
 }
 
-export { ResizableComponent } from './component/resizable';
+export * from './lifecycles';
+export * from './rx';
+export { ResizableComponent } from './components/resizable/resizable';
 export { PointInputComponent } from './components/point-input/point-input.component';
 export { ColorPipe } from './pipes/color.pipe';
 export { UtilsModule } from './utils.module';

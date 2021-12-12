@@ -8,6 +8,6 @@ import { IAssetPreviewComponent } from '../../../directives/preview.directive';
   styleUrls: ['default.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DefaultAssetPreviewComponent implements IAssetPreviewComponent {
+export class AssetDefaultPreviewComponent implements IAssetPreviewComponent {
   asset!: Asset;
 }

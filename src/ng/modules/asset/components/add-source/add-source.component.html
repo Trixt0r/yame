@@ -1,0 +1,36 @@
+<button
+  *ngIf="assetSources.length === 1"
+  nz-button
+  [nzType]="mode === 'icon' ? 'default' : 'primary'"
+  nz-tooltip
+  [nzTooltipTitle]="'asset.addResourceGroup' | translate"
+  nzTooltipPlacement="right"
+  [attr.aria-label]="'asset.addResourceGroup' | translate"
+  (click)="addFromSource(assetSources[0])"
+>
+  <i nz-icon nzType="folder-add"></i>
+  <span *ngIf="mode !== 'icon'" class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
+</button>
+
+<button
+  *ngIf="assetSources.length > 1"
+  nz-button
+  [nzType]="mode === 'icon' ? 'default' : 'primary'"
+  nz-tooltip
+  [nzTooltipTitle]="'asset.addResourceGroup' | translate"
+  nz-dropdown
+  nzTrigger="click"
+  [nzDropdownMenu]="menu"
+>
+  <i nz-icon nzType="folder-add"></i>
+  <span *ngIf="mode !== 'icon'" class="margin-left-4">{{ 'asset.addSource' | translate }}</span>
+</button>
+
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <li *ngFor="let source of assetSources" nz-menu-item (click)="addFromSource(source)">
+      <i nz-icon *ngIf="source.icon" [nzType]="source.icon"></i>
+      <span class="margin-left-4">{{ 'asset.source.' + source.type | translate }}</span>
+    </li>
+  </ul>
+</nz-dropdown-menu>

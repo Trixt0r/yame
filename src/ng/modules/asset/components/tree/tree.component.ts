@@ -5,37 +5,29 @@ import {
   EventEmitter,
   Input,
   NgZone,
-  OnDestroy,
   Output,
   ViewEncapsulation,
 } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import {
-  IAssetsSource,
-  LoadFromAssetsSource,
-  RemoveAsset,
-  ScanResource,
-  SelectAsset,
-  UnselectAsset,
-} from '../../states/actions/asset.action';
-import { AssetState } from '../../states/asset.state';
-import { Observable, Subject } from 'rxjs';
+import { IAssetsSource, RemoveAsset, ScanResource, SelectAsset, UnselectAsset, AssetState } from '../../states';
+import { firstValueFrom, Observable } from 'rxjs';
 import { filter, first, take, takeUntil } from 'rxjs/operators';
 import { Asset } from 'common/asset';
-import { IResource, IResourceGroup } from 'common/interfaces/resource';
 import { NzFormatEmitEvent, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { flatten, isEqual } from 'lodash';
+import { DestroyLifecycle } from 'ng/modules/utils';
 
 type AssetTreeNode = NzTreeNodeOptions & { asset: Asset };
 
 @Component({
   selector: 'yame-asset-tree',
-  templateUrl: 'asset-tree.component.html',
-  styleUrls: ['asset-tree.component.scss'],
+  templateUrl: 'tree.component.html',
+  styleUrls: ['tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  providers: [DestroyLifecycle],
 })
-export class AssetTreeComponent implements OnDestroy {
+export class AssetTreeComponent {
   /**
    * The group to be set externally.
    */
@@ -50,11 +42,6 @@ export class AssetTreeComponent implements OnDestroy {
    * Unselect event emitted as soon as the current group got unselected.
    */
   @Output() unselect = new EventEmitter<Asset>();
-
-  /**
-   * Selector for subscribing to asset source updates.
-   */
-  @Select(AssetState.sources) assetSources$!: Observable<IAssetsSource[]>;
 
   /**
    * Selector for subscribing to asset group updates.
@@ -77,11 +64,6 @@ export class AssetTreeComponent implements OnDestroy {
   icons: { [icon: string]: string } = {};
 
   /**
-   * The currently available asset sources.
-   */
-  assetSources: IAssetsSource[] = [];
-
-  /**
    * All currently available asset groups.
    */
   assets: Asset[] = [];
@@ -91,57 +73,48 @@ export class AssetTreeComponent implements OnDestroy {
    */
   nodes: AssetTreeNode[] = [];
 
+  get flatNodes(): AssetTreeNode[] {
+    const map: any = (node: AssetTreeNode) => [node, ...flatten((node.children ?? []).map(map) as AssetTreeNode[])];
+    return flatten(this.nodes.map(map)) as AssetTreeNode[];
+  }
+
   /**
    * Queue of asset ids, which will force a change detection as soon an asset state change happened.
    */
   protected expansionQueue: string[] = [];
 
-  /**
-   * Subject which gets triggered as soon as this component gets destroyed.
-   */
-  protected destroy$ = new Subject<void>();
-
-  constructor(protected store: Store, protected zone: NgZone, protected cdr: ChangeDetectorRef) {
+  constructor(
+    protected store: Store,
+    protected zone: NgZone,
+    protected cdr: ChangeDetectorRef,
+    destroy$: DestroyLifecycle
+  ) {
     zone.runOutsideAngular(() => {
-      const getFlatNodes = () => {
-        const map: any = (node: AssetTreeNode) => [node, ...flatten((node.children ?? []).map(map) as AssetTreeNode[])];
-        return flatten(this.nodes.map(map)) as AssetTreeNode[];
-      };
       let waitingForResource = false;
-
-      this.assetSources$.pipe(takeUntil(this.destroy$)).subscribe((sources) => (this.assetSources = sources));
-      this.assets$.pipe(takeUntil(this.destroy$)).subscribe(async (assets) => {
+      this.assets$.pipe(takeUntil(destroy$)).subscribe(async (assets) => {
         // Check first, if we need to update the nodes, if not, don't do anything
         const hasQueued = assets.some((_) => this.expansionQueue.indexOf(_.id) >= 0);
         if (waitingForResource || (!hasQueued && isEqual(assets, this.assets))) return;
-        // Preserve the currently expanded nodes
-        const expanded = getFlatNodes()
-          .filter((_) => _.expanded && !_.isLeaf)
-          .map((_) => _.key);
         // Wait for the current resource until it is loaded
-        waitingForResource = !!(await this.loading$.pipe(take(1)).toPromise());
+        waitingForResource = !!(await firstValueFrom(this.loading$.pipe(take(1))));
         if (waitingForResource) {
-          await this.loading$
-            .pipe(
+          await firstValueFrom(
+            this.loading$.pipe(
               filter((val) => val === null),
               first()
             )
-            .toPromise();
+          );
           waitingForResource = false;
         }
 
         this.assets = AssetState.assets(store.snapshot().assets);
-
-        // Update the tree nodes based on the current asset state. Restore expanded nodes state
-        this.nodes = this.assets.filter((it) => !it.parent).map(this.mapToNzTreeNode.bind(this));
-        getFlatNodes().forEach((node) => (node.expanded = expanded.indexOf(node.key) >= 0));
+        this.updateNodes();
         // Remove loaded assets from the expansion queue
         const notLoadedIds = this.assets.filter((_) => !_.resource.loaded).map((g) => g.id);
         this.expansionQueue = this.expansionQueue.filter((_) => notLoadedIds.indexOf(_) >= 0);
-
-        this.cdr.markForCheck();
+        cdr.markForCheck();
       });
-      this.icons$.pipe(takeUntil(this.destroy$)).subscribe((icons) => (this.icons = icons));
+      this.icons$.pipe(takeUntil(destroy$)).subscribe((icons) => (this.icons = icons));
     });
   }
 
@@ -164,6 +137,18 @@ export class AssetTreeComponent implements OnDestroy {
   }
 
   /**
+   * Updates the internal nodes based on the current asset state.
+   * Makes sure expansion state of all nodes is preserved.
+   */
+  protected updateNodes(): void {
+    // Preserve the currently expanded nodes
+    const expanded = this.flatNodes.filter((_) => _.expanded && !_.isLeaf).map((_) => _.key);
+    // Update the tree nodes based on the current asset state. Restore expanded nodes state
+    this.nodes = this.assets.filter((it) => !it.parent).map(this.mapToNzTreeNode.bind(this));
+    this.flatNodes.forEach((node) => (node.expanded = expanded.indexOf(node.key) >= 0));
+  }
+
+  /**
    * Handles the tree node click event, i.e. node selection.
    *
    * @param event The triggered event.
@@ -171,11 +156,15 @@ export class AssetTreeComponent implements OnDestroy {
   onNzClick(event: NzFormatEmitEvent): void {
     const node = event.node?.origin as any as AssetTreeNode;
     const isSelected = event.node?.isSelected;
+    if (!node.isLeaf) {
+      const expanded = !event.node?.isExpanded;
+      event.node?.setExpanded(expanded);
+      this.updateNodes(); // Force a node list update
+      this.onNzExpandChange(event);
+      return this.cdr.markForCheck();
+    }
     this.asset = isSelected ? node?.asset : null;
     if (isSelected) this.expansionQueue.push(node.asset.id);
-
-    console.log(this.asset);
-
     this.store.dispatch(!this.asset ? new UnselectAsset() : new SelectAsset(this.asset!));
 
     const emitter = isSelected ? this.select : this.unselect;
@@ -200,15 +189,6 @@ export class AssetTreeComponent implements OnDestroy {
   }
 
   /**
-   * Opens a dialog for opening a folder.
-   *
-   * @return `true` if a folder has been opened, `false` otherwise.
-   */
-  addFromSource(source: IAssetsSource): Observable<any> {
-    return this.store.dispatch(new LoadFromAssetsSource(source));
-  }
-
-  /**
    * Returns the icon for the given asset.
    *
    * @param asset The asset.
@@ -230,13 +210,5 @@ export class AssetTreeComponent implements OnDestroy {
     event.preventDefault();
     event.stopImmediatePropagation();
     this.store.dispatch(new RemoveAsset(group.id));
-  }
-
-  /**
-   * @inheritdoc
-   */
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

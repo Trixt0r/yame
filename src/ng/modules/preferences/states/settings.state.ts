@@ -137,7 +137,6 @@ export class SettingsState implements NgxsOnInit {
       if (idx < 0) return console.warn(`[Settings] Section with id ${it} doesn't exist`);
       sections.splice(idx, 1);
     });
-    console.log('remove');
     ui.sections = sections;
     ctx.patchState({ ui });
   }

@@ -1,0 +1,25 @@
+$init-padding: 8px;
+
+yame-asset-add-source {
+  text-align: center;
+  &.icon {
+    display: inline-block;
+  }
+  &.text {
+    display: block;
+
+    button[nz-button]:not(.no-margin) {
+      width: calc(100% - #{$init-padding} * 2);
+      margin: $init-padding;
+      max-width: 240px;
+      overflow: hidden;
+      span {
+        width: calc(100% - 8px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 1;
+      }
+    }
+  }
+}

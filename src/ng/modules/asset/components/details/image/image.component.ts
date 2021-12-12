@@ -9,14 +9,13 @@ import { IAssetDetailsComponent } from '../../../directives/details.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 @AssetDetailsComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
-export class ImageAssetDetailsComponent implements IAssetDetailsComponent, AfterViewInit {
-
+export class AssetImageDetailsComponent implements IAssetDetailsComponent, AfterViewInit {
   /**
    * @inheritdoc
    */
   asset!: Asset<unknown>;
 
-  constructor(protected cdr: ChangeDetectorRef) { }
+  constructor(protected cdr: ChangeDetectorRef) {}
 
   /**
    * @inheritdoc

@@ -6,14 +6,20 @@ import { AssetItemsComponent } from './components/items/items.component';
 import { AssetPanelComponent } from './components/panel/panel.component';
 import { AssetGroupsComponent } from './components/groups/groups.component';
 import { AssetPreviewDirective } from './directives/preview.directive';
-import { DefaultAssetPreviewComponent } from './components/previews/default/default.component';
+import { AssetDefaultPreviewComponent } from './components/previews/default/default.component';
 import { NgxsModule, Store } from '@ngxs/store';
 import { NgBytesPipeModule } from 'angular-pipes';
 import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
 import { AssetDetailsDirective } from './directives/details.directive';
 import { AssetState } from './states/asset.state';
-import { AssetTreeComponent, AssetTypeComponent, ImageAssetPreviewComponent } from './components';
-import { ImageAssetDetailsComponent } from './components/details/image/image.component';
+import {
+  AssetTreeComponent,
+  AssetTypeComponent,
+  AssetImagePreviewComponent,
+  AssetAddSourceComponent,
+  AssetExplorerComponent,
+} from './components';
+import { AssetImageDetailsComponent } from './components/details/image/image.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
@@ -31,6 +37,7 @@ import { createAssetComponent } from 'common/scene';
 import { SceneComponentService } from '../scene';
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { AddToolService } from './tools/add.tool';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 @NgModule({
   imports: [
@@ -49,6 +56,7 @@ import { AddToolService } from './tools/add.tool';
     NgBytesPipeModule,
     NzSpinModule,
     NzSelectModule,
+    NzToolTipModule,
     DndModule.forRoot(),
     NgxsModule.forFeature([AssetState]),
   ],
@@ -57,16 +65,18 @@ import { AddToolService } from './tools/add.tool';
     AssetGroupsComponent,
     AssetTreeComponent,
     AssetPanelComponent,
-    DefaultAssetPreviewComponent,
-    ImageAssetPreviewComponent,
-    ImageAssetDetailsComponent,
+    AssetDefaultPreviewComponent,
+    AssetImagePreviewComponent,
+    AssetImageDetailsComponent,
     AssetPreviewDirective,
     AssetDetailsDirective,
     AssetTypeComponent,
+    AssetAddSourceComponent,
+    AssetExplorerComponent,
   ],
   exports: [AssetItemsComponent, AssetGroupsComponent, AssetPanelComponent, AssetPreviewDirective],
   providers: [
-    provideAsDecorated(ImageAssetPreviewComponent, ImageAssetDetailsComponent),
+    provideAsDecorated(AssetImagePreviewComponent, AssetImageDetailsComponent),
     {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, addTool: AddToolService) => () => {

@@ -5,14 +5,14 @@ import { SceneAssetConverterService, SceneService } from 'ng/modules/scene';
 import { Tool } from 'ng/modules/toolbar/tool';
 import { Observable, of } from 'rxjs';
 import { catchError, take, takeUntil } from 'rxjs/operators';
-import { AssetTreeComponent } from '../components';
+import { AssetExplorerComponent } from '../components';
 import { AssetState } from '../states/asset.state';
 
 @Injectable({ providedIn: 'root' })
 export class AddToolService extends Tool {
   private mouseLeft = true;
 
-  settingsComponent = AssetTreeComponent as any;
+  settingsComponent = AssetExplorerComponent as any;
 
   @Select(AssetState.selectedAsset)
   private selectAsset$!: Observable<Asset>;
@@ -71,10 +71,7 @@ export class AddToolService extends Tool {
 
   async onActivate(): Promise<void> {
     delete this.selectedAsset;
-    this.selectAsset$.pipe(takeUntil(this.deactivated$)).subscribe((asset) => {
-      this.selectedAsset = asset;
-      console.log(this.selectedAsset);
-    });
+    this.selectAsset$.pipe(takeUntil(this.deactivated$)).subscribe((asset) => (this.selectedAsset = asset));
 
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mouseenter', this.onMouseenter);
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mousemove', this.onMousemove);
