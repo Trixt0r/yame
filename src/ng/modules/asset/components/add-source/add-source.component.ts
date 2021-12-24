@@ -44,9 +44,9 @@ export class AssetAddSourceComponent {
   /**
    * Opens a dialog for opening a folder.
    *
-   * @return `true` if a folder has been opened, `false` otherwise.
+   * @return A stream emitting on success or fail.
    */
-  addFromSource(source: IAssetsSource): Observable<any> {
+  addFromSource<T>(source: IAssetsSource): Observable<T> {
     return this.store.dispatch(new LoadFromAssetsSource(source));
   }
 }

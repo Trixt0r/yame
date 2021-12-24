@@ -1,0 +1,63 @@
+<ng-container *ngIf="selectedAsset">
+  <div class="ant-drawer-header">
+    <i nz-icon [nzType]="getIcon(selectedAsset)" class="inline"></i>
+    <div class="ant-drawer-title inline margin-left-8" [innerText]="selectedAsset.resource.name"></div>
+    <!-- <button (click)="toggleAsset(selectedAsset)" aria-label="Close" class="ant-drawer-close" style="--scroll-bar: 0px">
+      <i nz-icon nzType="close"></i>
+    </button> -->
+  </div>
+  <nz-tabset nzCentered>
+    <nz-tab [nzTitle]="titleTemplate">
+      <ng-template #titleTemplate>
+        <i nz-icon nzType="info-circle"></i>
+        <span>{{ 'asset.details.title' | translate }}</span>
+      </ng-template>
+      <div
+        class="preview"
+        dnd-draggable
+        [dragEnabled]="true"
+        [dragData]="selectedAsset"
+        (dragstart)="onDragStart($event)">
+        <div class="fill-width fill-height relative">
+          <ng-container [yameAssetPreview]="selectedAsset"></ng-container>
+        </div>
+      </div>
+      <nz-divider class="no-margin-bottom margin-top-16"></nz-divider>
+      <div class="details margin-top-4 padding-8">
+        <div class="row">
+          <div nz-typography class="col fill-33 text-left opacity-90">
+            <b>{{ 'asset.details.type' | translate }}</b>
+          </div>
+          <div nz-typography class="col fill-66 text-left">
+            <b>{{ getLabel(selectedAsset) | translate }}</b>
+          </div>
+        </div>
+        <div class="row" *ngIf="selectedAsset.resource.size !== undefined">
+          <div nz-typography class="col fill-33 text-left opacity-90">
+            <b>{{ 'asset.details.size' | translate }}</b>
+          </div>
+          <div nz-typography class="col fill-66 text-left">
+            <b>{{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)</b>
+          </div>
+        </div>
+        <div class="row" *ngIf="selectedAsset.resource.created !== undefined">
+          <div nz-typography class="col fill-33 text-left opacity-90">
+            <b>{{ 'asset.details.created' | translate }}</b>
+          </div>
+          <div nz-typography class="col fill-66 text-left">
+            <b>{{ selectedAsset.resource.created | date: 'medium':undefined:lang }}</b>
+          </div>
+        </div>
+        <div class="row" *ngIf="selectedAsset.resource.changed !== undefined">
+          <div nz-typography class="col fill-33 text-left opacity-90">
+            <b>{{ 'asset.details.modified' | translate }}</b>
+          </div>
+          <div nz-typography class="col fill-66 text-left">
+            <b>{{ selectedAsset?.resource.changed | date: 'medium':undefined:lang }}</b>
+          </div>
+        </div>
+        <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
+      </div>
+    </nz-tab>
+  </nz-tabset>
+</ng-container>

@@ -2,4 +2,7 @@
   <h4 nz-typography>{{ 'asset.explorer.title' | translate }}</h4>
   <yame-asset-add-source></yame-asset-add-source>
 </div>
-<yame-asset-tree></yame-asset-tree>
+<nz-divider *ngIf="tree.assets?.length" class="margin-bottom-8 margin-top-4"></nz-divider>
+<yame-asset-tree #tree></yame-asset-tree>
+<nz-divider *ngIf="preview.selectedAsset" class="margin-bottom-4 margin-top-4"></nz-divider>
+<yame-asset-preview #preview></yame-asset-preview>

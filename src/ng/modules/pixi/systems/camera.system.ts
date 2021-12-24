@@ -112,7 +112,12 @@ export class PixiCameraSystem extends System {
     return this.prevPos !== null;
   }
 
-  constructor(protected service: PixiRendererService, protected actions: Actions, protected store: Store, priority?: number) {
+  constructor(
+    protected service: PixiRendererService,
+    protected actions: Actions,
+    protected store: Store,
+    priority?: number
+  ) {
     super(priority);
     this.camera = new Camera();
     this.camera.attach(service.scene);
@@ -135,7 +140,7 @@ export class PixiCameraSystem extends System {
         this.onMouseWheelBound as EventListenerOrEventListenerObject
       );
       this.lastBoundElement.removeEventListener('pointerdown', this.onPointerDownBound);
-      this.keyboardSubs.forEach((sub) => sub.unsubscribe());
+      this.keyboardSubs.forEach(sub => sub.unsubscribe());
     }
   }
 
@@ -145,7 +150,9 @@ export class PixiCameraSystem extends System {
   init(): void {
     this.clearListenersAndSubs();
     this.lastBoundElement = this.service.component.ref.nativeElement;
-    this.lastBoundElement.addEventListener('mousewheel', this.onMouseWheelBound as EventListenerOrEventListenerObject);
+    this.lastBoundElement.addEventListener('mousewheel', this.onMouseWheelBound as EventListenerOrEventListenerObject, {
+      capture: true,
+    });
     this.lastBoundElement.addEventListener('pointerdown', this.onPointerDownBound);
     this.keyboardSubs = [
       this.actions.pipe(ofActionSuccessful(Keydown)).subscribe((data: Keydown) => {
@@ -159,17 +166,17 @@ export class PixiCameraSystem extends System {
       }),
     ];
 
-    this.entities$.subscribe(entities => this.rootEntities = entities.filter(it => !it.parent));
+    this.entities$.subscribe(entities => (this.rootEntities = entities.filter(it => !it.parent)));
 
-    this.selectedEntities$.subscribe(entities => this.selectedEntities = entities);
-    this.selectedComponents$.subscribe(components => this.selectedComponents = components);
-    this.isolated$.subscribe(isolated => this.isolated = isolated);
+    this.selectedEntities$.subscribe(entities => (this.selectedEntities = entities));
+    this.selectedComponents$.subscribe(components => (this.selectedComponents = components));
+    this.isolated$.subscribe(isolated => (this.isolated = isolated));
     this.moveButton$.subscribe(val => {
       this.mouseMoveButton = val;
       this.trackPad = val === -1;
     });
 
-    this.cameraZoom$.subscribe((zoom) => {
+    this.cameraZoom$.subscribe(zoom => {
       (this.camera.targetPosition as Point).copyFrom(zoom.target);
       this.camera.minZoom = zoom.min ?? this.camera.minZoom;
       this.camera.maxZoom = zoom.max ?? this.camera.maxZoom;
@@ -177,12 +184,10 @@ export class PixiCameraSystem extends System {
       this.camera.zoom = zoom.value;
       this.store.dispatch(new UpdateCameraPosition(this.camera.position as IPoint));
     });
-    this.cameraPosition$.subscribe((pos) => (this.camera.position = pos));
+    this.cameraPosition$.subscribe(pos => (this.camera.position = pos));
     this.actions.pipe(ofActionDispatched(ZoomCameraToPosition)).subscribe((action: ZoomCameraToPosition) => {
       if (action.target)
-        this.camera.targetPosition = action.global
-          ? this.service.stage!.toLocal(action.target)
-          : action.target;
+        this.camera.targetPosition = action.global ? this.service.stage!.toLocal(action.target) : action.target;
       this.camera.zoom = action.zoom;
       const zoom = {
         target: this.camera.targetPosition,
@@ -192,21 +197,18 @@ export class PixiCameraSystem extends System {
     });
     this.actions.pipe(ofActionDispatched(MoveCameraToPosition)).subscribe((action: MoveCameraToPosition) => {
       this.store.dispatch(
-        new UpdateCameraPosition(
-          action.global ? this.service.stage!.toLocal(action.position) : action.position
-        )
+        new UpdateCameraPosition(action.global ? this.service.stage!.toLocal(action.position) : action.position)
       );
     });
-    this.actions.pipe(ofActionDispatched(ZoomCameraOut))
-                  .subscribe((action: ZoomCameraOut) => {
-                    const isolated = this.isolated;
-                    if (action.entities.length > 0) {
-                      this.zoomToEntities(action.entities.map(it => this.service.sceneService.getEntity(it)) as SceneEntity[]);
-                    } else {
-                      if (isolated) this.zoomToEntities(this.service.sceneService.getChildren(isolated));
-                      else this.zoomToEntities(this.rootEntities);
-                    }
-                  });
+    this.actions.pipe(ofActionDispatched(ZoomCameraOut)).subscribe((action: ZoomCameraOut) => {
+      const isolated = this.isolated;
+      if (action.entities.length > 0) {
+        this.zoomToEntities(action.entities.map(it => this.service.sceneService.getEntity(it)) as SceneEntity[]);
+      } else {
+        if (isolated) this.zoomToEntities(this.service.sceneService.getChildren(isolated));
+        else this.zoomToEntities(this.rootEntities);
+      }
+    });
   }
 
   /**
@@ -239,10 +241,7 @@ export class PixiCameraSystem extends System {
     if (!this.service.renderer) return;
     // Get the bounds in scene space and adjust the zoom accordingly
     const bounds = getBoundingRect(entities, this.service, this.service.scene, tmpRect);
-    const value = Math.min(
-      this.service.renderer.width / bounds.width,
-      this.service.renderer.height / bounds.height
-    );
+    const value = Math.min(this.service.renderer.width / bounds.width, this.service.renderer.height / bounds.height);
     const step = this.camera.zoomStep;
     this.camera.zoomStep = Math.abs(this.camera.zoom - value);
     this.camera.zoom = value;
@@ -253,7 +252,7 @@ export class PixiCameraSystem extends System {
     const heightDiff = this.service.renderer.height - stageBounds.height;
     this.camera.position = {
       x: widthDiff - (stageBounds.x + widthDiff / 2),
-      y: heightDiff - (stageBounds.y + heightDiff / 2)
+      y: heightDiff - (stageBounds.y + heightDiff / 2),
     };
 
     await this.store.dispatch(new UpdateCameraZoom({ value, step })).toPromise();

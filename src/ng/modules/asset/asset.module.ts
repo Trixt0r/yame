@@ -18,6 +18,7 @@ import {
   AssetImagePreviewComponent,
   AssetAddSourceComponent,
   AssetExplorerComponent,
+  AssetPreviewComponent,
 } from './components';
 import { AssetImageDetailsComponent } from './components/details/image/image.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -73,6 +74,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
     AssetTypeComponent,
     AssetAddSourceComponent,
     AssetExplorerComponent,
+    AssetPreviewComponent,
   ],
   exports: [AssetItemsComponent, AssetGroupsComponent, AssetPanelComponent, AssetPreviewDirective],
   providers: [

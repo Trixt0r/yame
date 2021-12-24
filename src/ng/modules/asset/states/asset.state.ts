@@ -139,7 +139,7 @@ export class AssetState implements NgxsOnInit {
    */
   @Selector()
   static groups(state: IAssetState): Asset<IResourceGroup>[] {
-    return state.assets.filter((asset) => asset.type === 'group') as Asset<IResourceGroup>[];
+    return state.assets.filter(asset => asset.type === 'group') as Asset<IResourceGroup>[];
   }
 
   @Selector()
@@ -201,7 +201,7 @@ export class AssetState implements NgxsOnInit {
    * Initializes the given preview component for the given types.
    */
   static _initPreviewComponent(comp: Type<IAssetPreviewComponent>, ...types: string[]): void {
-    types.forEach((assetType) => (initPreviewComponents[assetType] = comp));
+    types.forEach(assetType => (initPreviewComponents[assetType] = comp));
   }
 
   /**
@@ -210,7 +210,7 @@ export class AssetState implements NgxsOnInit {
    * Initializes the given details component for the given types.
    */
   static _initDetailsComponent(comp: Type<IAssetDetailsComponent>, ...types: string[]): void {
-    types.forEach((assetType) => (initDetailsComponents[assetType] = comp));
+    types.forEach(assetType => (initDetailsComponents[assetType] = comp));
   }
 
   constructor(protected store: Store) {}
@@ -231,7 +231,7 @@ export class AssetState implements NgxsOnInit {
    */
   getAssetForResource(resource: IResource): Asset {
     const state = this.store.snapshot().assets as IAssetState;
-    let found = state.assets.find((it) => it.resource.uri === resource.uri);
+    let found = state.assets.find(it => it.resource.uri === resource.uri);
     if (!found) {
       found = new Asset();
       found.id = resource.uri;
@@ -249,7 +249,7 @@ export class AssetState implements NgxsOnInit {
    */
   getAssetForUri(uri: string): Asset | undefined {
     const state = this.store.snapshot().assets as IAssetState;
-    return state.assets.find((it) => it.resource.uri === uri);
+    return state.assets.find(it => it.resource.uri === uri);
   }
 
   /**
@@ -260,7 +260,7 @@ export class AssetState implements NgxsOnInit {
    */
   getAssetById(id: string): Asset | undefined {
     const state = this.store.snapshot().assets as IAssetState;
-    return state.assets.find((it) => it.id === id);
+    return state.assets.find(it => it.id === id);
   }
 
   /**
@@ -273,8 +273,8 @@ export class AssetState implements NgxsOnInit {
   getChildren(asset: Asset, deep = true): Asset[] {
     let children: Asset[] = [];
     const state = this.store.snapshot().assets as IAssetState;
-    asset.children.forEach((id) => {
-      const child = state.assets.find((it) => it.id === id);
+    asset.children.forEach(id => {
+      const child = state.assets.find(it => it.id === id);
       if (!child) return;
       children.push(child);
       if (!deep || child.children.length === 0) return;
@@ -286,7 +286,7 @@ export class AssetState implements NgxsOnInit {
   @Action(AddAssetsSource)
   addAssetsSource(ctx: StateContext<IAssetState>, action: AddAssetsSource): void {
     const sources = ctx.getState().sources.slice();
-    const found = sources.find((it) => it.type === action.source.type);
+    const found = sources.find(it => it.type === action.source.type);
     if (found) return console.warn(`[Assets] Asset source with type '${found.type}' is already registered.`);
     sources.push(action.source);
     ctx.patchState({ sources });
@@ -295,7 +295,7 @@ export class AssetState implements NgxsOnInit {
   @Action(RemoveAssetsSource)
   removeAssetsSource(ctx: StateContext<IAssetState>, action: RemoveAssetsSource): void {
     const sources = ctx.getState().sources.slice();
-    const idx = sources.findIndex((it) => it.type === action.type);
+    const idx = sources.findIndex(it => it.type === action.type);
     if (idx < 0) return console.warn(`[Assets] Asset source with type '${action.type}' is not registered.`);
     sources.splice(idx, 1);
     ctx.patchState({ sources });
@@ -305,13 +305,13 @@ export class AssetState implements NgxsOnInit {
   addAsset(ctx: StateContext<IAssetState>, action: AddAsset): void {
     const assets = ctx.getState().assets.slice();
     const toAdd = Array.isArray(action.asset) ? action.asset : [action.asset];
-    const newAssets = toAdd.filter((asset) => {
-      const found = assets.find((it) => it.id === asset.id);
+    const newAssets = toAdd.filter(asset => {
+      const found = assets.find(it => it.id === asset.id);
       if (found) console.warn(`[Asset] Asset with ${found.id} already exists`);
       return !found;
     });
     if (newAssets.length === 0) return;
-    newAssets.forEach((it) => assets.push(it));
+    newAssets.forEach(it => assets.push(it));
     ctx.patchState({ assets });
   }
 
@@ -320,15 +320,15 @@ export class AssetState implements NgxsOnInit {
     const state = ctx.getState();
     const assets = state.assets.slice();
     const toRemove = Array.isArray(action.id) ? action.id : [action.id];
-    let deletedAssets = toRemove.map((id) => assets.find((it) => it.id === id)).filter((it) => !!it) as Asset[];
+    let deletedAssets = toRemove.map(id => assets.find(it => it.id === id)).filter(it => !!it) as Asset[];
     if (deletedAssets.length === 0) return;
     let children: Asset[] = [];
-    deletedAssets.forEach((it) => {
+    deletedAssets.forEach(it => {
       children = children.concat(this.getChildren(it, true));
     });
     const patch: Partial<IAssetState> = { assets };
     deletedAssets = deletedAssets.concat(children);
-    deletedAssets.forEach((asset) => {
+    deletedAssets.forEach(asset => {
       if (!asset) return;
       const idx = assets.indexOf(asset);
       if (idx >= 0) {
@@ -344,8 +344,8 @@ export class AssetState implements NgxsOnInit {
   updateAsset(ctx: StateContext<IAssetState>, action: UpdateAsset): void {
     const assets = ctx.getState().assets.slice();
     const toUpdate = Array.isArray(action.asset) ? action.asset : [action.asset];
-    toUpdate.forEach((update) => {
-      const found = assets.find((it) => update.id === it.id);
+    toUpdate.forEach(update => {
+      const found = assets.find(it => update.id === it.id);
       if (!found) return console.warn(`[Asset] Asset with ${update.id} does not exist`);
       merge(found, update);
     });
@@ -364,7 +364,7 @@ export class AssetState implements NgxsOnInit {
     const assets = [parent];
 
     if (Array.isArray(resource.data)) {
-      resource.data?.forEach((it) => {
+      resource.data?.forEach(it => {
         const asset = this.getAssetForResource(it);
         asset.parent = parent.id;
         if (parent.children.indexOf(asset.id) < 0) parent.children.push(asset.id);
@@ -398,8 +398,11 @@ export class AssetState implements NgxsOnInit {
 
   @Action(SelectAsset)
   selectAsset(ctx: StateContext<IAssetState>, action: SelectAsset): void {
-    if (ctx.getState().selectedGroup?.id === action.asset.id) return;
-    ctx.patchState({ selectedAsset: action.asset });
+    const { asset } = action;
+    if (ctx.getState().selectedGroup?.id === asset?.id) return;
+    ctx.patchState({ selectedAsset: asset });
+    if (!asset || asset.resource.loaded) return;
+    ctx.dispatch(new ScanResource(asset.resource.uri, asset.resource.source, asset.resource.type));
   }
 
   @Action(UnselectAsset)
@@ -412,7 +415,7 @@ export class AssetState implements NgxsOnInit {
   registerAssetIcon(ctx: StateContext<IAssetState>, action: RegisterAssetIcon): void {
     const currentUi = ctx.getState().ui;
     const icons: { [icon: string]: string } = {};
-    action.types.forEach((it) => (icons[it] = action.icon));
+    action.types.forEach(it => (icons[it] = action.icon));
     const ui = merge({}, currentUi);
     ui.icons = { ...ui.icons, ...icons };
     ctx.patchState({ ui });
@@ -422,7 +425,7 @@ export class AssetState implements NgxsOnInit {
   registerAssetTypeLabel(ctx: StateContext<IAssetState>, action: RegisterAssetTypeLabel): void {
     const currentUi = ctx.getState().ui;
     const labels: { [label: string]: string } = {};
-    action.types.forEach((it) => (labels[it] = action.label));
+    action.types.forEach(it => (labels[it] = action.label));
     const ui = merge({}, currentUi);
     ui.typeLabels = { ...ui.typeLabels, ...labels };
     ctx.patchState({ ui });
@@ -437,11 +440,11 @@ export class AssetState implements NgxsOnInit {
   async write(context: ISerializeContext) {
     const uri = context.uri;
     const protocol = context.protocol;
-    const assetState = this.store.selectSnapshot((state) => state.assets) as IAssetState;
+    const assetState = this.store.selectSnapshot(state => state.assets) as IAssetState;
     const path = (global as any).require('path') as PlatformPath;
     return assetState.assets
-      .filter((asset) => !asset.parent)
-      .map((asset) => ({
+      .filter(asset => !asset.parent)
+      .map(asset => ({
         id: './' + path.relative(path.dirname(uri), asset.id.replace(protocol, '')).replace(/\\/g, '/'),
         resource: {
           uri: './' + path.relative(path.dirname(uri), asset.resource.uri.replace(protocol, '')).replace(/\\/g, '/'),
@@ -456,7 +459,7 @@ export class AssetState implements NgxsOnInit {
     const protocol = context.protocol;
     const path = (global as any).require('path') as PlatformPath;
     const scans = data.map(
-      (asset) =>
+      asset =>
         new ScanResource(
           path.resolve(path.dirname(uri), asset.resource.uri.replace(protocol, '')),
           asset.resource.source

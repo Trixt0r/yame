@@ -4,7 +4,6 @@ import { Directive, ViewContainerRef, HostListener, Output, EventEmitter, NgZone
  * Event which gets emitted on the number directive.
  */
 interface NumberDirectiveEvent {
-
   /**
    * The initial DOM event.
    */
@@ -24,7 +23,6 @@ interface NumberDirectiveEvent {
   selector: '[yameNumber]',
 })
 export class NumberDirective {
-
   /**
    * Emits as soon as the value has been changed.
    */
@@ -70,7 +68,6 @@ export class NumberDirective {
    */
   process(value: number, event: Event): void {
     const input = this.vcr.element.nativeElement as HTMLInputElement;
-    event.preventDefault();
     const val = Math.round(value * 1000) / 1000;
     input.value = String(val);
     this.yameNumberInput.next({ event, value: val });
@@ -83,8 +80,7 @@ export class NumberDirective {
    */
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
-    if (event.keyCode === 38 || event.keyCode === 40)
-      this.process(this.value + (event.keyCode === 38 ? 1 : -1), event);
+    if (event.keyCode === 38 || event.keyCode === 40) this.process(this.value + (event.keyCode === 38 ? 1 : -1), event);
   }
 
   /**
@@ -108,7 +104,7 @@ export class NumberDirective {
     if (event.which === 1) {
       this.clickedValue = this.value;
       this.clickedY = event.clientY;
-      window.addEventListener('mousemove', this.onMouseMoveBound);
+      window.addEventListener('mousemove', this.onMouseMoveBound, { passive: true });
     }
   }
 
@@ -128,5 +124,4 @@ export class NumberDirective {
     if (this.clickedY === null) return window.removeEventListener('mousemove', this.onMouseMoveBound);
     this.process((this.clickedValue as number) - (event.clientY - this.clickedY), event);
   }
-
 }
