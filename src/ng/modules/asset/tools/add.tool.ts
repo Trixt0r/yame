@@ -10,6 +10,8 @@ import { AssetState } from '../states/asset.state';
 
 @Injectable({ providedIn: 'root' })
 export class AddToolService extends Tool {
+  settingsMinWidth = 300;
+
   private mouseLeft = true;
 
   settingsComponent = AssetExplorerComponent as any;
@@ -58,7 +60,7 @@ export class AddToolService extends Tool {
     this.scene
       .addEntity(event.offsetX, event.offsetY, this.selectedAsset)
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           console.log(error);
           return of(null);
         }),
@@ -71,7 +73,7 @@ export class AddToolService extends Tool {
 
   async onActivate(): Promise<void> {
     delete this.selectedAsset;
-    this.selectAsset$.pipe(takeUntil(this.deactivated$)).subscribe((asset) => (this.selectedAsset = asset));
+    this.selectAsset$.pipe(takeUntil(this.deactivated$)).subscribe(asset => (this.selectedAsset = asset));
 
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mouseenter', this.onMouseenter);
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mousemove', this.onMousemove);

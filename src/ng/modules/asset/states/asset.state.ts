@@ -21,10 +21,10 @@ import { merge } from 'lodash';
 import { Injectable, Type } from '@angular/core';
 import { IResource, IResourceGroup } from 'common/interfaces/resource';
 import { IAssetPreviewComponent } from '../directives/preview.directive';
-import { IAssetDetailsComponent } from '../directives/details.directive';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 import { PlatformPath } from 'path';
 import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
+import { AssetDetailsComponent } from '../interfaces';
 
 /**
  * Preview components to initialize initially.
@@ -34,7 +34,7 @@ const initPreviewComponents: { [type: string]: Type<IAssetPreviewComponent> } = 
 /**
  * Details components to initialize initially.
  */
-const initDetailsComponents: { [type: string]: Type<IAssetDetailsComponent> } = {};
+const initDetailsComponents: { [type: string]: AssetDetailsComponent[] } = {};
 
 /**
  * Defines asset ui state.
@@ -48,7 +48,7 @@ interface AssetUI {
   /**
    * Component map for asset details.
    */
-  details: { [type: string]: Type<IAssetDetailsComponent> };
+  details: { [type: string]: AssetDetailsComponent[] };
 
   /**
    * The icon mapping.
@@ -209,8 +209,11 @@ export class AssetState implements NgxsOnInit {
    *
    * Initializes the given details component for the given types.
    */
-  static _initDetailsComponent(comp: Type<IAssetDetailsComponent>, ...types: string[]): void {
-    types.forEach(assetType => (initDetailsComponents[assetType] = comp));
+  static _initDetailsComponent(comp: AssetDetailsComponent, ...types: string[]): void {
+    types.forEach(assetType => {
+      if (!Array.isArray(initDetailsComponents[assetType])) initDetailsComponents[assetType] = [];
+      initDetailsComponents[assetType].push(comp);
+    });
   }
 
   constructor(protected store: Store) {}

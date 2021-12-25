@@ -8,6 +8,7 @@ import {
 import { ComponentPortal } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
 import { Action, Selector, State, StateContext, Store } from '@ngxs/store';
+import { lastValueFrom } from 'rxjs';
 import { ToolbarException } from '../exception';
 import { Tool, ToolType } from '../tool';
 import {
@@ -117,8 +118,8 @@ export class ToolbarState {
     const state = ctx.getState();
     const tools = state.tools.slice();
     const toRegister = Array.isArray(action.tool) ? action.tool : [action.tool];
-    toRegister.forEach((tool) => {
-      const found = tools.find((it) => it.id === tool.id);
+    toRegister.forEach(tool => {
+      const found = tools.find(it => it.id === tool.id);
       if (found) return console.warn(`[Toolbar] A tool with id ${tool.id} is already registered`);
       tools.push(tool);
     });
@@ -130,11 +131,11 @@ export class ToolbarState {
     const state = ctx.getState();
     const tools = state.tools;
     const id = typeof action.tool === 'string' ? action.tool : action.tool.id;
-    const activeTool = tools.find((it) => it.id === id);
+    const activeTool = tools.find(it => it.id === id);
     if (!activeTool) throw new ToolbarException(`Could not find tool '${id}'.`);
     if (state.activeTool?.id === id) return;
     if (state.activeTool && activeTool.type === ToolType.TOGGLE) {
-      await ctx.dispatch(new DeactivateTool(state.activeTool, action.event)).toPromise();
+      await lastValueFrom(ctx.dispatch(new DeactivateTool(state.activeTool, action.event)));
     }
     await activeTool.activate(action.event);
     if (activeTool.type === ToolType.TOGGLE) ctx.patchState({ activeTool });

@@ -2,15 +2,11 @@ import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideAsDecorated, UtilsModule } from '../utils';
 import { DndModule } from 'ng2-dnd';
-import { AssetItemsComponent } from './components/items/items.component';
-import { AssetPanelComponent } from './components/panel/panel.component';
-import { AssetGroupsComponent } from './components/groups/groups.component';
 import { AssetPreviewDirective } from './directives/preview.directive';
 import { AssetDefaultPreviewComponent } from './components/previews/default/default.component';
 import { NgxsModule, Store } from '@ngxs/store';
 import { NgBytesPipeModule } from 'angular-pipes';
 import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
-import { AssetDetailsDirective } from './directives/details.directive';
 import { AssetState } from './states/asset.state';
 import {
   AssetTreeComponent,
@@ -20,7 +16,7 @@ import {
   AssetExplorerComponent,
   AssetPreviewComponent,
 } from './components';
-import { AssetImageDetailsComponent } from './components/details/image/image.component';
+import { AssetDimensionsDetailsComponent } from './components/details/dimensions/dimensions.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
@@ -39,6 +35,8 @@ import { SceneComponentService } from '../scene';
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { AddToolService } from './tools/add.tool';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
 
 @NgModule({
   imports: [
@@ -58,27 +56,25 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
     NzSpinModule,
     NzSelectModule,
     NzToolTipModule,
+    NzDescriptionsModule,
+    NzTypographyModule,
     DndModule.forRoot(),
     NgxsModule.forFeature([AssetState]),
   ],
   declarations: [
-    AssetItemsComponent,
-    AssetGroupsComponent,
     AssetTreeComponent,
-    AssetPanelComponent,
     AssetDefaultPreviewComponent,
     AssetImagePreviewComponent,
-    AssetImageDetailsComponent,
+    AssetDimensionsDetailsComponent,
     AssetPreviewDirective,
-    AssetDetailsDirective,
     AssetTypeComponent,
     AssetAddSourceComponent,
     AssetExplorerComponent,
     AssetPreviewComponent,
   ],
-  exports: [AssetItemsComponent, AssetGroupsComponent, AssetPanelComponent, AssetPreviewDirective],
+  exports: [AssetPreviewDirective],
   providers: [
-    provideAsDecorated(AssetImagePreviewComponent, AssetImageDetailsComponent),
+    provideAsDecorated(AssetImagePreviewComponent, AssetDimensionsDetailsComponent),
     {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, addTool: AddToolService) => () => {

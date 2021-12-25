@@ -47,6 +47,9 @@ yame-toolbar {
   i[nz-icon].anticon-caret-right {
     position: absolute;
     opacity: 0.25;
+    &.active {
+      opacity: 1;
+    }
     right: 0;
     bottom: 0;
     transform: rotate(45deg);

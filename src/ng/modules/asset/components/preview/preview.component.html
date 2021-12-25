@@ -1,10 +1,7 @@
 <ng-container *ngIf="selectedAsset">
-  <div class="ant-drawer-header">
+  <div class="ant-drawer-header padding-8">
     <i nz-icon [nzType]="getIcon(selectedAsset)" class="inline"></i>
     <div class="ant-drawer-title inline margin-left-8" [innerText]="selectedAsset.resource.name"></div>
-    <!-- <button (click)="toggleAsset(selectedAsset)" aria-label="Close" class="ant-drawer-close" style="--scroll-bar: 0px">
-      <i nz-icon nzType="close"></i>
-    </button> -->
   </div>
   <nz-tabset nzCentered>
     <nz-tab [nzTitle]="titleTemplate">
@@ -22,42 +19,37 @@
           <ng-container [yameAssetPreview]="selectedAsset"></ng-container>
         </div>
       </div>
-      <nz-divider class="no-margin-bottom margin-top-16"></nz-divider>
-      <div class="details margin-top-4 padding-8">
-        <div class="row">
-          <div nz-typography class="col fill-33 text-left opacity-90">
-            <b>{{ 'asset.details.type' | translate }}</b>
-          </div>
-          <div nz-typography class="col fill-66 text-left">
-            <b>{{ getLabel(selectedAsset) | translate }}</b>
-          </div>
-        </div>
-        <div class="row" *ngIf="selectedAsset.resource.size !== undefined">
-          <div nz-typography class="col fill-33 text-left opacity-90">
-            <b>{{ 'asset.details.size' | translate }}</b>
-          </div>
-          <div nz-typography class="col fill-66 text-left">
-            <b>{{ selectedAsset?.resource.size | bytes }} ({{ selectedAsset?.resource.size | number }} bytes)</b>
-          </div>
-        </div>
-        <div class="row" *ngIf="selectedAsset.resource.created !== undefined">
-          <div nz-typography class="col fill-33 text-left opacity-90">
-            <b>{{ 'asset.details.created' | translate }}</b>
-          </div>
-          <div nz-typography class="col fill-66 text-left">
-            <b>{{ selectedAsset.resource.created | date: 'medium':undefined:lang }}</b>
-          </div>
-        </div>
-        <div class="row" *ngIf="selectedAsset.resource.changed !== undefined">
-          <div nz-typography class="col fill-33 text-left opacity-90">
-            <b>{{ 'asset.details.modified' | translate }}</b>
-          </div>
-          <div nz-typography class="col fill-66 text-left">
-            <b>{{ selectedAsset?.resource.changed | date: 'medium':undefined:lang }}</b>
-          </div>
-        </div>
-        <ng-container [yameAssetDetails]="selectedAsset"></ng-container>
-      </div>
+      <nz-descriptions nzBordered nzSize="small" [nzColumn]="{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }">
+        <nz-descriptions-item [nzTitle]="'asset.details.type' | translate">
+          {{ getLabel(selectedAsset) | translate }}
+        </nz-descriptions-item>
+        <nz-descriptions-item [nzTitle]="'asset.details.size' | translate">
+          <span>{{ selectedAsset?.resource.size | bytes }}</span>
+          <br />
+          <small nz-typography nzType="secondary">{{ selectedAsset?.resource.size | number }} bytes</small>
+        </nz-descriptions-item>
+        <nz-descriptions-item
+          *ngIf="selectedAsset.resource.created !== undefined"
+          [nzTitle]="'asset.details.created' | translate">
+          <span>{{ selectedAsset.resource.created | date: 'mediumDate':undefined:lang }}</span>
+          <br />
+          <small nz-typography nzType="secondary">{{
+            selectedAsset.resource.created | date: 'shortTime':undefined:lang
+          }}</small>
+        </nz-descriptions-item>
+        <nz-descriptions-item
+          *ngIf="selectedAsset.resource.changed !== undefined"
+          [nzTitle]="'asset.details.modified' | translate">
+          <span>{{ selectedAsset.resource.changed | date: 'mediumDate':undefined:lang }}</span>
+          <br />
+          <small nz-typography nzType="secondary">{{
+            selectedAsset.resource.changed | date: 'shortTime':undefined:lang
+          }}</small>
+        </nz-descriptions-item>
+        <nz-descriptions-item *ngFor="let description of descriptions" [nzTitle]="description.label | translate">
+          <ng-container [ngComponentOutlet]="description.content"></ng-container>
+        </nz-descriptions-item>
+      </nz-descriptions>
     </nz-tab>
   </nz-tabset>
 </ng-container>

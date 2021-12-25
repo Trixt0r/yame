@@ -1,7 +1,5 @@
-import { Type } from '@angular/core';
-import { IAssetDetailsComponent } from '../directives/details.directive';
 import { AssetState } from '../states/asset.state';
-
+import { AssetDetailsComponent } from '../interfaces';
 
 /**
  * Registers an asset details component for the given types.
@@ -10,7 +8,7 @@ import { AssetState } from '../states/asset.state';
  * @returns A function, which adds the given component to the internal registry.
  */
 export function AssetDetailsComponent(...types: string[]): Function {
-  return function decorator(component: Type<IAssetDetailsComponent>): void {
+  return function decorator(component: AssetDetailsComponent): void {
     AssetState._initDetailsComponent(component, ...types);
   };
 }

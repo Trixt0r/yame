@@ -43,6 +43,11 @@ export class Tool {
   icon?: string;
 
   /**
+   * Minimum width for the settings section of this tool.
+   */
+  settingsMinWidth = 150;
+
+  /**
    * Triggered when this tool got activated.
    */
   readonly activated$ = new Subject<void>();

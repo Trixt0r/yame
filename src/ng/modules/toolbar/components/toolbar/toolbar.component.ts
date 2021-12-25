@@ -7,23 +7,21 @@ import {
   HostBinding,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  OnDestroy,
   ViewEncapsulation,
   AfterViewInit,
 } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
 import { IToolbarUISettings, ToolbarState } from '../../states/toolbar.state';
-import { Observable, Subject } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { Tool, ToolType } from '../../tool';
 import { ActivateTool, UpdateToolbarUI } from '../../states/actions/toolbar.action';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
+import { DestroyLifecycle, notify } from 'ng/modules/utils';
 
 /**
  * The toolbar renders all tools.
  * This component is meant to be opened or closed in the editor.
  * Changing the opened state of the component will trigger the corresponding events on it.
- *
- * @class ToolbarComponent
  */
 @Component({
   selector: 'yame-toolbar',
@@ -31,8 +29,9 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['toolbar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  providers: [DestroyLifecycle],
 })
-export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
+export class ToolbarComponent implements OnChanges, AfterViewInit {
   /**
    * The height of the toolbar.
    */
@@ -80,35 +79,41 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
   }
 
   get settingsCollapsed(): boolean {
-    return this._width <= this.minWidth;
+    return !this.activeTool?.settingsComponent || this._width <= this.minWidth;
   }
 
   readonly minWidth = 48;
 
-  readonly threshold = 150;
-
-  /**
-   * Triggered as soon as this component gets removed
-   */
-  protected destroy$ = new Subject<void>();
+  get threshold(): number {
+    return this.activeTool?.settingsComponent ? this.activeTool?.settingsMinWidth ?? 150 : 0;
+  }
 
   @HostBinding('style.width.px')
   private _width = 0;
 
-  constructor(public ref: ElementRef<HTMLElement>, public store: Store, private cdr: ChangeDetectorRef) {
-    this.tools$.pipe(takeUntil(this.destroy$)).subscribe((tools) => {
-      this.tools = tools.filter((it) => it.type === ToolType.TOGGLE).sort((a, b) => a.position - b.position);
-      this.clickers = tools.filter((it) => it.type === ToolType.CLICK).sort((a, b) => b.position - a.position);
-      cdr.markForCheck();
-    });
-    this.activeTool$.pipe(takeUntil(this.destroy$)).subscribe((tool) => {
-      this.activeTool = tool;
-      this.cdr.markForCheck();
-    });
-    this.ui$.pipe(takeUntil(this.destroy$)).subscribe((ui) => {
-      this._width = ui.width;
-      cdr.markForCheck();
-    });
+  constructor(
+    public ref: ElementRef<HTMLElement>,
+    public store: Store,
+    cdr: ChangeDetectorRef,
+    destroy$: DestroyLifecycle
+  ) {
+    merge(
+      this.tools$.pipe(
+        tap(tools => {
+          this.tools = tools.filter(it => it.type === ToolType.TOGGLE).sort((a, b) => a.position - b.position);
+          this.clickers = tools.filter(it => it.type === ToolType.CLICK).sort((a, b) => b.position - a.position);
+        })
+      ),
+      this.activeTool$.pipe(
+        tap(tool => {
+          this.activeTool = tool;
+          this._width = this.minWidth + this.threshold;
+        })
+      ),
+      this.ui$.pipe(tap(ui => (this._width = ui.width)))
+    )
+      .pipe(takeUntil(destroy$), notify(cdr))
+      .subscribe();
   }
 
   /**
@@ -128,9 +133,9 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
    * @inheritdoc
    */
   ngAfterViewInit(): void {
-    const tools = this.tools.filter((it) => it.type === ToolType.TOGGLE);
+    const tools = this.tools.filter(it => it.type === ToolType.TOGGLE);
     if (tools.length === 0) return;
-    this.store.dispatch(new ActivateTool(tools[0])).toPromise();
+    this.store.dispatch(new ActivateTool(tools[0]));
   }
 
   /**
@@ -138,13 +143,5 @@ export class ToolbarComponent implements OnChanges, OnDestroy, AfterViewInit {
    */
   ngOnChanges(changes: SimpleChanges) {
     if (changes.height) this.ref.nativeElement.style['height'] = `${changes.height.currentValue}px`;
-  }
-
-  /**
-   * @inheritdoc
-   */
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

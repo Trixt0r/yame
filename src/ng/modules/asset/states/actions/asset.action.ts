@@ -1,11 +1,10 @@
 import { Type } from '@angular/core';
 import { Asset } from 'common/asset';
 import { IResource } from 'common/interfaces/resource';
-import { IAssetDetailsComponent } from '../../directives/details.directive';
 import { IAssetPreviewComponent } from '../../directives/preview.directive';
+import { AssetDetailsComponent } from '../../interfaces';
 
 export interface IAssetsSource {
-
   /**
    * Unique type identifier.
    */
@@ -30,116 +29,116 @@ export interface IAssetsSource {
 export class LoadFromAssetsSource {
   public static readonly type = '[Asset] Load assets source';
 
-  constructor(public source: IAssetsSource) { }
+  constructor(public source: IAssetsSource) {}
 }
 
 export class UnloadAssetsSource {
   public static readonly type = '[Asset] Unload assets source';
 
-  constructor(public source: IAssetsSource) { }
+  constructor(public source: IAssetsSource) {}
 }
 
 export class UpdateAssetsSource {
   public static readonly type = '[Asset] Update assets folder';
 
-  constructor(public source: IAssetsSource) { }
+  constructor(public source: IAssetsSource) {}
 }
 
 export class AddAssetsSource {
   public static readonly type = '[Asset] Add assets source';
 
-  constructor(public source: IAssetsSource) { }
+  constructor(public source: IAssetsSource) {}
 }
 
 export class RemoveAssetsSource {
   public static readonly type = '[Asset] Remove assets source';
 
-  constructor(public type: string) { }
+  constructor(public type: string) {}
 }
 
 export class SetAssetsRoot {
   public static readonly type = '[Asset] Set asset root';
 
-  constructor(public readonly root: string) { }
+  constructor(public readonly root: string) {}
 }
 
 export class AddAsset {
   public static readonly type = '[Asset] Add asset';
 
-  constructor(public asset: Asset | Asset[]) { }
+  constructor(public asset: Asset | Asset[]) {}
 }
 
 export class RemoveAsset {
   public static readonly type = '[Asset] Remove asset';
 
-  constructor(public id: string | string[]) { }
+  constructor(public id: string | string[]) {}
 }
 
 export class UpdateAsset {
   public static readonly type = '[Asset] Update asset';
 
-  constructor(public asset: Asset | Asset[]) { }
+  constructor(public asset: Asset | Asset[]) {}
 }
 
 export class ScanResource {
   public static readonly type = '[Asset] Scan Resource';
 
-  constructor(public uri: string, public source: string, public type = 'group') { }
+  constructor(public uri: string, public source: string, public type = 'group') {}
 }
 
 export class LoadAssetResource {
   public static readonly type = '[Asset] Load asset resource';
 
-  constructor(public resource: IResource, public force: boolean = false) { }
+  constructor(public resource: IResource, public force: boolean = false) {}
 }
 
 export class SelectAssetGroup {
   public static readonly type = '[Asset] Select asset group';
 
-  constructor(public asset: Asset) { }
+  constructor(public asset: Asset) {}
 }
 
 export class UnselectAssetGroup {
   public static readonly type = '[Asset] Unselect asset group';
 
-  constructor() { }
+  constructor() {}
 }
 
 export class SelectAsset {
   public static readonly type = '[Asset] Select asset';
 
-  constructor(public asset: Asset) { }
+  constructor(public asset: Asset) {}
 }
 
 export class UnselectAsset {
   public static readonly type = '[Asset] Unselect asset';
 
-  constructor() { }
+  constructor() {}
 }
 
 export class RegisterAssetPreviewComponent {
   public static readonly type = '[Asset] Register asset preview';
-  constructor(public component: Type<IAssetPreviewComponent>, public types: string[]) { }
+  constructor(public component: Type<IAssetPreviewComponent>, public types: string[]) {}
 }
 
 export class RegisterAssetDetailsComponent {
   public static readonly type = '[Asset] Register asset preview';
-  constructor(public component: Type<IAssetDetailsComponent>, public types: string[]) { }
+  constructor(public component: AssetDetailsComponent, public types: string[]) {}
 }
 
 export class RegisterAssetIcon {
   public static readonly type = '[Asset] Register asset icon';
 
-  constructor(public icon: string, public types: string[]) { }
+  constructor(public icon: string, public types: string[]) {}
 }
 
 export class RegisterAssetTypeLabel {
   public static readonly type = '[Asset] Register asset type label';
 
-  constructor(public label: string, public types: string[]) { }
+  constructor(public label: string, public types: string[]) {}
 }
 
 export class ResetAssets {
   public static readonly type = '[Asset] Reset assets';
-  constructor() { }
+  constructor() {}
 }
