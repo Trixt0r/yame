@@ -9,9 +9,6 @@ import { Keydown } from 'ng/states/hotkey.state';
 /**
  *
  * Configuration interface for the selection tool.
- *
- * @export
- * @interface SelectionToolConfig
  */
 export interface SelectionToolConfig {
   fill?: { alpha?: number; color?: number };
@@ -57,8 +54,8 @@ export class SelectionToolService extends Tool {
     actions.pipe(ofActionSuccessful(Keydown)).subscribe((action: Keydown) => {
       if (action.shortcut.id !== 'select.all') return;
       const all = scene.entities
-        .filter((it) => it.type !== SceneEntityType.Layer && this.isSelectable(it))
-        .map((it) => it.id);
+        .filter(it => it.type !== SceneEntityType.Layer && this.isSelectable(it))
+        .map(it => it.id);
       if (all.length === 0) return;
       this.store.dispatch(new Select(all, []));
     });
@@ -81,11 +78,11 @@ export class SelectionToolService extends Tool {
    * @return `true` if selectable.
    */
   isSelectable(entity: SceneEntity, fromHierarchy = false): boolean {
-    const isolated = this.store.selectSnapshot((state) => state.select).isolated;
+    const isolated = this.store.selectSnapshot(state => state.select).isolated;
     const parent = entity.parent ? this.scene.getEntity(entity.parent) : null;
     const isOnLayer = parent ? parent.type === SceneEntityType.Layer : false;
     return isolated
-      ? this.scene.getChildren(isolated).some((it) => it.id === entity.id)
+      ? this.scene.getChildren(isolated).some(it => it.id === entity.id)
       : !entity.parent || isOnLayer || (fromHierarchy && entity.type !== SceneEntityType.Layer);
   }
 
@@ -128,7 +125,7 @@ export class SelectionToolService extends Tool {
     this.down = true;
     window.addEventListener('mouseup', this.onMouseup);
     window.addEventListener('mousemove', this.onMousemove);
-    this.unselectAction.entities = this.store.selectSnapshot((state) => state.select).entities;
+    this.unselectAction.entities = this.store.selectSnapshot(state => state.select).entities;
     if ((this.unselectAction.entities?.length || 0) > 0) this.store.dispatch(this.unselectAction);
     this.begin$.next(event);
   }
