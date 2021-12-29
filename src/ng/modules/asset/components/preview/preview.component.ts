@@ -30,7 +30,6 @@ export class AssetPreviewComponent {
    */
   @Input() set asset(val: Asset | null) {
     this._asset = val;
-    console.log('preview', val);
     this.updateDescriptions();
     this.cdr.markForCheck();
   }

@@ -48,7 +48,7 @@ export class ToolbarComponent implements OnChanges, AfterViewInit {
   @Select(ToolbarState.tools) tools$!: Observable<Tool[]>;
 
   /**
-   * Selects the current toolbar width.
+   * Selects the current toolbar ui state.
    */
   @Select(ToolbarState.ui) ui$!: Observable<IToolbarUISettings>;
 
@@ -74,8 +74,8 @@ export class ToolbarComponent implements OnChanges, AfterViewInit {
     return this._width;
   }
 
-  @Input() set width(width: number) {
-    this.store.dispatch(new UpdateToolbarUI({ width }));
+  @Input() set width(fullWidth: number) {
+    this.store.dispatch(new UpdateToolbarUI({ width: this.minWidth, fullWidth }));
   }
 
   get settingsCollapsed(): boolean {
@@ -110,7 +110,7 @@ export class ToolbarComponent implements OnChanges, AfterViewInit {
           this._width = this.minWidth + this.threshold;
         })
       ),
-      this.ui$.pipe(tap(ui => (this._width = ui.width)))
+      this.ui$.pipe(tap(ui => (this._width = ui.fullWidth)))
     )
       .pipe(takeUntil(destroy$), notify(cdr))
       .subscribe();

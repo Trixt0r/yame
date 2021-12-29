@@ -21,9 +21,14 @@ import {
 
 export interface IToolbarUISettings {
   /**
-   * The overall width of the toolbar.
+   * The width of the toolbar buttons.
    */
   width: number;
+
+  /**
+   * The overall width of the toolbar.
+   */
+  fullWidth: number;
 
   /**
    * Whether the current tool's settings are collapsed or not.
@@ -56,7 +61,8 @@ export interface IToolbarState {
     tools: [],
     activeTool: null,
     ui: {
-      width: DEFAULT_TOOLBAR_WIDTH,
+      width: 48,
+      fullWidth: DEFAULT_TOOLBAR_WIDTH,
       collapsed: true,
     },
   },
