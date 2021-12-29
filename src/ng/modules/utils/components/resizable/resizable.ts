@@ -10,6 +10,7 @@ import {
   OnDestroy,
   NgZone,
   ChangeDetectionStrategy,
+  HostListener,
 } from '@angular/core';
 import { Subject } from 'rxjs';
 
@@ -17,10 +18,6 @@ import { Subject } from 'rxjs';
  * Abstract component which is able to handle resizes.
  * Pass the (mousedown), (window:mousemove) and (window:mouseup) handlers to
  * your resize element.
- *
- * @export
- * @abstract
- * @class ResizableComponent
  */
 @Component({
   selector: 'yame-resizable',
@@ -49,13 +46,17 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
    */
   protected isVer = false;
 
-  @Output() sizeUpdated = new EventEmitter();
+  @Output() sizeUpdated = new EventEmitter<number>();
   @Input() property!: string;
   @Input() minVal!: number;
   @Input() maxVal!: number;
   @Input() threshold = 0;
   @Input() set value(value: number) {
     this.updateValue(value, false);
+  }
+
+  get value(): number {
+    return this.propVal;
   }
 
   protected onMouseDownBind: (event: MouseEvent) => void;
@@ -164,6 +165,7 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   /**
    * Handles window resize event.
    */
+  @HostListener('window:resize')
   onResize(): void {
     const style = window.getComputedStyle(this.ref.nativeElement);
     const newVal = parseFloat(style.getPropertyValue(this.property));
@@ -189,12 +191,13 @@ export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   /**
    * Clamps the given value the the currently set constraints.
+   *
    * @param value
    * @return The clamped value.
    */
   clampValue(value: number): number {
-    if (this.minVal >= 0) value = isNaN(value) ? this.minVal : Math.max(value, this.minVal);
     if (this.maxVal >= 0) value = isNaN(value) ? this.maxVal : Math.min(value, this.maxVal);
+    if (this.minVal >= 0) value = isNaN(value) ? this.minVal : Math.max(value, this.minVal);
     return value;
   }
 

@@ -4,17 +4,4 @@ yame-asset-preview {
     height: 192px;
     max-height: 50%;
   }
-
-  .details {
-    .row {
-      .col {
-        vertical-align: top;
-        padding: 4px 8px;
-        &:first-child {
-          padding-left: 0;
-        }
-        box-sizing: border-box;
-      }
-    }
-  }
 }

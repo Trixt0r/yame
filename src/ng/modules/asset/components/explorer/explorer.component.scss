@@ -6,4 +6,26 @@ yame-asset-explorer {
     width: calc(100% - 32px);
     display: inline-block;
   }
+
+  yame-resizable {
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    left: 0;
+    cursor: ns-resize;
+  }
+  nz-divider.resizer {
+    position: absolute;
+    z-index: 999;
+    left: 8px;
+    width: calc(100% - 16px);
+    min-width: unset;
+    margin: 4px 0;
+  }
+  yame-asset-preview {
+    position: absolute;
+    left: 8px;
+    width: calc(100% - 16px);
+    overflow: auto;
+  }
 }

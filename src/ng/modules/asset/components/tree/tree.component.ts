@@ -3,13 +3,14 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  HostBinding,
   Input,
   NgZone,
   Output,
   ViewEncapsulation,
 } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import { IAssetsSource, RemoveAsset, ScanResource, SelectAsset, UnselectAsset, AssetState } from '../../states';
+import { RemoveAsset, ScanResource, AssetState } from '../../states';
 import { firstValueFrom, Observable } from 'rxjs';
 import { filter, first, take, takeUntil } from 'rxjs/operators';
 import { Asset } from 'common/asset';
@@ -29,19 +30,24 @@ type AssetTreeNode = NzTreeNodeOptions & { asset: Asset };
 })
 export class AssetTreeComponent {
   /**
-   * The group to be set externally.
+   * The asset to be set externally.
    */
   @Input() asset: Asset | null = null;
 
   /**
-   * Select event emitted as soon as a group got selected.
+   * The height of the tree.
    */
-  @Output() select = new EventEmitter<Asset>();
+  @Input() height?: number;
 
   /**
-   * Unselect event emitted as soon as the current group got unselected.
+   * Emitted as soon as the asset selection changed.
    */
-  @Output() unselect = new EventEmitter<Asset>();
+  @Output() assetChange = new EventEmitter<Asset | null>();
+
+  @HostBinding('style.max-height')
+  get maxHeight(): string | null {
+    return typeof this.height === 'number' ? `${this.height}px` : null;
+  }
 
   /**
    * Selector for subscribing to asset group updates.
@@ -73,6 +79,16 @@ export class AssetTreeComponent {
    */
   nodes: AssetTreeNode[] = [];
 
+  /**
+   * The selected node keys.
+   */
+  get selectedKeys(): string[] {
+    return this.asset ? [this.asset.id] : [];
+  }
+
+  /**
+   * All tree nodes as a flattened list.
+   */
   get flatNodes(): AssetTreeNode[] {
     const map: any = (node: AssetTreeNode) => [node, ...flatten((node.children ?? []).map(map) as AssetTreeNode[])];
     return flatten(this.nodes.map(map)) as AssetTreeNode[];
@@ -91,16 +107,16 @@ export class AssetTreeComponent {
   ) {
     zone.runOutsideAngular(() => {
       let waitingForResource = false;
-      this.assets$.pipe(takeUntil(destroy$)).subscribe(async (assets) => {
+      this.assets$.pipe(takeUntil(destroy$)).subscribe(async assets => {
         // Check first, if we need to update the nodes, if not, don't do anything
-        const hasQueued = assets.some((_) => this.expansionQueue.indexOf(_.id) >= 0);
+        const hasQueued = assets.some(_ => this.expansionQueue.indexOf(_.id) >= 0);
         if (waitingForResource || (!hasQueued && isEqual(assets, this.assets))) return;
         // Wait for the current resource until it is loaded
         waitingForResource = !!(await firstValueFrom(this.loading$.pipe(take(1))));
         if (waitingForResource) {
           await firstValueFrom(
             this.loading$.pipe(
-              filter((val) => val === null),
+              filter(val => val === null),
               first()
             )
           );
@@ -110,11 +126,11 @@ export class AssetTreeComponent {
         this.assets = AssetState.assets(store.snapshot().assets);
         this.updateNodes();
         // Remove loaded assets from the expansion queue
-        const notLoadedIds = this.assets.filter((_) => !_.resource.loaded).map((g) => g.id);
-        this.expansionQueue = this.expansionQueue.filter((_) => notLoadedIds.indexOf(_) >= 0);
+        const notLoadedIds = this.assets.filter(_ => !_.resource.loaded).map(g => g.id);
+        this.expansionQueue = this.expansionQueue.filter(_ => notLoadedIds.indexOf(_) >= 0);
         cdr.markForCheck();
       });
-      this.icons$.pipe(takeUntil(destroy$)).subscribe((icons) => (this.icons = icons));
+      this.icons$.pipe(takeUntil(destroy$)).subscribe(icons => (this.icons = icons));
     });
   }
 
@@ -128,7 +144,7 @@ export class AssetTreeComponent {
       title: asset.resource.label ?? asset.resource.name,
       key: asset.id,
       selected: asset.id === this.asset?.id,
-      children: this.assets.filter((it) => it.parent === asset.id).map(this.mapToNzTreeNode.bind(this)),
+      children: this.assets.filter(it => it.parent === asset.id).map(this.mapToNzTreeNode.bind(this)),
       asset,
     };
 
@@ -142,10 +158,10 @@ export class AssetTreeComponent {
    */
   protected updateNodes(): void {
     // Preserve the currently expanded nodes
-    const expanded = this.flatNodes.filter((_) => _.expanded && !_.isLeaf).map((_) => _.key);
+    const expanded = this.flatNodes.filter(_ => _.expanded && !_.isLeaf).map(_ => _.key);
     // Update the tree nodes based on the current asset state. Restore expanded nodes state
-    this.nodes = this.assets.filter((it) => !it.parent).map(this.mapToNzTreeNode.bind(this));
-    this.flatNodes.forEach((node) => (node.expanded = expanded.indexOf(node.key) >= 0));
+    this.nodes = this.assets.filter(it => !it.parent).map(this.mapToNzTreeNode.bind(this));
+    this.flatNodes.forEach(node => (node.expanded = expanded.indexOf(node.key) >= 0));
   }
 
   /**
@@ -165,10 +181,7 @@ export class AssetTreeComponent {
     }
     this.asset = isSelected ? node?.asset : null;
     if (isSelected) this.expansionQueue.push(node.asset.id);
-    this.store.dispatch(!this.asset ? new UnselectAsset() : new SelectAsset(this.asset!));
-
-    const emitter = isSelected ? this.select : this.unselect;
-    emitter.emit(node?.asset);
+    this.assetChange.emit(this.asset);
   }
 
   /**
@@ -179,7 +192,7 @@ export class AssetTreeComponent {
    */
   async onNzExpandChange(event: NzFormatEmitEvent): Promise<void> {
     const node = event.node;
-    const group = this.assets.find((it) => it.id === node?.key);
+    const group = this.assets.find(it => it.id === node?.key);
     if (!node || !group) return;
 
     if (group.resource.loaded || !node.isExpanded) return;

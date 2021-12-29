@@ -5,8 +5,8 @@
   [nzSelectedKeys]="this.asset ? [this.asset.id] : []"
   (nzClick)="onNzClick($event)"
   (nzExpandChange)="onNzExpandChange($event)"
-  [nzTreeTemplate]="nzTreeTemplate"
->
+  [nzSelectedKeys]="selectedKeys"
+  [nzTreeTemplate]="nzTreeTemplate">
   <ng-template #nzTreeTemplate let-node let-asset="origin.asset">
     <div class="pull-left text-left" [class.root]="!asset.parent" [class.fill-100]="!!asset.parent">
       <div class="pull-left inline-block icon-wrapper">
@@ -22,8 +22,7 @@
           nzType="text"
           nzSize="small"
           class="no-margin"
-          (click)="removeSource($event, asset)"
-        >
+          (click)="removeSource($event, asset)">
           <i nz-icon nzType="delete"></i>
         </button>
       </div>

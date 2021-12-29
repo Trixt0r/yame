@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, NgZone, ViewEncapsulation } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Actions, ofActionSuccessful, Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
@@ -26,9 +26,17 @@ interface AssetDescription {
 })
 export class AssetPreviewComponent {
   /**
-   * Selector for subscribing to asset selection.
+   * The asset to preview.
    */
-  @Select(AssetState.selectedAsset) asset$!: Observable<Asset>;
+  @Input() set asset(val: Asset | null) {
+    this._asset = val;
+    console.log('preview', val);
+    this.updateDescriptions();
+    this.cdr.markForCheck();
+  }
+  get asset(): Asset | null {
+    return this._asset;
+  }
 
   /**
    * Selector for subscribing to icon updates.
@@ -44,11 +52,6 @@ export class AssetPreviewComponent {
    * Selector for reacting to details component updates.
    */
   @Select(AssetState.detailsComponents) details$!: Observable<{ [key: string]: AssetDetailsComponent[] }>;
-
-  /**
-   * The currently selected asset.
-   */
-  selectedAsset: Asset | null = null;
 
   /**
    * The current asset icon map.
@@ -75,17 +78,21 @@ export class AssetPreviewComponent {
    */
   descriptions: AssetDescription[] = [];
 
+  /**
+   * Internal asset reference.
+   */
+  protected _asset: Asset | null = null;
+
   constructor(
+    protected cdr: ChangeDetectorRef,
     translate: TranslateService,
     actions: Actions,
     zone: NgZone,
-    destroy$: DestroyLifecycle,
-    cdr: ChangeDetectorRef
+    destroy$: DestroyLifecycle
   ) {
     this.lang = translate.currentLang;
     zone.runOutsideAngular(() => {
       merge(
-        this.asset$.pipe(tap(_ => (this.selectedAsset = _))),
         this.icons$.pipe(tap(_ => (this.icons = _))),
         this.labels$.pipe(tap(_ => (this.labels = _))),
         this.details$.pipe(tap(_ => (this.details = _))),
@@ -93,15 +100,13 @@ export class AssetPreviewComponent {
         actions.pipe(ofActionSuccessful(LoadAssetResource))
       )
         .pipe(takeUntil(destroy$), notify(cdr))
-        .subscribe(a => {
-          this.updateDescriptions();
-        });
+        .subscribe(() => this.updateDescriptions());
     });
   }
 
   protected updateDescriptions(): void {
-    if (!this.selectedAsset) return;
-    const components = this.details[this.selectedAsset.type];
+    if (!this._asset) return;
+    const components = this.details[this._asset.type];
     if (!Array.isArray(components)) return;
     this.descriptions = components.map(content => ({
       label: (content as any).label,
