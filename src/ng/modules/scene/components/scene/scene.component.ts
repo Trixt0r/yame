@@ -115,7 +115,7 @@ export class SceneComponent implements OnChanges, AfterViewInit {
     const sub = this.service
       .addEntity(mouseEvent.offsetX, mouseEvent.offsetY, asset)
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           console.log(error);
           return of(null);
         })

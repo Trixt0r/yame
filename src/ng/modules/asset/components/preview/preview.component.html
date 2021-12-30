@@ -19,7 +19,7 @@
           {{ getLabel(asset) | translate }}
         </nz-descriptions-item>
         <nz-descriptions-item [nzTitle]="'asset.details.size' | translate">
-          <span>{{ asset?.resource.size | bytes }}</span>
+          <span>{{ asset?.resource.size | bytes: 0 }}</span>
           <br />
           <small nz-typography nzType="secondary">{{ asset?.resource.size | number }} bytes</small>
         </nz-descriptions-item>

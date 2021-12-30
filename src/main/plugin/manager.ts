@@ -13,7 +13,6 @@ import { YamePlugin } from '../../common/plugin';
  * @extends CommonPluginManager
  */
 export class PluginManager extends CommonPluginManager {
-
   /** @inheritdoc */
   protected environment: IYameElectronEnvironment = Environment;
 
@@ -57,24 +56,23 @@ export class PluginManager extends CommonPluginManager {
    * Reads all plugin files from the config and resolves them.
    */
   static getFiles(force = false): Promise<string[]> {
-    if (PluginManager.files && !force)
-      return Promise.resolve(PluginManager.files);
-    let globs = (Environment.config || { }).plugins;
+    if (PluginManager.files && !force) return Promise.resolve(PluginManager.files);
+    let globs = (Environment.config || {}).plugins;
     if (!globs) return Promise.resolve([]);
-    if (!Array.isArray(globs))
-      globs = [globs];
+    if (!Array.isArray(globs)) globs = [globs];
     const proms: Promise<string[]>[] = [];
     globs.forEach(pattern => {
-      proms.push(new Promise((resolve, reject) => {
-        glob(pattern, (err, files) => {
-          if (err) return reject(err);
-          resolve(files);
-        });
-      }));
+      proms.push(
+        new Promise((resolve, reject) => {
+          glob(pattern, (err, files) => {
+            if (err) return reject(err);
+            resolve(files);
+          });
+        })
+      );
     });
     return Promise.all(proms)
-            .then(re => _.flatten(re, true).map(uri => path.resolve(uri)) )
-            .then(re => PluginManager.files = re);
+      .then(re => _.flatten(re).map(uri => path.resolve(uri)))
+      .then(re => (PluginManager.files = re));
   }
-
 }

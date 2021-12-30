@@ -5,7 +5,7 @@ import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { UtilsModule } from '../utils';
 import { HierarchyComponent } from './components/hierarchy/hierarchy.component';
 import { SelectionComponent } from './components/selection/selection.component';
-import { NgRoundPipeModule } from 'angular-pipes';
+import { NgMathPipesModule } from 'ngx-pipes';
 import { SceneComponentsService } from './services/scene-components.service';
 import { EntityComponentsDirective } from './directives/entity-components.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -43,7 +43,7 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
   imports: [
     BrowserModule,
     UtilsModule,
-    NgRoundPipeModule,
+    NgMathPipesModule,
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,

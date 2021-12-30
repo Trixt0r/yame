@@ -29,7 +29,7 @@ export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneCompon
   /**
    * THe current number value.
    */
-  get number(): number | string {
+  get number(): number {
     return typeof this.component?.number === 'number' ? (this.transform(this.component.number) as number) : 0;
   }
 

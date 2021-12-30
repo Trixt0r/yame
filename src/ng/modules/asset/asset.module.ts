@@ -5,7 +5,7 @@ import { DndModule } from 'ng2-dnd';
 import { AssetPreviewDirective } from './directives/preview.directive';
 import { AssetDefaultPreviewComponent } from './components/previews/default/default.component';
 import { NgxsModule, Store } from '@ngxs/store';
-import { NgBytesPipeModule } from 'angular-pipes';
+import { NgMathPipesModule } from 'ngx-pipes';
 import { RegisterAssetIcon, RegisterAssetTypeLabel } from './states/actions/asset.action';
 import { AssetState } from './states/asset.state';
 import {
@@ -52,7 +52,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
     NzTabsModule,
     NzDividerModule,
     NzResultModule,
-    NgBytesPipeModule,
+    NgMathPipesModule,
     NzSpinModule,
     NzSelectModule,
     NzToolTipModule,

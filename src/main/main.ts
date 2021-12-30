@@ -1,18 +1,17 @@
 import * as yame from '.';
-import * as bluebird from 'bluebird';
 import * as eventemitter3 from 'eventemitter3';
 import * as fsExtra from 'fs-extra';
 import * as lodash from 'lodash';
 import * as uuid from 'uuid';
 import { extend } from '../common/require';
+require('@electron/remote/main').initialize();
 
 const mapping = {
-  yame: yame,
-  bluebird: bluebird,
-  eventemitter3: eventemitter3,
+  yame,
+  eventemitter3,
   'fs-extra': fsExtra,
-  lodash: lodash,
-  uuid: uuid,
+  lodash,
+  uuid,
 };
 extend(mapping);
 
@@ -22,7 +21,6 @@ import { File } from './io/file';
 import initIpc from './ipc';
 import { Environment } from './environment';
 import { PluginManager } from './plugin/manager';
-
 
 // app.commandLine.appendSwitch('ignore-connections-limit', '/'); doesn't seem to work for files
 
@@ -42,8 +40,7 @@ app.commandLine.appendSwitch('disable-http-cache');
  * @returns {boolean} Whether quitting the application was successful or not.
  */
 function quit() {
-  pluginManager.finalize()
-    .then(() => app.quit());
+  pluginManager.finalize().then(() => app.quit());
 }
 
 /**
@@ -60,13 +57,14 @@ function init() {
     minHeight: 600,
     frame: false,
     titleBarStyle: 'hidden',
+    thickFrame: false,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
       contextIsolation: false,
-      enableRemoteModule: true,
-    }
+    },
   });
+  require('@electron/remote/main').enable(window.webContents);
   window.setAutoHideMenuBar(true);
   window.setMenuBarVisibility(false);
 
@@ -75,7 +73,7 @@ function init() {
   window.loadURL(`file:///${path.resolve(Environment.ngDir, 'index.html')}`);
   yame.Pubsub.emit('ready', window);
   window.on('close', () => window.destroy());
-  }
+}
 
 app.on('ready', async () => {
   try {
@@ -86,7 +84,7 @@ app.on('ready', async () => {
       Environment.config = json;
       await pluginManager.initialize();
     } catch (e) {
-      Environment.config = { };
+      Environment.config = {};
       console.error('Could not parse config file');
     }
   } catch (e) {

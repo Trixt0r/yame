@@ -10,7 +10,7 @@ import {
 import { AssetSceneComponent as AssetComponent } from 'common/scene/component/asset';
 import { DragDropData } from 'ng2-dnd';
 import { Asset } from 'common/asset';
-import { AssetState, IAssetState } from 'ng/modules/asset/states/asset.state';
+import { AssetState } from 'ng/modules/asset/states/asset.state';
 import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { filter, first, take, takeUntil } from 'rxjs/operators';
@@ -73,7 +73,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   }
 
   set selected(id: string | null | undefined) {
-    this.currentIndex = id ? this.allAssets.findIndex((it) => it.id === id) : -1;
+    this.currentIndex = id ? this.allAssets.findIndex(it => it.id === id) : -1;
     const asset = this.allAssets[this.currentIndex];
     if (id === this.component?.asset && id && !asset) this.loadMoreAssets();
     if (!this.component || (this.component && this.component.asset === id)) return;
@@ -103,7 +103,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   onAttach(): void {
     let waitingForResource = false;
     this.zone.runOutsideAngular(() => {
-      this.assets$.pipe(takeUntil(this.detach$)).subscribe(async (assets) => {
+      this.assets$.pipe(takeUntil(this.detach$)).subscribe(async assets => {
         this.allAssets = assets.slice();
 
         if (waitingForResource) return;
@@ -113,7 +113,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
         if (waitingForResource) {
           await this.loading$
             .pipe(
-              filter((val) => val === null),
+              filter(val => val === null),
               first()
             )
             .toPromise();
@@ -122,7 +122,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
         this.updateAssetBuffer();
       });
 
-      this.loading$.pipe(takeUntil(this.detach$)).subscribe(async (loading) => {
+      this.loading$.pipe(takeUntil(this.detach$)).subscribe(async loading => {
         this.loading = !!loading;
         this.cdr.markForCheck();
       });
@@ -134,7 +134,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    */
   updateAssetBuffer(): void {
     const before = this.assetBuffer.length;
-    this.assetBuffer = this.allAssets.filter((it) => this.checkType(it));
+    this.assetBuffer = this.allAssets.filter(it => this.checkType(it));
     this.cdr.markForCheck();
     if (this.assetBuffer.length < this.bufferThreshold || before === this.assetBuffer.length) this.loadMoreAssets();
   }
@@ -143,7 +143,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
    * Loads assets, which were not loaded yet.
    */
   loadMoreAssets(): void {
-    const notLoaded = this.allAssets.find((it) => it.type === 'group' && !it.resource.loaded);
+    const notLoaded = this.allAssets.find(it => it.type === 'group' && !it.resource.loaded);
     if (!notLoaded) return;
     this.store.dispatch(new ScanResource(notLoaded.resource.uri, notLoaded.resource.source));
   }
@@ -206,7 +206,7 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
   onScroll({ end }: { end: number }) {
     if (this.loading || this.allAssets.length <= this.assetBuffer.length) return;
     if (end + this.bufferThreshold >= this.assetBuffer.length) {
-      if (end + this.bufferThreshold >= this.allAssets.filter((it) => this.checkType(it)).length) this.loadMoreAssets();
+      if (end + this.bufferThreshold >= this.allAssets.filter(it => this.checkType(it)).length) this.loadMoreAssets();
       else this.updateAssetBuffer();
     }
   }

@@ -34,7 +34,7 @@ export class ElectronModule {
         const folder = (await dialog.open({ properties: ['openDirectory'] }))[0];
         if (!folder) return;
         await store.dispatch(new ScanResource(folder, action.source.type)).toPromise();
-        const sub = loaded$.subscribe((resource) => {
+        const sub = loaded$.subscribe(resource => {
           sub.unsubscribe();
           const asset = assetState.getAssetForResource(resource);
           if (!asset) return console.warn(`[Electron] Could not found asset for uri ${resource.uri}`);
@@ -71,7 +71,7 @@ export class ElectronModule {
       const uri = (await dialog.open({ properties: ['openFile'] }))[0].replace(protocol, '');
       const content = (await electron.getProvider(FileProvider).read(uri)) as string;
       store.dispatch(new LoadEditorFile({ uri, protocol, source: 'local', data: JSON.parse(content) }));
-      const sub = loaded$.subscribe((resource) => {
+      const sub = loaded$.subscribe(resource => {
         sub.unsubscribe();
         const asset = assetState.getAssetForResource(resource);
         if (!asset) return console.warn(`[Electron] Could not found asset for uri ${resource.uri}`);
@@ -80,8 +80,8 @@ export class ElectronModule {
       });
     });
 
-    const Menu = (global as any).require('electron').remote.Menu;
-    const MenuItem = (global as any).require('electron').remote.MenuItem;
+    const Menu = (global as any).require('@electron/remote').Menu;
+    const MenuItem = (global as any).require('@electron/remote').MenuItem;
     const menu = new Menu();
     menu.append(
       new MenuItem({
