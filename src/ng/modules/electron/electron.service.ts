@@ -3,26 +3,17 @@ import { ElectronProviderNotFound } from './exception/services/not-found.excepti
 import { Injectable, Type } from '@angular/core';
 import { ElectronProvider } from './electron.provider';
 
-interface ElectronProviders {
-  [key: string]: ElectronProvider;
-}
-
 /**
  * The electron service provides functionality for registering electron providers.
  * Electron providers can be used to abstract and simplify the usage for the ipc communication between
  * the browser process and the renderer process.
- *
- * @export
- * @class ElectronService
  */
 @Injectable({ providedIn: 'root' })
 export class ElectronService {
-
-  private providers: ElectronProviders = { };
+  private providers: Record<string, ElectronProvider> = {};
 
   /**
-   * @readonly
-   * @type {Electron.IpcRenderer} Reference to the ipc renderer
+   * Reference to the ipc renderer
    */
   get ipc() {
     return (global as any).require('electron').ipcRenderer;
@@ -48,9 +39,7 @@ export class ElectronService {
    * @return The instance for the given provider class.
    */
   getProvider<T extends ElectronProvider>(type: Type<T>): T {
-    if (!this.providers[type.name])
-      throw new ElectronProviderNotFound(type);
+    if (!this.providers[type.name]) throw new ElectronProviderNotFound(type);
     return <T>this.providers[type.name];
   }
-
 }

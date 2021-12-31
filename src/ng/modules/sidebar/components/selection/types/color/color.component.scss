@@ -27,7 +27,7 @@ yame-component-type-color {
   }
 
   .inline-block.header {
-    width: calc(100% - 24px);
+    width: calc(100% - 32px);
   }
 
   .preview-wrapper {
@@ -53,8 +53,9 @@ yame-component-type-color {
 
   .ant-collapse-header {
     padding: 4px !important;
-    .anticon.ant-collapse-arrow {
-      vertical-align: text-top;
+    & > div {
+      display: inline-block;
+      margin-right: 8px;
     }
   }
 }

@@ -28,28 +28,10 @@
     },
     {
       "type": "npm",
-      "script": "watch",
+      "script": "build.electron",
       "group": "none",
-      "label": "watch",
-      "isBackground": true,
-      "detail": "Watches for main and renderer changes and reloads",
-      "problemMatcher": [
-        {
-          "pattern": [
-            {
-              "regexp": ".",
-              "file": 1,
-              "location": 2,
-              "message": 3
-            }
-          ],
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": ".",
-            "endsPattern": "."
-          }
-        }
-      ]
+      "label": "build.electron",
+      "detail": "Builds the electron backend"
     },
     {
       "type": "npm",
@@ -57,6 +39,7 @@
       "group": "none",
       "label": "electron",
       "detail": "Runs the app inside electron",
+      "dependsOn": "build.electron",
       "problemMatcher": [
         {
           "pattern": [

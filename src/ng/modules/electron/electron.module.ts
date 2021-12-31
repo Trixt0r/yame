@@ -17,8 +17,6 @@ import { Keydown } from 'ng/states/hotkey.state';
 import { ZoomCameraOut } from '../camera/states/actions/camera.action';
 import { LoadEditorFile, SaveEditorFile } from 'ng/states/actions/editor.action';
 
-const customTitlebar = (global as any).require('custom-electron-titlebar');
-
 const loaded$ = new Subject<IResource>();
 
 const protocol = 'file:///';
@@ -80,108 +78,103 @@ export class ElectronModule {
       });
     });
 
-    const Menu = (global as any).require('@electron/remote').Menu;
-    const MenuItem = (global as any).require('@electron/remote').MenuItem;
-    const menu = new Menu();
-    menu.append(
-      new MenuItem({
-        label: 'File',
-        submenu: [
-          {
-            label: 'New File',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'new.file', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+N',
-          },
-          {
-            label: 'New Window',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'new.window', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+Shift+N',
-          },
-          {
-            type: 'separator',
-          },
-          {
-            label: 'Open File',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'open', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+O',
-          },
-          {
-            type: 'separator',
-          },
-          {
-            label: 'Save',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'save', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+S',
-          },
-          {
-            label: 'Save as...',
-            accelerator: 'CommandOrControl+Shift+S',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'save.as', label: '' }, event as any)),
-          },
-          {
-            type: 'separator',
-          },
-          {
-            label: 'Exit',
-            click: () => (event: unknown) => store.dispatch(new Keydown({ id: 'file.close', label: '' }, event as any)),
-          },
-        ],
-      })
-    );
-    menu.append(
-      new MenuItem({
-        label: 'Edit',
-        submenu: [
-          {
-            label: 'Undo',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'undo', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+Z',
-          },
-          {
-            label: 'Redo',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'redo', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+Y',
-          },
-          {
-            type: 'separator',
-          },
-          {
-            label: 'Cut',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'cut', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+X',
-          },
-          {
-            label: 'Copy',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'copy', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+C',
-          },
-          {
-            label: 'Paste',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'paste', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+V',
-          },
-          {
-            label: 'Remove',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'remove', label: '' }, event as any)),
-            accelerator: 'Delete',
-          },
-          {
-            type: 'separator',
-          },
-          {
-            label: 'Select all',
-            click: (event: unknown) => store.dispatch(new Keydown({ id: 'select.all', label: '' }, event as any)),
-            accelerator: 'CommandOrControl+A',
-          },
-        ],
-      })
-    );
-
-    const titleBar = new customTitlebar.Titlebar({
-      backgroundColor: customTitlebar.Color.fromHex('#252525'),
-      closeable: true,
-      icon: './assets/favicon.ico',
-      menu,
-    });
+    // TODO: move to main and use ipc messages
+    // const menu = new Menu();
+    // menu.append(
+    //   new MenuItem({
+    //     label: 'File',
+    //     submenu: [
+    //       {
+    //         label: 'New File',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'new.file', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+N',
+    //       },
+    //       {
+    //         label: 'New Window',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'new.window', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+Shift+N',
+    //       },
+    //       {
+    //         type: 'separator',
+    //       },
+    //       {
+    //         label: 'Open File',
+    //         click: (event: unknown) => {
+    //           console.log(new Error().stack);
+    //           store.dispatch(new Keydown({ id: 'open', label: '' }, event as any));
+    //         },
+    //         accelerator: 'CommandOrControl+O',
+    //       },
+    //       {
+    //         type: 'separator',
+    //       },
+    //       {
+    //         label: 'Save',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'save', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+S',
+    //       },
+    //       {
+    //         label: 'Save as...',
+    //         accelerator: 'CommandOrControl+Shift+S',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'save.as', label: '' }, event as any)),
+    //       },
+    //       {
+    //         type: 'separator',
+    //       },
+    //       {
+    //         label: 'Exit',
+    //         click: () => (event: unknown) => store.dispatch(new Keydown({ id: 'file.close', label: '' }, event as any)),
+    //       },
+    //     ],
+    //   })
+    // );
+    // menu.append(
+    //   new MenuItem({
+    //     label: 'Edit',
+    //     submenu: [
+    //       {
+    //         label: 'Undo',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'undo', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+Z',
+    //       },
+    //       {
+    //         label: 'Redo',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'redo', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+Y',
+    //       },
+    //       {
+    //         type: 'separator',
+    //       },
+    //       {
+    //         label: 'Cut',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'cut', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+X',
+    //       },
+    //       {
+    //         label: 'Copy',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'copy', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+C',
+    //       },
+    //       {
+    //         label: 'Paste',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'paste', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+V',
+    //       },
+    //       {
+    //         label: 'Remove',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'remove', label: '' }, event as any)),
+    //         accelerator: 'Delete',
+    //       },
+    //       {
+    //         type: 'separator',
+    //       },
+    //       {
+    //         label: 'Select all',
+    //         click: (event: unknown) => store.dispatch(new Keydown({ id: 'select.all', label: '' }, event as any)),
+    //         accelerator: 'CommandOrControl+A',
+    //       },
+    //     ],
+    //   })
+    // );
   }
 }

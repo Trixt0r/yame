@@ -1,12 +1,13 @@
 yame-component-type-group {
   .ant-collapse-header {
     padding: 4px !important;
-    .anticon.ant-collapse-arrow {
-      vertical-align: text-top;
+    & > div {
+      display: inline-block;
+      margin-right: 8px;
     }
   }
 
   yame-type-label {
-    width: calc(100% - 48px);
+    width: calc(100% - 54px);
   }
 }

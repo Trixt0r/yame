@@ -4,7 +4,6 @@ import * as fsExtra from 'fs-extra';
 import * as lodash from 'lodash';
 import * as uuid from 'uuid';
 import { extend } from '../common/require';
-require('@electron/remote/main').initialize();
 
 const mapping = {
   yame,
@@ -45,18 +44,16 @@ function quit() {
 
 /**
  * Initializes the app window and triggers the public subscription event 'ready'.
- *
- * @returns {void}
  */
-function init() {
+function init(): void {
   const window = new BrowserWindow({
     backgroundColor: '#303030',
     width: 1280,
     height: 720,
     minWidth: 800,
     minHeight: 600,
-    frame: false,
-    titleBarStyle: 'hidden',
+    // frame: false,
+    // titleBarStyle: 'hidden',
     thickFrame: false,
     webPreferences: {
       nodeIntegration: true,
@@ -64,7 +61,6 @@ function init() {
       contextIsolation: false,
     },
   });
-  require('@electron/remote/main').enable(window.webContents);
   window.setAutoHideMenuBar(true);
   window.setMenuBarVisibility(false);
 
