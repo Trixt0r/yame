@@ -1,0 +1,28 @@
+<div class="preview" dnd-draggable [dragEnabled]="true" [dragData]="asset" (dragstart)="onDragStart($event)">
+  <div class="fill-width fill-height relative">
+    <ng-container [yameAssetPreview]="asset"></ng-container>
+  </div>
+</div>
+<nz-descriptions nzBordered nzSize="small" [nzColumn]="{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }">
+  <nz-descriptions-item [nzTitle]="'asset.details.type' | translate">
+    {{ getLabel(asset) | translate }}
+  </nz-descriptions-item>
+  <nz-descriptions-item [nzTitle]="'asset.details.size' | translate">
+    <span>{{ asset?.resource.size | bytes: 0 }}</span>
+    <br />
+    <small nz-typography nzType="secondary">{{ asset?.resource.size | number }} bytes</small>
+  </nz-descriptions-item>
+  <nz-descriptions-item *ngIf="asset.resource.created !== undefined" [nzTitle]="'asset.details.created' | translate">
+    <span>{{ asset.resource.created | date: 'mediumDate':undefined:lang }}</span>
+    <br />
+    <small nz-typography nzType="secondary">{{ asset.resource.created | date: 'shortTime':undefined:lang }}</small>
+  </nz-descriptions-item>
+  <nz-descriptions-item *ngIf="asset.resource.changed !== undefined" [nzTitle]="'asset.details.modified' | translate">
+    <span>{{ asset.resource.changed | date: 'mediumDate':undefined:lang }}</span>
+    <br />
+    <small nz-typography nzType="secondary">{{ asset.resource.changed | date: 'shortTime':undefined:lang }}</small>
+  </nz-descriptions-item>
+  <nz-descriptions-item *ngFor="let description of descriptions" [nzTitle]="description.label | translate">
+    <ng-container [ngComponentOutlet]="description.content"></ng-container>
+  </nz-descriptions-item>
+</nz-descriptions>

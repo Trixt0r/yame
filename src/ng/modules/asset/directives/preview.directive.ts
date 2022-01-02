@@ -1,92 +1,58 @@
 import { Asset } from 'common/asset';
 
-import {
-  ComponentRef,
-  Directive,
-  Input,
-  ViewContainerRef,
-  OnChanges,
-  SimpleChanges,
-  Type,
-  NgZone,
-  OnDestroy,
-} from '@angular/core';
+import { ComponentRef, Directive, Input, ViewContainerRef, Type, NgZone } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { AssetState } from '../states/asset.state';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AssetDefaultPreviewComponent } from '../components/previews/default/default.component';
-
-/**
- * An interface for defining a component which is able to render a preview of a certain asset.
- */
-export interface IAssetPreviewComponent<T = unknown> {
-  /**
-   * The asset instance.
-   */
-  asset: Asset<T>;
-}
+import { DestroyLifecycle } from 'ng/modules/utils';
+import { IAssetOwner } from '../interfaces';
 
 /**
  * Directive for injecting a preview component for a certain asset.
  */
 @Directive({
   selector: '[yameAssetPreview]',
+  providers: [DestroyLifecycle],
 })
-export class AssetPreviewDirective implements OnChanges, OnDestroy {
+export class AssetPreviewDirective {
   /**
    * The asset to render.
    */
-  @Input('yameAssetPreview') asset!: Asset;
+  @Input('yameAssetPreview') set asset(val: Asset) {
+    this.render(val);
+  }
 
   /**
    * Selector for reacting to preview component updates.
    */
-  @Select(AssetState.previewComponents) previews$!: Observable<{ [key: string]: Type<IAssetPreviewComponent> }>;
+  @Select(AssetState.previewComponents) previews$!: Observable<{ [key: string]: Type<IAssetOwner> }>;
 
   /**
    * A map of all preview components.
    */
-  previews: { [key: string]: Type<IAssetPreviewComponent> } = {};
+  previews: { [key: string]: Type<IAssetOwner> } = {};
 
-  /**
-   * Triggered when this directive gets destroyed.
-   */
-  protected destroy$ = new Subject<void>();
-
-  constructor(protected viewContainerRef: ViewContainerRef, protected zone: NgZone) {
+  constructor(protected viewContainerRef: ViewContainerRef, protected zone: NgZone, destroy$: DestroyLifecycle) {
     this.zone.runOutsideAngular(() => {
-      this.previews$.pipe(takeUntil(this.destroy$)).subscribe((previews) => (this.previews = previews));
+      this.previews$.pipe(takeUntil(destroy$)).subscribe(previews => (this.previews = previews));
     });
   }
 
   /**
-   * Renders the group item, if a component type for the currently set group is registered.
+   * Renders the asset preview for the given asset.
    *
+   * @param asset The asset to render.
    * @return The created component reference or `null` if no component found for the current group.
    */
-  render(): ComponentRef<IAssetPreviewComponent> | null {
-    const compType = this.previews[this.asset.type] || AssetDefaultPreviewComponent;
+  render(asset: Asset): ComponentRef<IAssetOwner> | null {
+    const compType = this.previews[asset.type] || AssetDefaultPreviewComponent;
     const viewContainerRef = this.viewContainerRef;
     viewContainerRef.clear();
     if (!compType) return null;
     const componentRef = viewContainerRef.createComponent(compType);
-    componentRef.instance.asset = this.asset;
+    componentRef.instance.asset = asset;
     return componentRef;
-  }
-
-  /**
-   * @inheritdoc
-   */
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.asset) this.render();
-  }
-
-  /**
-   * @inheritdoc
-   */
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

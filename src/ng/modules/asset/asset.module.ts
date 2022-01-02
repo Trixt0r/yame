@@ -1,6 +1,6 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { provideAsDecorated, UtilsModule } from '../utils';
+import { UtilsModule } from '../utils';
 import { DndModule } from 'ng2-dnd';
 import { AssetPreviewDirective } from './directives/preview.directive';
 import { AssetDefaultPreviewComponent } from './components/previews/default/default.component';
@@ -14,7 +14,8 @@ import {
   AssetImagePreviewComponent,
   AssetAddSourceComponent,
   AssetExplorerComponent,
-  AssetPreviewComponent,
+  AssetInspectorComponent,
+  AssetDetailsTabComponent,
 } from './components';
 import { AssetDimensionsDetailsComponent } from './components/details/dimensions/dimensions.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -37,6 +38,7 @@ import { AddToolService } from './tools/add.tool';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { AssetTabDirective } from './directives';
 
 @NgModule({
   imports: [
@@ -67,14 +69,15 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
     AssetImagePreviewComponent,
     AssetDimensionsDetailsComponent,
     AssetPreviewDirective,
+    AssetTabDirective,
     AssetTypeComponent,
     AssetAddSourceComponent,
     AssetExplorerComponent,
-    AssetPreviewComponent,
+    AssetInspectorComponent,
+    AssetDetailsTabComponent,
   ],
   exports: [AssetPreviewDirective],
   providers: [
-    provideAsDecorated(AssetImagePreviewComponent, AssetDimensionsDetailsComponent),
     {
       provide: APP_INITIALIZER,
       useFactory: (store: Store, addTool: AddToolService) => () => {
@@ -110,7 +113,7 @@ export class AssetModule {
       type: 'asset',
       icon: 'file-image',
       label: 'componentLabel.texture',
-      factory: (entities, type, group) => {
+      factory: (entities, type, _group) => {
         const component = createAssetComponent(compService.generateComponentId(entities, type));
         component.allowedTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg'];
         return component;

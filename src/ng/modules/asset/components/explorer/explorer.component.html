@@ -3,7 +3,11 @@
   <yame-asset-add-source></yame-asset-add-source>
 </div>
 <nz-divider *ngIf="tree.assets?.length" class="margin-bottom-8 margin-top-4"></nz-divider>
-<yame-asset-tree #tree [(asset)]="asset" [height]="asset ? resizer.value - 58 : undefined"></yame-asset-tree>
+<yame-asset-tree
+  #tree
+  [(asset)]="asset"
+  [height]="asset ? resizer.value - 58 : undefined"
+  [style.min-height]="'92px'"></yame-asset-tree>
 <yame-resizable
   #resizer
   property="top"
@@ -11,9 +15,8 @@
   [maxVal]="maxResizerValue"
   (sizeUpdated)="tree.height = asset ? $event - 58 : undefined"></yame-resizable>
 <nz-divider *ngIf="asset" class="resizer" [style.top]="resizer.value + 'px'"></nz-divider>
-<yame-asset-preview
+<yame-asset-inspector
   *ngIf="asset"
   [asset]="asset"
-  #preview
   [style.top]="resizer.value + 'px'"
-  [style.max-height]="'calc(100% - ' + resizer.value + 'px)'"></yame-asset-preview>
+  [style.max-height]="'calc(100% - ' + resizer.value + 'px)'"></yame-asset-inspector>

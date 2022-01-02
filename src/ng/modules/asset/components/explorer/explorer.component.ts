@@ -21,9 +21,7 @@ import { AssetState, SelectAsset, UnselectAsset } from '../../states';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetExplorerComponent {
-  static readonly PREVIEW_MIN_HEIGHT = 330;
-
-  @ViewChild('resizer') resizer!: ResizableComponent;
+  static readonly PREVIEW_MIN_HEIGHT = 250;
 
   /**
    * Selector for subscribing to asset selection.

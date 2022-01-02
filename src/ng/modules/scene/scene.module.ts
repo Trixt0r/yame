@@ -9,7 +9,6 @@ import { SelectState } from './states/select.state';
 import { SceneComponentService } from './services/component.service';
 import { HistoryState } from './states/history.state';
 import { ImageAssetService } from './services/image-asset.service';
-import { provideAsDecorated } from '../utils';
 import { decorateComponentIOInstances, decorateConverterInstances } from './decorators';
 
 @NgModule({
@@ -18,7 +17,7 @@ import { decorateComponentIOInstances, decorateConverterInstances } from './deco
   declarations: [SceneComponent, SceneRendererComponentDirective, NoopSceneRendererComponent],
   exports: [SceneComponent],
   providers: [
-    provideAsDecorated(ImageAssetService),
+    ImageAssetService,
     {
       provide: APP_INITIALIZER,
       useFactory: (components: SceneComponentService, injector: Injector) => () => {

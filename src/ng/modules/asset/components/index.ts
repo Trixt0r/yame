@@ -4,4 +4,5 @@ export { AssetDimensionsDetailsComponent } from './details/dimensions/dimensions
 export { AssetDefaultPreviewComponent, AssetImagePreviewComponent } from './previews';
 export { AssetAddSourceComponent } from './add-source/add-source.component';
 export { AssetExplorerComponent } from './explorer/explorer.component';
-export { AssetPreviewComponent } from './preview/preview.component';
+export { AssetInspectorComponent } from './inspector/inspector.component';
+export { AssetDetailsTabComponent } from './details-tab/details-tab.component';

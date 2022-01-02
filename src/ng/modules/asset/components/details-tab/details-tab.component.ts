@@ -1,46 +1,33 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, NgZone, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, ViewEncapsulation } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Actions, ofActionSuccessful, Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
-import { NzDescriptionsItemComponent } from 'ng-zorro-antd/descriptions';
 import { DestroyLifecycle, notify } from 'ng/modules/utils';
 import { merge, Observable, takeUntil, tap } from 'rxjs';
-import { AssetDetailsComponent } from '../../interfaces';
+import { AssetTabComponent } from '../../decorators/tab.decorator';
+import { IAssetDetailsComponent, IAssetOwner } from '../../interfaces';
 import { AssetState, LoadAssetResource } from '../../states';
 
 const dragImage = new Image(0, 0);
 
 interface AssetDescription {
   label: string;
-  content: AssetDetailsComponent;
+  content: IAssetDetailsComponent;
 }
 
 @Component({
-  selector: 'yame-asset-preview',
-  templateUrl: './preview.component.html',
-  styleUrls: ['./preview.component.scss'],
+  selector: 'yame-asset-details-tab',
+  templateUrl: './details-tab.component.html',
+  styleUrls: ['./details-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  viewProviders: [NzDescriptionsItemComponent],
   providers: [DestroyLifecycle],
 })
-export class AssetPreviewComponent {
-  /**
-   * The asset to preview.
-   */
-  @Input() set asset(val: Asset | null) {
-    this._asset = val;
-    this.updateDescriptions();
-    this.cdr.markForCheck();
-  }
-  get asset(): Asset | null {
-    return this._asset;
-  }
+@AssetTabComponent()
+export class AssetDetailsTabComponent implements IAssetOwner {
+  static readonly icon = 'info-circle';
 
-  /**
-   * Selector for subscribing to icon updates.
-   */
-  @Select(AssetState.icons) icons$!: Observable<{ [icon: string]: string }>;
+  static readonly title = 'asset.details.title';
 
   /**
    * Selector for subscribing to type label updates.
@@ -50,12 +37,19 @@ export class AssetPreviewComponent {
   /**
    * Selector for reacting to details component updates.
    */
-  @Select(AssetState.detailsComponents) details$!: Observable<{ [key: string]: AssetDetailsComponent[] }>;
+  @Select(AssetState.detailsComponents) details$!: Observable<{ [key: string]: IAssetDetailsComponent[] }>;
 
   /**
-   * The current asset icon map.
+   * The asset to preview.
    */
-  icons: { [icon: string]: string } = {};
+  set asset(val: Asset) {
+    this._asset = val;
+    this.updateDescriptions();
+    this.cdr.markForCheck();
+  }
+  get asset(): Asset {
+    return this._asset!;
+  }
 
   /**
    * The current asset type label map.
@@ -65,7 +59,7 @@ export class AssetPreviewComponent {
   /**
    * The current asset details map.
    */
-  details: { [key: string]: AssetDetailsComponent[] } = {};
+  details: { [key: string]: IAssetDetailsComponent[] } = {};
 
   /**
    * The current language.
@@ -80,7 +74,7 @@ export class AssetPreviewComponent {
   /**
    * Internal asset reference.
    */
-  protected _asset: Asset | null = null;
+  private _asset?: Asset;
 
   constructor(
     protected cdr: ChangeDetectorRef,
@@ -92,7 +86,6 @@ export class AssetPreviewComponent {
     this.lang = translate.currentLang;
     zone.runOutsideAngular(() => {
       merge(
-        this.icons$.pipe(tap(_ => (this.icons = _))),
         this.labels$.pipe(tap(_ => (this.labels = _))),
         this.details$.pipe(tap(_ => (this.details = _))),
         translate.onLangChange.pipe(tap(_ => (this.lang = _.lang))),
@@ -103,7 +96,7 @@ export class AssetPreviewComponent {
     });
   }
 
-  protected updateDescriptions(): void {
+  private updateDescriptions(): void {
     if (!this._asset) return;
     const components = this.details[this._asset.type];
     if (!Array.isArray(components)) return;
@@ -111,16 +104,6 @@ export class AssetPreviewComponent {
       label: (content as any).label,
       content,
     }));
-  }
-
-  /**
-   * Returns the icon for the given asset.
-   *
-   * @param asset The asset.
-   * @return The icon name.
-   */
-  getIcon(asset: Asset): string {
-    return this.icons[asset.type] || 'file';
   }
 
   /**

@@ -11,7 +11,7 @@ import { AssetState } from '../states/asset.state';
 
 @Injectable({ providedIn: 'root' })
 export class AddToolService extends Tool {
-  settingsMinWidth = 300;
+  settingsMinWidth = 250;
 
   private mouseLeft = true;
 
@@ -50,7 +50,6 @@ export class AddToolService extends Tool {
   }
 
   private createPreview(): void {
-    console.log(this.isPreviewActive, this.mouseLeft, this.selectedEntities);
     if (!this.selectedAsset || this.isPreviewActive || this.mouseLeft || this.selectedEntities.length > 0) return;
     this.isPreviewActive = true;
     this.scene.createPreview(this.lastMouseX, this.lastMouseY, this.selectedAsset);
@@ -58,17 +57,10 @@ export class AddToolService extends Tool {
   }
 
   mouseenter(): void {
-    if (
-      !this.mouseLeft ||
-      !this.selectedAsset ||
-      !this.converter.has(this.selectedAsset) ||
-      this.selectedEntities.length > 0
-    ) {
-      this.mouseLeft = false;
-      return;
-    }
+    if (!this.mouseLeft) return;
     this.mouseLeft = false;
-    this.createPreview();
+    if (this.selectedAsset && this.converter.has(this.selectedAsset) && this.selectedEntities.length <= 0)
+      this.createPreview();
   }
 
   mouseleave(left: MouseEvent | boolean): void {

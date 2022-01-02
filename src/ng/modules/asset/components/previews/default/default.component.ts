@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { Asset } from 'common/asset';
-import { IAssetPreviewComponent } from '../../../directives/preview.directive';
+import { IAssetOwner } from '../../../interfaces';
 
 @Component({
-  templateUrl: 'default.component.html',
-  styleUrls: ['default.component.scss'],
+  templateUrl: './default.component.html',
+  styleUrls: ['./default.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssetDefaultPreviewComponent implements IAssetPreviewComponent {
+export class AssetDefaultPreviewComponent implements IAssetOwner {
   asset!: Asset;
 }

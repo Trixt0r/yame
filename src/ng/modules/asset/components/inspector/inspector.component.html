@@ -1,0 +1,18 @@
+<ng-container *ngIf="asset">
+  <div class="ant-drawer-header padding-8">
+    <i nz-icon [nzType]="getIcon(asset)" class="inline"></i>
+    <div class="ant-drawer-title inline margin-left-8" [innerText]="asset.resource.name"></div>
+  </div>
+  <nz-tabset nzCentered nzSize="small">
+    <nz-tab *ngFor="let content of tabContent" [nzTitle]="titleTemplate">
+      <ng-template #titleTemplate>
+        <span class="padding-left-8 padding-right-8" nz-tooltip [nzTooltipTitle]="content.title | translate">
+          <i *ngIf="content.icon" nz-icon [nzType]="content.icon"></i>
+        </span>
+      </ng-template>
+      <ng-template nz-tab>
+        <ng-container [yameAssetTab]="asset" [yameAssetTabContent]="content"></ng-container>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</ng-container>

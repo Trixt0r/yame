@@ -44,6 +44,7 @@ export class AssetTreeComponent {
    */
   @Output() assetChange = new EventEmitter<Asset | null>();
 
+  @HostBinding('style.height')
   @HostBinding('style.max-height')
   get maxHeight(): string | null {
     return typeof this.height === 'number' ? `${this.height}px` : null;

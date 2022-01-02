@@ -20,35 +20,44 @@ import {
 import { merge } from 'lodash';
 import { Injectable, Type } from '@angular/core';
 import { IResource, IResourceGroup } from 'common/interfaces/resource';
-import { IAssetPreviewComponent } from '../directives/preview.directive';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 import { PlatformPath } from 'path';
 import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
-import { AssetDetailsComponent } from '../interfaces';
+import { IAssetDetailsComponent, IAssetOwner } from '../interfaces';
+
+/**
+ * Tab components to initialize initially.
+ */
+const initTabComponents: { [type: string]: Type<IAssetOwner>[] } = {};
 
 /**
  * Preview components to initialize initially.
  */
-const initPreviewComponents: { [type: string]: Type<IAssetPreviewComponent> } = {};
+const initPreviewComponents: { [type: string]: Type<IAssetOwner> } = {};
 
 /**
  * Details components to initialize initially.
  */
-const initDetailsComponents: { [type: string]: AssetDetailsComponent[] } = {};
+const initDetailsComponents: { [type: string]: IAssetDetailsComponent[] } = {};
 
 /**
  * Defines asset ui state.
  */
 interface AssetUI {
   /**
+   * Component map for asset tabs.
+   */
+  tabs: { [type: string]: Type<IAssetOwner>[] };
+
+  /**
    * Component map for asset previews.
    */
-  previews: { [type: string]: Type<IAssetPreviewComponent> };
+  previews: { [type: string]: Type<IAssetOwner> };
 
   /**
    * Component map for asset details.
    */
-  details: { [type: string]: AssetDetailsComponent[] };
+  details: { [type: string]: IAssetDetailsComponent[] };
 
   /**
    * The icon mapping.
@@ -101,6 +110,7 @@ export interface IAssetState {
     selectedAsset: null,
     scanningResource: null,
     ui: {
+      tabs: {},
       previews: {},
       details: {},
       icons: {},
@@ -164,6 +174,14 @@ export class AssetState implements NgxsOnInit {
   }
 
   /**
+   * Returns all registered tab components.
+   */
+  @Selector()
+  static tabComponents(state: IAssetState) {
+    return state.ui.tabs;
+  }
+
+  /**
    * Returns all registered preview components.
    */
   @Selector()
@@ -198,9 +216,27 @@ export class AssetState implements NgxsOnInit {
   /**
    * @private
    *
+   * Initializes the given tab component for the given types.
+   */
+  static _initTabComponent(comp: Type<IAssetOwner>, ...types: string[]): void {
+    console.log(comp, types);
+    if (!types || types.length <= 0) {
+      if (!Array.isArray(initTabComponents['*'])) initTabComponents['*'] = [];
+      initTabComponents['*'].push(comp);
+    }
+
+    types.forEach(assetType => {
+      if (!Array.isArray(initTabComponents[assetType])) initTabComponents[assetType] = [];
+      initTabComponents[assetType].push(comp);
+    });
+  }
+
+  /**
+   * @private
+   *
    * Initializes the given preview component for the given types.
    */
-  static _initPreviewComponent(comp: Type<IAssetPreviewComponent>, ...types: string[]): void {
+  static _initPreviewComponent(comp: Type<IAssetOwner>, ...types: string[]): void {
     types.forEach(assetType => (initPreviewComponents[assetType] = comp));
   }
 
@@ -209,7 +245,7 @@ export class AssetState implements NgxsOnInit {
    *
    * Initializes the given details component for the given types.
    */
-  static _initDetailsComponent(comp: AssetDetailsComponent, ...types: string[]): void {
+  static _initDetailsComponent(comp: IAssetDetailsComponent, ...types: string[]): void {
     types.forEach(assetType => {
       if (!Array.isArray(initDetailsComponents[assetType])) initDetailsComponents[assetType] = [];
       initDetailsComponents[assetType].push(comp);
@@ -223,7 +259,9 @@ export class AssetState implements NgxsOnInit {
    */
   ngxsOnInit(ctx?: StateContext<IAssetState>) {
     const ui = ctx?.getState().ui;
-    ctx?.patchState({ ui: merge({ previews: initPreviewComponents, details: initDetailsComponents }, ui) });
+    ctx?.patchState({
+      ui: merge({ tabs: initTabComponents, previews: initPreviewComponents, details: initDetailsComponents }, ui),
+    });
   }
 
   /**

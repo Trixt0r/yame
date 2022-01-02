@@ -14,13 +14,13 @@ import { NgxsModule } from '@ngxs/store';
 import { SceneModule } from './modules/scene';
 import { PixiModule } from './modules/pixi/pixi.module';
 import { ToolbarModule } from './modules/toolbar/toolbar.module';
-import { CursorService } from 'ng/services/cursor.service';
 import { HotkeyState } from 'ng/states/hotkey.state';
 import { AssetModule } from './modules/asset/asset.module';
 import { CameraModule } from './modules/camera/camera.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { EditorState } from './states/editor.state';
 import { NgxsOnBeforePluginModule } from './modules/onbefore-plugin/onbefore-plugin.module';
+import { TileMapModule } from './modules/tile-map';
 
 @NgModule({
   imports: [
@@ -38,6 +38,7 @@ import { NgxsOnBeforePluginModule } from './modules/onbefore-plugin/onbefore-plu
     PreferencesModule,
     CameraModule,
     PixiModule,
+    TileMapModule,
   ],
   declarations: [AppComponent, MainComponent],
   bootstrap: [AppComponent],

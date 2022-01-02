@@ -1,21 +1,17 @@
 import {
   Component,
   ElementRef,
-  ViewChild,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Input,
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
-import { SceneComponent } from '../../modules/scene/components/scene/scene.component';
-import { ToolbarComponent } from 'ng/modules/toolbar/components/toolbar/toolbar.component';
 
 @Component({
-  moduleId: module.id.toString(),
   selector: 'yame-main',
-  templateUrl: 'main.component.html',
-  styleUrls: ['main.component.scss'],
+  templateUrl: './main.component.html',
+  styleUrls: ['./main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements OnChanges {
@@ -24,9 +20,6 @@ export class MainComponent implements OnChanges {
   }
 
   @Input() width!: number;
-
-  @ViewChild(SceneComponent, { static: false }) scene!: SceneComponent;
-  @ViewChild(ToolbarComponent, { static: false }) toolbar!: ToolbarComponent;
 
   constructor(public ref: ElementRef, protected cdr: ChangeDetectorRef) {}
 
