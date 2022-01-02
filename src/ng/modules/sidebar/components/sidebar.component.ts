@@ -119,7 +119,7 @@ export class SidebarComponent extends ResizableComponent implements AfterViewIni
    * @inheritdoc
    */
   ngAfterViewInit(): void {
-    this.selectionSub = this.selection$.subscribe((data) => {
+    this.selectionSub = this.selection$.subscribe(data => {
       this.selected = data;
       this.selectedEntities = this.selected.entities;
       this.hasSelections = this.selectedEntities.length > 0;

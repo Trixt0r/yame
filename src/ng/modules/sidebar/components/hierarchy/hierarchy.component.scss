@@ -51,6 +51,9 @@ yame-hierarchy {
     margin-bottom: 4px;
     overflow: hidden;
     user-select: none;
+    &::after {
+      display: none;
+    }
     transition: all 0.3s, border 0s, line-height 0s, box-shadow 0s;
     &:hover {
       background-color: rgba(255, 255, 255, 0.08);

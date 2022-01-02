@@ -54,7 +54,7 @@ function init(): void {
     minHeight: 600,
     // frame: false,
     // titleBarStyle: 'hidden',
-    thickFrame: false,
+    // thickFrame: false,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,

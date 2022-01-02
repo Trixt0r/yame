@@ -10,36 +10,36 @@
   nzBlockNode
   nzDraggable
   [nzData]="nodes"
-  [nzTreeTemplate]="nzTreeTemplate"
   [nzMultiple]="true"
   [nzBeforeDrop]="nzBeforeDrop"
   [nzSelectedKeys]="selectedKeys"
   (nzDblClick)="onNzDblClick($event)"
   (nzClick)="onNzClick($event)"
   (nzOnDrop)="onNzDrop($event)"
-  (nzOnDragStart)="onNzDragStart($event)"
->
-  <ng-template #nzTreeTemplate let-node let-origin="origin" let-entity="origin.entity">
-    <div *ngIf="isolated && isolated === node.key" class="isolated"></div>
-    <div class="pull-left text-left">
-      <div class="inline-block icon-wrapper">
-        <i nz-icon [nzType]="getIcon(origin)"></i>
-      </div>
-      <div class="node-title pull-right text-ellipsis inline-block">{{ node.title }}</div>
-    </div>
-    <div class="inline-actions-wrapper pull-right">
-      <div class="inline-actions inline">
-        <yame-add-entity *ngIf="canHaveChildren(origin)" class="embedded" [parent]="origin.key"></yame-add-entity>
-        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="toggleVisibility($event, origin)">
-          <i nz-icon [nzType]="isVisible(origin) ? 'eye' : 'eye-invisible'"></i>
-        </button>
-        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="toggleLock($event, origin)">
-          <i nz-icon [nzType]="isLocked(origin) ? 'lock' : 'unlock'"></i>
-        </button>
-        <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="removeEntity($event, origin)">
-          <i nz-icon nzType="delete"></i>
-        </button>
-      </div>
-    </div>
+  (nzOnDragStart)="onNzDragStart($event)">
+  <ng-template #nzTreeTemplate let-node let-origin="origin">
+    <span [attr.draggable]="true" [attr.aria-grabbed]="true" [class.draggable]="true">
+      <span *ngIf="isolated && isolated === node.key" class="isolated"></span>
+      <span class="pull-left text-left">
+        <span class="inline-block icon-wrapper">
+          <i nz-icon [nzType]="getIcon(origin)"></i>
+        </span>
+        <span class="node-title pull-right text-ellipsis inline-block">{{ node.title }}</span>
+      </span>
+      <span class="inline-actions-wrapper pull-right">
+        <span class="inline-actions inline">
+          <yame-add-entity *ngIf="canHaveChildren(origin)" class="embedded" [parent]="origin.key"></yame-add-entity>
+          <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="toggleVisibility($event, origin)">
+            <i nz-icon [nzType]="isVisible(origin) ? 'eye' : 'eye-invisible'"></i>
+          </button>
+          <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="toggleLock($event, origin)">
+            <i nz-icon [nzType]="isLocked(origin) ? 'lock' : 'unlock'"></i>
+          </button>
+          <button nz-button nzShape="circle" nzType="text" nzSize="small" (click)="removeEntity($event, origin)">
+            <i nz-icon nzType="delete"></i>
+          </button>
+        </span>
+      </span>
+    </span>
   </ng-template>
 </nz-tree>

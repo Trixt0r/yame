@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, AfterViewInit, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, AfterViewInit, Input, ChangeDetectorRef } from '@angular/core';
 import { NavItem } from 'ng/modules/utils/components/nested-dropdown/nested-dropdown.component';
 import { EntityTypeService } from 'ng/modules/sidebar/services/entity-type.service';
 import { capitalize, isNil } from 'lodash';
@@ -23,7 +23,7 @@ export class AddEntityComponent implements AfterViewInit {
    */
   @Input() parent?: string;
 
-  constructor(protected entityTypes: EntityTypeService) {}
+  constructor(protected entityTypes: EntityTypeService, private cdr: ChangeDetectorRef) {}
 
   /**
    * Initializes the items to render.
@@ -33,7 +33,7 @@ export class AddEntityComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const items: NavItem[] = [];
     const entityTypeCategories = this.entityTypes.categories;
-    const flatList: NavItem[] = entityTypeCategories.map((category) => {
+    const flatList: NavItem[] = entityTypeCategories.map(category => {
       return {
         id: category.id,
         label: category.label,
@@ -42,49 +42,50 @@ export class AddEntityComponent implements AfterViewInit {
       };
     });
 
-    flatList.forEach((item) => {
-      const sceneCategory = entityTypeCategories.find((it) => item.id === it.id);
+    flatList.forEach(item => {
+      const sceneCategory = entityTypeCategories.find(it => item.id === it.id);
       if (!sceneCategory) return;
       if (sceneCategory.categories) {
         const categories = sceneCategory.categories || [];
-        item.children = flatList.filter((it) => categories?.indexOf(it.id) >= 0);
+        item.children = flatList.filter(it => categories?.indexOf(it.id) >= 0);
       }
       if (!sceneCategory.parent) items.push(item);
     });
 
-    this.entityTypes.items.forEach((item) => {
+    this.entityTypes.items.forEach(item => {
       const entityTypeItem = {
         id: item.id,
         icon: item.icon,
         label: item.label,
       };
-      const categories = entityTypeCategories.filter((it) => it.items.indexOf(item.id) >= 0);
+      const categories = entityTypeCategories.filter(it => it.items.indexOf(item.id) >= 0);
       if (categories.length === 0) {
         if (!entityTypeItem.label)
           entityTypeItem.label = item.id
             .split(/\.|_|-/g)
-            .map((str) => capitalize(str))
+            .map(str => capitalize(str))
             .join(' ');
         items.push(entityTypeItem);
       } else {
-        categories.forEach((it) => {
-          const navItem = flatList.find((_) => _.id === it.id);
+        categories.forEach(it => {
+          const navItem = flatList.find(_ => _.id === it.id);
           const child = Object.assign({}, entityTypeItem);
           if (!child.label)
             child.label = item.id
               .split(/\.|_|-/g)
-              .filter((str) => it.id !== str)
-              .map((str) => capitalize(str))
+              .filter(str => it.id !== str)
+              .map(str => capitalize(str))
               .join(' ');
           navItem?.children?.push(child);
         });
       }
     });
-    this.items = items.filter((it) => {
+    this.items = items.filter(it => {
       if (it.id === 'layer' && this.parent) return false;
-
       return isNil(it.children) || (it.children && it.children.length > 0);
     });
+
+    this.cdr.markForCheck();
   }
 
   /**

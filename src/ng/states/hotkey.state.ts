@@ -70,7 +70,7 @@ export interface IHotkeyState {
       {
         id: 'redo',
         label: 'Redo',
-        keys: [`${HotkeyService.commandOrControl}.y`, 'meta.shift.z'],
+        keys: [`${HotkeyService.commandOrControl}.y`, `${HotkeyService.commandOrControl}.shift.z`],
       },
       {
         id: 'copy',
@@ -108,10 +108,10 @@ export class HotkeyState implements NgxsOnInit {
     this.zone.runOutsideAngular(() => {
       this.hotkeys
         .register({ keys: shortcut.keys, event: 'keydown' })
-        .subscribe((event) => this.store.dispatch(new Keydown(shortcut, event)));
+        .subscribe(event => this.store.dispatch(new Keydown(shortcut, event)));
       this.hotkeys
         .register({ keys: shortcut.keys, event: 'keyup' })
-        .subscribe((event) => this.store.dispatch(new Keyup(shortcut, event)));
+        .subscribe(event => this.store.dispatch(new Keyup(shortcut, event)));
     });
   }
 
@@ -119,7 +119,7 @@ export class HotkeyState implements NgxsOnInit {
    * @inheritdoc
    */
   ngxsOnInit(ctx?: StateContext<IHotkeyState>) {
-    ctx?.getState().shortcuts.forEach((it) => {
+    ctx?.getState().shortcuts.forEach(it => {
       if (!it.keys) return;
       this.registerShortcut(it);
     });

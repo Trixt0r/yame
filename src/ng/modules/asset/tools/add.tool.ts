@@ -34,9 +34,9 @@ export class AddToolService extends Tool {
   private mousePressed = false;
   private lastMouseX = 0;
   private lastMouseY = 0;
+  private isPreviewActive = false;
 
   constructor(
-    // private store: Store,
     private selection: SelectionToolService,
     private scene: SceneService,
     private converter: SceneAssetConverterService
@@ -49,7 +49,15 @@ export class AddToolService extends Tool {
     this.onMouseup = this.mouseup.bind(this);
   }
 
-  mouseenter(event: MouseEvent): void {
+  private createPreview(): void {
+    console.log(this.isPreviewActive, this.mouseLeft, this.selectedEntities);
+    if (!this.selectedAsset || this.isPreviewActive || this.mouseLeft || this.selectedEntities.length > 0) return;
+    this.isPreviewActive = true;
+    this.scene.createPreview(this.lastMouseX, this.lastMouseY, this.selectedAsset);
+    requestAnimationFrame(() => this.scene.updatePreview(this.lastMouseX, this.lastMouseY));
+  }
+
+  mouseenter(): void {
     if (
       !this.mouseLeft ||
       !this.selectedAsset ||
@@ -60,12 +68,13 @@ export class AddToolService extends Tool {
       return;
     }
     this.mouseLeft = false;
-    this.scene.createPreview(event.clientX, event.clientY, this.selectedAsset);
+    this.createPreview();
   }
 
-  mouseleave(): void {
+  mouseleave(left: MouseEvent | boolean): void {
     this.scene.removePreview();
-    this.mouseLeft = true;
+    this.mouseLeft = typeof left === 'boolean' ? left : !!left;
+    this.isPreviewActive = false;
   }
 
   mousedown(event: MouseEvent): void {
@@ -90,6 +99,7 @@ export class AddToolService extends Tool {
   mousemove(event: MouseEvent): void {
     this.lastMouseX = event.offsetX;
     this.lastMouseY = event.offsetY;
+    this.createPreview();
     this.selection.mousemove(event);
     this.scene.updatePreview(event.offsetX, event.offsetY);
   }
@@ -101,7 +111,7 @@ export class AddToolService extends Tool {
         catchError(() => of(null)),
         take(1)
       )
-      .subscribe(() => this.mouseenter(event));
+      .subscribe(() => this.mouseenter());
   }
 
   async onActivate(): Promise<void> {
@@ -112,12 +122,8 @@ export class AddToolService extends Tool {
       this.selectedEntities$.pipe(
         tap(_ => {
           this.selectedEntities = _;
-          if (this.selectedEntities.length > 0) this.mouseleave();
-          else if (this.selectedAsset) {
-            this.mouseLeft = false;
-            this.scene.createPreview(this.lastMouseX, this.lastMouseY, this.selectedAsset);
-            requestAnimationFrame(() => this.scene.updatePreview(this.lastMouseX, this.lastMouseY));
-          }
+          if (this.selectedEntities.length > 0) this.mouseleave(this.mouseLeft);
+          else this.createPreview();
         })
       )
     )

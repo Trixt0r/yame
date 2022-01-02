@@ -93,7 +93,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    * The current isolated entity id.
    */
   get isolated(): string | null {
-    const isolated = this.store.selectSnapshot((state) => state.select).isolated as SceneEntity;
+    const isolated = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
     return isolated ? isolated.id : null;
   }
 
@@ -153,8 +153,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
           const flatNodes = this.getFlatNodes();
 
           // Keep expanded and selected nodes
-          const expanded = flatNodes.filter((_) => _.expanded && !_.isLeaf).map((_) => _.key);
-          const selected = flatNodes.filter((_) => _.selected).map((_) => _.key);
+          const expanded = flatNodes.filter(_ => _.expanded && !_.isLeaf).map(_ => _.key);
+          const selected = flatNodes.filter(_ => _.selected).map(_ => _.key);
 
           const mapFn: (entity: SceneEntity) => TreeNode = (entity: SceneEntity) => {
             const children = this.scene.getChildren(entity, false);
@@ -169,7 +169,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
             };
           };
 
-          this.nodes = entities.filter((it) => !it.parent).map(mapFn);
+          this.nodes = entities.filter(it => !it.parent).map(mapFn);
           this.cdr.markForCheck();
         });
       this.actions.pipe(takeUntil(this.destroy$), ofActionSuccessful(Select, Unselect)).subscribe(() => {
@@ -178,7 +178,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
       });
       this.actions.pipe(takeUntil(this.destroy$), ofActionSuccessful(Isolate)).subscribe((action: Isolate) => {
         if (action.entity) {
-          const node = this.nodes.find((_) => _.key === action.entity?.id);
+          const node = this.nodes.find(_ => _.key === action.entity?.id);
           if (node) node.expanded = true;
         }
         this.cdr.markForCheck();
@@ -220,7 +220,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     if (!entity || (entity.type !== SceneEntityType.Layer && entity.type !== SceneEntityType.Group)) return;
     const isolated = this.store.snapshot().select.isolated as SceneEntity;
     let toIsolate: SceneEntity | null = entity;
-    if (isolated && entity.id !== isolated.id && this.scene.getChildren(isolated).some((it) => it.id === entity.id)) {
+    if (isolated && entity.id !== isolated.id && this.scene.getChildren(isolated).some(it => it.id === entity.id)) {
       toIsolate = null;
     }
     this.store.dispatch(new Isolate(toIsolate));
@@ -239,7 +239,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     this.store.dispatch(
       new SortEntity({
         id: node.key,
-        index: children?.findIndex((_) => _.key === node.key) || 0,
+        index: children?.findIndex(_ => _.key === node.key) || 0,
         parent: node.parentNode?.key || null,
         oldParent: (node.origin as TreeNode).entity.parent,
       })
@@ -389,7 +389,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     const isolated = this.store.snapshot().select.isolated as SceneEntity;
     if (isolated) {
       if (isolated.id === node.id) return;
-      if (!this.scene.getChildren(isolated).some((_) => _.id === node.key)) {
+      if (!this.scene.getChildren(isolated).some(_ => _.id === node.key)) {
         this.store.dispatch(new Isolate(null));
         return;
       }
@@ -399,7 +399,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     const selectedIds = this.selectedKeys as string[];
     if (multiSelect) {
       const parentIsSelected = this.selectedKeys.find(
-        (parent) => parent !== node.key && this.scene.getChildren(parent as string).some((_) => _.id === node.key)
+        parent => parent !== node.key && this.scene.getChildren(parent as string).some(_ => _.id === node.key)
       );
       if (parentIsSelected) return;
       let toUnselect: string[] = [];
@@ -411,8 +411,8 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
 
         const nodes = this.getFlatNodes();
 
-        const prevPosition = nodes.findIndex((_) => _.key === prevKey);
-        const position = nodes.findIndex((_) => _.key === node.key);
+        const prevPosition = nodes.findIndex(_ => _.key === prevKey);
+        const position = nodes.findIndex(_ => _.key === node.key);
         this.scene.getEntity(node.key)?.components;
         if (position < prevPosition) {
           for (let i = position + 1; i < prevPosition; i++) toSelect.push(nodes[i].key);
@@ -420,20 +420,20 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
           for (let i = prevPosition + 1; i < position; i++) toSelect.push(nodes[i].key);
         }
         // Filter out all nodes, which are selected via their parent
-        toSelect = toSelect.slice().filter((id) => {
-          const found = toSelect.find((it) => {
+        toSelect = toSelect.slice().filter(id => {
+          const found = toSelect.find(it => {
             if (it === id) return false;
-            return this.scene.getChildren(it).some((_) => _.id === id);
+            return this.scene.getChildren(it).some(_ => _.id === id);
           });
           if (found && this.previousShiftSelect.indexOf(id) < 0) this.previousShiftSelect.push(id);
           return !found;
         });
-        toUnselect = this.previousShiftSelect.filter((id) => toSelect.indexOf(id) < 0);
+        toUnselect = this.previousShiftSelect.filter(id => toSelect.indexOf(id) < 0);
         this.previousShiftSelect = toSelect.slice();
       } else {
         this.prevSelectedNode = node;
         this.previousShiftSelect = [];
-        toUnselect = selectedIds.filter((id) => this.scene.getChildren(node.key).find((child) => child.id === id));
+        toUnselect = selectedIds.filter(id => this.scene.getChildren(node.key).find(child => child.id === id));
         if (selectedIds.indexOf(node.key) >= 0) toUnselect.push(node.key);
         else toSelect.push(node.key);
       }
@@ -442,7 +442,7 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
     } else {
       this.previousShiftSelect = [];
       if (selectedIds.indexOf(node.key) >= 0 && selectedIds.length > 1) {
-        const toUnselect = selectedIds.filter((id) => id !== node.key);
+        const toUnselect = selectedIds.filter(id => id !== node.key);
         await this.store.dispatch(new Unselect(toUnselect)).toPromise();
         this.prevSelectedNode = node;
         this.store.dispatch(new Select([node.key]));
