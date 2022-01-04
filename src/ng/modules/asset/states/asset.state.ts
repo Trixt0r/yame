@@ -219,7 +219,6 @@ export class AssetState implements NgxsOnInit {
    * Initializes the given tab component for the given types.
    */
   static _initTabComponent(comp: Type<IAssetOwner>, ...types: string[]): void {
-    console.log(comp, types);
     if (!types || types.length <= 0) {
       if (!Array.isArray(initTabComponents['*'])) initTabComponents['*'] = [];
       initTabComponents['*'].push(comp);

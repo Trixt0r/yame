@@ -72,6 +72,9 @@ export class PixiCameraSystem extends System {
    */
   @Select(SelectState.isolated) isolated$!: Observable<SceneEntity | null>;
 
+  /**
+   * Selector for the camera move button.
+   */
   @Select(SettingsState.value('camera.moveType')) moveButton$!: Observable<number>;
 
   /**

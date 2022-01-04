@@ -20,7 +20,7 @@ import { CameraModule } from './modules/camera/camera.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { EditorState } from './states/editor.state';
 import { NgxsOnBeforePluginModule } from './modules/onbefore-plugin/onbefore-plugin.module';
-import { TileMapModule } from './modules/tile-map';
+import { TilesetModule } from './modules/tileset';
 
 @NgModule({
   imports: [
@@ -38,7 +38,7 @@ import { TileMapModule } from './modules/tile-map';
     PreferencesModule,
     CameraModule,
     PixiModule,
-    TileMapModule,
+    TilesetModule,
   ],
   declarations: [AppComponent, MainComponent],
   bootstrap: [AppComponent],

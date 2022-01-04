@@ -190,10 +190,14 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   private _disabled = false;
 
   /**
+   * Emits as soon as the value changes.
+   */
+  @Output() valueChange = new EventEmitter<IPoint | null>();
+
+  /**
    * @inheritdoc
    */
-  @Input()
-  get value(): IPoint | null {
+  @Input() get value(): IPoint | null {
     const {
       value: { x, y },
     } = this.parts;
@@ -216,6 +220,7 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
     if (x === void 0 || y === void 0) return;
     this.parts.setValue({ x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 });
     this.stateChanges.next();
+    this.valueChange.next(this.value);
   }
 
   constructor(
@@ -229,7 +234,7 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
       y: 0,
     });
 
-    _focusMonitor.monitor(_elementRef, true).subscribe((origin) => {
+    _focusMonitor.monitor(_elementRef, true).subscribe(origin => {
       if (this.focused && !origin) {
         this.onTouched();
       }

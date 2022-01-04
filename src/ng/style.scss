@@ -49,3 +49,16 @@ body {
 li[nz-submenu] [nz-submenu-title] i[nz-icon] + span {
   margin-left: 8px;
 }
+
+.image-wrapper {
+  text-align: center;
+  height: 100%;
+
+  background: #aaa
+    url('data:image/svg+xml,\
+  <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" fill-opacity=".25" >\
+           <rect x="200" width="200" height="200" />\
+           <rect y="200" width="200" height="200" />\
+           </svg>');
+  background-size: 30px 30px;
+}

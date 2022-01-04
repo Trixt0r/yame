@@ -21,6 +21,9 @@ import { PixiRenderingSystem } from './systems/rendering.system';
 import { PixiTransformationSystem } from './systems/transformation.system';
 import { AddShortcut } from 'ng/states/hotkey.state';
 import { HotkeyService } from 'ng/services/hotkey.service';
+import { SCALE_MODES, settings } from 'pixi.js';
+
+settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
 /**
  * Sets up all necessary systems for rendering entities in the scene.
@@ -101,11 +104,11 @@ export function setupSystems(
   providers: [
     {
       provide: YAME_RENDERER,
-      useClass: PixiRendererService
+      useClass: PixiRendererService,
     },
     {
       provide: YAME_RENDERER_COMPONENT,
-      useValue: PixiRendererComponent
+      useValue: PixiRendererComponent,
     },
     {
       provide: APP_INITIALIZER,

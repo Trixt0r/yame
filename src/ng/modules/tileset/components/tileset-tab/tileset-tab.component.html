@@ -1,0 +1,25 @@
+<div class="preview">
+  <div class="image-wrapper relative">
+    <yame-tileset-canvas
+      [asset]="asset"
+      [size]="size"
+      [spacing]="spacing"
+      [offset]="offset"
+      class="fill-height"></yame-tileset-canvas>
+  </div>
+</div>
+
+<div class="margin-top-8">
+  <div class="margin-bottom-4">
+    <span class="margin-bottom-8 inline-block">Grid size</span>
+    <point-input #input [(value)]="size"></point-input>
+  </div>
+  <div class="margin-bottom-4">
+    <span class="margin-bottom-8 inline-block">Spacing</span>
+    <point-input #input [(value)]="spacing"></point-input>
+  </div>
+  <div class="margin-bottom-4">
+    <span class="margin-bottom-8 inline-block">Offset</span>
+    <point-input #input [(value)]="offset"></point-input>
+  </div>
+</div>
