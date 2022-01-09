@@ -13,9 +13,9 @@ import { IToolComponent, Tool } from 'ng/modules/toolbar/tool';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CameraZoom } from '../../camera-zoom.interface';
-import { UpdateCameraZoom, ZoomCameraOut, ZoomCameraToPosition } from '../../states/actions/camera.action';
+import { CameraId } from '../../camera.ids';
+import { UpdateCameraZoom, ZoomCameraOut } from '../../states/actions/camera.action';
 import { CameraState } from '../../states/camera.state';
-
 @Component({
   selector: 'yame-camera-tool',
   templateUrl: 'tool.component.html',
@@ -32,7 +32,7 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
   /**
    * Selector for the current camera zoom config.
    */
-  @Select(CameraState.zoom) cameraZoom$!: Observable<CameraZoom>;
+  @Select(CameraState.zoom(CameraId.SCENE)) cameraZoom$!: Observable<CameraZoom>;
 
   /**
    * The current camera zoom config.
@@ -67,11 +67,11 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
 
   constructor(protected store: Store, protected cdr: ChangeDetectorRef, protected zone: NgZone) {
     zone.runOutsideAngular(() => {
-      this.cameraZoom$.pipe(takeUntil(this.destroy$)).subscribe((zoom) => {
+      this.cameraZoom$.pipe(takeUntil(this.destroy$)).subscribe(zoom => {
         this.cameraZoom = zoom;
         cdr.markForCheck();
       });
-      this.selectedEntities$.pipe(takeUntil(this.destroy$)).subscribe((entities) => {
+      this.selectedEntities$.pipe(takeUntil(this.destroy$)).subscribe(entities => {
         this.selectedEntities = entities;
         cdr.markForCheck();
       });
@@ -86,9 +86,9 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
   update(value: number): void {
     const step = this.cameraZoom.step;
     this.store.dispatch([
-      new UpdateCameraZoom({ step: Math.abs(this.cameraZoom.value - value) }),
-      new ZoomCameraToPosition(value as number, this.getTargetPosition()),
-      new UpdateCameraZoom({ step }),
+      new UpdateCameraZoom(CameraId.SCENE, { step: Math.abs(this.cameraZoom.value - value) }),
+      new UpdateCameraZoom(CameraId.SCENE, { value, target: this.getTargetPosition() }),
+      new UpdateCameraZoom(CameraId.SCENE, { step }),
     ]);
   }
 
@@ -119,14 +119,14 @@ export class CameraToolComponent implements IToolComponent, OnDestroy {
    * Zooms out, so all entities are visible.
    */
   onZoomCameraOut(): void {
-    this.store.dispatch(new ZoomCameraOut());
+    this.store.dispatch(new ZoomCameraOut(CameraId.SCENE));
   }
 
   /**
    * Zooms to the currently selected entities.
    */
   onZoomCameraToSelection(): void {
-    this.store.dispatch(new ZoomCameraOut(this.selectedEntities));
+    this.store.dispatch(new ZoomCameraOut(CameraId.SCENE, this.selectedEntities));
   }
 
   /**

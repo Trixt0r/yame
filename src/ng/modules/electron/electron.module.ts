@@ -74,7 +74,7 @@ export class ElectronModule {
         const asset = assetState.getAssetForResource(resource);
         if (!asset) return console.warn(`[Electron] Could not found asset for uri ${resource.uri}`);
         store.dispatch(new SelectAssetGroup(asset));
-        setTimeout(() => store.dispatch(new ZoomCameraOut()), 1000 / 10);
+        setTimeout(() => store.dispatch(new ZoomCameraOut('main')), 1000 / 10);
       });
     });
 

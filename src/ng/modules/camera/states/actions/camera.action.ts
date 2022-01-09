@@ -1,27 +1,17 @@
 import { IPoint } from 'common/math';
 import { CameraZoom } from '../../camera-zoom.interface';
 
-export class ZoomCameraToPosition {
-  static type = '[Camera] Zoom camera';
-  constructor(public zoom: number, public target?: IPoint, public global = true) { }
-}
-
 export class ZoomCameraOut {
   static type = '[Camera] Zoom camera out';
-  constructor(public entities: string[] = []) { }
-}
-
-export class MoveCameraToPosition {
-  static type = '[Camera] Move camera to position';
-  constructor(public position: IPoint, public global = true) { }
+  constructor(public id: string, public entities: string[] = []) {}
 }
 
 export class UpdateCameraZoom {
   static type = '[Camera] Update camera zoom';
-  constructor(public zoom: Partial<CameraZoom>) { }
+  constructor(public id: string, public zoom: Partial<CameraZoom>) {}
 }
 
 export class UpdateCameraPosition {
   static type = '[Camera] Update camera position';
-  constructor(public position: IPoint) { }
+  constructor(public id: string, public position: IPoint) {}
 }

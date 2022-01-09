@@ -3,26 +3,9 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
     "module": "esnext",
-    "baseUrl": "../",
-    "paths": {
-      "@common/*": ["./common/*"],
-      "@main/*": ["./ng/modules/main/*"],
-      "@pixi/*": ["./ng/modules/pixi/*"],
-      "@plugin/*": ["./ng/modules/plugin/*"],
-      "@sidebar/*": ["./ng/modules/sidebar/*"],
-      "@toolbar/*": ["./ng/modules/toolbar/*"],
-      "@utils/*": ["./ng/modules/utils/*"],
-      "*": ["./*", "./node_modules/*"],
-    }
+    "baseUrl": "../"
   },
-  "exclude": [
-    "test.ts",
-    "**/*.spec.ts",
-    "dist",
-    "app-builds",
-    "out",
-    "node_modules"
-  ],
+  "exclude": ["test.ts", "**/*.spec.ts", "dist", "app-builds", "out", "node_modules"],
   "angularCompilerOptions": {
     "enableIvy": true,
     "fullTemplateTypeCheck": true,

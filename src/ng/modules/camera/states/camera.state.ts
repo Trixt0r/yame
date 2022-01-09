@@ -1,12 +1,19 @@
-import { Injectable, NgZone } from '@angular/core';
-import { Action, Select, Selector, State, StateContext, Store } from '@ngxs/store';
+import { Injectable, NgZone, Type } from '@angular/core';
+import { Action, createSelector, Select, State, StateContext, Store } from '@ngxs/store';
 import { UpdateCameraZoom, UpdateCameraPosition } from './actions/camera.action';
 import { IPoint } from 'common/math';
 import { CameraZoom } from '../camera-zoom.interface';
 import { SettingsState } from 'ng/modules/preferences/states/settings.state';
 import { Observable } from 'rxjs';
+import { cloneDeep } from 'lodash';
+import { CameraId } from '../camera.ids';
 
-export interface ICameraState {
+export interface ICamera {
+  /**
+   * The camera id.
+   */
+  id: string;
+
   /**
    * The zoom settings.
    */
@@ -18,71 +25,112 @@ export interface ICameraState {
   position: IPoint;
 }
 
+export type ICameraState = {
+  cameras: ICamera[];
+};
+
+const DEFAULT_ID = CameraId.SCENE;
+const DEFAULT_CAMERA: ICamera = {
+  id: DEFAULT_ID,
+  zoom: {
+    value: 1,
+    min: 0.05,
+    max: 3,
+    step: 0.05,
+    target: { x: 0, y: 0 },
+  },
+  position: { x: 0, y: 0 },
+};
+
 @State<ICameraState>({
   name: 'camera',
   defaults: {
-    zoom: {
-      value: 1,
-      min: 0.05,
-      max: 3,
-      step: 0.05,
-      target: { x: 0, y: 0 }
-    },
-    position: { x: 0, y: 0 }
-  }
+    cameras: [cloneDeep(DEFAULT_CAMERA)],
+  },
 })
 @Injectable()
 export class CameraState {
-
   /**
    * Returns the current zoom config.
    */
-  @Selector()
-  static zoom(state: ICameraState) { return state.zoom; }
+  static zoom(id: string) {
+    return createSelector(
+      [this],
+      (state: ICameraState) => state.cameras.find(_ => _.id === id)?.zoom ?? { ...DEFAULT_CAMERA.zoom }
+    );
+  }
 
   /**
    * Returns the current camera position.
    */
-  @Selector()
-  static position(state: ICameraState) { return state.position; }
+  static position(id: string) {
+    return createSelector(
+      [this],
+      (state: ICameraState) => state.cameras.find(_ => _.id === id)?.position ?? { ...DEFAULT_CAMERA.position }
+    );
+  }
 
   @Select(SettingsState.value('camera.zoomStep')) zoomStep$!: Observable<number>;
   @Select(SettingsState.value('camera.zoomMax')) zoomMax$!: Observable<number>;
   @Select(SettingsState.value('camera.zoomMin')) zoomMin$!: Observable<number>;
 
-  constructor(store: Store, zone: NgZone) {
+  constructor(private store: Store, zone: NgZone) {
     zone.runOutsideAngular(() => {
       this.zoomStep$.subscribe(zoom => {
-        store.dispatch(new UpdateCameraZoom({ step: typeof zoom === 'number' ? zoom : 0.05 }));
+        this.updateSettings(UpdateCameraZoom, { step: typeof zoom === 'number' ? zoom : 0.05 });
       });
       this.zoomMax$.subscribe(max => {
-        store.dispatch(new UpdateCameraZoom({ max: typeof max === 'number' ? max : 3 }));
+        this.updateSettings(UpdateCameraZoom, { max: typeof max === 'number' ? max : 3 });
       });
       this.zoomMin$.subscribe(min => {
-        store.dispatch(new UpdateCameraZoom({ min: typeof min === 'number' ? min : 0.05 }));
+        this.updateSettings(UpdateCameraZoom, { min: typeof min === 'number' ? min : 0.05 });
       });
     });
+  }
+
+  /**
+   * Updates the camera settings for all registered cameras.
+   *
+   * @param clazz The type to create the instance for.
+   * @param args The argument to pass to the constructor of the given type
+   */
+  private updateSettings<T>(clazz: Type<T>, ...args: unknown[]): void {
+    const state = this.store.selectSnapshot(_ => _.camera) as ICameraState;
+    if (!state) return;
+    const actions = state.cameras.map(_ => new clazz(_.id, ...args));
+    this.store.dispatch(actions);
+  }
+
+  private ensureCamera(id: string, state: ICameraState): ICamera {
+    let found = state.cameras.find(_ => _.id === id);
+    if (!found) {
+      found = { ...cloneDeep(DEFAULT_CAMERA), id };
+      state.cameras.push(found);
+    }
+    return found;
   }
 
   @Action(UpdateCameraZoom)
   updateZoom(ctx: StateContext<ICameraState>, action: UpdateCameraZoom) {
     const state = ctx.getState();
-    const target = action.zoom?.target ?? state.zoom.target;
-    const zoom = {
-        value: action.zoom?.value ?? state.zoom.value,
-        target: { x: target.x, y: target.y },
-        min: action.zoom?.min ?? state.zoom.min,
-        max: action.zoom?.max ?? state.zoom.max,
-        step: action.zoom?.step ?? state.zoom.step,
+    let cam = this.ensureCamera(action.id, state);
+    const target = action.zoom?.target ?? cam.zoom.target;
+    cam.zoom = {
+      value: action.zoom?.value ?? cam.zoom.value,
+      target: { x: target.x, y: target.y },
+      min: action.zoom?.min ?? cam.zoom.min,
+      max: action.zoom?.max ?? cam.zoom.max,
+      step: action.zoom?.step ?? cam.zoom.step,
     };
-    ctx.patchState({ zoom });
+    ctx.patchState({ cameras: state.cameras });
   }
 
   @Action(UpdateCameraPosition)
   updatePosition(ctx: StateContext<ICameraState>, action: UpdateCameraPosition) {
     const state = ctx.getState();
-    const position = action.position ?? state.position;
-    ctx.patchState({ position: { x: position.x, y: position.y } });
+    let cam = this.ensureCamera(action.id, state);
+    if (action.position.x === cam.position.x && action.position.y === cam.position.y) return;
+    cam.position = { ...(action.position ?? cam.position) };
+    ctx.patchState({ cameras: state.cameras });
   }
-
 }

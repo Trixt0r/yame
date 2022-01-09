@@ -19,7 +19,6 @@ import { Injectable, NgZone } from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class CursorService {
-
   /**
    * The image reference, which gets displayed instead of the cursor.
    */
@@ -89,5 +88,4 @@ export class CursorService {
       this.image.style.top = `${event.clientY}px`;
     }
   }
-
 }

@@ -22,6 +22,7 @@ import { PixiTransformationSystem } from './systems/transformation.system';
 import { AddShortcut } from 'ng/states/hotkey.state';
 import { HotkeyService } from 'ng/services/hotkey.service';
 import { SCALE_MODES, settings } from 'pixi.js';
+import { CameraModule } from '../camera/camera.module';
 
 settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
@@ -100,7 +101,7 @@ export function setupSystems(
 
 @NgModule({
   declarations: [PixiRendererComponent],
-  imports: [SceneModule],
+  imports: [SceneModule, CameraModule],
   providers: [
     {
       provide: YAME_RENDERER,

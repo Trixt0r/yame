@@ -16,6 +16,7 @@ import {
 import { RegisterTool } from '../toolbar/states/actions/toolbar.action';
 import { CameraTool } from './camera.tool';
 import { CameraToolComponent } from './components/tool/tool.component';
+import { CameraDirective } from './directives';
 import { CameraState } from './states/camera.state';
 
 @NgModule({
@@ -29,7 +30,7 @@ import { CameraState } from './states/camera.state';
     NzIconModule,
     NgxsModule.forFeature([CameraState]),
   ],
-  declarations: [CameraToolComponent],
+  declarations: [CameraToolComponent, CameraDirective],
   providers: [
     {
       provide: APP_INITIALIZER,
@@ -56,11 +57,6 @@ import { CameraState } from './states/camera.state';
                 options: [
                   { value: 1, label: 'preferences.settings.option.camera.moveTypeOptions.mmb', icon: 'fa:mouse-solid' },
                   { value: 2, label: 'preferences.settings.option.camera.moveTypeOptions.rmb', icon: 'fa:mouse-solid' },
-                  {
-                    value: -1,
-                    label: 'preferences.settings.option.camera.moveTypeOptions.trackpad',
-                    icon: 'fa:touchpad',
-                  },
                 ],
               },
             },
@@ -131,5 +127,6 @@ import { CameraState } from './states/camera.state';
       multi: true,
     },
   ],
+  exports: [CameraDirective],
 })
 export class CameraModule {}

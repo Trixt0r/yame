@@ -7,7 +7,6 @@ import { DisplayObject, Point } from 'pixi.js';
  * A camera is responsible for updating the users view correctly.
  */
 export class Camera extends EventEmitter {
-
   /**
    * The target position.
    * The coordinate space should be the one of the attached container's parent.
@@ -22,7 +21,7 @@ export class Camera extends EventEmitter {
   /**
    * The container this camera is attached to.
    */
-  get container(): PIXI.DisplayObject |null {
+  get container(): PIXI.DisplayObject | null {
     return this._container;
   }
 

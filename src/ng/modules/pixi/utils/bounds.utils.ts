@@ -17,7 +17,7 @@ export function getCornerPoints(
   space: DisplayObject = rendererService.scene
 ): IPoint[] {
   let points: IPoint[] = [];
-  entities.forEach((it) => {
+  entities.forEach(it => {
     const container = rendererService.getContainer(it.id);
     if (!container) return;
     const bounds = container.getLocalBounds();
@@ -48,7 +48,7 @@ export function getBoundingRect(
   space: DisplayObject = rendererService.scene,
   target: Rectangle = new Rectangle()
 ): Rectangle {
-  const boundingPoints = getCornerPoints(entities, rendererService, space!);
+  const boundingPoints = getCornerPoints(entities, rendererService, space);
   target.x = minBy(boundingPoints, 'x')?.x ?? 0;
   target.width = (maxBy(boundingPoints, 'x')?.x ?? 0) - target.x;
   target.y = minBy(boundingPoints, 'y')?.y ?? 0;

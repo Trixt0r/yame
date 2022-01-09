@@ -12,7 +12,6 @@ interface TweenSettings {
 }
 
 export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
-
   static settings: TweenSettings = {
     fps: 60,
     duration: 250,
@@ -25,7 +24,13 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
     super(priority, [{ id: 'sprite.texture' }, { id: 'sprite.color' }]);
   }
 
-  protected tween(start: number, end: number, t: number, duration: number, type = PixiSpriteSystem.settings.type): number {
+  protected tween(
+    start: number,
+    end: number,
+    t: number,
+    duration: number,
+    type = PixiSpriteSystem.settings.type
+  ): number {
     const fn = tweenFunctions[type] as (...args: number[]) => number;
     if (!fn) return end;
     else return fn(t, start, end, duration);
@@ -40,7 +45,7 @@ export class PixiSpriteSystem extends AbstractEntitySystem<SceneEntity> {
     container.height = 0;
     size.width = 0;
     size.height = 0;
-    const sprite = container.getChildByName('sprite') as Sprite
+    const sprite = container.getChildByName('sprite') as Sprite;
     const targetWidth = sprite.width;
     const targetHeight = sprite.height;
     let t = 0;
