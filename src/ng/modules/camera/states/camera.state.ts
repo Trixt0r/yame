@@ -122,6 +122,7 @@ export class CameraState {
       max: action.zoom?.max ?? cam.zoom.max,
       step: action.zoom?.step ?? cam.zoom.step,
     };
+    cam.zoom.value = Math.max(cam.zoom.min, Math.min(cam.zoom.max, cam.zoom.value));
     ctx.patchState({ cameras: state.cameras });
   }
 

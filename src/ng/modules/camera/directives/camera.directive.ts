@@ -189,20 +189,23 @@ export class CameraDirective {
   onWheel(event: WheelEvent): void {
     if (!this._id) return;
     event.preventDefault();
+    event.detail;
     const isTrackPad = Math.abs(event.deltaY) <= 120 && event.deltaMode === 0;
     if (isTrackPad && !event.ctrlKey) {
       if (!this.moving) this.moveInitiator = MoveInitiator.WHEEL;
       this.store.dispatch(
         new UpdateCameraPosition(this._id, {
-          x: this.position.x + event.deltaX * (2 - this.zoom.value),
-          y: this.position.y + event.deltaY * (2 - this.zoom.value),
+          x: this.position.x + event.deltaX * 2,
+          y: this.position.y + event.deltaY * 2,
         })
       );
     } else {
       if (this.moving && this.moveInitiator === MoveInitiator.WHEEL) this.end();
+      const step = isTrackPad ? -event.deltaY / 100 : -this.zoom.step * Math.sign(event.deltaY);
+      const value = Math.min(this.zoom.max, Math.max(this.zoom.min, this.zoom.value + step));
       this.store.dispatch(
         new UpdateCameraZoom(this.id, {
-          value: event.deltaY < 0 ? this.zoom.max : this.zoom.min,
+          value,
           target: this.getMousePosition(event),
         })
       );

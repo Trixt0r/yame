@@ -13,10 +13,11 @@ import {
 import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { IPoint } from 'common/math';
-import { CameraState, CameraZoom, UpdateCameraPosition } from 'ng/modules/camera';
+import { DestroyLifecycle } from 'ng/modules/utils';
+import { CameraState, CameraZoom, ICameraState, UpdateCameraPosition, UpdateCameraZoom } from 'ng/modules/camera';
 import { Camera } from 'ng/modules/pixi';
 import { Application, Container, Graphics, InteractionEvent, Point, Sprite } from 'pixi.js';
-import { Observable } from 'rxjs';
+import { Observable, takeUntil } from 'rxjs';
 
 const CAMERA_ID = 'tileset';
 
@@ -26,6 +27,7 @@ const CAMERA_ID = 'tileset';
   styleUrls: ['./tileset-canvas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  providers: [DestroyLifecycle],
 })
 export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() asset!: Asset;
@@ -56,24 +58,32 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
 
   private tileWidth = this.size.x + this.spacing.x + this.offset.x;
   private tileHeight = this.size.y + this.spacing.y + this.offset.y;
-  private prevPos: IPoint | null = null;
   private centered = false;
   private downPos: IPoint | null = null;
 
-  constructor(private store: Store, private actions: Actions) {}
+  constructor(private store: Store, private actions: Actions, private destroy$: DestroyLifecycle) {}
 
   private init(): void {
-    this.camera.zoomStep = 0.1;
-    this.camera.maxZoom = 10;
     this.camera.attach(this.scene);
 
-    this.center();
+    const state = this.store.selectSnapshot(_ => _.camera) as ICameraState;
+    const zoom = CameraState.zoom(CAMERA_ID)(state);
 
+    if (!state.cameras.some(_ => _.id === CAMERA_ID)) {
+      this.camera.zoomStep = zoom.step;
+      this.camera.maxZoom = zoom.max;
+      this.camera.minZoom = zoom.min;
+      this.center();
+    } else {
+      const position = CameraState.position(CAMERA_ID)(state);
+      this.updateCameraZoom(zoom);
+      this.camera.position = position;
+    }
     this.app?.render();
   }
 
   private center(): void {
-    if (this.centered || !this.app) return;
+    if (this.centered || !this.app || !this.sprite.texture.valid) return;
     const bounds = this.sprite.getLocalBounds();
     const step = this.camera.zoomStep;
     const value = Math.min(this.app.renderer.width / bounds.width, this.app.renderer.height / bounds.height);
@@ -89,8 +99,8 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
       y: heightDiff - (stageBounds.y + heightDiff / 2),
     };
 
-    this.camera.zoomStep = step;
-    this.camera.zoom = value;
+    this.store.dispatch(new UpdateCameraZoom(CAMERA_ID, { value, step }));
+
     this.centered = true;
   }
 
@@ -142,6 +152,16 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.app?.render();
   }
 
+  private updateCameraZoom(zoom: CameraZoom): void {
+    (this.camera.targetPosition as Point).copyFrom(zoom.target);
+    this.camera.minZoom = zoom.min ?? this.camera.minZoom;
+    this.camera.maxZoom = zoom.max ?? this.camera.maxZoom;
+    const step = zoom.step ?? this.camera.zoomStep;
+    this.camera.zoomStep = Math.abs(this.camera.zoom - zoom.value);
+    this.camera.zoom = zoom.value;
+    this.camera.zoomStep = step;
+  }
+
   /**
    * @inheritdoc
    */
@@ -161,18 +181,22 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.app.stage.addChild(this.scene);
     this.init();
 
-    this.zoom$.subscribe(zoom => {
-      (this.camera.targetPosition as Point).copyFrom(zoom.target);
-      this.camera.minZoom = zoom.min ?? this.camera.minZoom;
-      this.camera.maxZoom = zoom.max ?? this.camera.maxZoom;
-      this.camera.zoomStep = zoom.step ?? this.camera.zoomStep;
-      this.camera.zoom = zoom.value;
+    let firstRun = true;
+
+    this.zoom$.pipe(takeUntil(this.destroy$)).subscribe(zoom => {
+      this.updateCameraZoom(zoom);
+      if (firstRun) {
+        firstRun = false;
+        return;
+      }
       const pos = { x: this.camera.position?.x ?? 0, y: this.camera.position?.y ?? 0 } as IPoint;
       this.store.dispatch(new UpdateCameraPosition(CAMERA_ID, pos));
     });
-    this.actions.pipe(ofActionSuccessful(UpdateCameraPosition)).subscribe((action: UpdateCameraPosition) => {
-      if (action.id === CAMERA_ID) this.camera.position = action.position;
-    });
+    this.actions
+      .pipe(ofActionSuccessful(UpdateCameraPosition), takeUntil(this.destroy$))
+      .subscribe((action: UpdateCameraPosition) => {
+        if (action.id === CAMERA_ID) this.camera.position = action.position;
+      });
   }
 
   /**
