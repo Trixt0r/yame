@@ -11,11 +11,9 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ControlValueAccessor, NgControl, FormGroup, FormBuilder } from '@angular/forms';
-import { Subject } from 'rxjs';
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { IPoint } from 'common/math';
-import { isNil } from 'lodash';
 
 /**
  * The point input component displays a point's values in an input field on the same line.
@@ -23,7 +21,6 @@ import { isNil } from 'lodash';
  * Usage:
  * ```html
  * <point-input type="number"
- *              delimiter=";"
  *              (input)=update($event)
  *              [value]="point || { x: 0, y: 0 }"
  *              [placeholder]="placeholder"
@@ -52,11 +49,6 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
    * The parts of this input.
    */
   parts: FormGroup;
-
-  /**
-   * @inheritdoc
-   */
-  stateChanges = new Subject<void>();
 
   /**
    * Whether this component is focused or not.
@@ -94,23 +86,6 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   onTouched = () => {};
 
   /**
-   * @inheritdoc
-   */
-  get empty() {
-    const {
-      value: { x, y },
-    } = this.parts;
-    return (isNil(x) || x === '') && (y === '' || isNil(y));
-  }
-
-  /**
-   * @inheritdoc
-   */
-  get shouldLabelFloat() {
-    return this.focused || !this.empty;
-  }
-
-  /**
    * Input event triggered by number directive.
    */
   @Output() input: EventEmitter<Event> = new EventEmitter();
@@ -119,11 +94,6 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
    * The internal input type.
    */
   @Input() type: string = 'text';
-
-  /**
-   * The delimiter between x and y. Default will be `,`.
-   */
-  @Input() delimiter: string = ',';
 
   /**
    * @inheritdoc
@@ -138,7 +108,6 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
    */
   set placeholder(value: string) {
     this._placeholder = value;
-    this.stateChanges.next();
   }
 
   /**
@@ -159,7 +128,6 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
    */
   set required(value: boolean) {
     this._required = coerceBooleanProperty(value);
-    this.stateChanges.next();
   }
 
   /**
@@ -181,7 +149,6 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   set disabled(value: boolean) {
     this._disabled = coerceBooleanProperty(value);
     this._disabled ? this.parts.disable() : this.parts.enable();
-    this.stateChanges.next();
   }
 
   /**
@@ -190,38 +157,32 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   private _disabled = false;
 
   /**
-   * Emits as soon as the value changes.
-   */
-  @Output() valueChange = new EventEmitter<IPoint | null>();
-
-  /**
    * @inheritdoc
    */
   @Input() get value(): IPoint | null {
-    const {
-      value: { x, y },
-    } = this.parts;
-    const xValid = typeof x === 'number' || (typeof x === 'string' && x.length > 0);
-    const yValid = typeof y === 'number' || (typeof y === 'string' && y.length > 0);
-    if (xValid && yValid) {
-      return {
-        x: typeof x === 'string' ? parseFloat(x.replace(',', '.')) : x,
-        y: typeof y === 'string' ? parseFloat(y.replace(',', '.')) : y,
-      };
-    }
-    return null;
+    return this._value;
   }
 
   /**
    * @inheritdoc
    */
   set value(point: IPoint | null) {
-    const { x, y } = point || { x: 0, y: 0 };
+    const { x, y } = point ?? { x: 0, y: 0 };
     if (x === void 0 || y === void 0) return;
     this.parts.setValue({ x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 });
-    this.stateChanges.next();
+    this._value = {
+      x,
+      y,
+    };
     this.valueChange.next(this.value);
   }
+
+  private _value: IPoint = { x: 0, y: 0 };
+
+  /**
+   * Emits as soon as the value changes.
+   */
+  @Output() valueChange = new EventEmitter<IPoint | null>();
 
   constructor(
     formBuilder: FormBuilder,
@@ -229,17 +190,13 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
     private _elementRef: ElementRef<HTMLElement>,
     @Optional() @Self() public ngControl: NgControl
   ) {
-    this.parts = formBuilder.group({
-      x: 0,
-      y: 0,
-    });
+    this.parts = formBuilder.group({ ...this._value });
 
     _focusMonitor.monitor(_elementRef, true).subscribe(origin => {
       if (this.focused && !origin) {
         this.onTouched();
       }
       this.focused = !!origin;
-      this.stateChanges.next();
     });
 
     if (this.ngControl != null) {
@@ -251,24 +208,7 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
    * @inheritdoc
    */
   ngOnDestroy() {
-    this.stateChanges.complete();
     this._focusMonitor.stopMonitoring(this._elementRef);
-  }
-
-  /**
-   * @inheritdoc
-   */
-  setDescribedByIds(ids: string[]) {
-    this.describedBy = ids.join(' ');
-  }
-
-  /**
-   * @inheritdoc
-   */
-  onContainerClick(event: MouseEvent) {
-    if ((event.target as Element).tagName.toLowerCase() !== 'input') {
-      this._elementRef.nativeElement.querySelector('input')!.focus();
-    }
   }
 
   /**
@@ -293,16 +233,19 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   }
 
   /**
-   * @inheritdoc
-   */
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
-  /**
    * Handles the input.
    */
   _handleInput(): void {
+    const {
+      value: { x, y },
+    } = this.parts;
+    const xx = typeof x === 'string' ? parseFloat(x.replace(',', '.')) : x;
+    const yy = typeof y === 'string' ? parseFloat(y.replace(',', '.')) : y;
+    this.value = {
+      x: isNaN(xx) ? 0 : xx,
+      y: isNaN(yy) ? 0 : yy,
+    };
+
     this.onChange(this.parts.value);
   }
 }

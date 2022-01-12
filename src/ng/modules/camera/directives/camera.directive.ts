@@ -151,7 +151,7 @@ export class CameraDirective {
    */
   private getMousePosition(event: PointerEvent | WheelEvent): IPoint {
     const canvas = this.el.nativeElement;
-    const rect = this.el.nativeElement.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     return {
       x: ((event.clientX - rect.left) / (rect.right - rect.left)) * canvas.clientWidth,
       y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.clientHeight,

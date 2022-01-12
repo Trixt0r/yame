@@ -21,6 +21,9 @@ interface NumberDirectiveEvent {
  */
 @Directive({
   selector: '[yameNumber]',
+  host: {
+    style: 'cursor: ew-resize',
+  },
 })
 export class NumberDirective {
   /**
@@ -31,7 +34,7 @@ export class NumberDirective {
   /**
    * Last clicked y position of the mouse.
    */
-  protected clickedY: number | null = null;
+  protected clickedX: number | null = null;
 
   /**
    * Initial clicked value, when moving the mouse.
@@ -90,6 +93,7 @@ export class NumberDirective {
    */
   @HostListener('wheel', ['$event'])
   onWheel(event: WheelEvent): void {
+    event.preventDefault();
     this.process(this.value - Math.sign(event.deltaY), event);
   }
 
@@ -103,7 +107,7 @@ export class NumberDirective {
   onMouseDown(event: MouseEvent): void {
     if (event.which === 1) {
       this.clickedValue = this.value;
-      this.clickedY = event.clientY;
+      this.clickedX = event.clientX;
       window.addEventListener('mousemove', this.onMouseMoveBound, { passive: true });
     }
   }
@@ -116,12 +120,15 @@ export class NumberDirective {
    */
   onMouseMove(event: MouseEvent): void {
     if (event.which !== 1) {
-      this.clickedY = null;
+      this.clickedX = null;
       this.clickedValue = null;
+      (this.vcr.element.nativeElement as HTMLInputElement).style.userSelect = '';
       window.removeEventListener('mousemove', this.onMouseMoveBound);
       return;
     }
-    if (this.clickedY === null) return window.removeEventListener('mousemove', this.onMouseMoveBound);
-    this.process((this.clickedValue as number) - (event.clientY - this.clickedY), event);
+    if (this.clickedX === null) return window.removeEventListener('mousemove', this.onMouseMoveBound);
+
+    (this.vcr.element.nativeElement as HTMLInputElement).style.userSelect = 'none';
+    this.process((this.clickedValue as number) + (event.clientX - this.clickedX), event);
   }
 }

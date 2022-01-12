@@ -197,6 +197,12 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
       .subscribe((action: UpdateCameraPosition) => {
         if (action.id === CAMERA_ID) this.camera.position = action.position;
       });
+    this.scene.on('pointerdown', (event: InteractionEvent) => {
+      if (event.data.button !== 0) return;
+      this.downPos = { x: event.data.global.x, y: event.data.global.y };
+    });
+    this.scene.on('pointermove', (event: InteractionEvent) => this.preview(event.data.global));
+    this.scene.on('pointerup', () => (this.downPos = null));
   }
 
   /**
@@ -210,12 +216,6 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
 
     this.tileWidth = this.size.x + this.spacing.x + this.offset.x;
     this.tileHeight = this.size.y + this.spacing.y + this.offset.y;
-    this.scene.on('pointerdown', (event: InteractionEvent) => {
-      if (event.data.button !== 0) return;
-      this.downPos = { x: event.data.global.x, y: event.data.global.y };
-    });
-    this.scene.on('pointermove', (event: InteractionEvent) => this.preview(event.data.global));
-    this.scene.on('pointerup', () => (this.downPos = null));
 
     this.scene.addChild(this.sprite, this.selection);
     this.preview({ x: 0, y: 0 });

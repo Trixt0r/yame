@@ -9,10 +9,9 @@
           aria-label="x"
           placeholder="x"
           yameNumber
-          (yameNumberInput)="value = { x: $event.value, y: value ? value.y : 0 }; input.next($event.event)"
+          (yameNumberInput)="value!.x = $event.value; input.next($event.event)"
           (input)="_handleInput()"
-          [type]="type"
-        />
+          [type]="type" />
       </nz-input-group>
     </nz-form-control>
     <nz-form-control [nzSpan]="12" [style.padding-left]="'4px'">
@@ -24,10 +23,9 @@
           aria-label="y"
           placeholder="y"
           yameNumber
-          (yameNumberInput)="value = { x: value ? value.x : 0, y: $event.value }; input.next($event.event)"
+          (yameNumberInput)="value!.y = $event.value; input.next($event.event)"
           (input)="_handleInput()"
-          [type]="type"
-        /> </nz-input-group
+          [type]="type" /> </nz-input-group
     ></nz-form-control>
   </div>
 </nz-form-item>
