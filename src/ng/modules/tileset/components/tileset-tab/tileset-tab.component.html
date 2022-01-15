@@ -1,4 +1,8 @@
-<div class="preview">
+<div
+  class="preview"
+  [class.expanded]="expanded"
+  (dblclick)="expanded = true"
+  (window:keydown)="expanded = expanded && $event.key !== 'Escape'">
   <div class="image-wrapper relative">
     <yame-tileset-canvas
       [asset]="asset"
@@ -8,6 +12,7 @@
       class="fill-height"></yame-tileset-canvas>
   </div>
 </div>
+<div class="expansion-cancel" (click)="expanded = false"></div>
 
 <div class="margin-top-8">
   <div class="margin-bottom-4">

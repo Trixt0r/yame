@@ -76,13 +76,16 @@ export class CameraState {
 
   constructor(private store: Store, zone: NgZone) {
     zone.runOutsideAngular(() => {
-      this.zoomStep$.subscribe(zoom => {
-        this.updateSettings(UpdateCameraZoom, { step: typeof zoom === 'number' ? zoom : 0.05 });
+      this.zoomStep$.subscribe(step => {
+        DEFAULT_CAMERA.zoom.step = step;
+        this.updateSettings(UpdateCameraZoom, { step: typeof step === 'number' ? step : 0.05 });
       });
       this.zoomMax$.subscribe(max => {
+        DEFAULT_CAMERA.zoom.max = max;
         this.updateSettings(UpdateCameraZoom, { max: typeof max === 'number' ? max : 3 });
       });
       this.zoomMin$.subscribe(min => {
+        DEFAULT_CAMERA.zoom.min = min;
         this.updateSettings(UpdateCameraZoom, { min: typeof min === 'number' ? min : 0.05 });
       });
     });

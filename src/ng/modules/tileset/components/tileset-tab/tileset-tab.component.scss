@@ -3,5 +3,39 @@ yame-tileset-tab {
   .preview {
     height: 200px;
     max-height: 50%;
+    &.expanded {
+      position: fixed;
+      width: calc(40vw - 48px);
+      left: 48px;
+      height: 100vh;
+      top: 0;
+      z-index: 999999;
+      &::before {
+        content: ' ';
+        position: fixed;
+        top: 0;
+        left: 40vw;
+        width: calc(100vw - 40vw);
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.25);
+        pointer-events: none;
+      }
+      .image-wrapper {
+        height: 100vh;
+      }
+    }
+  }
+  .expansion-cancel {
+    display: none;
+  }
+
+  .preview.expanded + .expansion-cancel {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999998;
   }
 }

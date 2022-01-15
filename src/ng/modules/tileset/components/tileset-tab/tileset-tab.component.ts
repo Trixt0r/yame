@@ -17,6 +17,8 @@ export class TilesetTabComponent implements IAssetOwner {
 
   static readonly title = 'Tileset';
 
+  expanded = false;
+
   asset!: Asset;
 
   size: IPoint = { x: 8, y: 8 };

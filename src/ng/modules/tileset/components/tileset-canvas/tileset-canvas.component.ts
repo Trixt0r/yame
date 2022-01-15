@@ -16,7 +16,7 @@ import { IPoint } from 'common/math';
 import { DestroyLifecycle } from 'ng/modules/utils';
 import { CameraState, CameraZoom, ICameraState, UpdateCameraPosition, UpdateCameraZoom } from 'ng/modules/camera';
 import { Camera } from 'ng/modules/pixi';
-import { Application, Container, Graphics, InteractionEvent, Point, Sprite } from 'pixi.js';
+import { Application, Container, Graphics, InteractionEvent, Point, Rectangle, Sprite } from 'pixi.js';
 import { Observable, takeUntil } from 'rxjs';
 
 const CAMERA_ID = 'tileset';
@@ -44,10 +44,14 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
   sprite!: Sprite;
   scene = new Container();
   selection = new Graphics();
+  grid = new Graphics();
   camera = new Camera();
   observer = new ResizeObserver(() => {
-    this.app?.resize();
-    this.app?.render();
+    if (!this.app) return;
+    this.app.resize();
+    (this.app.stage.hitArea as Rectangle).width = this.app.renderer.width;
+    (this.app.stage.hitArea as Rectangle).height = this.app.renderer.height;
+    this.app.render();
   });
 
   get mouse(): IPoint {
@@ -106,6 +110,9 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
 
   private preview(point: IPoint): void {
     this.selection.clear();
+
+    if (!this.tileWidth || !this.tileHeight) return;
+
     const position = this.selection.toLocal(this.downPos ?? point);
     position.x += -this.offset.x / 2 + this.spacing.x / 2;
     position.y += -this.offset.y / 2 + this.spacing.y / 2;
@@ -127,28 +134,51 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
 
     this.selection.lineStyle(1, 0x3399bb, 1, 1);
 
+    const hCount = Math.floor((this.sprite.texture.width - this.offset.x) / this.tileWidth);
+    const vCount = Math.floor((this.sprite.texture.height - this.offset.y) / this.tileHeight);
     const x = Math.min(
-      this.sprite.texture.width - (this.size.x - this.offset.x),
+      this.offset.x + hCount * this.tileWidth,
       Math.max(this.offset.x, this.offset.x + Math.floor(position.x / this.tileWidth) * this.tileWidth)
     );
     const y = Math.min(
-      this.sprite.texture.height - (this.size.y - this.offset.y),
+      this.offset.y + vCount * this.tileHeight,
       Math.max(this.offset.y, this.offset.y + Math.floor(position.y / this.tileHeight) * this.tileHeight)
     );
 
     const xx = Math.min(
-      this.sprite.texture.width + this.tileWidth - (this.size.x - this.offset.x),
+      this.offset.x + hCount * this.tileWidth + this.tileWidth,
       Math.max(this.offset.x, this.offset.x + (1 + Math.floor(pos.x / this.tileWidth)) * this.tileWidth)
     );
     const yy = Math.min(
-      this.sprite.texture.height + this.tileHeight - (this.size.y - this.offset.y),
+      this.offset.y + vCount * this.tileHeight + this.tileHeight,
       Math.max(this.offset.y, this.offset.y + (1 + Math.floor(pos.y / this.tileHeight)) * this.tileHeight)
     );
 
-    const width = xx - x - this.spacing.x - this.offset.x;
-    const height = yy - y - this.spacing.y - this.offset.y;
+    const width = xx - x - this.offset.x - this.spacing.x;
+    const height = yy - y - this.offset.y - this.spacing.y;
 
     this.selection.drawRect(x, y, width, height);
+    this.app?.render();
+  }
+
+  private renderGrid(): void {
+    this.grid.clear();
+
+    const width = this.size.x;
+    const height = this.size.y;
+
+    if (!width || !height) return;
+
+    this.grid.lineStyle(1, 0x333333, 0.75, 1);
+    const xStep = width + this.spacing.x + this.offset.x;
+    const yStep = height + this.spacing.y + this.offset.y;
+
+    for (let x = this.offset.x; x < this.sprite.texture.width; x += xStep) {
+      for (let y = this.offset.y; y < this.sprite.texture.height; y += yStep) {
+        this.grid.drawRect(x, y, width, height);
+      }
+    }
+
     this.app?.render();
   }
 
@@ -176,6 +206,8 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
       width: this.canvas!.nativeElement.clientWidth,
       height: this.canvas!.nativeElement.clientHeight,
     });
+    this.app.stage.interactive = true;
+    this.app.stage.hitArea = new Rectangle(0, 0, this.app.renderer.width, this.app.renderer.height);
     this.observer.observe(this.canvas!.nativeElement);
     this.scene.on('camera:updated', () => this.app?.render());
     this.app.stage.addChild(this.scene);
@@ -197,12 +229,12 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
       .subscribe((action: UpdateCameraPosition) => {
         if (action.id === CAMERA_ID) this.camera.position = action.position;
       });
-    this.scene.on('pointerdown', (event: InteractionEvent) => {
+    this.app.stage.on('pointerdown', (event: InteractionEvent) => {
       if (event.data.button !== 0) return;
       this.downPos = { x: event.data.global.x, y: event.data.global.y };
     });
-    this.scene.on('pointermove', (event: InteractionEvent) => this.preview(event.data.global));
-    this.scene.on('pointerup', () => (this.downPos = null));
+    this.app.stage.on('pointermove', (event: InteractionEvent) => this.preview(event.data.global));
+    this.app.stage.on('pointerup', () => (this.downPos = null));
   }
 
   /**
@@ -212,19 +244,19 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.scene.removeChildren();
     if (this.sprite) this.sprite.destroy();
     this.sprite = Sprite.from(this.asset.resource.uri);
-    this.scene.interactive = true;
 
     this.tileWidth = this.size.x + this.spacing.x + this.offset.x;
     this.tileHeight = this.size.y + this.spacing.y + this.offset.y;
 
-    this.scene.addChild(this.sprite, this.selection);
-    this.preview({ x: 0, y: 0 });
+    this.scene.addChild(this.sprite, this.grid, this.selection);
+    this.renderGrid();
 
     if (this.centered && changes.asset) this.centered = false;
     if (this.sprite.texture.baseTexture.valid) return this.init();
     this.sprite.texture.baseTexture.on('update', () => {
       this.centered = false;
       this.init();
+      this.renderGrid();
     });
   }
 
