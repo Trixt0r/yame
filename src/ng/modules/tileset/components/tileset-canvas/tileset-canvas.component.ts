@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnChanges,
   OnDestroy,
+  Output,
   SimpleChanges,
   ViewChild,
   ViewEncapsulation,
@@ -18,6 +20,7 @@ import { CameraState, CameraZoom, ICameraState, UpdateCameraPosition, UpdateCame
 import { Camera } from 'ng/modules/pixi';
 import { Application, Container, Graphics, InteractionEvent, Point, Rectangle, Sprite } from 'pixi.js';
 import { Observable, takeUntil } from 'rxjs';
+import { uniqBy } from 'lodash';
 
 const CAMERA_ID = 'tileset';
 
@@ -40,10 +43,14 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
   @Select(CameraState.zoom(CAMERA_ID)) zoom$!: Observable<CameraZoom>;
   @Select(CameraState.position(CAMERA_ID)) position$!: Observable<IPoint>;
 
+  previewColor = 0x0055ff; // 0x3399bb
+  selectionColor = 0xffffff;
+
   app?: Application;
   sprite!: Sprite;
   scene = new Container();
   selection = new Graphics();
+  preview = new Graphics();
   grid = new Graphics();
   camera = new Camera();
   observer = new ResizeObserver(() => {
@@ -53,6 +60,8 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     (this.app.stage.hitArea as Rectangle).height = this.app.renderer.height;
     this.app.render();
   });
+  @Input() selections: IPoint[] = [{ x: 0, y: 0 }];
+  @Output() selectionsChange = new EventEmitter<IPoint[]>();
 
   get mouse(): IPoint {
     return this.app?.renderer?.plugins.interaction.mouse.global;
@@ -86,6 +95,53 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.app?.render();
   }
 
+  private fix(from: IPoint, to: IPoint): void {
+    if (to.x < from.x) {
+      const x = to.x;
+      to.x = from.x;
+      from.x = x;
+    }
+    if (to.y < from.y) {
+      const y = to.y;
+      to.y = from.y;
+      from.y = y;
+    }
+  }
+
+  private getSelection(from: IPoint, to: IPoint): [IPoint, IPoint] {
+    from = { x: from.x, y: from.y };
+    to = { x: to.x, y: to.y };
+    from.x += -this.offset.x / 2 + this.spacing.x / 2;
+    from.y += -this.offset.y / 2 + this.spacing.y / 2;
+    to.x += -this.offset.x / 2 + this.spacing.x / 2;
+    to.y += -this.offset.y / 2 + this.spacing.y / 2;
+    this.fix(from, to);
+
+    const hCount = Math.floor((this.sprite.texture.width - this.offset.x) / this.tileWidth);
+    const vCount = Math.floor((this.sprite.texture.height - this.offset.y) / this.tileHeight);
+    const x = Math.min(
+      this.offset.x + hCount * this.tileWidth,
+      Math.max(this.offset.x, this.offset.x + Math.floor(from.x / this.tileWidth) * this.tileWidth)
+    );
+    const y = Math.min(
+      this.offset.y + vCount * this.tileHeight,
+      Math.max(this.offset.y, this.offset.y + Math.floor(from.y / this.tileHeight) * this.tileHeight)
+    );
+
+    const xx = Math.min(
+      this.offset.x + hCount * this.tileWidth + this.tileWidth,
+      Math.max(this.offset.x + this.size.x, this.offset.x + (1 + Math.floor(to.x / this.tileWidth)) * this.tileWidth)
+    );
+    const yy = Math.min(
+      this.offset.y + vCount * this.tileHeight + this.tileHeight,
+      Math.max(this.offset.y + this.size.y, this.offset.y + (1 + Math.floor(to.y / this.tileHeight)) * this.tileHeight)
+    );
+    return [
+      { x, y },
+      { x: xx, y: yy },
+    ];
+  }
+
   private center(): void {
     if (this.centered || !this.app || !this.sprite.texture.valid) return;
     const bounds = this.sprite.getLocalBounds();
@@ -108,57 +164,55 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.centered = true;
   }
 
-  private preview(point: IPoint): void {
-    this.selection.clear();
+  private renderPreview(point: IPoint): void {
+    this.preview.clear();
 
     if (!this.tileWidth || !this.tileHeight) return;
 
-    const position = this.selection.toLocal(this.downPos ?? point);
-    position.x += -this.offset.x / 2 + this.spacing.x / 2;
-    position.y += -this.offset.y / 2 + this.spacing.y / 2;
+    const from = this.sprite.toLocal(this.downPos ?? point);
+    const to = this.sprite.toLocal(point);
+    const [start, end] = this.getSelection(from, to);
 
-    const pos = this.selection.toLocal(point);
-    pos.x += -this.offset.x / 2 + this.spacing.x / 2;
-    pos.y += -this.offset.y / 2 + this.spacing.y / 2;
+    const width = Math.max(end.x - start.x - this.offset.x - this.spacing.x, this.size.x);
+    const height = Math.max(end.y - start.y - this.offset.y - this.spacing.y, this.size.y);
+    this.preview.lineStyle(1, this.previewColor, 1, 1);
+    this.preview.fill.color = this.previewColor;
+    this.preview.fill.alpha = 0.25;
+    this.preview.fill.visible = true;
+    this.renderSelections(this.getSelections(start, end), this.preview);
+    this.preview.fill.reset();
+    this.preview.drawRect(start.x, start.y, width, height);
 
-    if (pos.x < position.x) {
-      const x = pos.x;
-      pos.x = position.x;
-      position.x = x;
-    }
-    if (pos.y < position.y) {
-      const y = pos.y;
-      pos.y = position.y;
-      position.y = y;
-    }
-
-    this.selection.lineStyle(1, 0x3399bb, 1, 1);
-
-    const hCount = Math.floor((this.sprite.texture.width - this.offset.x) / this.tileWidth);
-    const vCount = Math.floor((this.sprite.texture.height - this.offset.y) / this.tileHeight);
-    const x = Math.min(
-      this.offset.x + hCount * this.tileWidth,
-      Math.max(this.offset.x, this.offset.x + Math.floor(position.x / this.tileWidth) * this.tileWidth)
-    );
-    const y = Math.min(
-      this.offset.y + vCount * this.tileHeight,
-      Math.max(this.offset.y, this.offset.y + Math.floor(position.y / this.tileHeight) * this.tileHeight)
-    );
-
-    const xx = Math.min(
-      this.offset.x + hCount * this.tileWidth + this.tileWidth,
-      Math.max(this.offset.x, this.offset.x + (1 + Math.floor(pos.x / this.tileWidth)) * this.tileWidth)
-    );
-    const yy = Math.min(
-      this.offset.y + vCount * this.tileHeight + this.tileHeight,
-      Math.max(this.offset.y, this.offset.y + (1 + Math.floor(pos.y / this.tileHeight)) * this.tileHeight)
-    );
-
-    const width = xx - x - this.offset.x - this.spacing.x;
-    const height = yy - y - this.offset.y - this.spacing.y;
-
-    this.selection.drawRect(x, y, width, height);
     this.app?.render();
+  }
+
+  private getSelections(from: IPoint, to: IPoint): IPoint[] {
+    const selections: IPoint[] = [];
+    const xOffset = Math.floor(from.x / this.tileWidth);
+    const yOffset = Math.floor(from.y / this.tileHeight);
+    const xCount = Math.floor((to.x - from.x) / this.tileWidth) + xOffset;
+    const yCount = Math.floor((to.y - from.y) / this.tileHeight) + yOffset;
+
+    for (let x = Math.floor(from.x / this.tileWidth); x < xCount; x += 1) {
+      for (let y = Math.floor(from.y / this.tileHeight); y < yCount; y += 1) {
+        selections.push({ x, y });
+      }
+    }
+    return selections;
+  }
+
+  private renderSelections(selections: IPoint[], target: Graphics): void {
+    const xCount = Math.floor((this.sprite.texture.width - this.offset.x) / this.tileWidth);
+    const yCount = Math.floor((this.sprite.texture.height - this.offset.y) / this.tileHeight);
+    const xMax = this.offset.x + xCount * this.tileWidth;
+    const yMax = this.offset.y + yCount * this.tileHeight;
+    for (let i = 0; i < selections.length; i++) {
+      const { x, y } = selections[i];
+      const xx = this.offset.x + x * this.tileWidth;
+      const yy = this.offset.y + y * this.tileHeight;
+      if (xx > xMax || yy > yMax) continue;
+      target.drawRect(xx, yy, this.size.x, this.size.y);
+    }
   }
 
   private renderGrid(): void {
@@ -170,16 +224,14 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     if (!width || !height) return;
 
     this.grid.lineStyle(1, 0x333333, 0.75, 1);
-    const xStep = width + this.spacing.x + this.offset.x;
-    const yStep = height + this.spacing.y + this.offset.y;
+    const xStep = this.tileWidth;
+    const yStep = this.tileHeight;
 
     for (let x = this.offset.x; x < this.sprite.texture.width; x += xStep) {
       for (let y = this.offset.y; y < this.sprite.texture.height; y += yStep) {
         this.grid.drawRect(x, y, width, height);
       }
     }
-
-    this.app?.render();
   }
 
   private updateCameraZoom(zoom: CameraZoom): void {
@@ -211,6 +263,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.observer.observe(this.canvas!.nativeElement);
     this.scene.on('camera:updated', () => this.app?.render());
     this.app.stage.addChild(this.scene);
+
     this.init();
 
     let firstRun = true;
@@ -224,17 +277,53 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
       const pos = { x: this.camera.position?.x ?? 0, y: this.camera.position?.y ?? 0 } as IPoint;
       this.store.dispatch(new UpdateCameraPosition(CAMERA_ID, pos));
     });
+
     this.actions
       .pipe(ofActionSuccessful(UpdateCameraPosition), takeUntil(this.destroy$))
       .subscribe((action: UpdateCameraPosition) => {
         if (action.id === CAMERA_ID) this.camera.position = action.position;
       });
+
     this.app.stage.on('pointerdown', (event: InteractionEvent) => {
       if (event.data.button !== 0) return;
       this.downPos = { x: event.data.global.x, y: event.data.global.y };
     });
-    this.app.stage.on('pointermove', (event: InteractionEvent) => this.preview(event.data.global));
-    this.app.stage.on('pointerup', () => (this.downPos = null));
+
+    this.app.stage.on('pointermove', (event: InteractionEvent) => this.renderPreview(event.data.global));
+
+    this.app.stage.on('pointerup', (event: InteractionEvent) => {
+      if (!this.downPos) return;
+
+      const resetSelection = !event.data.originalEvent.shiftKey && !event.data.originalEvent.ctrlKey;
+      const toggleSelection = event.data.originalEvent.ctrlKey;
+
+      const from = this.sprite.toLocal(this.downPos);
+      const to = this.sprite.toLocal(event.data.global);
+      let selections = this.getSelections(...this.getSelection(from, to));
+      if (resetSelection) {
+        this.selections = selections;
+      } else {
+        const prevSelections = [...this.selections];
+        let toRemove: IPoint[] = [];
+        if (toggleSelection) {
+          toRemove = prevSelections.filter(({ x, y }) => selections.some(_ => _.x === x && _.y === y));
+        }
+        this.selections = uniqBy([...prevSelections, ...selections], ({ x, y }) => `${x},${y}`).filter(
+          ({ x, y }) => !toRemove.some(_ => _.x === x && _.y === y)
+        );
+      }
+
+      this.selectionsChange.emit(this.selections);
+
+      this.selection.clear();
+      this.selection.lineStyle(1, this.selectionColor, 1, 1);
+      this.selection.fill.visible = true;
+      this.selection.fill.color = this.selectionColor;
+      this.selection.fill.alpha = 0.25;
+      this.renderSelections(this.selections, this.selection);
+
+      this.downPos = null;
+    });
   }
 
   /**
@@ -248,15 +337,24 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.tileWidth = this.size.x + this.spacing.x + this.offset.x;
     this.tileHeight = this.size.y + this.spacing.y + this.offset.y;
 
-    this.scene.addChild(this.sprite, this.grid, this.selection);
+    this.scene.addChild(this.sprite, this.grid, this.selection, this.preview);
     this.renderGrid();
+
+    this.selection.clear();
+    this.selection.lineStyle(1, this.selectionColor, 1, 1);
+    this.selection.fill.visible = true;
+    this.selection.fill.color = this.selectionColor;
+    this.selection.fill.alpha = 0.25;
+    this.renderSelections(this.selections, this.selection);
+
+    this.app?.render();
 
     if (this.centered && changes.asset) this.centered = false;
     if (this.sprite.texture.baseTexture.valid) return this.init();
     this.sprite.texture.baseTexture.on('update', () => {
       this.centered = false;
-      this.init();
       this.renderGrid();
+      this.init();
     });
   }
 
@@ -264,6 +362,14 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
    * @inheritdoc
    */
   ngOnDestroy(): void {
+    console.log('here');
+    this.grid.clear();
+    this.preview.clear();
+    this.selection.clear();
+    this.scene.removeChildren();
+    this.scene.removeAllListeners();
+    this.app?.stage.removeAllListeners();
+    this.canvas?.nativeElement.remove();
     this.observer.disconnect();
     this.camera.detach();
     this.app?.destroy();

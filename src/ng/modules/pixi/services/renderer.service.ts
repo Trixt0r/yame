@@ -138,7 +138,7 @@ export class PixiRendererService implements ISceneRenderer {
       actions.pipe(ofActionSuccessful(SortEntity)).subscribe((action: SortEntity) => {
         const data = Array.isArray(action.data) ? action.data : [action.data];
         const parents: string[] = [];
-        data.forEach((it) => {
+        data.forEach(it => {
           if (it.parent === it.oldParent) return;
           const container = this.getContainer(it.id);
           if (!container) return;
@@ -160,7 +160,7 @@ export class PixiRendererService implements ISceneRenderer {
         const pushParents = (source: string[]) => {
           if (source.length === 0) return;
           const pushed = [] as string[];
-          source.forEach((id) => {
+          source.forEach(id => {
             const entity = this.sceneService.getEntity(id);
             if (!entity) return;
             const parent = entity.parent;
@@ -173,7 +173,7 @@ export class PixiRendererService implements ISceneRenderer {
 
         pushParents(parents);
 
-        parents.forEach((id) => {
+        parents.forEach(id => {
           const container = this.getContainer(id);
           if (!container) return;
           const entity = this.sceneService.getEntity(id);
@@ -192,7 +192,7 @@ export class PixiRendererService implements ISceneRenderer {
       const self = this;
       engine.addListener({
         onAddedEntities(...entities: SceneEntity[]) {
-          entities.forEach((entity) => {
+          entities.forEach(entity => {
             const child = new Container();
             child.name = entity.id;
             child.sortableChildren = true;
@@ -219,10 +219,10 @@ export class PixiRendererService implements ISceneRenderer {
           });
         },
         onRemovedEntities(...entities: SceneEntity[]) {
-          entities.forEach((entity) => {
+          entities.forEach(entity => {
             const children = self.sceneService
               .getChildren(entity.id, true)
-              .filter((it) => entities.find((e) => e.id !== it.id));
+              .filter(it => entities.find(e => e.id !== it.id));
             if (children.length > 0) engine.entities.remove.apply(engine.entities, children);
             const container = self.pixiContainers[entity.id];
             if (container?.parent) {
@@ -238,7 +238,7 @@ export class PixiRendererService implements ISceneRenderer {
           });
         },
         onClearedEntities() {
-          each(self.pixiContainers, (container) => {
+          each(self.pixiContainers, container => {
             container?.removeChildren(0, container.children.length);
             if (container?.parent) container.parent.removeChild(container);
           });
@@ -292,18 +292,21 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * @inheritdoc
    */
-  createPreview(x: number, y: number, asset: Asset): void {
+  createPreview(x: number, y: number, asset: Asset, ...components: SceneComponent[]): void {
     this.zone.runOutsideAngular(() => {
-      this.sceneService.createEntity(x, y, asset).subscribe((entity) => {
+      this.sceneService.createEntity(x, y, asset).subscribe(entity => {
         this._previewEntity = entity;
         this._previewEntity.parent = null;
         this._previewEntity.components.add({ id: 'sprite.animate', type: 'boolean', boolean: true, group: 'sprite' });
         this.engineService.engine.entities.add(this._previewEntity);
-        this._previewEntity.components.add({
-          id: 'index',
-          type: 'index',
-          index: (maxBy(this.scene.children, (child) => child.zIndex)?.zIndex ?? 0) + 1,
-        });
+        this._previewEntity.components.add(
+          {
+            id: 'index',
+            type: 'index',
+            index: (maxBy(this.scene.children, child => child.zIndex)?.zIndex ?? 0) + 1,
+          },
+          ...components
+        );
         this.engineService.run();
       });
     });
@@ -464,18 +467,18 @@ export class PixiRendererService implements ISceneRenderer {
     const pos: Partial<PointSceneComponent> = { x: 0, y: 0 };
     if (selectedIds.length > 0) {
       await this.sceneService.store.dispatch(new Unselect(selectedIds, [], false)).toPromise();
-      Object.assign(pos, select.components.find((c) => c.id === 'transformation.position') as PointSceneComponent);
+      Object.assign(pos, select.components.find(c => c.id === 'transformation.position') as PointSceneComponent);
     }
 
     const compsBefore: { [id: string]: SceneComponent[] } = {};
 
     // Transform each entity to the scene realm
-    ids.forEach((id) => {
+    ids.forEach(id => {
       const entity = this.sceneService.getEntity(id);
       const container = this.getContainer(id);
       if (!entity || !container) return;
 
-      compsBefore[id] = entity.components.map((it) => cloneDeep(it));
+      compsBefore[id] = entity.components.map(it => cloneDeep(it));
       container.transform.updateTransform(container.parent.transform);
 
       transformTo(container, this.scene);
@@ -492,10 +495,10 @@ export class PixiRendererService implements ISceneRenderer {
 
     // Restore the old component values, as soon as the action is done
     this.actions.pipe(ofActionCompleted(CopyEntity), take(1)).subscribe(() => {
-      ids.forEach((id) => {
+      ids.forEach(id => {
         const entity = this.sceneService.getEntity(id);
         if (!entity) return;
-        entity.components.remove(...entity.components.filter((it) => it.id === 'position.offset'));
+        entity.components.remove(...entity.components.filter(it => it.id === 'position.offset'));
         entity.components.set(...compsBefore[id]);
       });
       if (selectedIds.length > 0) this.sceneService.store.dispatch(new Select(selectedIds, comps, false));
@@ -506,11 +509,11 @@ export class PixiRendererService implements ISceneRenderer {
   async handlePaste(state: { scene: ISceneState }): Promise<void> {
     const copied = state.scene.copied;
     const projected = this.projectToScene(this.mouse.x, this.mouse.y);
-    copied.forEach((copy) => {
-      if (!copy.components.find((c) => c.id === 'copy-descriptor')?.root) return;
-      const position = copy.components.find((c) => c.id === 'transformation.position') as PointSceneComponent;
+    copied.forEach(copy => {
+      if (!copy.components.find(c => c.id === 'copy-descriptor')?.root) return;
+      const position = copy.components.find(c => c.id === 'transformation.position') as PointSceneComponent;
       if (!position) return;
-      const offset = copy.components.find((c) => c.id === 'position.offset') as PointSceneComponent;
+      const offset = copy.components.find(c => c.id === 'position.offset') as PointSceneComponent;
       if (!offset) return;
       position.x = projected.x + offset.x;
       position.y = projected.y + offset.y;

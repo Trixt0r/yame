@@ -9,7 +9,7 @@
           aria-label="x"
           placeholder="x"
           yameNumber
-          (yameNumberInput)="value!.x = $event.value; input.next($event.event)"
+          (yameNumberInput)="value = { x: $event.value, y: value.y }; input.next($event.event)"
           (input)="_handleInput()"
           [type]="type" />
       </nz-input-group>
@@ -23,7 +23,7 @@
           aria-label="y"
           placeholder="y"
           yameNumber
-          (yameNumberInput)="value!.y = $event.value; input.next($event.event)"
+          (yameNumberInput)="value = { x: value.x, y: $event.value }; input.next($event.event)"
           (input)="_handleInput()"
           [type]="type" /> </nz-input-group
     ></nz-form-control>

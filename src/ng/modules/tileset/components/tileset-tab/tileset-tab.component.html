@@ -1,14 +1,11 @@
-<div
-  class="preview"
-  [class.expanded]="expanded"
-  (dblclick)="expanded = true"
-  (window:keydown)="expanded = expanded && $event.key !== 'Escape'">
+<div class="preview" [class.expanded]="expanded" (dblclick)="expanded = true">
   <div class="image-wrapper relative">
     <yame-tileset-canvas
       [asset]="asset"
       [size]="size"
       [spacing]="spacing"
       [offset]="offset"
+      [(selections)]="selections"
       class="fill-height"></yame-tileset-canvas>
   </div>
 </div>

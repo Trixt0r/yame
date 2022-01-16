@@ -159,21 +159,18 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   /**
    * @inheritdoc
    */
-  @Input() get value(): IPoint | null {
+  @Input() get value(): IPoint {
     return this._value;
   }
 
   /**
    * @inheritdoc
    */
-  set value(point: IPoint | null) {
+  set value(point: IPoint) {
     const { x, y } = point ?? { x: 0, y: 0 };
     if (x === void 0 || y === void 0) return;
     this.parts.setValue({ x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 });
-    this._value = {
-      x,
-      y,
-    };
+    this._value = { x, y };
     this.valueChange.next(this.value);
   }
 
@@ -214,14 +211,16 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   /**
    * @inheritdoc
    */
-  writeValue(point: IPoint | null): void {
+  writeValue(point: IPoint): void {
     this.value = point;
+    console.log(this.value);
   }
 
   /**
    * @inheritdoc
    */
   registerOnChange(fn: any): void {
+    console.log(fn);
     this.onChange = fn;
   }
 
@@ -241,10 +240,7 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
     } = this.parts;
     const xx = typeof x === 'string' ? parseFloat(x.replace(',', '.')) : x;
     const yy = typeof y === 'string' ? parseFloat(y.replace(',', '.')) : y;
-    this.value = {
-      x: isNaN(xx) ? 0 : xx,
-      y: isNaN(yy) ? 0 : yy,
-    };
+    this.value = { x: isNaN(xx) ? 0 : xx, y: isNaN(yy) ? 0 : yy };
 
     this.onChange(this.parts.value);
   }

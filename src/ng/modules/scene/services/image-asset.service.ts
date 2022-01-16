@@ -18,7 +18,6 @@ export class ImageAssetService {
    * Converts the given asset to a list of components representing an image.
    *
    * @param asset The asset to convert.
-   * @returns
    */
   @Convert(...ImageAssetService.ALLOWED_TYPES)
   async convert(asset: Asset): Promise<SceneComponent[]> {

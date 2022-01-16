@@ -3,11 +3,11 @@ import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { SceneAssetConverterService } from './converter.service';
 import { CreateEntity, SortEntity, DeleteEntity } from '../states/actions/entity.action';
-import { SceneEntity, createTransformationComponents, SceneEntityData } from 'common/scene';
+import { SceneEntity, createTransformationComponents, SceneEntityData, SceneComponent } from 'common/scene';
 import { Observable, from, of, Subscription } from 'rxjs';
 import { SceneState } from '../states/scene.state';
-import { flatMap } from 'rxjs/operators';
-import { SceneComponent } from '../components/scene/scene.component';
+import { mergeMap } from 'rxjs/operators';
+import { SceneComponent as SceneComp } from '../components/scene/scene.component';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
 import { ResetScene } from '../states/actions/scene.action';
@@ -17,7 +17,7 @@ export interface ISceneRenderer {
    * The scene component reference.
    * Use it to visualize your rendered data.
    */
-  component: SceneComponent;
+  component: SceneComp;
 
   /**
    * The scene service reference.
@@ -48,7 +48,7 @@ export interface ISceneRenderer {
    * @param y The y coordinate.
    * @param asset The asset to create the preview for.
    */
-  createPreview(x: number, y: number, asset: Asset): void;
+  createPreview(x: number, y: number, asset: Asset, ...components: SceneComponent[]): void;
 
   /**
    * Updates the current preview at the given coordinates.
@@ -74,7 +74,7 @@ export interface ISceneRenderer {
  * Renderer which does nothing.
  */
 export class NoopRenderer implements ISceneRenderer {
-  component!: SceneComponent;
+  component!: SceneComp;
 
   sceneService!: SceneService;
 
@@ -82,11 +82,11 @@ export class NoopRenderer implements ISceneRenderer {
     return { x, y };
   }
 
-  setSize(width: number, height: number) {}
+  setSize() {}
 
-  createPreview(x: number, y: number, asset: Asset): void {}
+  createPreview(): void {}
 
-  updatePreview(x: number, y: number) {}
+  updatePreview() {}
 
   removePreview() {}
 
@@ -144,7 +144,7 @@ export class SceneService {
     };
 
     const updateEntities = (ids: string[]) => {
-      ids.forEach((id) => {
+      ids.forEach(id => {
         this.childDeepMapping[id] = this._getChildren(id, true);
         this.childFlatMapping[id] = this._getChildren(id, false);
       });
@@ -155,14 +155,14 @@ export class SceneService {
         this._entities = this.store.snapshot().scene.entities.slice() as SceneEntity[];
         const updates: string[] = [];
         if (action instanceof CreateEntity) {
-          action.created.forEach((entity) => {
+          action.created.forEach(entity => {
             this.idMapping[entity.id] = entity;
             this.childDeepMapping[entity.id] = this._getChildren(entity.id, true);
             this.childFlatMapping[entity.id] = this._getChildren(entity.id, false);
             collectUpdates(entity, updates);
           });
         } else {
-          action.deleted.forEach((it) => {
+          action.deleted.forEach(it => {
             const entity = this.idMapping[it.id];
             if (!entity) return;
             collectUpdates(entity, updates);
@@ -177,7 +177,7 @@ export class SceneService {
     this.subs.push(
       actions.pipe(ofActionSuccessful(SortEntity)).subscribe(() => {
         this._entities = this.store.snapshot().scene.entities.slice();
-        this.entities.forEach((it) => {
+        this.entities.forEach(it => {
           this.childDeepMapping[it.id] = this._getChildren(it.id, true);
           this.childFlatMapping[it.id] = this._getChildren(it.id, false);
         });
@@ -209,9 +209,9 @@ export class SceneService {
    */
   protected _getChildren(entityOrId: string | SceneEntity, deep: boolean = true): SceneEntity[] {
     const id = entityOrId instanceof SceneEntity ? entityOrId.id : entityOrId;
-    let children = this._entities.filter((entity) => entity.parent === id);
+    let children = this._entities.filter(entity => entity.parent === id);
     if (deep) {
-      children.slice().forEach((it) => {
+      children.slice().forEach(it => {
         children = [...children, ...this._getChildren(it.id)];
       });
     }
@@ -244,9 +244,9 @@ export class SceneService {
   createEntity(x: number, y: number, asset?: Asset): Observable<SceneEntity> {
     const hasAsset = asset && asset instanceof Asset;
     const obs = hasAsset ? from(this.converter.get(asset as Asset)) : of([]);
-    const parent = this.store.selectSnapshot((state) => state.select).isolated as SceneEntity;
+    const parent = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
     const re = obs.pipe(
-      flatMap((data) => {
+      mergeMap(data => {
         const entity = new SceneEntity();
         if (parent) entity.parent = parent.id;
         const comps = createTransformationComponents();
@@ -273,7 +273,7 @@ export class SceneService {
    */
   addEntity(x: number, y: number, asset?: Asset): Observable<SceneState> {
     return this.createEntity(x, y, asset).pipe(
-      flatMap((entity) => {
+      mergeMap(entity => {
         return this.store.dispatch(new CreateEntity(entity));
       })
     );
@@ -289,7 +289,7 @@ export class SceneService {
     if (entity === null || entity === void 0) return void 0;
     const id = entity instanceof SceneEntity ? entity.id : entity;
     const re = this.idMapping[id];
-    if (!re) return this.store.selectSnapshot((state) => state.scene.entities).find((it: SceneEntity) => it.id === id);
+    if (!re) return this.store.selectSnapshot(state => state.scene.entities).find((it: SceneEntity) => it.id === id);
     return re;
   }
 
@@ -325,8 +325,8 @@ export class SceneService {
    * @param y The y value for the position.
    * @param asset The asset to create the preview for.
    */
-  createPreview(x: number, y: number, asset: Asset): void {
-    this.renderer.createPreview(x, y, asset);
+  createPreview(x: number, y: number, asset: Asset, ...components: SceneComponent[]): void {
+    this.renderer.createPreview(x, y, asset, ...components);
   }
 
   /**
@@ -350,7 +350,7 @@ export class SceneService {
    * Disposes this service and its dependencies.
    */
   dispose(): void {
-    this.subs.forEach((sub) => sub.unsubscribe());
+    this.subs.forEach(sub => sub.unsubscribe());
     this.renderer.dispose();
   }
 
@@ -360,14 +360,14 @@ export class SceneService {
    * @param context Any export context.
    */
   async export(context: ISerializeContext): Promise<SceneEntityData[]> {
-    const entities = await Promise.all(this.entities.map((entity) => entity.export(context)));
+    const entities = await Promise.all(this.entities.map(entity => entity.export(context)));
 
     const getParentCount = (entity: SceneEntityData) => {
       let parent = entity.parent;
       let count = 0;
       while (parent) {
         ++count;
-        const found = entities.find((it) => it.id === parent);
+        const found = entities.find(it => it.id === parent);
         parent = found ? found.parent : null;
       }
       return count;
@@ -385,7 +385,7 @@ export class SceneService {
    */
   async import(entities: SceneEntityData[], context: ISerializeContext): Promise<SceneEntity[]> {
     const newEntities = await Promise.all(
-      entities.map(async (data) => {
+      entities.map(async data => {
         const entity = await SceneEntity.import(data, context);
         entity.components.set({ id: 'copy-descriptor', type: 'copy-data', ref: entity.id });
         return entity;
@@ -396,7 +396,7 @@ export class SceneService {
       let count = 0;
       while (parent) {
         ++count;
-        const found = newEntities.find((it) => it.id === parent);
+        const found = newEntities.find(it => it.id === parent);
         parent = found ? found.parent : null;
       }
       return count;
