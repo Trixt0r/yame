@@ -37,10 +37,10 @@ export class TilesetState {
     }
     const settings = [...found.settings];
     action.settings.forEach(_ => {
-      const setting = settings.find(s => s.id === _.id);
-      const clone = cloneDeep(_);
-      if (!setting) settings.push(merge({ id: settings.length, label: 'default' }, cloneDeep(DEFAULT_SETTINGS), clone));
-      else merge(setting, cloneDeep(_));
+      let idx = settings.findIndex(s => s.id === _.id);
+      const setting = settings[idx] ?? { id: settings.length, label: 'default', ...cloneDeep(DEFAULT_SETTINGS) };
+      if (idx < 0) settings.push(setting);
+      Object.keys(_).forEach(k => ((setting as any)[k] = (_ as any)[k]));
     });
     found.settings = settings;
     ctx.patchState({ tilesets });

@@ -213,14 +213,12 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
    */
   writeValue(point: IPoint): void {
     this.value = point;
-    console.log(this.value);
   }
 
   /**
    * @inheritdoc
    */
   registerOnChange(fn: any): void {
-    console.log(fn);
     this.onChange = fn;
   }
 

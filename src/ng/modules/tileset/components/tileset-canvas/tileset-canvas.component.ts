@@ -24,6 +24,13 @@ import { uniqBy } from 'lodash';
 
 const CAMERA_ID = 'tileset';
 
+const app = new Application({
+  antialias: false,
+  clearBeforeRender: true,
+  autoStart: false,
+  transparent: true,
+});
+
 @Component({
   selector: 'yame-tileset-canvas',
   templateUrl: './tileset-canvas.component.html',
@@ -33,12 +40,19 @@ const CAMERA_ID = 'tileset';
   providers: [DestroyLifecycle],
 })
 export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestroy {
-  @Input() asset!: Asset;
+  @Input() set asset(value: Asset) {
+    if (this._asset?.id === value.id) return;
+    this._asset = value;
+    if (this.sprite) this.sprite.destroy();
+    this.sprite = Sprite.from(value.resource.uri);
+    this.scene.removeChildren();
+    this.scene.addChild(this.sprite, this.grid, this.selection, this.preview);
+  }
   @Input() size: IPoint = { x: 8, y: 8 };
   @Input() spacing: IPoint = { x: 0, y: 0 };
   @Input() offset: IPoint = { x: 0, y: 0 };
 
-  @ViewChild('canvas') canvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvas') canvas?: ElementRef<HTMLDivElement>;
 
   @Select(CameraState.zoom(CAMERA_ID)) zoom$!: Observable<CameraZoom>;
   @Select(CameraState.position(CAMERA_ID)) position$!: Observable<IPoint>;
@@ -46,7 +60,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
   previewColor = 0x0055ff; // 0x3399bb
   selectionColor = 0xffffff;
 
-  app?: Application;
+  app = app;
   sprite!: Sprite;
   scene = new Container();
   selection = new Graphics();
@@ -64,7 +78,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
   @Output() selectionsChange = new EventEmitter<IPoint[]>();
 
   get mouse(): IPoint {
-    return this.app?.renderer?.plugins.interaction.mouse.global;
+    return this.app.renderer.plugins.interaction.mouse.global;
   }
 
   readonly cameraId = CAMERA_ID;
@@ -73,6 +87,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
   private tileHeight = this.size.y + this.spacing.y + this.offset.y;
   private centered = false;
   private downPos: IPoint | null = null;
+  private _asset?: Asset;
 
   constructor(private store: Store, private actions: Actions, private destroy$: DestroyLifecycle) {}
 
@@ -92,7 +107,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
       this.updateCameraZoom(zoom);
       this.camera.position = position;
     }
-    this.app?.render();
+    this.app.render();
   }
 
   private fix(from: IPoint, to: IPoint): void {
@@ -117,8 +132,8 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     to.y += -this.offset.y / 2 + this.spacing.y / 2;
     this.fix(from, to);
 
-    const hCount = Math.floor((this.sprite.texture.width - this.offset.x) / this.tileWidth);
-    const vCount = Math.floor((this.sprite.texture.height - this.offset.y) / this.tileHeight);
+    const hCount = Math.ceil((this.sprite.texture.width - this.offset.x) / this.tileWidth) - 1;
+    const vCount = Math.ceil((this.sprite.texture.height - this.offset.y) / this.tileHeight) - 1;
     const x = Math.min(
       this.offset.x + hCount * this.tileWidth,
       Math.max(this.offset.x, this.offset.x + Math.floor(from.x / this.tileWidth) * this.tileWidth)
@@ -183,7 +198,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.preview.fill.reset();
     this.preview.drawRect(start.x, start.y, width, height);
 
-    this.app?.render();
+    this.app.render();
   }
 
   private getSelections(from: IPoint, to: IPoint): IPoint[] {
@@ -248,21 +263,14 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
    * @inheritdoc
    */
   ngAfterViewInit(): void {
-    this.app = new Application({
-      antialias: false,
-      clearBeforeRender: true,
-      autoStart: false,
-      transparent: true,
-      resizeTo: this.canvas!.nativeElement,
-      view: this.canvas!.nativeElement,
-      width: this.canvas!.nativeElement.clientWidth,
-      height: this.canvas!.nativeElement.clientHeight,
-    });
+    this.app = app;
+    this.app.resizeTo = this.canvas!.nativeElement;
     this.app.stage.interactive = true;
     this.app.stage.hitArea = new Rectangle(0, 0, this.app.renderer.width, this.app.renderer.height);
     this.observer.observe(this.canvas!.nativeElement);
-    this.scene.on('camera:updated', () => this.app?.render());
+    this.scene.on('camera:updated', () => this.app.render());
     this.app.stage.addChild(this.scene);
+    this.canvas?.nativeElement.appendChild(this.app.view);
 
     this.init();
 
@@ -330,14 +338,9 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
    * @inheritdoc
    */
   ngOnChanges(changes: SimpleChanges): void {
-    this.scene.removeChildren();
-    if (this.sprite) this.sprite.destroy();
-    this.sprite = Sprite.from(this.asset.resource.uri);
-
     this.tileWidth = this.size.x + this.spacing.x + this.offset.x;
     this.tileHeight = this.size.y + this.spacing.y + this.offset.y;
 
-    this.scene.addChild(this.sprite, this.grid, this.selection, this.preview);
     this.renderGrid();
 
     this.selection.clear();
@@ -347,7 +350,7 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
     this.selection.fill.alpha = 0.25;
     this.renderSelections(this.selections, this.selection);
 
-    this.app?.render();
+    this.app.render();
 
     if (this.centered && changes.asset) this.centered = false;
     if (this.sprite.texture.baseTexture.valid) return this.init();
@@ -362,16 +365,9 @@ export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestr
    * @inheritdoc
    */
   ngOnDestroy(): void {
-    console.log('here');
-    this.grid.clear();
-    this.preview.clear();
-    this.selection.clear();
-    this.scene.removeChildren();
-    this.scene.removeAllListeners();
-    this.app?.stage.removeAllListeners();
-    this.canvas?.nativeElement.remove();
     this.observer.disconnect();
     this.camera.detach();
-    this.app?.destroy();
+    this.app.stage.removeAllListeners();
+    this.app.stage.removeChildren();
   }
 }

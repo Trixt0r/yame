@@ -14,7 +14,7 @@ import { AssetTabComponent, IAssetOwner } from 'ng/modules/asset';
 import { Observable, takeUntil } from 'rxjs';
 import { ITileset, ITilesetSetting } from '../../interfaces';
 import { DEFAULT_SETTINGS, SaveTilesetSettings, TilesetState } from '../../states';
-import { merge } from 'lodash';
+import { difference, merge } from 'lodash';
 
 @Component({
   selector: 'yame-tileset-tab',
@@ -44,6 +44,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   }
 
   set size(value: IPoint) {
+    if (value.x === this._size.x && value.y === this._size.y) return;
     this.updateValue('size', value);
   }
   get size(): IPoint {
@@ -51,6 +52,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   }
 
   set spacing(value: IPoint) {
+    if (value.x === this._spacing.x && value.y === this._spacing.y) return;
     this.updateValue('spacing', value);
   }
   get spacing(): IPoint {
@@ -58,6 +60,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   }
 
   set offset(value: IPoint) {
+    if (value.x === this._offset.x && value.y === this._offset.y) return;
     this.updateValue('offset', value);
   }
   get offset(): IPoint {
@@ -65,6 +68,13 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   }
 
   set selections(value: IPoint[]) {
+    if (
+      difference(
+        this._selections.map(_ => `${_.x},${_.y}`),
+        value.map(_ => `${_.x},${_.y}`)
+      ).length === 0
+    )
+      return;
     this.updateValue('selections', value);
   }
   get selections(): IPoint[] {
@@ -88,7 +98,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
 
   private updateValue<T>(key: keyof ITilesetSetting, value: T): void {
     (this as any)[`_${key}`] = value;
-    this.store.dispatch(new SaveTilesetSettings(this._asset, [{ id: this.settingId, [key]: { ...value } }]));
+    this.store.dispatch(new SaveTilesetSettings(this._asset, [{ id: this.settingId, [key]: value }]));
   }
 
   ngOnInit(): void {
@@ -101,7 +111,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
         merge(this._size, setting.size);
         merge(this._offset, setting.offset);
         merge(this._spacing, setting.spacing);
-        this._selections = setting.selections;
+        this._selections = setting.selections.slice();
       });
     });
   }
