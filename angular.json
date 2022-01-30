@@ -42,12 +42,12 @@
             "styles": ["node_modules/ng-zorro-antd/ng-zorro-antd.dark.min.css", "src/ng/style.scss"],
             "scripts": [],
             "allowedCommonJsDependencies": ["common/require", "lodash", "@trixt0r/ecs", "uuid"],
-            "aot": true,
+            "aot": false,
             "vendorChunk": true,
             "extractLicenses": false,
-            "buildOptimizer": true,
+            "buildOptimizer": false,
             "sourceMap": true,
-            "optimization": true,
+            "optimization": false,
             "namedChunks": true
           },
           "configurations": {
