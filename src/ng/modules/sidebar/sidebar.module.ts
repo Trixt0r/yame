@@ -11,7 +11,6 @@ import { EntityComponentsDirective } from './directives/entity-components.direct
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GroupTypeComponent } from './components/selection/types/group/group.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { DndModule } from 'ng2-dnd';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { AddSceneComponentButtonComponent } from './components/selection/add/add.component';
 import {
@@ -48,7 +47,6 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
     ReactiveFormsModule,
     BrowserAnimationsModule,
     ColorPickerModule,
-    DndModule,
     ScrollingModule,
     NzTreeModule,
     NzButtonModule,

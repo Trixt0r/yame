@@ -1,7 +1,6 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { UtilsModule } from '../utils';
-import { DndModule } from 'ng2-dnd';
 import { AssetPreviewDirective } from './directives/preview.directive';
 import { AssetDefaultPreviewComponent } from './components/previews/default/default.component';
 import { NgxsModule, Store } from '@ngxs/store';
@@ -60,7 +59,6 @@ import { AssetTabDirective } from './directives';
     NzToolTipModule,
     NzDescriptionsModule,
     NzTypographyModule,
-    DndModule.forRoot(),
     NgxsModule.forFeature([AssetState]),
   ],
   declarations: [

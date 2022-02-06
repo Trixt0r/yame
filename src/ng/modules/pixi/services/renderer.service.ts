@@ -194,7 +194,7 @@ export class PixiRendererService implements ISceneRenderer {
         onAddedEntities(...entities: SceneEntity[]) {
           entities.forEach(entity => {
             const child = new Container();
-            child.name = entity.id;
+            (child as any).name = entity.id;
             child.sortableChildren = true;
             self.pixiContainers[entity.id] = child;
             self.applyComponents(entity.components, child);
@@ -292,9 +292,9 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * @inheritdoc
    */
-  createPreview(x: number, y: number, asset: Asset, ...components: SceneComponent[]): void {
+  createPreview(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): void {
     this.zone.runOutsideAngular(() => {
-      this.sceneService.createEntity(x, y, asset).subscribe(entity => {
+      this.sceneService.createEntity(x, y, asset, ...cloneDeep(components)).subscribe(entity => {
         this._previewEntity = entity;
         this._previewEntity.parent = null;
         this._previewEntity.components.add({ id: 'sprite.animate', type: 'boolean', boolean: true, group: 'sprite' });

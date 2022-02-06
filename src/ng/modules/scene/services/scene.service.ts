@@ -11,6 +11,7 @@ import { SceneComponent as SceneComp } from '../components/scene/scene.component
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
 import { ResetScene } from '../states/actions/scene.action';
+import { cloneDeep } from 'lodash';
 
 export interface ISceneRenderer {
   /**
@@ -48,7 +49,7 @@ export interface ISceneRenderer {
    * @param y The y coordinate.
    * @param asset The asset to create the preview for.
    */
-  createPreview(x: number, y: number, asset: Asset, ...components: SceneComponent[]): void;
+  createPreview(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): void;
 
   /**
    * Updates the current preview at the given coordinates.
@@ -241,9 +242,9 @@ export class SceneService {
    * @param asset The asset to create the entity from.
    * @return An observable, you can subscribe to.
    */
-  createEntity(x: number, y: number, asset?: Asset): Observable<SceneEntity> {
+  createEntity(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): Observable<SceneEntity> {
     const hasAsset = asset && asset instanceof Asset;
-    const obs = hasAsset ? from(this.converter.get(asset as Asset)) : of([]);
+    const obs = hasAsset ? from(this.converter.get(asset)) : of([]);
     const parent = this.store.selectSnapshot(state => state.select).isolated as SceneEntity;
     const re = obs.pipe(
       mergeMap(data => {
@@ -254,8 +255,7 @@ export class SceneService {
         comps[1].x = point.x;
         comps[1].y = point.y;
 
-        const components = [...comps, ...data];
-        entity.components.add.apply(entity.components, components);
+        entity.components.add.apply(entity.components, [...comps, ...data, ...cloneDeep(components)]);
         return of(entity);
       })
     );
@@ -271,8 +271,8 @@ export class SceneService {
    * @param asset The asset to create the entity from.
    * @return An observable, you can subscribe to.
    */
-  addEntity(x: number, y: number, asset?: Asset): Observable<SceneState> {
-    return this.createEntity(x, y, asset).pipe(
+  addEntity(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): Observable<SceneState> {
+    return this.createEntity(x, y, asset, ...components).pipe(
       mergeMap(entity => {
         return this.store.dispatch(new CreateEntity(entity));
       })
@@ -325,7 +325,7 @@ export class SceneService {
    * @param y The y value for the position.
    * @param asset The asset to create the preview for.
    */
-  createPreview(x: number, y: number, asset: Asset, ...components: SceneComponent[]): void {
+  createPreview(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): void {
     this.renderer.createPreview(x, y, asset, ...components);
   }
 

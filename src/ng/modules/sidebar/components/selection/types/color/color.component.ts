@@ -60,7 +60,7 @@ export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> 
 
   constructor(protected translate: TranslateService, protected cdr: ChangeDetectorRef) {
     super(translate, cdr);
-    this.sub = this.control.valueChanges.subscribe((val) => {
+    this.sub = this.control.valueChanges.subscribe(val => {
       if (!this.component) return;
       this._rgbaString = val.toRgbaString();
       const value = val.getRgba();

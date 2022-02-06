@@ -1,11 +1,3 @@
-<div
-  #wrapper
-  dnd-droppable
-  [allowDrop]="allowDrop"
-  (onDropSuccess)="onDrop($event)"
-  (onDragOver)="onDragOver($event)"
-  (onDragEnter)="onDragEnter($event)"
-  (onDragLeave)="onDragLeave($event)"
->
+<div #wrapper>
   <ng-container yameSceneRendererComponent></ng-container>
 </div>

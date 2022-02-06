@@ -1,15 +1,28 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { NgxsModule } from '@ngxs/store';
 import { AssetModule } from '../asset';
 import { CameraModule } from '../camera';
+import { EngineService } from '../scene';
 import { provideAsDecorated, UtilsModule } from '../utils';
 import { TilesetCanvasComponent, TilesetTabComponent } from './components';
 import { TilesetState } from './states';
+import { TilesetSystem } from './systems';
 
 @NgModule({
   imports: [AssetModule, CameraModule, UtilsModule, NgxsModule.forFeature([TilesetState])],
   declarations: [TilesetTabComponent, TilesetCanvasComponent],
-  providers: [provideAsDecorated(TilesetTabComponent)],
+  providers: [
+    provideAsDecorated(TilesetTabComponent),
+    TilesetSystem,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (engineService: EngineService, tilesetSystem: TilesetSystem) => () => {
+        engineService.engine.systems.add(tilesetSystem);
+      },
+      deps: [EngineService, TilesetSystem],
+      multi: true,
+    },
+  ],
   exports: [TilesetCanvasComponent],
 })
 export class TilesetModule {}

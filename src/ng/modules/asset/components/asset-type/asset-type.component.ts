@@ -8,7 +8,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { AssetSceneComponent as AssetComponent } from 'common/scene/component/asset';
-import { DragDropData } from 'ng2-dnd';
 import { Asset } from 'common/asset';
 import { AssetState } from 'ng/modules/asset/states/asset.state';
 import { Select, Store } from '@ngxs/store';
@@ -161,25 +160,25 @@ export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeCo
     return Array.isArray(allowedTypes) && allowedTypes.length > 0 ? allowedTypes.indexOf(asset.type) >= 0 : true;
   }
 
-  /**
-   * Returns a function which returns `true` if a drop is allowed onto this component.
-   */
-  allowDrop(): (event: DragDropData) => boolean {
-    return (event: DragDropData) => {
-      return event.dragData instanceof Asset && this.checkType(event.dragData);
-    };
-  }
+  // /** TODO: Use cdk for d&d
+  //  * Returns a function which returns `true` if a drop is allowed onto this component.
+  //  */
+  // allowDrop(): (event: DragDropData) => boolean {
+  //   return (event: DragDropData) => {
+  //     return event.dragData instanceof Asset && this.checkType(event.dragData);
+  //   };
+  // }
 
-  /**
-   * Handles an asset drop onto this component.
-   *
-   * @param data The drop data.
-   */
-  onDrop(data: DragDropData): void {
-    if (!this.checkType(data.dragData)) return;
-    this.selected = data.dragData.id;
-    this.updateAssetBuffer();
-  }
+  // /**
+  //  * Handles an asset drop onto this component.
+  //  *
+  //  * @param data The drop data.
+  //  */
+  // onDrop(data: DragDropData): void {
+  //   if (!this.checkType(data.dragData)) return;
+  //   this.selected = data.dragData.id;
+  //   this.updateAssetBuffer();
+  // }
 
   /**
    * @inheritdoc

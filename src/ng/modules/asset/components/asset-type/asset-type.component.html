@@ -9,9 +9,7 @@
   [nzDropdownRender]="loadingTpl"
   [(ngModel)]="selected"
   (nzScrollToBottom)="onScrollToEnd()"
-  (nzOpenChange)="updateAssetBuffer()"
-  (onDropSuccess)="onDrop($event)"
->
+  (nzOpenChange)="updateAssetBuffer()">
   <nz-option nzCustomContent *ngFor="let asset of assetBuffer" [nzValue]="asset.id" [nzLabel]="asset.resource.label">
     <img class="asset-preview" [src]="asset.resource.uri" />
     <span class="asset-name">{{ asset.resource.label }}</span>

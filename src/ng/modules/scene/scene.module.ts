@@ -1,5 +1,4 @@
 import { APP_INITIALIZER, Injector, NgModule } from '@angular/core';
-import { DndModule } from 'ng2-dnd';
 import { SceneComponent } from './components/scene/scene.component';
 import { SceneRendererComponentDirective } from './directives/renderer.directive';
 import { NoopSceneRendererComponent } from './services/scene.service';
@@ -12,7 +11,7 @@ import { ImageAssetService } from './services/image-asset.service';
 import { decorateComponentIOInstances, decorateConverterInstances } from './decorators';
 
 @NgModule({
-  imports: [DndModule.forRoot(), NgxsModule.forFeature([SceneState, HistoryState, SelectState])],
+  imports: [NgxsModule.forFeature([SceneState, HistoryState, SelectState])],
 
   declarations: [SceneComponent, SceneRendererComponentDirective, NoopSceneRendererComponent],
   exports: [SceneComponent],

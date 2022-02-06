@@ -10,11 +10,13 @@ import { Select, Store } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { IPoint } from 'common/math';
 import { DestroyLifecycle, notify } from 'ng/modules/utils';
-import { AssetTabComponent, IAssetOwner } from 'ng/modules/asset';
+import { AddToolService, AssetTabComponent, IAssetOwner } from 'ng/modules/asset';
 import { Observable, takeUntil } from 'rxjs';
 import { ITileset, ITilesetSetting } from '../../interfaces';
 import { DEFAULT_SETTINGS, SaveTilesetSettings, TilesetState } from '../../states';
 import { difference, merge } from 'lodash';
+import { ToolbarState } from 'ng/modules/toolbar';
+import { AssetSceneComponent, createAssetComponent, createGroupComponent } from 'common/scene';
 
 @Component({
   selector: 'yame-tileset-tab',
@@ -31,6 +33,8 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   static readonly title = 'Tileset';
 
   @Select(TilesetState.tilesets) tilesets$!: Observable<ITileset[]>;
+
+  @Select(ToolbarState.activeTool) activeTool$!: Observable<AddToolService>;
 
   expanded = false;
 
@@ -88,6 +92,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   private _spacing: IPoint = { ...DEFAULT_SETTINGS.spacing };
   private _offset: IPoint = { ...DEFAULT_SETTINGS.offset };
   private _selections: IPoint[] = [...DEFAULT_SETTINGS.selections];
+  private _tool?: AddToolService;
 
   constructor(
     private store: Store,
@@ -103,6 +108,10 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
 
   ngOnInit(): void {
     this.zone.runOutsideAngular(() => {
+      this.destroy$.subscribe(_ => {
+        if (!this._tool) return;
+        this._tool.previewComponents = [];
+      });
       this.tilesets$.pipe(takeUntil(this.destroy$), notify(this.cdr)).subscribe(tilesets => {
         const tileset = tilesets.find(_ => _.asset.id === this._asset.id);
         if (!tileset) return;
@@ -112,6 +121,39 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
         merge(this._offset, setting.offset);
         merge(this._spacing, setting.spacing);
         this._selections = setting.selections.slice();
+        if (!this._tool?.previewComponents) return;
+
+        this._tool.previewComponents[this._tool.previewComponents.length - 1].setting = {
+          id: this.settingId,
+          label: 'dflt',
+          size: this._size,
+          offset: this._offset,
+          spacing: this._spacing,
+          selections: this._selections,
+        };
+      });
+
+      this.activeTool$.pipe(takeUntil(this.destroy$), notify(this.cdr)).subscribe(tool => {
+        if (!(tool instanceof AddToolService)) return;
+        this._tool = tool;
+        const group = createGroupComponent('tileset', ['tileset.texture', 'tileset.setting']);
+        const asset = createAssetComponent('tileset.texture', this._asset.resource.uri, 'tileset');
+        const setting = {
+          id: 'tileset.setting',
+          type: 'tileset',
+          label: 'Tileset',
+          removable: false,
+          group: 'tileset',
+          setting: {
+            id: this.settingId,
+            label: 'dflt',
+            size: this._size,
+            offset: this._offset,
+            spacing: this._spacing,
+            selections: this._selections,
+          } as ITilesetSetting,
+        };
+        this._tool.previewComponents = [group, asset, setting];
       });
     });
   }

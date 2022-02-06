@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
+import { SceneComponent } from 'common/scene';
 import { SceneAssetConverterService, SceneService, SelectState } from 'ng/modules/scene';
 import { Tool } from 'ng/modules/toolbar/tool';
 import { SelectionToolService } from 'ng/modules/toolbar/tools/selection';
@@ -16,6 +17,8 @@ export class AddToolService extends Tool {
   private mouseLeft = true;
 
   settingsComponent = AssetExplorerComponent as any;
+
+  previewComponents: SceneComponent[] = [];
 
   @Select(AssetState.selectedAsset)
   private selectAsset$!: Observable<Asset>;
@@ -52,14 +55,23 @@ export class AddToolService extends Tool {
   private createPreview(): void {
     if (!this.selectedAsset || this.isPreviewActive || this.mouseLeft || this.selectedEntities.length > 0) return;
     this.isPreviewActive = true;
-    this.scene.createPreview(this.lastMouseX, this.lastMouseY, this.selectedAsset);
+    this.scene.createPreview(
+      this.lastMouseX,
+      this.lastMouseY,
+      this.previewComponents.length ? undefined : this.selectedAsset,
+      ...this.previewComponents
+    );
     requestAnimationFrame(() => this.scene.updatePreview(this.lastMouseX, this.lastMouseY));
   }
 
   mouseenter(): void {
     if (!this.mouseLeft) return;
     this.mouseLeft = false;
-    if (this.selectedAsset && this.converter.has(this.selectedAsset) && this.selectedEntities.length <= 0)
+    if (
+      this.selectedAsset &&
+      (this.converter.has(this.selectedAsset) || this.previewComponents.length) &&
+      this.selectedEntities.length <= 0
+    )
       this.createPreview();
   }
 
@@ -98,7 +110,12 @@ export class AddToolService extends Tool {
 
   addPreview(event: MouseEvent): void {
     this.scene
-      .addEntity(event.offsetX, event.offsetY, this.selectedAsset)
+      .addEntity(
+        event.offsetX,
+        event.offsetY,
+        this.previewComponents.length ? undefined : this.selectedAsset,
+        ...this.previewComponents
+      )
       .pipe(
         catchError(() => of(null)),
         take(1)
