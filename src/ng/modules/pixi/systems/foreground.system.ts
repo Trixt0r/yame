@@ -3,7 +3,6 @@ import { Container } from 'pixi.js';
 import { PixiRendererService } from '../services/renderer.service';
 
 export class PixiForegroundSystem extends System {
-
   private foreground: Container;
 
   constructor(protected service: PixiRendererService, priority?: number) {
@@ -20,7 +19,6 @@ export class PixiForegroundSystem extends System {
    * @inheritdoc
    */
   process(): void {
-    this.service.renderer?.render(this.foreground, void 0, false);
+    this.service.renderer?.render(this.foreground, { clear: false });
   }
-
 }

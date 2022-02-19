@@ -16,8 +16,12 @@
     "target": "es2017",
     "module": "esnext",
     "lib": ["es2018", "dom"],
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "paths": {
-      "common/*": ["./common/*"]
+      "common/*": ["./common/*"],
+      "pixi.js": ["./ng/modules/pixi/pixi"]
     }
   },
   "exclude": ["app-builds", "dist", "out", "node_modules"]

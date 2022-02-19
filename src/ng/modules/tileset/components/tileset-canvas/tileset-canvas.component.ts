@@ -28,7 +28,7 @@ const app = new Application({
   antialias: false,
   clearBeforeRender: true,
   autoStart: false,
-  transparent: true,
+  backgroundAlpha: 0,
 });
 
 @Component({

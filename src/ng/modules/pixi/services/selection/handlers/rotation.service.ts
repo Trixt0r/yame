@@ -15,8 +15,7 @@ const tempPoint = new Point();
 
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionHandlerRotationService {
-
-  readonly area = new DisplayObject();
+  readonly area = new Container();
   readonly hitArea = new Polygon();
 
   protected mouseStartPos = new Point();
@@ -136,9 +135,12 @@ export class PixiSelectionHandlerRotationService {
     if (!this.containerService.isHandling || this.containerService.currentHandler !== this) return;
     this.mouseCurrentPos.set(event.data.global.x, event.data.global.y);
     this.containerService.container.parent.toLocal(this.mouseCurrentPos, void 0, this.mouseCurrentPos);
-    this.containerService.container.rotation = this.initRot + angleBetween(this.clickedPos, this.mouseCurrentPos) - this.clickedRot;
+    this.containerService.container.rotation =
+      this.initRot + angleBetween(this.clickedPos, this.mouseCurrentPos) - this.clickedRot;
     this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation') as RangeSceneComponent);
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.rotation') as RangeSceneComponent
+    );
   }
 
   /**
@@ -147,8 +149,12 @@ export class PixiSelectionHandlerRotationService {
   updateAreaPositions(): void {
     const bnds = this.containerService.container.getLocalBounds();
 
-    const horRatio = Math.abs(this.rendererService.scene.scale.x * (this.containerService.container.width / bnds.width));
-    const verRatio = Math.abs(this.rendererService.scene.scale.y * (this.containerService.container.height / bnds.height));
+    const horRatio = Math.abs(
+      this.rendererService.scene.scale.x * (this.containerService.container.width / bnds.width)
+    );
+    const verRatio = Math.abs(
+      this.rendererService.scene.scale.y * (this.containerService.container.height / bnds.height)
+    );
     const thickness = 50;
     const offset = 15;
     const thicknessHor = thickness / horRatio;
@@ -159,28 +165,38 @@ export class PixiSelectionHandlerRotationService {
     this.area.position.set(0, 0);
     const points = this.hitArea.points;
     // inner bottom left
-    points[0] = bnds.x - offsetHor; points[1] = bnds.y + bnds.height + offsetVer;
+    points[0] = bnds.x - offsetHor;
+    points[1] = bnds.y + bnds.height + offsetVer;
     // inner top left
-    points[2] = bnds.x - offsetHor; points[3] = bnds.y - offsetVer;
+    points[2] = bnds.x - offsetHor;
+    points[3] = bnds.y - offsetVer;
     // inner top right
-    points[4] = bnds.x + bnds.width + offsetHor; points[5] = bnds.y - offsetVer;
+    points[4] = bnds.x + bnds.width + offsetHor;
+    points[5] = bnds.y - offsetVer;
     // inner bottom right
-    points[6] = bnds.x + bnds.width + offsetHor; points[7] = bnds.y + bnds.height + offsetVer;
+    points[6] = bnds.x + bnds.width + offsetHor;
+    points[7] = bnds.y + bnds.height + offsetVer;
 
     // inner bottom left
-    points[8] = bnds.x - offsetHor; points[9] = bnds.y + bnds.height + offsetVer;
+    points[8] = bnds.x - offsetHor;
+    points[9] = bnds.y + bnds.height + offsetVer;
 
     // outer bottom left
-    points[10] = bnds.x - offsetHor - thicknessHor; points[11] = bnds.y + bnds.height + offsetVer + thicknessVer;
+    points[10] = bnds.x - offsetHor - thicknessHor;
+    points[11] = bnds.y + bnds.height + offsetVer + thicknessVer;
     // outer top left
-    points[12] = bnds.x - offsetHor - thicknessHor; points[13] = bnds.y - offsetVer - thicknessVer;
+    points[12] = bnds.x - offsetHor - thicknessHor;
+    points[13] = bnds.y - offsetVer - thicknessVer;
     // outer top right
-    points[14] = bnds.x + bnds.width + offsetHor + thicknessHor; points[15] = bnds.y - offsetVer - thicknessVer;
+    points[14] = bnds.x + bnds.width + offsetHor + thicknessHor;
+    points[15] = bnds.y - offsetVer - thicknessVer;
     // outer bottom right
-    points[16] = bnds.x + bnds.width + offsetHor + thicknessHor; points[17] = bnds.y + bnds.height + offsetVer + thicknessVer;
+    points[16] = bnds.x + bnds.width + offsetHor + thicknessHor;
+    points[17] = bnds.y + bnds.height + offsetVer + thicknessVer;
 
     // outer bottom left
-    points[18] = bnds.x - offsetHor - thicknessHor; points[19] = bnds.y + bnds.height + offsetVer + thicknessVer;
+    points[18] = bnds.x - offsetHor - thicknessHor;
+    points[19] = bnds.y + bnds.height + offsetVer + thicknessVer;
 
     this.rendererService.stage?.toLocal(this.area.position, this.containerService.container, this.area.position);
 
@@ -206,8 +222,7 @@ export class PixiSelectionHandlerRotationService {
       this.debugGraphics.toLocal(points[i], this.area, points[i]);
     }
     this.debugGraphics.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++)
-      this.debugGraphics.lineTo(points[i].x, points[i].y);
+    for (let i = 1; i < points.length; i++) this.debugGraphics.lineTo(points[i].x, points[i].y);
     this.debugGraphics.endFill();
   }
 
@@ -224,7 +239,9 @@ export class PixiSelectionHandlerRotationService {
     }
     this.containerService.container.rotation = data.rotation;
     this.cursorService.image.style.transform = `rotate(${this.containerService.container.rotation}rad)`;
-    this.containerService.dispatchUpdate(this.containerService.components.byId('transformation.rotation') as RangeSceneComponent);
+    this.containerService.dispatchUpdate(
+      this.containerService.components.byId('transformation.rotation') as RangeSceneComponent
+    );
   }
 
   /**
@@ -247,34 +264,35 @@ export class PixiSelectionHandlerRotationService {
       if (!this.debugGraphics) this.debugGraphics = new Graphics();
       if (!this.debugPoints) {
         this.debugPoints = new Array(10);
-        for (let i = 0; i < 10; i++)
-          this.debugPoints[i] = new Point();
+        for (let i = 0; i < 10; i++) this.debugPoints[i] = new Point();
       }
       (this.rendererService.stage?.getChildByName('debug') as Container).addChild(this.debugGraphics);
     }
     this.updateAreaPositions();
 
-    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
-                .subscribe((action: Keydown) => {
-                  if (action.shortcut.id !== 'selection.rotate') return;
-                  const step = 1 * DEG_TO_RAD;
-                  switch (action.event.key.toLowerCase()) {
-                    case 'arrowleft':
-                    case 'arrowup':
-                      this.keydown({ event: action.event, rotation: this.containerService.container.rotation - step });
-                      break;
-                    case 'arrowright':
-                    case 'arrowdown':
-                      this.keydown({ event: action.event, rotation: this.containerService.container.rotation + step });
-                      break;
-                  }
-                });
+    this.actions
+      .pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: Keydown) => {
+        if (action.shortcut.id !== 'selection.rotate') return;
+        const step = 1 * DEG_TO_RAD;
+        switch (action.event.key.toLowerCase()) {
+          case 'arrowleft':
+          case 'arrowup':
+            this.keydown({ event: action.event, rotation: this.containerService.container.rotation - step });
+            break;
+          case 'arrowright':
+          case 'arrowdown':
+            this.keydown({ event: action.event, rotation: this.containerService.container.rotation + step });
+            break;
+        }
+      });
 
-    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
-                .subscribe((action: Keyup) => {
-                  if (action.shortcut.id !== 'selection.rotate') return;
-                  this.keyup(action.event);
-                });
+    this.actions
+      .pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: Keyup) => {
+        if (action.shortcut.id !== 'selection.rotate') return;
+        this.keyup(action.event);
+      });
   }
 
   /**

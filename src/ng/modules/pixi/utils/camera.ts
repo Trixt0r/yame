@@ -21,7 +21,7 @@ export class Camera extends EventEmitter {
   /**
    * The container this camera is attached to.
    */
-  get container(): PIXI.DisplayObject | null {
+  get container(): DisplayObject | null {
     return this._container;
   }
 

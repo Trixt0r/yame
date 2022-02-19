@@ -45,8 +45,6 @@ export const LEFT = 16;
  */
 export const UP = 32;
 
-const cursorOrder = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
-
 /**
  * A resize anchor is responsible for resizing the content of a single entity inside a selection container.
  * It will make sure that the size can be changed via mouse and keep the visual position at the same point.
@@ -167,7 +165,7 @@ export class ResizeAnchor extends Graphics {
     this.clear();
     if (fillAlpha) this.beginFill(fillColor, fillAlpha);
 
-    this.lineStyle(lineWidth, lineColor, lineAlpha);
+    this.lineStyle(lineWidth!, lineColor, lineAlpha);
     this.drawCircle(0, 0, (this.config?.size || 1) / 2);
 
     if (fillAlpha) this.endFill();
@@ -191,7 +189,9 @@ export class ResizeAnchor extends Graphics {
     }
     this.cursorService.begin(this.service.view as HTMLElement);
     this.cursorService.image.src = 'assets/resize-icon.svg';
-    this.cursorService.image.style.transform = `rotate(${(this.containerService?.container?.rotation || 0) + rotOff}rad)`;
+    this.cursorService.image.style.transform = `rotate(${
+      (this.containerService?.container?.rotation || 0) + rotOff
+    }rad)`;
   }
 
   /**
@@ -221,7 +221,7 @@ export class ResizeAnchor extends Graphics {
     this.target.width = this.tmpLocalBounds?.width || 0;
     this.target.height = this.tmpLocalBounds?.height || 0;
 
-    this.clickedPos = this.target?.toLocal(event.data.global, void 0, void 0, false);
+    this.clickedPos = this.target?.toLocal(event.data.global, void 0, void 0, false) as Point;
     this.containerPos.copyFrom(this.containerService.container.position);
 
     this.target.width = this.tmp.x;
@@ -233,7 +233,7 @@ export class ResizeAnchor extends Graphics {
     this.tmpXSignBounds = Math.sign(this.tmpXDirection + 1);
     this.tmpYSignBounds = Math.sign(this.tmpYDirection + 1);
     this.clickedBound.set(
-      bnds.x + ( bnds.width - bnds.width * this.tmpXSignBounds),
+      bnds.x + (bnds.width - bnds.width * this.tmpXSignBounds),
       bnds.y + (bnds.height - bnds.height * this.tmpYSignBounds)
     );
     this.clickedSize.set(this.target.width, this.target.height);

@@ -21,10 +21,11 @@ import { PixiRenderingSystem } from './systems/rendering.system';
 import { PixiTransformationSystem } from './systems/transformation.system';
 import { AddShortcut } from 'ng/states/hotkey.state';
 import { HotkeyService } from 'ng/services/hotkey.service';
-import { SCALE_MODES, settings } from 'pixi.js';
+import { MIPMAP_MODES, SCALE_MODES, settings } from 'pixi.js';
 import { CameraModule } from '../camera/camera.module';
 
 settings.SCALE_MODE = SCALE_MODES.NEAREST;
+settings.MIPMAP_TEXTURES = MIPMAP_MODES.ON;
 
 /**
  * Sets up all necessary systems for rendering entities in the scene.

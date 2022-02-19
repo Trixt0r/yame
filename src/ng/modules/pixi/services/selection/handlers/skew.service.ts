@@ -122,7 +122,7 @@ export class PixiSelectionHandlerSkewService {
   /**
    * A list of the bound points for the selection container in parent coordinates.
    */
-  protected boundPoints = [ new Point(), new Point(), new Point(), new Point() ];
+  protected boundPoints = [new Point(), new Point(), new Point(), new Point()];
 
   /**
    * The key code for activating the handling.
@@ -132,7 +132,7 @@ export class PixiSelectionHandlerSkewService {
   /**
    * The clickable area.
    */
-  readonly area = new DisplayObject();
+  readonly area = new Container();
 
   /**
    * The hit area. Updated on mouse move, if active.
@@ -208,8 +208,8 @@ export class PixiSelectionHandlerSkewService {
     this.boundPoints[0].set(bounds.x, bounds.y);
     this.boundPoints[1].set(bounds.x + bounds.width, bounds.y);
     this.boundPoints[2].set(bounds.x, bounds.y + bounds.height);
-    this.boundPoints[3].set(bounds.x + bounds.width , bounds.y + bounds.height);
-    this.boundPoints.forEach((point) => this.container.parent.toLocal(point, this.container, point));
+    this.boundPoints[3].set(bounds.x + bounds.width, bounds.y + bounds.height);
+    this.boundPoints.forEach(point => this.container.parent.toLocal(point, this.container, point));
     return this.boundPoints;
   }
 
@@ -220,7 +220,7 @@ export class PixiSelectionHandlerSkewService {
    * @param event The triggered DOM event.
    */
   keydown(event: KeyboardEvent): void {
-    this.area.interactive = event.keyCode === this.keyCode;
+    (this.area as any).interactive = event.keyCode === this.keyCode;
     if (this.active) {
       this.updateAreaPositions();
       if (this.mouseOverArea) {
@@ -293,10 +293,8 @@ export class PixiSelectionHandlerSkewService {
 
     this.container.parent.toLocal(this.clickRefPos, this.container, this.clickedRefPosTransform);
     tempPoint.copyFrom(this.clickedPos);
-    if (this.yDirection !== 0)
-      tempPoint.x = Math.min(bounds.x + bounds.width, Math.max(bounds.x, tempPoint.x));
-    if (this.xDirection !== 0)
-      tempPoint.y = Math.min(bounds.y + bounds.height, Math.max(bounds.y, tempPoint.y));
+    if (this.yDirection !== 0) tempPoint.x = Math.min(bounds.x + bounds.width, Math.max(bounds.x, tempPoint.x));
+    if (this.xDirection !== 0) tempPoint.y = Math.min(bounds.y + bounds.height, Math.max(bounds.y, tempPoint.y));
     this.container.parent.toLocal(tempPoint, this.container, tempPoint);
     this.initAngle = angleBetween(this.clickedRefPosTransform, tempPoint);
   }
@@ -312,7 +310,7 @@ export class PixiSelectionHandlerSkewService {
     window.removeEventListener('mouseup', this.mouseupFn);
     this.containerService.endHandling(this);
     this.area.worldTransform.applyInverse(this.rendererService.mouse as Point, tempPoint);
-    const contains = this.area.hitArea.contains(tempPoint.x, tempPoint.y);
+    const contains = (this.area as any).hitArea.contains(tempPoint.x, tempPoint.y);
     if (!contains) this.resetCursor(true);
   }
 
@@ -332,16 +330,11 @@ export class PixiSelectionHandlerSkewService {
 
     const bounds = this.container.getLocalBounds();
     tempPoint.copyFrom(this.currentPos);
-    if (this.yDirection !== 0)
-      tempPoint.x = Math.min(bounds.x + bounds.width, Math.max(bounds.x, tempPoint.x));
-    if (this.xDirection !== 0)
-      tempPoint.y = Math.min(bounds.y + bounds.height, Math.max(bounds.y, tempPoint.y));
+    if (this.yDirection !== 0) tempPoint.x = Math.min(bounds.x + bounds.width, Math.max(bounds.x, tempPoint.x));
+    if (this.xDirection !== 0) tempPoint.y = Math.min(bounds.y + bounds.height, Math.max(bounds.y, tempPoint.y));
     this.container.parent.toLocal(tempPoint, this.container, tempPoint);
     const angle = angleBetween(this.clickedRefPosTransform, tempPoint) - this.initAngle;
-    this.container.skew.set(
-      this.clickedSkew.x - angle * this.xDirection,
-      this.clickedSkew.y + angle * this.yDirection
-    );
+    this.container.skew.set(this.clickedSkew.x - angle * this.xDirection, this.clickedSkew.y + angle * this.yDirection);
 
     const points = this.getBoundPoints();
     const width = distanceToSegment(points[0], { v: points[1], w: points[3] });
@@ -517,22 +510,32 @@ export class PixiSelectionHandlerSkewService {
       (this.rendererService.stage?.getChildByName('debug') as Container).addChild(this.debugGraphics);
     }
     this.updateAreaPositions();
-    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
-                .subscribe((action: Keydown) => {
-                  if (action.shortcut.id !== 'selection.skew') return;
-                  switch (action.event.key.toLowerCase()) {
-                    case 'arrowleft': this.hotkeyDown({ event: action.event, x: this.container.skew.x - 0.01 }); break;
-                    case 'arrowright': this.hotkeyDown({ event: action.event, x: this.container.skew.x + 0.01 }); break;
-                    case 'arrowup': this.hotkeyDown({ event: action.event, y: this.container.skew.y - 0.01 }); break;
-                    case 'arrowdown': this.hotkeyDown({ event: action.event, y: this.container.skew.y + 0.01 }); break;
-                  }
-                });
+    this.actions
+      .pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: Keydown) => {
+        if (action.shortcut.id !== 'selection.skew') return;
+        switch (action.event.key.toLowerCase()) {
+          case 'arrowleft':
+            this.hotkeyDown({ event: action.event, x: this.container.skew.x - 0.01 });
+            break;
+          case 'arrowright':
+            this.hotkeyDown({ event: action.event, x: this.container.skew.x + 0.01 });
+            break;
+          case 'arrowup':
+            this.hotkeyDown({ event: action.event, y: this.container.skew.y - 0.01 });
+            break;
+          case 'arrowdown':
+            this.hotkeyDown({ event: action.event, y: this.container.skew.y + 0.01 });
+            break;
+        }
+      });
 
-    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
-                .subscribe((action: Keyup) => {
-                  if (action.shortcut.id !== 'selection.skew') return;
-                  this.hotKeyup(action.event);
-                });
+    this.actions
+      .pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: Keyup) => {
+        if (action.shortcut.id !== 'selection.skew') return;
+        this.hotKeyup(action.event);
+      });
   }
 
   /**

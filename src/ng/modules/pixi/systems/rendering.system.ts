@@ -3,7 +3,6 @@ import { PixiRendererService } from '../services/renderer.service';
 import { SceneEntity } from 'common/scene';
 
 export class PixiRenderingSystem extends System {
-
   constructor(private service: PixiRendererService, priority?: number) {
     super(priority);
   }

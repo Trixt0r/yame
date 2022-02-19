@@ -3,7 +3,6 @@ import { Container, Text } from 'pixi.js';
 import { PixiRendererService } from '../services/renderer.service';
 
 export class PixiDebugSystem extends System {
-
   private debugDisplay: Container;
   private debugDuration?: Text;
 
@@ -36,7 +35,6 @@ export class PixiDebugSystem extends System {
 Iteration: ${iterationTime || 0} ms
 Rendering: ${renderingTime || 0} ms
 Overall: ${overAllTime || 0} ms`;
-    this.service.renderer?.render(this.debugDisplay, void 0, false);
+    this.service.renderer?.render(this.debugDisplay, { clear: false });
   }
-
 }

@@ -189,7 +189,7 @@ export class CameraDirective {
   onWheel(event: WheelEvent): void {
     if (!this._id) return;
     event.preventDefault();
-    const isTrackPad = Math.abs(event.deltaY) <= 10 && event.deltaMode === 0;
+    const isTrackPad = Math.abs(event.deltaY) <= 50 && event.deltaMode === 0;
     if (isTrackPad && !event.ctrlKey) {
       if (!this.moving) this.moveInitiator = MoveInitiator.WHEEL;
       this.store.dispatch(

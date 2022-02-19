@@ -23,6 +23,7 @@ import {
   Ellipse,
   Polygon,
   IPointData,
+  AbstractRenderer,
   Renderer,
   Ticker,
 } from 'pixi.js';
@@ -87,7 +88,7 @@ export class PixiRendererService implements ISceneRenderer {
   /**
    * The pixi renderer instance.
    */
-  get renderer(): Renderer | undefined {
+  get renderer(): Renderer | AbstractRenderer | undefined {
     return this._app?.renderer;
   }
 
@@ -255,7 +256,7 @@ export class PixiRendererService implements ISceneRenderer {
     this._app = new Application({
       antialias: true,
       autoDensity: true,
-      transparent: true,
+      backgroundAlpha: 0,
       view: this.comp.ref.nativeElement.querySelector('canvas') as HTMLCanvasElement,
     });
     this._app.stage.sortableChildren = true;

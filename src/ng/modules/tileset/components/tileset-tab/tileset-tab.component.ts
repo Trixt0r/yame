@@ -75,7 +75,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
     if (
       difference(
         this._selections.map(_ => `${_.x},${_.y}`),
-        value.map(_ => `${_.x},${_.y}`)
+        ...value.map(_ => `${_.x},${_.y}`)
       ).length === 0
     )
       return;
@@ -103,6 +103,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
 
   private updateValue<T>(key: keyof ITilesetSetting, value: T): void {
     (this as any)[`_${key}`] = value;
+    console.log('update', key, value);
     this.store.dispatch(new SaveTilesetSettings(this._asset, [{ id: this.settingId, [key]: value }]));
   }
 
@@ -123,13 +124,14 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
         this._selections = setting.selections.slice();
         if (!this._tool?.previewComponents) return;
 
+        console.log('here', setting.selections.toString());
         this._tool.previewComponents[this._tool.previewComponents.length - 1].setting = {
           id: this.settingId,
           label: 'dflt',
           size: this._size,
           offset: this._offset,
           spacing: this._spacing,
-          selections: this._selections,
+          selections: setting.selections.slice(),
         };
       });
 
