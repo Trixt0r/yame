@@ -109,7 +109,7 @@
     "copyfiles": "^2.4.1",
     "cross-env": "5.0.1",
     "del-cli": "^4.0.1",
-    "electron": "^17.0.0",
+    "electron": "^17.2.0",
     "electron-packager": "^15.4.0",
     "ng-zorro-antd": "^13.0.1",
     "ngx-pipes": "^3.0.0",
