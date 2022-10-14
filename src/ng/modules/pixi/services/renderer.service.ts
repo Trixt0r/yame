@@ -320,7 +320,7 @@ export class PixiRendererService implements ISceneRenderer {
     if (!this._previewEntity) return;
     const container = this.getContainer(this._previewEntity.id);
     if (!container) return;
-    container.position.copyFrom(this.projectToScene(x, y));
+    container.position.set(x, y);
     const position = this._previewEntity.components.byId('transformation.position') as PointSceneComponent;
     position.x = container.position.x;
     position.y = container.position.y;

@@ -550,5 +550,6 @@ export class PixiSelectionHandlerSkewService {
     if (this.debugGraphics)
       (this.rendererService.stage?.getChildByName('debug') as Container).removeChild(this.debugGraphics);
     this.rendererService.stage?.removeChild(this.area);
+    this.resetCursor();
   }
 }

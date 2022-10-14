@@ -38,7 +38,7 @@ export interface ISceneRenderer {
    *
    * @param x The x coordinate.
    * @param y The y coordinate.
-   * @return { { x: number, y: number } } The coordinates in scene space.
+   * @return The coordinates in scene space.
    */
   projectToScene(x: number, y: number): { x: number; y: number };
 
@@ -94,7 +94,7 @@ export class NoopRenderer implements ISceneRenderer {
   dispose() {}
 }
 
-export const YAME_RENDERER = new InjectionToken<ISceneRenderer>('Yame Renderer', {
+export const YAME_RENDERER = new InjectionToken<ISceneRenderer>('YAME_RENDERER', {
   providedIn: 'root',
   factory: () => new NoopRenderer(),
 });
@@ -251,9 +251,9 @@ export class SceneService {
         const entity = new SceneEntity();
         if (parent) entity.parent = parent.id;
         const comps = createTransformationComponents();
-        const point = this.renderer.projectToScene(x, y);
-        comps[1].x = point.x;
-        comps[1].y = point.y;
+        // const point = this.renderer.projectToScene(x, y);
+        comps[1].x = x;
+        comps[1].y = y;
 
         entity.components.add.apply(entity.components, [...comps, ...data, ...cloneDeep(components)]);
         return of(entity);

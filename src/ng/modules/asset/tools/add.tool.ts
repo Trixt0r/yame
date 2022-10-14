@@ -1,10 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
+import { IPoint } from 'common/math';
 import { SceneComponent } from 'common/scene';
-import { SceneAssetConverterService, SceneService, SelectState } from 'ng/modules/scene';
+import { SceneAssetConverterService, SceneService, SceneState, SelectState } from 'ng/modules/scene';
+import { ToolEvent, ToolInterceptor } from 'ng/modules/toolbar/interceptor';
 import { Tool } from 'ng/modules/toolbar/tool';
 import { SelectionToolService } from 'ng/modules/toolbar/tools/selection';
+import { CursorService } from 'ng/services/cursor.service';
 import { merge, Observable, of } from 'rxjs';
 import { catchError, take, takeUntil, tap } from 'rxjs/operators';
 import { AssetExplorerComponent } from '../components';
@@ -19,6 +22,8 @@ export class AddToolService extends Tool {
   settingsComponent = AssetExplorerComponent as any;
 
   previewComponents: SceneComponent[] = [];
+  grid: IPoint | null = null;
+  mousePressed = false;
 
   @Select(AssetState.selectedAsset)
   private selectAsset$!: Observable<Asset>;
@@ -26,15 +31,14 @@ export class AddToolService extends Tool {
   @Select(SelectState.entities)
   private selectedEntities$!: Observable<string[]>;
 
-  private selectedAsset?: Asset;
-  private selectedEntities: string[] = [];
   private onMouseenter: (event: MouseEvent) => void;
   private onMousemove: (event: MouseEvent) => void;
   private onMouseleave: (event: MouseEvent) => void;
   private onMousedown: (event: MouseEvent) => void;
   private onMouseup: (event: MouseEvent) => void;
 
-  private mousePressed = false;
+  private selectedAsset?: Asset;
+  private selectedEntities: string[] = [];
   private lastMouseX = 0;
   private lastMouseY = 0;
   private isPreviewActive = false;
@@ -42,17 +46,21 @@ export class AddToolService extends Tool {
   constructor(
     private selection: SelectionToolService,
     private scene: SceneService,
-    private converter: SceneAssetConverterService
+    private converter: SceneAssetConverterService,
+    private cursor: CursorService,
+    @Optional()
+    @Inject(ToolInterceptor.tokenFor(AddToolService))
+    interceptors?: ToolInterceptor<MouseEvent, AddToolService>[]
   ) {
     super('add-entity', 'plus-square', 1);
-    this.onMouseenter = this.mouseenter.bind(this);
-    this.onMousemove = this.mousemove.bind(this);
-    this.onMouseleave = this.mouseleave.bind(this);
-    this.onMousedown = this.mousedown.bind(this);
-    this.onMouseup = this.mouseup.bind(this);
+    this.onMouseenter = this.mouseenter.withToolInterceptors(this, interceptors);
+    this.onMousemove = this.mousemove.withToolInterceptors(this, interceptors);
+    this.onMouseleave = this.mouseleave.withToolInterceptors(this, interceptors);
+    this.onMousedown = this.mousedown.withToolInterceptors(this, interceptors);
+    this.onMouseup = this.mouseup.withToolInterceptors(this, interceptors);
   }
 
-  private createPreview(): void {
+  createPreview(): void {
     if (!this.selectedAsset || this.isPreviewActive || this.mouseLeft || this.selectedEntities.length > 0) return;
     this.isPreviewActive = true;
     this.scene.createPreview(
@@ -75,55 +83,67 @@ export class AddToolService extends Tool {
       this.createPreview();
   }
 
-  mouseleave(left: MouseEvent | boolean): void {
+  mouseleave(left: ToolEvent<MouseEvent> | boolean): void {
     this.scene.removePreview();
     this.mouseLeft = typeof left === 'boolean' ? left : !!left;
     this.isPreviewActive = false;
   }
 
-  mousedown(event: MouseEvent): void {
-    this.lastMouseX = event.offsetX;
-    this.lastMouseY = event.offsetY;
+  mousedown({ origin }: ToolEvent<MouseEvent>): void {
+    this.updateMouse(origin);
     const selected = this.selectedEntities.length;
-    this.selection.mousedown(event);
+    if (selected > 0) this.selection.mousedown(origin);
     this.mousePressed =
-      selected <= 0 && this.selectedEntities.length <= 0 && event.button === 0 && !this.selection.handledByExternal;
+      selected <= 0 && this.selectedEntities.length <= 0 && origin.button === 0 && !this.selection.handledByExternal;
   }
 
-  mouseup(event: MouseEvent): void {
-    this.lastMouseX = event.offsetX;
-    this.lastMouseY = event.offsetY;
+  mouseup({ origin }: ToolEvent<MouseEvent>): void {
+    this.updateMouse(origin);
     if (this.selection.handledByExternal) return;
-    this.selection.mouseup(event);
-    if (!this.mousePressed || this.selectedEntities.length > 0) return;
+    const wasPressed = this.mousePressed;
     this.mousePressed = false;
-    this.addPreview(event);
+    if (!wasPressed || this.selectedEntities.length > 0) return this.selection.mouseup(origin);
+    this.addPreview(origin);
   }
 
-  mousemove(event: MouseEvent): void {
+  mousemove({ origin }: ToolEvent<MouseEvent>): void {
+    this.updateMouse(origin);
+    this.createPreview();
+    const { x, y } = this.getPoint(origin);
+    this.selection.mousemove(origin);
+    this.scene.updatePreview(x, y);
+  }
+
+  updateMouse(event: MouseEvent): void {
     this.lastMouseX = event.offsetX;
     this.lastMouseY = event.offsetY;
-    this.createPreview();
-    this.selection.mousemove(event);
-    this.scene.updatePreview(event.offsetX, event.offsetY);
   }
 
-  addPreview(event: MouseEvent): void {
-    this.scene
-      .addEntity(
-        event.offsetX,
-        event.offsetY,
-        this.previewComponents.length ? undefined : this.selectedAsset,
-        ...this.previewComponents
-      )
+  getPoint(event: MouseEvent): IPoint {
+    const point = this.scene.renderer.projectToScene(event.offsetX, event.offsetY);
+    return {
+      x: typeof this.grid?.x === 'number' ? Math.round(point.x / this.grid.x) * this.grid.x : point.x,
+      y: typeof this.grid?.y === 'number' ? Math.round(point.y / this.grid.y) * this.grid.y : point.y,
+    };
+  }
+
+  addEntity({ x, y }: IPoint): Observable<SceneState | null> {
+    return this.scene
+      .addEntity(x, y, this.previewComponents.length ? undefined : this.selectedAsset, ...this.previewComponents)
       .pipe(
         catchError(() => of(null)),
         take(1)
-      )
-      .subscribe(() => this.mouseenter());
+      );
   }
 
-  async onActivate(): Promise<void> {
+  addPreview(event: MouseEvent): void {
+    this.addEntity(this.getPoint(event)).subscribe(() => this.mouseenter());
+  }
+
+  /**
+   * @inheritdoc
+   */
+  override async onActivate(): Promise<void> {
     delete this.selectedAsset;
     this.selectedEntities = [];
     merge(
@@ -139,6 +159,7 @@ export class AddToolService extends Tool {
       .pipe(takeUntil(this.deactivated$))
       .subscribe();
 
+    this.cursor.end();
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mouseenter', this.onMouseenter);
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mousemove', this.onMousemove);
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mouseleave', this.onMouseleave);
@@ -146,7 +167,8 @@ export class AddToolService extends Tool {
     this.scene.renderer.component?.ref.nativeElement.addEventListener('mouseup', this.onMouseup);
   }
 
-  async onDeactivate(): Promise<void> {
+  override async onDeactivate(): Promise<void> {
+    this.cursor.end();
     this.scene.renderer.component?.ref.nativeElement.removeEventListener('mouseenter', this.onMouseenter);
     this.scene.renderer.component?.ref.nativeElement.removeEventListener('mousemove', this.onMousemove);
     this.scene.renderer.component?.ref.nativeElement.removeEventListener('mouseleave', this.onMouseleave);

@@ -26,11 +26,13 @@ export class PixiSelectionHandlerResizeService {
   /**
    * Creates an instance of SelectionResizeHandler.
    */
-  constructor(private containerService: PixiSelectionContainerService,
-              protected renderer: PixiSelectionRendererService,
-              @Inject(YAME_RENDERER) protected service: PixiRendererService,
-              protected cursorService: CursorService,
-              protected actions: Actions) {
+  constructor(
+    private containerService: PixiSelectionContainerService,
+    protected renderer: PixiSelectionRendererService,
+    @Inject(YAME_RENDERER) protected service: PixiRendererService,
+    protected cursorService: CursorService,
+    protected actions: Actions
+  ) {
     this.anchors = [
       new ResizeAnchor(HOR | VERT | LEFT | UP, service, cursorService), // top left
       new ResizeAnchor(VERT | UP, service, cursorService), // top mid
@@ -39,7 +41,7 @@ export class PixiSelectionHandlerResizeService {
       new ResizeAnchor(HOR | VERT | RIGHT | DOWN, service, cursorService), // bot right
       new ResizeAnchor(VERT | DOWN, service, cursorService), // bot mid
       new ResizeAnchor(HOR | VERT | LEFT | DOWN, service, cursorService), // bot left
-      new ResizeAnchor(HOR | LEFT, service, cursorService) // left mid
+      new ResizeAnchor(HOR | LEFT, service, cursorService), // left mid
     ];
 
     renderer.attached$.subscribe(() => this.attached());
@@ -98,24 +100,30 @@ export class PixiSelectionHandlerResizeService {
       (this.service.stage?.getChildByName('foreground') as Container).addChild(anchor);
     });
 
-    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.renderer.detached$))
-                .subscribe((action: Keydown) => {
-                  if (action.shortcut.id !== 'selection.resize') return;
-                  const width = this.containerService.container.width;
-                  const height = this.containerService.container.height;
-                  switch (action.event.key.toLowerCase()) {
-                    case 'arrowleft': this.keydown({ event: action.event, width: width - 1 }); break;
-                    case 'arrowright': this.keydown({ event: action.event, width: width + 1 }); break;
-                    case 'arrowup': this.keydown({ event: action.event, height: height + 1 }); break;
-                    case 'arrowdown': this.keydown({ event: action.event, height: height - 1 }); break;
-                  }
-                });
+    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.renderer.detached$)).subscribe((action: Keydown) => {
+      if (action.shortcut.id !== 'selection.resize') return;
+      const width = this.containerService.container.width;
+      const height = this.containerService.container.height;
+      switch (action.event.key.toLowerCase()) {
+        case 'arrowleft':
+          this.keydown({ event: action.event, width: width - 1 });
+          break;
+        case 'arrowright':
+          this.keydown({ event: action.event, width: width + 1 });
+          break;
+        case 'arrowup':
+          this.keydown({ event: action.event, height: height + 1 });
+          break;
+        case 'arrowdown':
+          this.keydown({ event: action.event, height: height - 1 });
+          break;
+      }
+    });
 
-    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.renderer.detached$))
-                .subscribe((action: Keyup) => {
-                  if (action.shortcut.id !== 'selection.resize') return;
-                  this.keyup(action.event);
-                });
+    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.renderer.detached$)).subscribe((action: Keyup) => {
+      if (action.shortcut.id !== 'selection.resize') return;
+      this.keyup(action.event);
+    });
   }
 
   /**
@@ -126,10 +134,8 @@ export class PixiSelectionHandlerResizeService {
     this.anchors.forEach(anchor => {
       anchor.containerService = null;
       anchor.target = null;
-      anchor
-        .off('updated')
-        .off('handle:start')
-        .off('handle:end');
+      anchor.resetCursor();
+      anchor.off('updated').off('handle:start').off('handle:end');
       (this.service.stage?.getChildByName('foreground') as Container).removeChild(anchor);
     });
   }

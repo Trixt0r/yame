@@ -8,13 +8,13 @@ import { MonoTypeOperatorFunction, Observable } from 'rxjs';
  */
 export function notify<T>(cdr: ChangeDetectorRef): MonoTypeOperatorFunction<T> {
   return (source: Observable<T>) => {
-    return new Observable((sub) => {
+    return new Observable(sub => {
       source.subscribe({
-        next: (val) => {
+        next: val => {
           sub.next(val);
           cdr.markForCheck();
         },
-        error: (error) => {
+        error: error => {
           sub.error(error);
           cdr.markForCheck();
         },

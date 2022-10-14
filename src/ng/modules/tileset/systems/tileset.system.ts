@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, Type } from '@angular/core';
 import { AbstractEntitySystem } from '@trixt0r/ecs';
 import { AssetSceneComponent, createAssetComponent, SceneEntity } from 'common/scene';
 import { PixiRendererService } from 'ng/modules/pixi/services/renderer.service';
@@ -41,7 +41,7 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
     tileMapComp.hidden = true;
     entity.components.add(tileMapComp);
     const tileMap = new Tilemap([tex.baseTexture]);
-    (tileMap as any).name = TILE_MAP_NAME;
+    tileMap.name = TILE_MAP_NAME;
 
     const width = tilesetSetting.setting.size.x + tilesetSetting.setting.spacing.x + tilesetSetting.setting.offset.x;
     const height = tilesetSetting.setting.size.y + tilesetSetting.setting.spacing.y + tilesetSetting.setting.offset.y;

@@ -5,6 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { Select, Unselect, SceneService } from 'ng/modules/scene';
 import { SceneComponent, SceneEntity, SceneEntityType } from 'common/scene';
 import { Keydown } from 'ng/states/hotkey.state';
+import { CursorService } from 'ng/services/cursor.service';
 
 /**
  *
@@ -47,7 +48,12 @@ export class SelectionToolService extends Tool {
 
   handledByExternal = false;
 
-  constructor(protected store: Store, protected scene: SceneService, actions: Actions) {
+  constructor(
+    protected store: Store,
+    protected scene: SceneService,
+    protected cursor: CursorService,
+    actions: Actions
+  ) {
     super('edit', 'select', 0);
     this.initFunctions();
 
@@ -110,6 +116,7 @@ export class SelectionToolService extends Tool {
    * Removes the mouse listeners from the canvas element.
    */
   removeToolListeners(): void {
+    this.cursor.end();
     this.scene.renderer.component.ref.nativeElement.removeEventListener('mousedown', this.onMousedown);
   }
 

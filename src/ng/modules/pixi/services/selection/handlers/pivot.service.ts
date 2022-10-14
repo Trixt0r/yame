@@ -18,7 +18,6 @@ const tmp2 = new Point();
  */
 @Injectable({ providedIn: 'root' })
 export class PixiSelectionHandlerPivotService {
-
   /**
    * Bound mouse up function.
    */
@@ -58,11 +57,10 @@ export class PixiSelectionHandlerPivotService {
     protected cursorService: CursorService,
     protected actions: Actions
   ) {
-
     this.area.interactive = true;
     this.area.zIndex = 20;
     const hitArea = new Circle(0, 0, 7.5);
-    this.area.hitArea = hitArea
+    this.area.hitArea = hitArea;
 
     this.area.lineStyle(1, 0xffffff, 1);
     this.area.beginFill(0x303030, 0.5);
@@ -217,48 +215,57 @@ export class PixiSelectionHandlerPivotService {
   attach(): void {
     (this.rendererService.stage?.getChildByName('foreground') as Container).addChild(this.area);
     this.updateArea();
-    this.containerService
-        .updateDispatched$
-        .pipe(takeUntil(this.selectionRenderer.detached$))
-        .subscribe((action: UpdateEntity) => {
-          if (action === this.containerService.updateEntityAction) return;
-          const data = Array.isArray(action.data) ? action.data : [action.data];
-          if (data.length <= 0) return;
-          const pivot = data[0].components?.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
-          if (!pivot) return;
+    this.containerService.updateDispatched$
+      .pipe(takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: UpdateEntity) => {
+        if (action === this.containerService.updateEntityAction) return;
+        const data = Array.isArray(action.data) ? action.data : [action.data];
+        if (data.length <= 0) return;
+        const pivot = data[0].components?.find(it => it.id === 'transformation.pivot') as PointSceneComponent;
+        if (!pivot) return;
 
-          const oldPos = tmp2.copyFrom(this.container.position);
-          this.container.parent.toLocal(pivot, this.container, this.container.position);
+        const oldPos = tmp2.copyFrom(this.container.position);
+        this.container.parent.toLocal(pivot, this.container, this.container.position);
 
-          const diffX = oldPos.x - this.container.position.x;
-          const diffY = oldPos.y - this.container.position.y;
+        const diffX = oldPos.x - this.container.position.x;
+        const diffY = oldPos.y - this.container.position.y;
 
-          this.container.position.set(oldPos.x - diffX, oldPos.y - diffY);
+        this.container.position.set(oldPos.x - diffX, oldPos.y - diffY);
 
-          const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
-          position.x = this.container.position.x;
-          position.y = this.container.position.y;
+        const position = this.containerService.components.byId('transformation.position') as PointSceneComponent;
+        position.x = this.container.position.x;
+        position.y = this.container.position.y;
 
-          this.container.pivot.copyFrom(pivot);
-          this.containerService.dispatchUpdate(position);
-        });
+        this.container.pivot.copyFrom(pivot);
+        this.containerService.dispatchUpdate(position);
+      });
 
-    this.actions.pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
-    .subscribe((action: Keydown) => {
-      if (action.shortcut.id !== 'selection.pivot') return;
-      switch (action.event.key.toLowerCase()) {
-        case 'arrowleft': this.keydown({ event: action.event, x: this.container.pivot.x - 1 }); break;
-        case 'arrowright': this.keydown({ event: action.event, x: this.container.pivot.x + 1 }); break;
-        case 'arrowup': this.keydown({ event: action.event, y: this.container.pivot.y - 1 }); break;
-        case 'arrowdown': this.keydown({ event: action.event, y: this.container.pivot.y + 1 }); break;
-      }
-    });
+    this.actions
+      .pipe(ofActionSuccessful(Keydown), takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: Keydown) => {
+        if (action.shortcut.id !== 'selection.pivot') return;
+        switch (action.event.key.toLowerCase()) {
+          case 'arrowleft':
+            this.keydown({ event: action.event, x: this.container.pivot.x - 1 });
+            break;
+          case 'arrowright':
+            this.keydown({ event: action.event, x: this.container.pivot.x + 1 });
+            break;
+          case 'arrowup':
+            this.keydown({ event: action.event, y: this.container.pivot.y - 1 });
+            break;
+          case 'arrowdown':
+            this.keydown({ event: action.event, y: this.container.pivot.y + 1 });
+            break;
+        }
+      });
 
-    this.actions.pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
-        .subscribe((action: Keyup) => {
-          if (action.shortcut.id !== 'selection.pivot') return;
-          this.keyup(action.event);
-        });
+    this.actions
+      .pipe(ofActionSuccessful(Keyup), takeUntil(this.selectionRenderer.detached$))
+      .subscribe((action: Keyup) => {
+        if (action.shortcut.id !== 'selection.pivot') return;
+        this.keyup(action.event);
+      });
   }
 
   /**
@@ -266,6 +273,6 @@ export class PixiSelectionHandlerPivotService {
    */
   detach(): void {
     (this.rendererService.stage?.getChildByName('foreground') as Container).removeChild(this.area);
+    this.resetCursor();
   }
-
 }

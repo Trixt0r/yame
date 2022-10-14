@@ -14,7 +14,7 @@ import { AddToolService, AssetTabComponent, IAssetOwner } from 'ng/modules/asset
 import { Observable, takeUntil } from 'rxjs';
 import { ITileset, ITilesetSetting } from '../../interfaces';
 import { DEFAULT_SETTINGS, SaveTilesetSettings, TilesetState } from '../../states';
-import { difference, merge } from 'lodash';
+import { difference, maxBy, merge, minBy } from 'lodash';
 import { ToolbarState } from 'ng/modules/toolbar';
 import { AssetSceneComponent, createAssetComponent, createGroupComponent } from 'common/scene';
 
@@ -92,26 +92,27 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
   private _spacing: IPoint = { ...DEFAULT_SETTINGS.spacing };
   private _offset: IPoint = { ...DEFAULT_SETTINGS.offset };
   private _selections: IPoint[] = [...DEFAULT_SETTINGS.selections];
-  private _tool?: AddToolService;
 
   constructor(
     private store: Store,
     private destroy$: DestroyLifecycle,
     private cdr: ChangeDetectorRef,
-    private zone: NgZone
+    private zone: NgZone,
+    private _tool: AddToolService
   ) {}
 
   private updateValue<T>(key: keyof ITilesetSetting, value: T): void {
     (this as any)[`_${key}`] = value;
-    console.log('update', key, value);
     this.store.dispatch(new SaveTilesetSettings(this._asset, [{ id: this.settingId, [key]: value }]));
   }
 
   ngOnInit(): void {
     this.zone.runOutsideAngular(() => {
+      this._tool.grid = { ...this.size };
       this.destroy$.subscribe(_ => {
         if (!this._tool) return;
         this._tool.previewComponents = [];
+        this._tool.grid = null;
       });
       this.tilesets$.pipe(takeUntil(this.destroy$), notify(this.cdr)).subscribe(tilesets => {
         const tileset = tilesets.find(_ => _.asset.id === this._asset.id);
@@ -122,9 +123,13 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
         merge(this._offset, setting.offset);
         merge(this._spacing, setting.spacing);
         this._selections = setting.selections.slice();
-        if (!this._tool?.previewComponents) return;
+        const maxX = maxBy(this._selections, 'x')!.x;
+        const minX = minBy(this._selections, 'x')!.x;
+        const maxY = maxBy(this._selections, 'y')!.y;
+        const minY = minBy(this._selections, 'y')!.y;
+        this._tool.grid = { x: (1 + maxX - minX) * this._size.x, y: (1 + maxY - minY) * this._size.y };
+        if (!this._tool?.previewComponents?.length) return;
 
-        console.log('here', setting.selections.toString());
         this._tool.previewComponents[this._tool.previewComponents.length - 1].setting = {
           id: this.settingId,
           label: 'dflt',
@@ -137,7 +142,6 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
 
       this.activeTool$.pipe(takeUntil(this.destroy$), notify(this.cdr)).subscribe(tool => {
         if (!(tool instanceof AddToolService)) return;
-        this._tool = tool;
         const group = createGroupComponent('tileset', ['tileset.texture', 'tileset.setting']);
         const asset = createAssetComponent('tileset.texture', this._asset.resource.uri, 'tileset');
         const setting = {
@@ -156,6 +160,7 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
           } as ITilesetSetting,
         };
         this._tool.previewComponents = [group, asset, setting];
+        this._tool.grid = { ...this.size };
       });
     });
   }

@@ -1,10 +1,12 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { NgxsModule } from '@ngxs/store';
-import { AssetModule } from '../asset';
+import { AddToolService, AssetModule } from '../asset';
 import { CameraModule } from '../camera';
 import { EngineService } from '../scene';
+import { ToolInterceptor } from '../toolbar/interceptor';
 import { provideAsDecorated, UtilsModule } from '../utils';
 import { TilesetCanvasComponent, TilesetTabComponent } from './components';
+import { TileBrushInterceptor } from './interceptors';
 import { TilesetState } from './states';
 import { TilesetSystem } from './systems';
 
@@ -13,7 +15,7 @@ import { TilesetSystem } from './systems';
   declarations: [TilesetTabComponent, TilesetCanvasComponent],
   providers: [
     provideAsDecorated(TilesetTabComponent),
-    TilesetSystem,
+    ToolInterceptor.forTool(AddToolService, TileBrushInterceptor),
     {
       provide: APP_INITIALIZER,
       useFactory: (engineService: EngineService, tilesetSystem: TilesetSystem) => () => {
