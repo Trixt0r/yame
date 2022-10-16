@@ -6,7 +6,7 @@ import { CreateEntity, SortEntity, DeleteEntity } from '../states/actions/entity
 import { SceneEntity, createTransformationComponents, SceneEntityData, SceneComponent } from 'common/scene';
 import { Observable, from, of, Subscription } from 'rxjs';
 import { SceneState } from '../states/scene.state';
-import { mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 import { SceneComponent as SceneComp } from '../components/scene/scene.component';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
 import { OnRead, OnWrite } from 'ng/decorators/serializer.decorator';
@@ -271,10 +271,10 @@ export class SceneService {
    * @param asset The asset to create the entity from.
    * @return An observable, you can subscribe to.
    */
-  addEntity(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): Observable<SceneState> {
+  addEntity(x: number, y: number, asset?: Asset, ...components: SceneComponent[]): Observable<SceneEntity> {
     return this.createEntity(x, y, asset, ...components).pipe(
       mergeMap(entity => {
-        return this.store.dispatch(new CreateEntity(entity));
+        return this.store.dispatch(new CreateEntity(entity)).pipe(map(() => entity));
       })
     );
   }

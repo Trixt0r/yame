@@ -1,17 +1,64 @@
 import { Inject, Injectable, Type } from '@angular/core';
 import { AbstractEntitySystem } from '@trixt0r/ecs';
-import { AssetSceneComponent, createAssetComponent, SceneEntity } from 'common/scene';
+import { AssetSceneComponent, createAssetComponent, PointSceneComponent, SceneEntity } from 'common/scene';
 import { PixiRendererService } from 'ng/modules/pixi/services/renderer.service';
 import { EngineService, SceneComponent, YAME_RENDERER } from 'ng/modules/scene';
-import { Container, MIPMAP_MODES, ParticleContainer, Texture, TilingSprite } from 'pixi.js';
+import { DisplayObject, Texture, TilingSprite } from 'pixi.js';
 import { ITilesetSetting } from '../interfaces';
-import { CompositeTilemap, Tilemap } from '@pixi/tilemap';
+import { Tilemap } from '@pixi/tilemap';
+import { IPoint } from 'common/math';
 
 const TILE_MAP_NAME = 'tile-map';
+const TEXTURE_ID = 'tileset.texture';
+const SETTING_ID = 'tileset.setting';
+const POSITIONS_ID = 'tileset.positions';
+const LOCKED_ID = 'tileset.locked';
 @Injectable({ providedIn: 'root' })
 export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
   constructor(@Inject(YAME_RENDERER) private renderer: PixiRendererService, private engineService: EngineService) {
-    super(3, [{ id: 'tileset.texture' }, { id: 'tileset.setting' }]);
+    super(3, [{ id: TEXTURE_ID }, { id: SETTING_ID }]);
+  }
+
+  private updateTiles(
+    tileMap: Tilemap,
+    tilesetSetting: SceneComponent & { setting: ITilesetSetting },
+    tex: Texture,
+    container: DisplayObject,
+    positions?: IPoint[] | null
+  ): void {
+    const width = tilesetSetting.setting.size.x + tilesetSetting.setting.spacing.x + tilesetSetting.setting.offset.x;
+    const height = tilesetSetting.setting.size.y + tilesetSetting.setting.spacing.y + tilesetSetting.setting.offset.y;
+    const options = {
+      tileWidth: tilesetSetting.setting.size.x,
+      tileHeight: tilesetSetting.setting.size.y,
+      alpha: container.alpha,
+    };
+
+    if (!positions?.length) positions = [{ x: 0, y: 0 }];
+
+    tileMap.clear();
+    positions.forEach(p => {
+      tilesetSetting.setting.selections.forEach(({ x, y }) => {
+        tileMap.tile(
+          tex,
+          p.x + tilesetSetting.setting.offset.x + x * tilesetSetting.setting.size.x,
+          p.y + tilesetSetting.setting.offset.y + y * tilesetSetting.setting.size.y,
+          {
+            ...options,
+            u: tilesetSetting.setting.offset.x + x * width,
+            v: tilesetSetting.setting.offset.y + y * height,
+          }
+        );
+      });
+    });
+
+    if (positions.length === 1) this.updatePivot(tileMap);
+  }
+
+  private updatePivot(tileMap: Tilemap): void {
+    const bounds = tileMap.getLocalBounds();
+    tileMap.pivot.x = bounds.x + bounds.width / 2;
+    tileMap.pivot.y = bounds.y + bounds.height / 2;
   }
 
   /**
@@ -20,53 +67,58 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
   processEntity(entity: SceneEntity): void {
     const container = this.renderer.getContainer(entity.id);
     if (!container) return;
-    const tilesetTex = entity.components.byId('tileset.texture') as AssetSceneComponent;
-    const tilesetSetting = entity.components.byId('tileset.setting') as
+    const tilesetTex = entity.components.byId(TEXTURE_ID) as AssetSceneComponent;
+    const tilesetSetting = entity.components.byId(SETTING_ID) as
       | (SceneComponent & { setting: ITilesetSetting })
       | undefined;
     if (!tilesetTex || !tilesetSetting) return;
 
-    let tile = container.getChildByName(TILE_MAP_NAME) as TilingSprite | null;
+    let tileMap = container.getChildByName(TILE_MAP_NAME) as Tilemap | null;
     let tileMapComp = entity.components.byId('tile-map-asset') as AssetSceneComponent | undefined;
-    if (tile && tileMapComp?.asset !== tilesetTex.asset) {
-      container.removeChild(tile);
+    if (tileMap && tileMapComp?.asset !== tilesetTex.asset) {
+      container.removeChild(tileMap);
       if (tileMapComp) entity.components.remove(tileMapComp);
-      tile = null;
+      tileMap = null;
     }
 
-    if (tile) return;
-
     const tex = Texture.from(tilesetTex.asset!);
-    tileMapComp = createAssetComponent('tile-map-asset', tilesetTex.asset!);
-    tileMapComp.hidden = true;
-    entity.components.add(tileMapComp);
-    const tileMap = new Tilemap([tex.baseTexture]);
-    tileMap.name = TILE_MAP_NAME;
+    let locked = entity.components.byId(LOCKED_ID);
+    let updatePivot: unknown = entity.components.byId('tileset.update-pivot');
 
-    const width = tilesetSetting.setting.size.x + tilesetSetting.setting.spacing.x + tilesetSetting.setting.offset.x;
-    const height = tilesetSetting.setting.size.y + tilesetSetting.setting.spacing.y + tilesetSetting.setting.offset.y;
-    const options = {
-      tileWidth: tilesetSetting.setting.size.x,
-      tileHeight: tilesetSetting.setting.size.y,
-      alpha: container.alpha,
-    };
-    tilesetSetting.setting.selections.forEach(({ x, y }) => {
-      tileMap.tile(
-        tex,
-        tilesetSetting.setting.offset.x + x * tilesetSetting.setting.size.x,
-        tilesetSetting.setting.offset.y + y * tilesetSetting.setting.size.y,
-        {
-          ...options,
-          u: tilesetSetting.setting.offset.x + x * width,
-          v: tilesetSetting.setting.offset.y + y * height,
-        }
-      );
-    });
+    if (!tileMap) {
+      tileMapComp = createAssetComponent('tile-map-asset', tilesetTex.asset!);
+      tileMapComp.hidden = true;
+      entity.components.add(tileMapComp);
+      tileMap = new Tilemap([tex.baseTexture]);
+      tileMap.name = TILE_MAP_NAME;
+      container.addChild(tileMap);
+      locked = undefined;
+      // updatePivot = true;
+    }
 
-    const bounds = tileMap.getLocalBounds();
-    tileMap.pivot.x = bounds.x + bounds.width / 2;
-    tileMap.pivot.y = bounds.y + bounds.height / 2;
-    container.addChild(tileMap);
+    if (!locked) {
+      const positions = (entity.components.byId(POSITIONS_ID) as unknown as SceneComponent & { values: IPoint[] })
+        .values;
+      this.updateTiles(tileMap, tilesetSetting, tex, container, positions);
+    }
+
+    if (updatePivot) {
+      const bounds = tileMap.getLocalBounds();
+      const tmp = {
+        x: bounds.x + bounds.width / 2,
+        y: bounds.y + bounds.height / 2,
+      };
+
+      const pos = this.renderer.scene.toLocal(tmp, tileMap);
+      tileMap.pivot.copyFrom(tmp);
+
+      const position = entity.components.byId('transformation.position') as PointSceneComponent;
+      position.x = pos.x;
+      position.y = pos.y;
+
+      entity.components.remove(entity.components.byId('tileset.update-pivot')!);
+      entity.components.add({ id: LOCKED_ID, type: 'tileset' });
+    }
 
     if (!tex.baseTexture.valid) {
       tex.baseTexture.on('update', () => {
@@ -74,6 +126,4 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
       });
     }
   }
-
-  private render(): void {}
 }

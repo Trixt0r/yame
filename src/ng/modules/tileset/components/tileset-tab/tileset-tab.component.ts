@@ -16,7 +16,7 @@ import { ITileset, ITilesetSetting } from '../../interfaces';
 import { DEFAULT_SETTINGS, SaveTilesetSettings, TilesetState } from '../../states';
 import { difference, maxBy, merge, minBy } from 'lodash';
 import { ToolbarState } from 'ng/modules/toolbar';
-import { AssetSceneComponent, createAssetComponent, createGroupComponent } from 'common/scene';
+import { AssetSceneComponent, createAssetComponent, createGroupComponent, SceneComponent } from 'common/scene';
 
 @Component({
   selector: 'yame-tileset-tab',
@@ -130,7 +130,11 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
         this._tool.grid = { x: (1 + maxX - minX) * this._size.x, y: (1 + maxY - minY) * this._size.y };
         if (!this._tool?.previewComponents?.length) return;
 
-        this._tool.previewComponents[this._tool.previewComponents.length - 1].setting = {
+        const settingComp = this._tool.previewComponents.find(_ => _.id === 'tileset.setting') as SceneComponent & {
+          setting: ITilesetSetting;
+        };
+
+        settingComp.setting = {
           id: this.settingId,
           label: 'dflt',
           size: this._size,
@@ -142,9 +146,9 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
 
       this.activeTool$.pipe(takeUntil(this.destroy$), notify(this.cdr)).subscribe(tool => {
         if (!(tool instanceof AddToolService)) return;
-        const group = createGroupComponent('tileset', ['tileset.texture', 'tileset.setting']);
+        const group = createGroupComponent('tileset', ['tileset.texture', 'tileset.setting', 'tileset.positions']);
         const asset = createAssetComponent('tileset.texture', this._asset.resource.uri, 'tileset');
-        const setting = {
+        const setting: SceneComponent = {
           id: 'tileset.setting',
           type: 'tileset',
           label: 'Tileset',
@@ -159,7 +163,16 @@ export class TilesetTabComponent implements IAssetOwner, OnInit {
             selections: this._selections,
           } as ITilesetSetting,
         };
-        this._tool.previewComponents = [group, asset, setting];
+        const positions: SceneComponent = {
+          id: 'tileset.positions',
+          type: 'tileset',
+          removable: false,
+          editable: false,
+          group: 'tileset',
+          values: [],
+        };
+
+        this._tool.previewComponents = [group, asset, setting, positions];
         this._tool.grid = { ...this.size };
       });
     });

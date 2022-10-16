@@ -2,7 +2,7 @@ import { Inject, Injectable, Optional } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { IPoint } from 'common/math';
-import { SceneComponent } from 'common/scene';
+import { SceneComponent, SceneEntity } from 'common/scene';
 import { SceneAssetConverterService, SceneService, SceneState, SelectState } from 'ng/modules/scene';
 import { ToolEvent, ToolInterceptor } from 'ng/modules/toolbar/interceptor';
 import { Tool } from 'ng/modules/toolbar/tool';
@@ -127,7 +127,7 @@ export class AddToolService extends Tool {
     };
   }
 
-  addEntity({ x, y }: IPoint): Observable<SceneState | null> {
+  addEntity({ x, y }: IPoint): Observable<SceneEntity | null> {
     return this.scene
       .addEntity(x, y, this.previewComponents.length ? undefined : this.selectedAsset, ...this.previewComponents)
       .pipe(

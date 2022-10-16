@@ -28,7 +28,7 @@ import {
   Ticker,
 } from 'pixi.js';
 import { Injectable, NgZone } from '@angular/core';
-import { Subject } from 'rxjs';
+import { lastValueFrom, Subject } from 'rxjs';
 import { SceneEntity, PointSceneComponent, RangeSceneComponent, SceneComponent, SceneEntityType } from 'common/scene';
 import { Actions, ofActionCompleted, ofActionSuccessful } from '@ngxs/store';
 import { transformTo } from '../utils/transform.utils';
@@ -467,7 +467,7 @@ export class PixiRendererService implements ISceneRenderer {
     const selectedIds = select.entities.slice();
     const pos: Partial<PointSceneComponent> = { x: 0, y: 0 };
     if (selectedIds.length > 0) {
-      await this.sceneService.store.dispatch(new Unselect(selectedIds, [], false)).toPromise();
+      await lastValueFrom(this.sceneService.store.dispatch(new Unselect(selectedIds, [], false)));
       Object.assign(pos, select.components.find(c => c.id === 'transformation.position') as PointSceneComponent);
     }
 
