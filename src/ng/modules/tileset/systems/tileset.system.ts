@@ -1,12 +1,13 @@
-import { Inject, Injectable, Type } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { AbstractEntitySystem } from '@trixt0r/ecs';
-import { AssetSceneComponent, createAssetComponent, PointSceneComponent, SceneEntity } from 'common/scene';
+import { AssetSceneComponent, createAssetComponent, SceneEntity } from 'common/scene';
 import { PixiRendererService } from 'ng/modules/pixi/services/renderer.service';
 import { EngineService, SceneComponent, YAME_RENDERER } from 'ng/modules/scene';
-import { DisplayObject, Texture, TilingSprite } from 'pixi.js';
+import { DisplayObject } from '@pixi/display';
 import { ITilesetSetting } from '../interfaces';
 import { Tilemap } from '@pixi/tilemap';
 import { IPoint } from 'common/math';
+import { Texture } from '@pixi/core';
 
 const TILE_MAP_NAME = 'tile-map';
 const TEXTURE_ID = 'tileset.texture';
@@ -24,7 +25,7 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
     tilesetSetting: SceneComponent & { setting: ITilesetSetting },
     tex: Texture,
     container: DisplayObject,
-    positions?: IPoint[] | null
+    positions: IPoint[] | null | void
   ): void {
     const width = tilesetSetting.setting.size.x + tilesetSetting.setting.spacing.x + tilesetSetting.setting.offset.x;
     const height = tilesetSetting.setting.size.y + tilesetSetting.setting.spacing.y + tilesetSetting.setting.offset.y;
@@ -37,6 +38,25 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
     if (!positions?.length) positions = [{ x: 0, y: 0 }];
 
     tileMap.clear();
+
+    tilesetSetting.setting.selections.forEach(({ x, y }) => {
+      tileMap.tile(
+        tex,
+        tilesetSetting.setting.offset.x + x * tilesetSetting.setting.size.x,
+        tilesetSetting.setting.offset.y + y * tilesetSetting.setting.size.y,
+        {
+          ...options,
+          u: tilesetSetting.setting.offset.x + x * width,
+          v: tilesetSetting.setting.offset.y + y * height,
+        }
+      );
+    });
+
+    tileMap.position.set(0, 0);
+    tileMap.pivot.set(0, 0);
+    const bounds = tileMap.getLocalBounds();
+    tileMap.pivot.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+
     positions.forEach(p => {
       tilesetSetting.setting.selections.forEach(({ x, y }) => {
         tileMap.tile(
@@ -51,14 +71,6 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
         );
       });
     });
-
-    if (positions.length === 1) this.updatePivot(tileMap);
-  }
-
-  private updatePivot(tileMap: Tilemap): void {
-    const bounds = tileMap.getLocalBounds();
-    tileMap.pivot.x = bounds.x + bounds.width / 2;
-    tileMap.pivot.y = bounds.y + bounds.height / 2;
   }
 
   /**
@@ -68,9 +80,7 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
     const container = this.renderer.getContainer(entity.id);
     if (!container) return;
     const tilesetTex = entity.components.byId(TEXTURE_ID) as AssetSceneComponent;
-    const tilesetSetting = entity.components.byId(SETTING_ID) as
-      | (SceneComponent & { setting: ITilesetSetting })
-      | undefined;
+    const tilesetSetting = entity.components.byId(SETTING_ID) as (SceneComponent & { setting: ITilesetSetting }) | undefined;
     if (!tilesetTex || !tilesetSetting) return;
 
     let tileMap = container.getChildByName(TILE_MAP_NAME) as Tilemap | null;
@@ -93,29 +103,14 @@ export class TilesetSystem extends AbstractEntitySystem<SceneEntity> {
       tileMap.name = TILE_MAP_NAME;
       container.addChild(tileMap);
       locked = undefined;
-      // updatePivot = true;
     }
 
     if (!locked) {
-      const positions = (entity.components.byId(POSITIONS_ID) as unknown as SceneComponent & { values: IPoint[] })
-        .values;
+      const positions = (entity.components.byId(POSITIONS_ID) as unknown as SceneComponent & { values: IPoint[] }).values;
       this.updateTiles(tileMap, tilesetSetting, tex, container, positions);
     }
 
     if (updatePivot) {
-      const bounds = tileMap.getLocalBounds();
-      const tmp = {
-        x: bounds.x + bounds.width / 2,
-        y: bounds.y + bounds.height / 2,
-      };
-
-      const pos = this.renderer.scene.toLocal(tmp, tileMap);
-      tileMap.pivot.copyFrom(tmp);
-
-      const position = entity.components.byId('transformation.position') as PointSceneComponent;
-      position.x = pos.x;
-      position.y = pos.y;
-
       entity.components.remove(entity.components.byId('tileset.update-pivot')!);
       entity.components.add({ id: LOCKED_ID, type: 'tileset' });
     }

@@ -12,16 +12,7 @@ import {
 } from '@angular/core';
 import { Store, Actions, ofActionSuccessful } from '@ngxs/store';
 import { SceneEntity, StringSceneComponent, SceneEntityType } from 'common/scene';
-import {
-  CreateEntity,
-  UpdateEntity,
-  DeleteEntity,
-  SortEntity,
-  Unselect,
-  Select,
-  Isolate,
-  SceneService,
-} from 'ng/modules/scene';
+import { CreateEntity, UpdateEntity, DeleteEntity, SortEntity, Unselect, Select, Isolate, SceneService } from 'ng/modules/scene';
 import { of, Subject } from 'rxjs';
 import { flatten } from 'lodash';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
@@ -44,7 +35,7 @@ type TreeNode = NzTreeNodeOptions & { entity: SceneEntity };
 @Component({
   moduleId: module.id.toString(),
   selector: 'yame-hierarchy',
-  templateUrl: 'hierarchy.component.html',
+  templateUrl: './hierarchy.component.html',
   styleUrls: ['./hierarchy.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -145,33 +136,31 @@ export class HierarchyComponent implements AfterViewInit, OnDestroy {
    */
   ngAfterViewInit(): void {
     this.zone.runOutsideAngular(() => {
-      this.actions
-        .pipe(takeUntil(this.destroy$), ofActionSuccessful(CreateEntity, DeleteEntity, SortEntity))
-        .subscribe(() => {
-          const entities = this.scene.entities;
-          const self = this;
-          const flatNodes = this.getFlatNodes();
+      this.actions.pipe(takeUntil(this.destroy$), ofActionSuccessful(CreateEntity, DeleteEntity, SortEntity)).subscribe(() => {
+        const entities = this.scene.entities;
+        const self = this;
+        const flatNodes = this.getFlatNodes();
 
-          // Keep expanded and selected nodes
-          const expanded = flatNodes.filter(_ => _.expanded && !_.isLeaf).map(_ => _.key);
-          const selected = flatNodes.filter(_ => _.selected).map(_ => _.key);
+        // Keep expanded and selected nodes
+        const expanded = flatNodes.filter(_ => _.expanded && !_.isLeaf).map(_ => _.key);
+        const selected = flatNodes.filter(_ => _.selected).map(_ => _.key);
 
-          const mapFn: (entity: SceneEntity) => TreeNode = (entity: SceneEntity) => {
-            const children = this.scene.getChildren(entity, false);
-            return {
-              key: entity.id,
-              title: self.getDisplayName(entity),
-              isLeaf: entity.type !== SceneEntityType.Group && entity.type !== SceneEntityType.Layer,
-              children: children.map(mapFn),
-              expanded: children.length > 0 && expanded.indexOf(entity.id) >= 0,
-              selected: selected.indexOf(entity.id) >= 0,
-              entity,
-            };
+        const mapFn: (entity: SceneEntity) => TreeNode = (entity: SceneEntity) => {
+          const children = this.scene.getChildren(entity, false);
+          return {
+            key: entity.id,
+            title: self.getDisplayName(entity),
+            isLeaf: entity.type !== SceneEntityType.Group && entity.type !== SceneEntityType.Layer,
+            children: children.map(mapFn),
+            expanded: children.length > 0 && expanded.indexOf(entity.id) >= 0,
+            selected: selected.indexOf(entity.id) >= 0,
+            entity,
           };
+        };
 
-          this.nodes = entities.filter(it => !it.parent).map(mapFn);
-          this.cdr.markForCheck();
-        });
+        this.nodes = entities.filter(it => !it.parent).map(mapFn);
+        this.cdr.markForCheck();
+      });
       this.actions.pipe(takeUntil(this.destroy$), ofActionSuccessful(Select, Unselect)).subscribe(() => {
         this.selectedKeys = this.store.snapshot().select.entities.slice();
         this.cdr.markForCheck();

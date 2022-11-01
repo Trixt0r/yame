@@ -2,8 +2,8 @@ import { Inject, Injectable, Optional } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { Asset } from 'common/asset';
 import { IPoint } from 'common/math';
-import { SceneComponent, SceneEntity } from 'common/scene';
-import { SceneAssetConverterService, SceneService, SceneState, SelectState } from 'ng/modules/scene';
+import { createComponent, SceneComponent, SceneEntity } from 'common/scene';
+import { SceneAssetConverterService, SceneService, SelectState } from 'ng/modules/scene';
 import { ToolEvent, ToolInterceptor } from 'ng/modules/toolbar/interceptor';
 import { Tool } from 'ng/modules/toolbar/tool';
 import { SelectionToolService } from 'ng/modules/toolbar/tools/selection';
@@ -62,13 +62,9 @@ export class AddToolService extends Tool {
 
   createPreview(): void {
     if (!this.selectedAsset || this.isPreviewActive || this.mouseLeft || this.selectedEntities.length > 0) return;
+    const comps = [createComponent('preview', 'string'), ...this.previewComponents];
     this.isPreviewActive = true;
-    this.scene.createPreview(
-      this.lastMouseX,
-      this.lastMouseY,
-      this.previewComponents.length ? undefined : this.selectedAsset,
-      ...this.previewComponents
-    );
+    this.scene.createPreview(this.lastMouseX, this.lastMouseY, this.previewComponents.length ? undefined : this.selectedAsset, ...comps);
     requestAnimationFrame(() => this.scene.updatePreview(this.lastMouseX, this.lastMouseY));
   }
 
@@ -93,8 +89,7 @@ export class AddToolService extends Tool {
     this.updateMouse(origin);
     const selected = this.selectedEntities.length;
     if (selected > 0) this.selection.mousedown(origin);
-    this.mousePressed =
-      selected <= 0 && this.selectedEntities.length <= 0 && origin.button === 0 && !this.selection.handledByExternal;
+    this.mousePressed = selected <= 0 && this.selectedEntities.length <= 0 && origin.button === 0 && !this.selection.handledByExternal;
   }
 
   mouseup({ origin }: ToolEvent<MouseEvent>): void {
@@ -128,12 +123,10 @@ export class AddToolService extends Tool {
   }
 
   addEntity({ x, y }: IPoint): Observable<SceneEntity | null> {
-    return this.scene
-      .addEntity(x, y, this.previewComponents.length ? undefined : this.selectedAsset, ...this.previewComponents)
-      .pipe(
-        catchError(() => of(null)),
-        take(1)
-      );
+    return this.scene.addEntity(x, y, this.previewComponents.length ? undefined : this.selectedAsset, ...this.previewComponents).pipe(
+      catchError(() => of(null)),
+      take(1)
+    );
   }
 
   addPreview(event: MouseEvent): void {

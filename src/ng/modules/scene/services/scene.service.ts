@@ -5,7 +5,6 @@ import { SceneAssetConverterService } from './converter.service';
 import { CreateEntity, SortEntity, DeleteEntity } from '../states/actions/entity.action';
 import { SceneEntity, createTransformationComponents, SceneEntityData, SceneComponent } from 'common/scene';
 import { Observable, from, of, Subscription } from 'rxjs';
-import { SceneState } from '../states/scene.state';
 import { map, mergeMap } from 'rxjs/operators';
 import { SceneComponent as SceneComp } from '../components/scene/scene.component';
 import { ISerializeContext } from 'common/interfaces/serialize-context.interface';
@@ -110,13 +109,10 @@ export class NoopSceneRendererComponent implements ISceneRendererComponent<HTMLC
   constructor(public readonly ref: ElementRef<HTMLCanvasElement>) {}
 }
 
-export const YAME_RENDERER_COMPONENT = new InjectionToken<Type<ISceneRendererComponent<HTMLElement>>>(
-  'Yame Renderer Component',
-  {
-    providedIn: 'root',
-    factory: () => NoopSceneRendererComponent,
-  }
-);
+export const YAME_RENDERER_COMPONENT = new InjectionToken<Type<ISceneRendererComponent<HTMLElement>>>('Yame Renderer Component', {
+  providedIn: 'root',
+  factory: () => NoopSceneRendererComponent,
+});
 
 /**
  * The scene service provides an interface to access entities in the scene and the renderer.
@@ -308,10 +304,10 @@ export class SceneService {
    * Note, that by default a deep scan is done.
    *
    * @param entityOrId The entity or the id.
-   * @param [deep = true] Whether to return also the children of the children.
+   * @param deep Whether to return also the children of the children. Default is `true`.
    * @return A list of scene entity children for the given id.
    */
-  getChildren(entityOrId?: string | SceneEntity | null, deep: boolean = true): SceneEntity[] {
+  getChildren(entityOrId?: string | SceneEntity | null, deep = true): SceneEntity[] {
     const id = entityOrId instanceof SceneEntity ? entityOrId.id : entityOrId;
     const re = deep ? this.childDeepMapping[id as string] : this.childFlatMapping[id as string];
     if (re === void 0) return this._getChildren(entityOrId as string, deep);

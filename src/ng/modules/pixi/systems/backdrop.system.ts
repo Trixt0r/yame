@@ -9,7 +9,6 @@ import { Observable } from 'rxjs';
 import { ISelectState } from 'ng/modules/scene';
 
 export class PixiBackdropSystem extends System {
-
   protected container = new Container();
   protected graphics = new Graphics();
   protected blur = new filters.BlurFilter(5);
@@ -35,15 +34,15 @@ export class PixiBackdropSystem extends System {
     this.container.addChild(this.graphics);
     this.active = false;
     this.isolated$.subscribe(async isolated => {
-                    const actionId = isolated ? isolated.id : null;
-                    const currentId = this.isolated ? this.isolated.id : null;
-                    if (actionId !== currentId) this.unlock();
-                    if (isolated) this.lock(isolated)
-                    else this.scene.removeChild(this.container);
-                    this.isolated = isolated;
-                    this.active = !!isolated;
-                    service.engineService.engine.run();
-                  });
+      const actionId = isolated ? isolated.id : null;
+      const currentId = this.isolated ? this.isolated.id : null;
+      if (actionId !== currentId) this.unlock();
+      if (isolated) this.lock(isolated);
+      else this.scene.removeChild(this.container);
+      this.isolated = isolated;
+      this.active = !!isolated;
+      service.engineService.engine.run();
+    });
   }
 
   /**
@@ -85,8 +84,7 @@ export class PixiBackdropSystem extends System {
       it.components.add(this.transformOff);
       service.updateComponents(it.components, child);
     });
-    if (this.container.children.length > 0)
-      this.graphics.zIndex = (maxBy(this.container.children, it => it.zIndex)?.zIndex || 0) + 1;
+    if (this.container.children.length > 0) this.graphics.zIndex = (maxBy(this.container.children, it => it.zIndex)?.zIndex || 0) + 1;
     service.engineService.engine.run();
   }
 
@@ -133,7 +131,7 @@ export class PixiBackdropSystem extends System {
   /**
    * @inheritdoc
    */
-  process(): void {
+  override process(): void {
     this.graphics.clear();
     this.graphics.beginFill(0x000000, 0.5);
     this.topLeft.set(0, 0);
@@ -143,5 +141,4 @@ export class PixiBackdropSystem extends System {
     this.graphics.drawRect(this.topLeft.x, this.topLeft.y, this.bottomRight.x - this.topLeft.x, this.bottomRight.y - this.topLeft.y);
     this.graphics.endFill();
   }
-
 }
