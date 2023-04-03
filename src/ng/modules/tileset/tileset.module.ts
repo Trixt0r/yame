@@ -8,7 +8,7 @@ import { provideAsDecorated, UtilsModule } from '../utils';
 import { TilesetCanvasComponent, TilesetTabComponent } from './components';
 import { TileBrushInterceptor } from './interceptors';
 import { TilesetState } from './states';
-import { TilesetSystem } from './systems';
+import { TileOverlaySystem, TilesetSystem } from './systems';
 
 @NgModule({
   imports: [AssetModule, CameraModule, UtilsModule, NgxsModule.forFeature([TilesetState])],
@@ -18,10 +18,10 @@ import { TilesetSystem } from './systems';
     ToolInterceptor.forTool(AddToolService, TileBrushInterceptor),
     {
       provide: APP_INITIALIZER,
-      useFactory: (engineService: EngineService, tilesetSystem: TilesetSystem) => () => {
-        engineService.engine.systems.add(tilesetSystem);
+      useFactory: (engineService: EngineService, tilesetSystem: TilesetSystem, overlaySystem: TileOverlaySystem) => () => {
+        engineService.engine.systems.add(tilesetSystem, overlaySystem);
       },
-      deps: [EngineService, TilesetSystem],
+      deps: [EngineService, TilesetSystem, TileOverlaySystem],
       multi: true,
     },
   ],

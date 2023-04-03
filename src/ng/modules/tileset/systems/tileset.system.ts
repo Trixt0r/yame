@@ -11,7 +11,7 @@ import { Texture } from '@pixi/core';
 
 const TILE_MAP_NAME = 'tile-map';
 const TEXTURE_ID = 'tileset.texture';
-const SETTING_ID = 'tileset.setting';
+export const SETTING_ID = 'tileset.setting';
 const POSITIONS_ID = 'tileset.positions';
 const LOCKED_ID = 'tileset.locked';
 @Injectable({ providedIn: 'root' })
