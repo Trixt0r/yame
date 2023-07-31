@@ -10,12 +10,6 @@
       "request": "launch",
       "cwd": "${workspaceFolder}/out",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
-      "windows": {
-        "name": "Launch",
-        "type": "node",
-        "request": "launch",
-        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
-      },
       "args": ["--remote-debugging-port=9223", "."],
       "outputCapture": "std",
       "preLaunchTask": "start"
