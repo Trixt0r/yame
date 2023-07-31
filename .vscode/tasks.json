@@ -20,8 +20,8 @@
           ],
           "background": {
             "activeOnStart": true,
-            "beginsPattern": ".",
-            "endsPattern": "."
+            "beginsPattern": "npm run",
+            "endsPattern": "Index html generation complete\\."
           }
         }
       ]
