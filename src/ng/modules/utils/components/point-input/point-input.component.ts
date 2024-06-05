@@ -10,7 +10,7 @@ import {
   Output,
   ViewEncapsulation,
 } from '@angular/core';
-import { ControlValueAccessor, NgControl, FormGroup, FormBuilder } from '@angular/forms';
+import { ControlValueAccessor, NgControl, UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { IPoint } from 'common/math';
@@ -48,7 +48,7 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   /**
    * The parts of this input.
    */
-  parts: FormGroup;
+  parts: UntypedFormGroup;
 
   /**
    * Whether this component is focused or not.
@@ -182,7 +182,7 @@ export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   @Output() valueChange = new EventEmitter<IPoint | null>();
 
   constructor(
-    formBuilder: FormBuilder,
+    formBuilder: UntypedFormBuilder,
     private _focusMonitor: FocusMonitor,
     private _elementRef: ElementRef<HTMLElement>,
     @Optional() @Self() public ngControl: NgControl
