@@ -11,7 +11,7 @@ import { PreferencesState } from '../../states/preferences.state';
   styleUrls: ['menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, OnDestroy {
+export class PreferencesMenuComponent implements IToolComponent, OnDestroy {
   /**
    * @inheritdoc
    */
@@ -32,7 +32,13 @@ export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, 
    */
   protected destroy$ = new Subject<void>();
 
-  constructor(protected cdr: ChangeDetectorRef, protected store: Store) {}
+  constructor(protected cdr: ChangeDetectorRef, protected store: Store) {
+    
+    this.options$.pipe(takeUntil(this.destroy$)).subscribe((options) => {
+      this.options = options;
+      this.cdr.markForCheck();
+    });
+  }
 
   /**
    * Handles an option click.
@@ -42,16 +48,6 @@ export class PreferencesMenuComponent implements IToolComponent, AfterViewInit, 
   onClick(option: IPreferenceOption): void {
     if (!option.action) return console.warn('[Preferences] Option has no action', option);
     this.store.dispatch(new option.action());
-  }
-
-  /**
-   * @inheritdoc
-   */
-  ngAfterViewInit(): void {
-    this.options$.pipe(takeUntil(this.destroy$)).subscribe((options) => {
-      this.options = options;
-      this.cdr.markForCheck();
-    });
   }
 
   /**

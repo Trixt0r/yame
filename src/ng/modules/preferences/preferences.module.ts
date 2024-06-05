@@ -60,11 +60,9 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
     {
       provide: APP_INITIALIZER,
       useFactory: (store: Store) => () => {
-        store.dispatch(new RegisterTool(new PreferencesTool()));
         store.dispatch([
-          new AddSettingsSection([
-            { id: 'general', label: 'preferences.settings.section.general', icon: 'home', position: 0 },
-          ]),
+          new RegisterTool(new PreferencesTool()),
+          new AddSettingsSection([{ id: 'general', label: 'preferences.settings.section.general', icon: 'home', position: 0 }]),
           new AddSettingsOption([
             {
               id: 'autoSave',
