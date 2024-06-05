@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NestedDropdownComponent } from './components/nested-dropdown/nested-dropdown.component';
 import { NumberDirective } from './directives/number.directive';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { Select, Store } from '@ngxs/store';
 import { SettingsState } from '../preferences/states/settings.state';
@@ -23,6 +23,16 @@ export function createTranslateLoader(http: HttpClient) {
 }
 
 @NgModule({
+  declarations: [ResizableComponent, PointInputComponent, NestedDropdownComponent, NumberDirective, ColorPipe, TypeLabelComponent],
+  exports: [
+    TranslateModule,
+    ResizableComponent,
+    PointInputComponent,
+    NestedDropdownComponent,
+    NumberDirective,
+    ColorPipe,
+    TypeLabelComponent,
+  ],
   imports: [
     BrowserModule,
     FormsModule,
@@ -31,7 +41,6 @@ export function createTranslateLoader(http: HttpClient) {
     NzFormModule,
     NzIconModule,
     ReactiveFormsModule,
-    HttpClientModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -39,24 +48,6 @@ export function createTranslateLoader(http: HttpClient) {
         deps: [HttpClient],
       },
     }),
-  ],
-  declarations: [
-    ResizableComponent,
-    PointInputComponent,
-    NestedDropdownComponent,
-    NumberDirective,
-    ColorPipe,
-    TypeLabelComponent,
-  ],
-  exports: [
-    HttpClientModule,
-    TranslateModule,
-    ResizableComponent,
-    PointInputComponent,
-    NestedDropdownComponent,
-    NumberDirective,
-    ColorPipe,
-    TypeLabelComponent,
   ],
   providers: [
     {
@@ -68,6 +59,7 @@ export function createTranslateLoader(http: HttpClient) {
       deps: [Store, TranslateService],
       multi: true,
     },
+    provideHttpClient(withInterceptorsFromDi()),
   ],
 })
 export class UtilsModule {
@@ -75,7 +67,7 @@ export class UtilsModule {
 
   constructor(protected translate: TranslateService, zone: NgZone) {
     translate.setDefaultLang('en');
-    zone.runOutsideAngular(() => this.language$.subscribe((lng) => this.setLang(lng)));
+    zone.runOutsideAngular(() => this.language$.subscribe(lng => this.setLang(lng)));
   }
 
   /**
