@@ -6,8 +6,8 @@ const mapping = {};
 // Define a way to require yame
 extend(mapping);
 
-import './style.scss';
-import './polyfills';
+// import './style.scss';
+// import './polyfills';
 
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 

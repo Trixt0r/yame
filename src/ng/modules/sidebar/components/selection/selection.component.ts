@@ -28,7 +28,6 @@ import { Observable } from 'rxjs';
  * It delegates the specific scene component rendering the `yameSceneComponents` directive.
  */
 @Component({
-  moduleId: module.id.toString(),
   selector: 'yame-selection',
   templateUrl: 'selection.component.html',
   styleUrls: ['./selection.component.scss'],
