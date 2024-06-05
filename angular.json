@@ -79,11 +79,11 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "yame:build"
+            "buildTarget": "yame:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "yame:build:production"
+              "buildTarget": "yame:build:production"
             }
           }
         }
