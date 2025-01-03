@@ -1,4 +1,4 @@
-import * as glob from 'glob';
+import { glob } from 'glob';
 import * as path from 'path';
 import { Environment, IYameElectronEnvironment } from '../environment';
 import * as _ from 'lodash';
@@ -60,17 +60,7 @@ export class PluginManager extends CommonPluginManager {
     let globs = (Environment.config || {}).plugins;
     if (!globs) return Promise.resolve([]);
     if (!Array.isArray(globs)) globs = [globs];
-    const proms: Promise<string[]>[] = [];
-    globs.forEach(pattern => {
-      proms.push(
-        new Promise((resolve, reject) => {
-          glob(pattern, (err, files) => {
-            if (err) return reject(err);
-            resolve(files);
-          });
-        })
-      );
-    });
+    const proms: Promise<string[]>[] = globs.map(pattern => glob(pattern));
     return Promise.all(proms)
       .then(re => _.flatten(re).map(uri => path.resolve(uri)))
       .then(re => (PluginManager.files = re));

@@ -1,4 +1,4 @@
-@import '/src/ng/variables.scss';
+@use '/src/ng/variables.scss' as *;
 
 $toolbar-min-width: 48px;
 
