@@ -7,10 +7,11 @@ import { Observable, takeUntil } from 'rxjs';
 import { AssetDetailsComponent } from '../../../decorators/details.decorator';
 
 @Component({
-  templateUrl: 'dimensions.component.html',
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [DestroyLifecycle],
+    templateUrl: 'dimensions.component.html',
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 @AssetDetailsComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
 export class AssetDimensionsDetailsComponent {

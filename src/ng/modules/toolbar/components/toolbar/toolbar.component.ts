@@ -24,12 +24,13 @@ import { DestroyLifecycle, notify } from 'ng/modules/utils';
  * Changing the opened state of the component will trigger the corresponding events on it.
  */
 @Component({
-  selector: 'yame-toolbar',
-  templateUrl: 'toolbar.component.html',
-  styleUrls: ['toolbar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [DestroyLifecycle],
+    selector: 'yame-toolbar',
+    templateUrl: 'toolbar.component.html',
+    styleUrls: ['toolbar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class ToolbarComponent implements OnChanges, AfterViewInit {
   /**

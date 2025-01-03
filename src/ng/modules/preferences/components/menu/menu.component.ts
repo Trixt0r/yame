@@ -7,9 +7,10 @@ import { IPreferenceOption } from '../../interfaces/preference-option.interface'
 import { PreferencesState } from '../../states/preferences.state';
 
 @Component({
-  templateUrl: 'menu.component.html',
-  styleUrls: ['menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: 'menu.component.html',
+    styleUrls: ['menu.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class PreferencesMenuComponent implements IToolComponent, OnDestroy {
   /**

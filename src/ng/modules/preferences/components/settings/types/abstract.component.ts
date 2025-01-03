@@ -6,7 +6,10 @@ import { ISettingsValues, SettingsState } from 'ng/modules/preferences/states/se
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-@Component({ template: '' })
+@Component({
+    template: '',
+    standalone: false
+})
 export class SettingsAbstractComponent<T = unknown> implements ISettingsOptionComponent, OnDestroy, AfterViewInit {
   /**
    * The settings option to visualize.

@@ -11,11 +11,12 @@ import { SceneComponent, StringSceneComponent } from 'common/scene';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'yame-component-type-string',
-  templateUrl: './input.component.html',
-  styleUrls: ['../style.scss', './input.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-component-type-string',
+    templateUrl: './input.component.html',
+    styleUrls: ['../style.scss', './input.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class InputTypeComponent<T extends SceneComponent = SceneComponent>
   extends AbstractTypeComponent<T>

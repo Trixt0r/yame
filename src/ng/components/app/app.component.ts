@@ -6,10 +6,11 @@ import { SidebarComponent } from '../../modules/sidebar/components/sidebar.compo
  * Entry point for the main application.
  */
 @Component({
-  selector: 'yame-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-root',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AppComponent implements AfterViewInit {
   name = 'YAME';

@@ -33,11 +33,12 @@ type TreeNode = NzTreeNodeOptions & { entity: SceneEntity };
  * It allows the user to apply additional actions, like locking, deleting and toggling visibility of a node in the scene.
  */
 @Component({
-  selector: 'yame-hierarchy',
-  templateUrl: './hierarchy.component.html',
-  styleUrls: ['./hierarchy.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-hierarchy',
+    templateUrl: './hierarchy.component.html',
+    styleUrls: ['./hierarchy.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class HierarchyComponent implements AfterViewInit, OnDestroy {
   /**

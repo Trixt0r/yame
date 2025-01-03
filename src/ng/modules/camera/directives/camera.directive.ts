@@ -16,8 +16,9 @@ enum MoveInitiator {
 }
 
 @Directive({
-  selector: '[yameCamera]',
-  providers: [DestroyLifecycle],
+    selector: '[yameCamera]',
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class CameraDirective {
   @Input('yameCamera') set id(value: string) {

@@ -13,11 +13,12 @@ import { IPoint } from 'common/math';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'yame-component-type-point',
-  templateUrl: './point.component.html',
-  styleUrls: ['../style.scss', '../inline.actions.scss', './point.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-component-type-point',
+    templateUrl: './point.component.html',
+    styleUrls: ['../style.scss', '../inline.actions.scss', './point.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class PointTypeComponent extends AbstractTypeComponent<PointSceneComponent> implements OnChanges {
   static readonly type: string = 'point';

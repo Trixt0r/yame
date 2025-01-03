@@ -2,7 +2,8 @@ import { Directive, Input, OnChanges, SimpleChanges, ViewContainerRef } from '@a
 import { ISettingsOption } from '../interfaces/settings-option.interface';
 
 @Directive({
-  selector: '[yameSettingOption]',
+    selector: '[yameSettingOption]',
+    standalone: false
 })
 export class SettingsOptionDirective implements OnChanges {
   @Input('yameSettingOption') settingsOption?: ISettingsOption;

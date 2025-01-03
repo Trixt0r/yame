@@ -23,10 +23,11 @@ import { Subscription } from 'rxjs';
  * It also tells the child components to resize properly.
  */
 @Component({
-  selector: 'yame-sidebar',
-  templateUrl: 'sidebar.component.html',
-  styleUrls: ['sidebar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-sidebar',
+    templateUrl: 'sidebar.component.html',
+    styleUrls: ['sidebar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SidebarComponent extends ResizableComponent implements AfterViewInit, OnDestroy {
   /**

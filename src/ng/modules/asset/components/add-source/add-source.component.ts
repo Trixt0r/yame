@@ -12,12 +12,13 @@ import { Observable, takeUntil } from 'rxjs';
 import { AssetState, IAssetsSource, LoadFromAssetsSource } from '../../states';
 
 @Component({
-  selector: 'yame-asset-add-source',
-  templateUrl: './add-source.component.html',
-  styleUrls: ['./add-source.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [DestroyLifecycle],
+    selector: 'yame-asset-add-source',
+    templateUrl: './add-source.component.html',
+    styleUrls: ['./add-source.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class AssetAddSourceComponent {
   @Input() mode: 'icon' | 'text' = 'icon';

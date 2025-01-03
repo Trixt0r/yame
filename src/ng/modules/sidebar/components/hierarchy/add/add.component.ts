@@ -7,10 +7,11 @@ import { capitalize, isNil } from 'lodash';
  * The add entity component handles the creation of new object.
  */
 @Component({
-  selector: 'yame-add-entity',
-  templateUrl: './add.component.html',
-  styleUrls: ['./add.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-add-entity',
+    templateUrl: './add.component.html',
+    styleUrls: ['./add.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AddEntityComponent implements AfterViewInit {
   /**

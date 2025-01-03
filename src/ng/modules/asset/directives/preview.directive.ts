@@ -13,8 +13,9 @@ import { IAssetOwner } from '../interfaces';
  * Directive for injecting a preview component for a certain asset.
  */
 @Directive({
-  selector: '[yameAssetPreview]',
-  providers: [DestroyLifecycle],
+    selector: '[yameAssetPreview]',
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class AssetPreviewDirective {
   /**

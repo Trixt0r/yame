@@ -21,12 +21,13 @@ import { DestroyLifecycle } from 'ng/modules/utils';
 type AssetTreeNode = NzTreeNodeOptions & { asset: Asset };
 
 @Component({
-  selector: 'yame-asset-tree',
-  templateUrl: 'tree.component.html',
-  styleUrls: ['tree.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [DestroyLifecycle],
+    selector: 'yame-asset-tree',
+    templateUrl: 'tree.component.html',
+    styleUrls: ['tree.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class AssetTreeComponent {
   /**

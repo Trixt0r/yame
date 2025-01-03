@@ -62,7 +62,8 @@ interface SceneComponentRefPool {
  * This way lags won't be noticed during runtime.
  */
 @Directive({
-  selector: '[yameSceneComponents]',
+    selector: '[yameSceneComponents]',
+    standalone: false
 })
 export class EntityComponentsDirective implements OnChanges, OnInit, AfterViewInit {
   private static componentRefCache: SceneComponentRefCache = {};

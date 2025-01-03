@@ -28,10 +28,11 @@ import { Observable } from 'rxjs';
  * It delegates the specific scene component rendering the `yameSceneComponents` directive.
  */
 @Component({
-  selector: 'yame-selection',
-  templateUrl: 'selection.component.html',
-  styleUrls: ['./selection.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-selection',
+    templateUrl: 'selection.component.html',
+    styleUrls: ['./selection.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SelectionComponent extends ResizableComponent implements OnChanges {
   /**

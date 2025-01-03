@@ -6,7 +6,8 @@ import { IAssetOwner } from '../interfaces';
  * Directive for injecting a preview component for a certain asset.
  */
 @Directive({
-  selector: '[yameAssetTab]',
+    selector: '[yameAssetTab]',
+    standalone: false
 })
 export class AssetTabDirective implements OnChanges {
   /**

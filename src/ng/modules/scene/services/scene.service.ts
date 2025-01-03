@@ -103,7 +103,8 @@ export interface ISceneRendererComponent<T extends HTMLElement> {
 }
 
 @Component({
-  template: `<canvas></canvas>`,
+    template: `<canvas></canvas>`,
+    standalone: false
 })
 export class NoopSceneRendererComponent implements ISceneRendererComponent<HTMLCanvasElement> {
   constructor(public readonly ref: ElementRef<HTMLCanvasElement>) {}

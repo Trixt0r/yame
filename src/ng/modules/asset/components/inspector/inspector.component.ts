@@ -16,12 +16,13 @@ import { IAssetOwner } from '../../interfaces';
 import { AssetState, LoadAssetResource } from '../../states';
 
 @Component({
-  selector: 'yame-asset-inspector',
-  templateUrl: './inspector.component.html',
-  styleUrls: ['./inspector.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [DestroyLifecycle],
+    selector: 'yame-asset-inspector',
+    templateUrl: './inspector.component.html',
+    styleUrls: ['./inspector.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class AssetInspectorComponent {
   /**

@@ -16,7 +16,10 @@ export interface AbstractRemoveEvent<T extends SceneComponent = SceneComponent> 
   index?: number;
 }
 
-@Component({ template: '' })
+@Component({
+    template: '',
+    standalone: false
+})
 export abstract class AbstractTypeComponent<T extends SceneComponent = SceneComponent> implements OnDestroy {
   static readonly type: string = 'abstract';
 

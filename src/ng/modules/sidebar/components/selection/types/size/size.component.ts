@@ -15,11 +15,12 @@ import { cloneDeep } from 'lodash';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'yame-component-type-size',
-  templateUrl: './size.component.html',
-  styleUrls: ['../style.scss', '../inline.actions.scss', './size.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-component-type-size',
+    templateUrl: './size.component.html',
+    styleUrls: ['../style.scss', '../inline.actions.scss', './size.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SizeTypeComponent extends AbstractTypeComponent<SizeSceneComponent> implements OnChanges {
   static readonly type: string = 'size';

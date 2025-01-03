@@ -12,11 +12,12 @@ import { NumberSceneComponent } from 'common/scene';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'yame-component-type-number',
-  templateUrl: './number.component.html',
-  styleUrls: ['../style.scss', '../inline.actions.scss', './number.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-component-type-number',
+    templateUrl: './number.component.html',
+    styleUrls: ['../style.scss', '../inline.actions.scss', './number.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class NumberTypeComponent extends AbstractTypeComponent<NumberSceneComponent> implements OnChanges {
   static readonly type: string = 'number';

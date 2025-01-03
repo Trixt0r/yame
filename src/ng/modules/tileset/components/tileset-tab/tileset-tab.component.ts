@@ -19,12 +19,13 @@ import { ToolbarState } from 'ng/modules/toolbar';
 import { AssetSceneComponent, createAssetComponent, createGroupComponent, SceneComponent } from 'common/scene';
 
 @Component({
-  selector: 'yame-tileset-tab',
-  templateUrl: './tileset-tab.component.html',
-  styleUrls: ['./tileset-tab.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [DestroyLifecycle],
+    selector: 'yame-tileset-tab',
+    templateUrl: './tileset-tab.component.html',
+    styleUrls: ['./tileset-tab.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 @AssetTabComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
 export class TilesetTabComponent implements IAssetOwner, OnInit {

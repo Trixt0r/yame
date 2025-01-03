@@ -2,7 +2,8 @@ import { Directive, ViewContainerRef, ComponentFactoryResolver, AfterViewInit, I
 import { ISceneRendererComponent, YAME_RENDERER_COMPONENT } from '../services/scene.service';
 
 @Directive({
-  selector: '[yameSceneRendererComponent]',
+    selector: '[yameSceneRendererComponent]',
+    standalone: false
 })
 export class SceneRendererComponentDirective implements AfterViewInit {
   constructor(

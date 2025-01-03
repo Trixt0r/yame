@@ -17,11 +17,12 @@ import { CameraId } from '../../camera.ids';
 import { UpdateCameraZoom, ZoomCameraOut } from '../../states/actions/camera.action';
 import { CameraState } from '../../states/camera.state';
 @Component({
-  selector: 'yame-camera-tool',
-  templateUrl: 'tool.component.html',
-  styleUrls: ['tool.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-camera-tool',
+    templateUrl: 'tool.component.html',
+    styleUrls: ['tool.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class CameraToolComponent implements IToolComponent, OnDestroy {
   /**

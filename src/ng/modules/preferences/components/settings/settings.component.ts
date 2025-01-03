@@ -20,11 +20,12 @@ import { SelectSettingsSection } from '../../states/actions/settings.action';
 import { SettingsState } from '../../states/settings.state';
 
 @Component({
-  selector: 'yame-settings',
-  templateUrl: 'settings.component.html',
-  styleUrls: ['settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-settings',
+    templateUrl: 'settings.component.html',
+    styleUrls: ['settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SettingsComponent implements AfterViewInit, OnDestroy {
   @ViewChildren('sections', { read: ElementRef }) sectionElements!: QueryList<ElementRef<HTMLElement>>;

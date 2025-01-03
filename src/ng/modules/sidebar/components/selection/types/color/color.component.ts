@@ -16,15 +16,16 @@ import { TranslateService } from '@ngx-translate/core';
 import { NzCollapseComponent } from 'ng-zorro-antd/collapse';
 
 @Component({
-  selector: 'yame-component-type-color',
-  templateUrl: './color.component.html',
-  styleUrls: ['../style.scss', './color.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  viewProviders: [NzCollapseComponent],
-  host: {
-    class: 'margin-bottom-4',
-  },
+    selector: 'yame-component-type-color',
+    templateUrl: './color.component.html',
+    styleUrls: ['../style.scss', './color.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    viewProviders: [NzCollapseComponent],
+    host: {
+        class: 'margin-bottom-4',
+    },
+    standalone: false
 })
 export class ColorTypeComponent extends InputTypeComponent<ColorSceneComponent> implements OnDestroy, OnChanges {
   static readonly type: string = 'color';

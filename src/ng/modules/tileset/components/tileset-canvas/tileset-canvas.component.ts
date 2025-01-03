@@ -32,12 +32,13 @@ const app = new Application({
 });
 
 @Component({
-  selector: 'yame-tileset-canvas',
-  templateUrl: './tileset-canvas.component.html',
-  styleUrls: ['./tileset-canvas.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [DestroyLifecycle],
+    selector: 'yame-tileset-canvas',
+    templateUrl: './tileset-canvas.component.html',
+    styleUrls: ['./tileset-canvas.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 export class TilesetCanvasComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() set asset(value: Asset) {

@@ -5,9 +5,10 @@ import { AssetPreviewComponent } from '../../../decorators/preview.decorator';
 import { IAssetOwner } from '../../../interfaces';
 
 @Component({
-  templateUrl: './image.component.html',
-  styleUrls: ['./image.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './image.component.html',
+    styleUrls: ['./image.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 @AssetPreviewComponent('png', 'jpg', 'jpeg', 'gif', 'svg')
 export class AssetImagePreviewComponent implements IAssetOwner {

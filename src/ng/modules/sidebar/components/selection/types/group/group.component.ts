@@ -16,15 +16,16 @@ import { TranslateService } from '@ngx-translate/core';
 import { NzCollapseComponent } from 'ng-zorro-antd/collapse';
 
 @Component({
-  selector: 'yame-component-type-group',
-  templateUrl: `./group.component.html`,
-  styleUrls: ['../style.scss', './group.component.scss'],
-  host: {
-    class: 'full block margin-bottom-4',
-  },
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  viewProviders: [NzCollapseComponent],
+    selector: 'yame-component-type-group',
+    templateUrl: `./group.component.html`,
+    styleUrls: ['../style.scss', './group.component.scss'],
+    host: {
+        class: 'full block margin-bottom-4',
+    },
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    viewProviders: [NzCollapseComponent],
+    standalone: false
 })
 export class GroupTypeComponent extends AbstractTypeComponent<GroupSceneComponent> implements OnChanges {
   static readonly type: string = 'group';

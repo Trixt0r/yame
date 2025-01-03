@@ -29,15 +29,16 @@ import { IPoint } from 'common/math';
  * ```
  */
 @Component({
-  selector: 'point-input',
-  templateUrl: 'point-input.component.html',
-  styleUrls: ['./point-input.component.scss'],
-  host: {
-    '[id]': 'id',
-    '[attr.aria-describedby]': 'describedBy',
-  },
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'point-input',
+    templateUrl: 'point-input.component.html',
+    styleUrls: ['./point-input.component.scss'],
+    host: {
+        '[id]': 'id',
+        '[attr.aria-describedby]': 'describedBy',
+    },
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class PointInputComponent implements ControlValueAccessor, OnDestroy {
   /**

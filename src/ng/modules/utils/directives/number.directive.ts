@@ -20,10 +20,11 @@ interface NumberDirectiveEvent {
  * for changing the value, such as keyboard up/down arrow keys, mouse wheel and mouse move events.
  */
 @Directive({
-  selector: '[yameNumber]',
-  host: {
-    style: 'cursor: ew-resize',
-  },
+    selector: '[yameNumber]',
+    host: {
+        style: 'cursor: ew-resize',
+    },
+    standalone: false
 })
 export class NumberDirective {
   /**

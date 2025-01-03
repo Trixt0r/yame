@@ -9,10 +9,11 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'yame-main',
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-main',
+    templateUrl: './main.component.html',
+    styleUrls: ['./main.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class MainComponent implements OnChanges {
   static get DEFAULT_SIZE(): number {

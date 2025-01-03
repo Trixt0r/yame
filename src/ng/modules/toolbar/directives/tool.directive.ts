@@ -6,7 +6,8 @@ import { DefaultToolComponent } from '../components/tool/default/default.compone
  * Directive for rendering a tool component in a template.
  */
 @Directive({
-  selector: '[yameTool]',
+    selector: '[yameTool]',
+    standalone: false
 })
 export class ToolDirective implements OnChanges {
   /**

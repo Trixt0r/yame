@@ -14,11 +14,12 @@ import { Observable, takeUntil } from 'rxjs';
 import { AssetState, SelectAsset, UnselectAsset } from '../../states';
 
 @Component({
-  selector: 'yame-asset-explorer',
-  templateUrl: './explorer.component.html',
-  styleUrls: ['./explorer.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-asset-explorer',
+    templateUrl: './explorer.component.html',
+    styleUrls: ['./explorer.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AssetExplorerComponent {
   static readonly PREVIEW_MIN_HEIGHT = 250;

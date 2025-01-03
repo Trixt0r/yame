@@ -8,10 +8,11 @@ export interface NavItem {
 }
 
 @Component({
-  selector: 'nested-dropdown',
-  templateUrl: './nested-dropdown.component.html',
-  styleUrls: ['./nested-dropdown.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'nested-dropdown',
+    templateUrl: './nested-dropdown.component.html',
+    styleUrls: ['./nested-dropdown.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class NestedDropdownComponent {
   @Input() items!: NavItem[];

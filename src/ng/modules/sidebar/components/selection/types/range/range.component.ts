@@ -5,11 +5,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { NzMarks } from 'ng-zorro-antd/slider';
 
 @Component({
-  selector: 'yame-type-component-range',
-  templateUrl: './range.component.html',
-  styleUrls: ['../style.scss', '../inline.actions.scss', './range.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-type-component-range',
+    templateUrl: './range.component.html',
+    styleUrls: ['../style.scss', '../inline.actions.scss', './range.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class RangeTypeComponent extends AbstractTypeComponent<RangeSceneComponent> implements OnChanges {
   static readonly type: string = 'range';

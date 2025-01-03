@@ -19,11 +19,12 @@ import { AbstractTypeComponent } from 'ng/modules/sidebar/components/selection/t
 
 // TODO: use tree select instead of list
 @Component({
-  selector: 'yame-component-type-asset',
-  templateUrl: 'asset-type.component.html',
-  styleUrls: ['asset-type.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-component-type-asset',
+    templateUrl: 'asset-type.component.html',
+    styleUrls: ['asset-type.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class AssetTypeComponent<T extends AssetComponent> extends AbstractTypeComponent<T> implements OnChanges {
   static readonly type: string = 'asset';

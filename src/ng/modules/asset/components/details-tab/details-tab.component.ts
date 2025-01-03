@@ -16,12 +16,13 @@ interface AssetDescription {
 }
 
 @Component({
-  selector: 'yame-asset-details-tab',
-  templateUrl: './details-tab.component.html',
-  styleUrls: ['./details-tab.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [DestroyLifecycle],
+    selector: 'yame-asset-details-tab',
+    templateUrl: './details-tab.component.html',
+    styleUrls: ['./details-tab.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [DestroyLifecycle],
+    standalone: false
 })
 @AssetTabComponent()
 export class AssetDetailsTabComponent implements IAssetOwner {

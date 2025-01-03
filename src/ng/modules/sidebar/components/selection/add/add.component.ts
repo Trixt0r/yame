@@ -10,21 +10,22 @@ import { MenuService, NzIsMenuInsideDropDownToken, NzSubmenuService } from 'ng-z
  * The add scene component button handles the creation of new components per entity.
  */
 @Component({
-  selector: 'yame-add-component',
-  templateUrl: './add.component.html',
-  styleUrls: ['./add.component.scss'],
-  host: {
-    class: 'block relative fill-width padding-vert-4',
-  },
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [
-    MenuService,
-    NzSubmenuService,
-    {
-      provide: NzIsMenuInsideDropDownToken,
-      useValue: true,
+    selector: 'yame-add-component',
+    templateUrl: './add.component.html',
+    styleUrls: ['./add.component.scss'],
+    host: {
+        class: 'block relative fill-width padding-vert-4',
     },
-  ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    viewProviders: [
+        MenuService,
+        NzSubmenuService,
+        {
+            provide: NzIsMenuInsideDropDownToken,
+            useValue: true,
+        },
+    ],
+    standalone: false
 })
 export class AddSceneComponentButtonComponent implements OnChanges {
   /**

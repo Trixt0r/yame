@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { SettingsAbstractComponent } from '../abstract.component';
 
 @Component({
-  templateUrl: 'selection.component.html',
-  styleUrls: ['../../../../../../styles/utils.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: 'selection.component.html',
+    styleUrls: ['../../../../../../styles/utils.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SettingsSelectionComponent extends SettingsAbstractComponent<string> {
 

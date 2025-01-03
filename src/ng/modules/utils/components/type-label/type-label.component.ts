@@ -5,11 +5,12 @@ import { cloneDeep } from 'lodash';
 import { SceneComponentsService } from 'ng/modules/sidebar/services/scene-components.service';
 
 @Component({
-  selector: 'yame-type-label',
-  templateUrl: './type-label.component.html',
-  styleUrls: ['./type-label.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'yame-type-label',
+    templateUrl: './type-label.component.html',
+    styleUrls: ['./type-label.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class TypeLabelComponent {
   /**

@@ -20,10 +20,11 @@ import { Subject } from 'rxjs';
  * your resize element.
  */
 @Component({
-  selector: 'yame-resizable',
-  templateUrl: 'resizable.html',
-  styles: ['div { width: 100%; height: 100%; }'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'yame-resizable',
+    templateUrl: 'resizable.html',
+    styles: ['div { width: 100%; height: 100%; }'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ResizableComponent implements OnChanges, AfterViewInit, OnDestroy {
   /**

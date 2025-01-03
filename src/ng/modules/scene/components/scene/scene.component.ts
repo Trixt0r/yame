@@ -17,9 +17,10 @@ import { of } from 'rxjs';
 import { SceneAssetConverterService } from '../../services/converter.service';
 
 @Component({
-  selector: 'yame-scene',
-  templateUrl: './scene.component.html',
-  styleUrls: ['./scene.component.scss'],
+    selector: 'yame-scene',
+    templateUrl: './scene.component.html',
+    styleUrls: ['./scene.component.scss'],
+    standalone: false
 })
 export class SceneComponent implements OnChanges, AfterViewInit {
   /**

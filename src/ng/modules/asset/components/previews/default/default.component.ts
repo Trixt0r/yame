@@ -4,9 +4,10 @@ import { Asset } from 'common/asset';
 import { IAssetOwner } from '../../../interfaces';
 
 @Component({
-  templateUrl: './default.component.html',
-  styleUrls: ['./default.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './default.component.html',
+    styleUrls: ['./default.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AssetDefaultPreviewComponent implements IAssetOwner {
   asset!: Asset;
