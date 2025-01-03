@@ -134,7 +134,7 @@ export class EditorState implements NgxsOnInit {
           };
         return new AddEditorFileSerializer(serializer);
       })
-      .filter((action) => !!action);
+      .filter((action) => !!action) as AddEditorFileSerializer[];
 
     this.store.dispatch(actions);
   }

@@ -144,7 +144,7 @@ export class PixiSelectionHandlerSkewService {
    */
   get mouseOverArea(): boolean {
     this.area.worldTransform.applyInverse(this.rendererService.mouse as Point, tempPoint);
-    return this.area.hitArea.contains(tempPoint.x, tempPoint.y);
+    return this.area.hitArea?.contains(tempPoint.x, tempPoint.y) ?? false;
   }
 
   /**

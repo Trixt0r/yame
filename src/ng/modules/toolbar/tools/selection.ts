@@ -99,7 +99,7 @@ export class SelectionToolService extends Tool {
    * @param components The components to be selected.
    * @return An observable to subscribe to.
    */
-  dispatchSelect<T>(entities: string[], components: SceneComponent[]): Observable<T> {
+  dispatchSelect(entities: string[], components: SceneComponent[]): Observable<void> {
     this.selectAction.components = components;
     this.selectAction.entities = entities;
     return this.store.dispatch(this.selectAction);

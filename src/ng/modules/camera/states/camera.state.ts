@@ -100,7 +100,7 @@ export class CameraState {
   private updateSettings<T>(clazz: Type<T>, ...args: unknown[]): void {
     const state = this.store.selectSnapshot(_ => _.camera) as ICameraState;
     if (!state) return;
-    const actions = state.cameras.map(_ => new clazz(_.id, ...args));
+    const actions = state.cameras.map(_ => new clazz(_.id, ...args) as NonNullable<T>);
     this.store.dispatch(actions);
   }
 

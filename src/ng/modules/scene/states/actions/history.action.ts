@@ -1,6 +1,6 @@
 export class PushHistory {
   static readonly type = '[History] Push';
-  constructor(public readonly actions: unknown[], public readonly last: unknown[], public readonly override: boolean = false) { }
+  constructor(public readonly actions: {}[], public readonly last: {}[], public readonly override: boolean = false) { }
 }
 
 export class UndoHistory {

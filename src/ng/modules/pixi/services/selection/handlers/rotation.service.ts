@@ -121,7 +121,7 @@ export class PixiSelectionHandlerRotationService {
     window.removeEventListener('mouseup', this.mouseupFn);
     this.containerService.endHandling(this);
     this.area.worldTransform.applyInverse(this.rendererService.mouse as Point, tempPoint);
-    const contains = this.area.hitArea.contains(tempPoint.x, tempPoint.y);
+    const contains = this.area.hitArea?.contains(tempPoint.x, tempPoint.y);
     if (!contains) this.resetCursor(true);
   }
 

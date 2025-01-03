@@ -4,15 +4,15 @@ import { cloneDeep } from 'lodash';
 import { Keydown } from 'ng/states/hotkey.state';
 import { Injectable } from '@angular/core';
 
-export interface IHistorySnapshot<T> {
+export interface IHistorySnapshot<T extends {}> {
   last: T[];
   actions: T[];
   date: Date;
 }
 
 export interface IHistoryState {
-  previous: IHistorySnapshot<unknown>[];
-  next: IHistorySnapshot<unknown>[];
+  previous: IHistorySnapshot<{}>[];
+  next: IHistorySnapshot<{}>[];
 }
 
 @State<IHistoryState>({

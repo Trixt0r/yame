@@ -46,7 +46,7 @@ export class AssetAddSourceComponent {
    *
    * @return A stream emitting on success or fail.
    */
-  addFromSource<T>(source: IAssetsSource): Observable<T> {
+  addFromSource(source: IAssetsSource): Observable<void> {
     return this.store.dispatch(new LoadFromAssetsSource(source));
   }
 }

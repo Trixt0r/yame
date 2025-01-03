@@ -136,7 +136,7 @@ export class PixiSelectionHandlerPivotService {
     this.area.on('pointerout', this.resetCursor, this);
     this.containerService.endHandling(this);
     this.area.worldTransform.applyInverse(this.rendererService.mouse as Point, tmp1);
-    const contains = this.area.hitArea.contains(tmp1.x, tmp1.y);
+    const contains = this.area.hitArea?.contains(tmp1.x, tmp1.y);
     if (!contains) this.resetCursor(true);
     else if (this.rendererService.view) this.rendererService.view.style.cursor = 'grab';
   }

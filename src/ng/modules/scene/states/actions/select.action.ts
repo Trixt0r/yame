@@ -27,7 +27,7 @@ export class Isolate {
 
 export class Input {
   static readonly type = '[Selection] Input';
-  constructor(public actions: unknown[], public source?: unknown) {}
+  constructor(public actions: {}[], public source?: unknown) {}
 }
 
 export type SelectActions = Select | Unselect | UpdateComponents | Isolate | Input;

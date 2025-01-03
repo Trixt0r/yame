@@ -298,7 +298,7 @@ export class ResizeAnchor extends Graphics {
     window.removeEventListener('mouseup', this.mouseupFn);
     this.clickedPos = null;
     this.worldTransform.applyInverse(this.service.mouse as Point, this.tmp);
-    if (!this.hitArea.contains(this.tmp.x, this.tmp.y)) this.resetCursor();
+    if (!this.hitArea?.contains(this.tmp.x, this.tmp.y)) this.resetCursor();
     this.emit('handle:end');
   }
 

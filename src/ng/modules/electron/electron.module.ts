@@ -10,7 +10,7 @@ import {
   SelectAssetGroup,
 } from 'ng/modules/asset/states/actions/asset.action';
 import { AssetState } from '../asset/states/asset.state';
-import { Subject } from 'rxjs';
+import { lastValueFrom, Subject } from 'rxjs';
 import { IResource } from 'common/interfaces/resource';
 import { FileProvider } from './providers/file.provider';
 import { Keydown } from 'ng/states/hotkey.state';
@@ -58,8 +58,8 @@ export class ElectronModule {
         currentFile.uri && action.shortcut.id !== 'save.as'
           ? currentFile.uri
           : (await dialog.save({ properties: ['openFile'] as any })).replace(protocol, '');
-      const state = await store.dispatch(new SaveEditorFile({ uri, protocol, source: 'local', data: {} })).toPromise();
-      const toSave = state.editor.currentFile.data;
+      await lastValueFrom(store.dispatch(new SaveEditorFile({ uri, protocol, source: 'local', data: {} })));
+      const toSave = store.snapshot().editor.currentFile.data;
       electron.getProvider(FileProvider).write(uri, JSON.stringify(toSave));
     });
 

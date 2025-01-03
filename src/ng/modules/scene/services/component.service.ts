@@ -11,7 +11,6 @@ import { isNil, maxBy, cloneDeep } from 'lodash';
 
 @Injectable({ providedIn: 'root' })
 export class SceneComponentService {
-
   protected reservedIds: string[];
 
   /**
@@ -57,8 +56,7 @@ export class SceneComponentService {
   }
 
   reserveId(componentId: string): void {
-    if (this.reservedIds.indexOf(componentId) < 0)
-      this.reservedIds.push(componentId);
+    if (this.reservedIds.indexOf(componentId) < 0) this.reservedIds.push(componentId);
   }
 
   /**
@@ -105,8 +103,7 @@ export class SceneComponentService {
   generateComponentId(entities: (string | SceneEntity)[], type: string): string {
     const entityObjects = entities.map(it => {
       const entityObj = this.scene.getEntity(it);
-      if (!this.scene.assertEntity(entityObj))
-        throw new EntityNotFoundException('No entity found', it);
+      if (!this.scene.assertEntity(entityObj)) throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     });
     const max = maxBy(entityObjects, it => it?.components.byType(type).length);
@@ -122,15 +119,10 @@ export class SceneComponentService {
    * @param group Optional group, to attach the scene component to.
    * @return An observable, finishing on successful entity update.
    */
-  add(
-    entities: (string | SceneEntity)[],
-    component: SceneComponent,
-    group?: GroupSceneComponent
-  ): Observable<any> {
+  add(entities: (string | SceneEntity)[], component: SceneComponent, group?: GroupSceneComponent): Observable<any> {
     const entityObjects = entities.map(it => {
       const entityObj = this.scene.getEntity(it);
-      if (!this.scene.assertEntity(entityObj))
-        throw new EntityNotFoundException('No entity found', it);
+      if (!this.scene.assertEntity(entityObj)) throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     });
     // Custom components can always be removed and edited
@@ -147,14 +139,14 @@ export class SceneComponentService {
 
     const selected = this.store.selectSnapshot(data => data.select);
     const data = entityObjects.map(it => ({ id: it?.id, components: [cloneDeep(component)] }));
-    const components = [ ...selected.components, component ];
-    return this.store.dispatch([
-      new UpdateEntity(
-        data,
-        `Component added in entities ${data.map(it => it.id).join(',')}`
-      ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(components, true) : void 0
-    ]);
+    const components = [...selected.components, component];
+    const actions: {}[] = [new UpdateEntity(data, `Component added in entities ${data.map(it => it.id).join(',')}`)];
+
+    if (selected && selected.entities.length > 0) {
+      actions.push(new UpdateComponents(components, true));
+    }
+
+    return this.store.dispatch(actions);
   }
 
   /**
@@ -167,8 +159,7 @@ export class SceneComponentService {
   remove(entities: (string | SceneEntity)[], component: SceneComponent): Observable<any> {
     const entityObjects = entities.map(it => {
       const entityObj = this.scene.getEntity(it);
-      if (!this.scene.assertEntity(entityObj))
-        throw new EntityNotFoundException('No entity found', it);
+      if (!this.scene.assertEntity(entityObj)) throw new EntityNotFoundException('No entity found', it);
       return entityObj;
     });
     component.markedForDelete = true;
@@ -177,13 +168,14 @@ export class SceneComponentService {
     const components = selected.components.slice();
     const idx = components.findIndex(it => it.id === component.id);
     if (idx >= 0) components.splice(idx, 1);
-    return this.store.dispatch([
-      new UpdateEntity(
-        data,
-        `Component ${component.id} removed in entity ${data.map(it => it.id).join(',')}`
-      ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(components, true) : void 0
-    ]);
+
+    const actions: {}[] = [new UpdateEntity(data, `Component ${component.id} removed in entity ${data.map(it => it.id).join(',')}`)];
+
+    if (selected && selected.entities.length > 0) {
+      actions.push(new UpdateComponents(components, true));
+    }
+
+    return this.store.dispatch(actions);
   }
 
   /**
@@ -195,24 +187,26 @@ export class SceneComponentService {
    * @return An observable, finishing on successful entity update.
    */
   update(entities: (string | SceneEntity)[], component: SceneComponent, old: SceneComponent): Observable<any> {
-    const entityObjects = entities.map(it => {
-      const entityObj = this.scene.getEntity(it);
-      if (!this.scene.assertEntity(entityObj))
-        throw new EntityNotFoundException('No entity found', it);
-      return entityObj;
-    }).filter(entity => !!entity?.components.byId(old.id));
+    const entityObjects = entities
+      .map(it => {
+        const entityObj = this.scene.getEntity(it);
+        if (!this.scene.assertEntity(entityObj)) throw new EntityNotFoundException('No entity found', it);
+        return entityObj;
+      })
+      .filter(entity => !!entity?.components.byId(old.id));
     const selected = this.store.selectSnapshot(data => data.select) as ISelectState;
     old.markedForDelete = true;
     const data = entityObjects.map(it => ({ id: it?.id, components: [cloneDeep(component), cloneDeep(old)] }));
     const components = selected.components.slice();
     const idx = components.indexOf(old);
     if (idx >= 0) components[idx] = component;
-    return this.store.dispatch([
-      new UpdateEntity(
-        data,
-        `Component ${component.id} update in entity ${data.map(it => it.id).join(',')}`
-      ),
-      selected && selected.entities.length > 0 ? new UpdateComponents(components, true) : void 0
-    ]);
+
+    const actions: {}[] = [new UpdateEntity(data, `Component ${component.id} update in entity ${data.map(it => it.id).join(',')}`)];
+
+    if (selected && selected.entities.length > 0) {
+      actions.push(new UpdateComponents(components, true));
+    }
+
+    return this.store.dispatch(actions);
   }
 }
