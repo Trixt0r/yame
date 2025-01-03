@@ -54,7 +54,7 @@ export class SettingsState implements NgxsOnInit {
    * @param id The id of the setting.
    */
   static value(id: string) {
-    return createSelector([this], (state: ISettingsState) => state.values[id]);
+    return createSelector([this], (state?: ISettingsState) => (state?.values ?? {})[id]);
   }
 
   /**

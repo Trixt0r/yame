@@ -74,7 +74,8 @@ export class PreferencesState {
         height: '80vh',
       },
       nzFooter: null,
-      nzCloseIcon: void 0,
+      nzCloseIcon: 'close',
+      nzWidth: '100%',
     });
   }
 }
