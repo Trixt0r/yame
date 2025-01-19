@@ -113,7 +113,7 @@
     "del-cli": "^4.0.1",
     "electron": "^33.2.1",
     "electron-packager": "^17.1.2",
-    "ng-zorro-antd": "^19.0.1",
+    "ng-zorro-antd": "^19.0.2",
     "ngx-pipes": "^3.2.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.4.0",
