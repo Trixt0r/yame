@@ -19,6 +19,24 @@ import { SelectionToolService } from 'ng/modules/toolbar/tools/selection';
 import { ITilesetSetting } from '../interfaces';
 import { SETTING_ID } from '../systems/tileset.system';
 
+/**
+ * Interceptor for handling tile brush tool events in the tileset editor.
+ *
+ * This class manages the placement of tiles using a brush tool, including grid snapping,
+ * preview overlays, and updating the scene with new tile entities. It interacts with the
+ * scene, selection, and engine services to provide a seamless tile painting experience.
+ *
+ * - Handles mouse events to place tiles on a grid.
+ * - Manages an overlay entity for visual feedback during placement.
+ * - Updates tile positions and interacts with the NGXS store for state management.
+ * - Supports snapping to grid and previewing tile placement.
+ *
+ * @extends ToolInterceptor<MouseEvent, AddToolService>
+ * @see AddToolService
+ * @see SceneService
+ * @see SelectionToolService
+ * @see EngineService
+ */
 @Injectable()
 export class TileBrushInterceptor extends ToolInterceptor<MouseEvent, AddToolService> {
   private placements: IPoint[] = [];
