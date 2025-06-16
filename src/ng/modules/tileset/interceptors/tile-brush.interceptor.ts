@@ -42,6 +42,7 @@ export class TileBrushInterceptor extends ToolInterceptor<MouseEvent, AddToolSer
   private placements: IPoint[] = [];
   private entity: SceneEntity | null = null;
   private overlay: SceneEntity;
+  private deleting = false;
 
   constructor(private scene: SceneService, private selection: SelectionToolService, private engine: EngineService, protected store: Store) {
     super();
@@ -75,12 +76,72 @@ export class TileBrushInterceptor extends ToolInterceptor<MouseEvent, AddToolSer
     this.placements.push({ x, y });
   }
 
+  private updateOverlay(entity: SceneEntity, mapped: IPoint): void {
+    // border overlay update
+    const renderer = this.scene.renderer as PixiRendererService;
+    const back = renderer.scene.toLocal(mapped, renderer.getContainer(this.entity!.id));
+
+    this.engine.engine.entities.add(this.overlay);
+    const { setting } = entity.components.byId(SETTING_ID) as SceneComponent & { setting: ITilesetSetting };
+
+    const minX = minBy(setting.selections, 'x')?.x ?? 0;
+    const minY = minBy(setting.selections, 'y')?.y ?? 0;
+    const maxX = maxBy(setting.selections, 'x')?.x ?? 0;
+    const maxY = maxBy(setting.selections, 'y')?.y ?? 0;
+
+    const tileWidth = setting.size.x + setting.spacing.x + setting.offset.x;
+    const tileHeight = setting.size.y + setting.spacing.y + setting.offset.y;
+    const width = (maxX - minX + 1) * tileWidth;
+    const height = (maxY - minY + 1) * tileHeight;
+
+    const position = this.overlay.components.byId('transformation.position') as PointSceneComponent;
+    position.x = back.x;
+    position.y = back.y;
+
+    const overlayComp = this.overlay.components.byId('tileset.overlay.remove') as { points: PointSceneComponent[] } | undefined;
+
+    if (overlayComp) {
+      overlayComp.points[0].x = -width / 2;
+      overlayComp.points[0].y = -height / 2;
+
+      overlayComp.points[1].x = width / 2;
+      overlayComp.points[1].y = -height / 2;
+
+      overlayComp.points[2].x = width / 2;
+      overlayComp.points[2].y = height / 2;
+
+      overlayComp.points[3].x = -width / 2;
+      overlayComp.points[3].y = height / 2;
+
+      const container = renderer.getContainer(this.overlay.id)!;
+      renderer.applyComponents(this.overlay.components, container);
+
+      for (let i = 0; i < 4; i++) {
+        overlayComp.points[i].x += mapped.x;
+        overlayComp.points[i].y += mapped.y;
+        const back = container.toLocal(overlayComp.points[i], renderer.getContainer(this.entity!.id));
+        overlayComp.points[i].x = back.x;
+        overlayComp.points[i].y = back.y;
+      }
+    }
+  }
+
   /**
    * @inheritdoc
    */
   intercept<R>(event: ToolEvent<MouseEvent, AddToolService>, next: ToolHandler<MouseEvent, AddToolService>): ToolResult<R> {
     const { origin, tool } = event;
     const grid = tool.grid;
+
+    if (!this.entity) this.engine.engine.entities.remove(this.overlay);
+
+    if (origin.type === 'mousedown' && origin.button === 2) {
+      this.deleting = true;
+      tool.mousePressed = true;
+    }
+    if (origin.type === 'mouseup' && origin.button === 2) {
+      this.deleting = false;
+    }
 
     if (origin.type !== 'mousemove' || !grid || !tool.mousePressed) {
       if (origin.type === 'mouseup' && tool.grid) {
@@ -127,51 +188,7 @@ export class TileBrushInterceptor extends ToolInterceptor<MouseEvent, AddToolSer
           const back = renderer.scene.toLocal(mapped, renderer.getContainer(this.entity!.id));
           this.scene.updatePreview(back.x ?? x, back.y ?? y);
 
-          // border overlay update
-          this.engine.engine.entities.add(this.overlay);
-          const { setting } = isolated.components.byId(SETTING_ID) as SceneComponent & { setting: ITilesetSetting };
-
-          const minX = minBy(setting.selections, 'x')?.x ?? 0;
-          const minY = minBy(setting.selections, 'y')?.y ?? 0;
-          const maxX = maxBy(setting.selections, 'x')?.x ?? 0;
-          const maxY = maxBy(setting.selections, 'y')?.y ?? 0;
-
-          const tileWidth = setting.size.x + setting.spacing.x + setting.offset.x;
-          const tileHeight = setting.size.y + setting.spacing.y + setting.offset.y;
-          const width = (maxX - minX + 1) * tileWidth;
-          const height = (maxY - minY + 1) * tileHeight;
-
-          const position = this.overlay.components.byId('transformation.position') as PointSceneComponent;
-          position.x = back.x;
-          position.y = back.y;
-
-          const overlayComp = this.overlay.components.byId('tileset.overlay.remove') as { points: PointSceneComponent[] } | undefined;
-
-          if (overlayComp) {
-            overlayComp.points[0].x = -width / 2;
-            overlayComp.points[0].y = -height / 2;
-
-            overlayComp.points[1].x = width / 2;
-            overlayComp.points[1].y = -height / 2;
-
-            overlayComp.points[2].x = width / 2;
-            overlayComp.points[2].y = height / 2;
-
-            overlayComp.points[3].x = -width / 2;
-            overlayComp.points[3].y = height / 2;
-
-            const renderer = this.scene.renderer as PixiRendererService;
-            const container = renderer.getContainer(this.overlay.id)!;
-            renderer.applyComponents(this.overlay.components, container);
-
-            for (let i = 0; i < 4; i++) {
-              overlayComp.points[i].x += mapped.x;
-              overlayComp.points[i].y += mapped.y;
-              const back = container.toLocal(overlayComp.points[i], renderer.getContainer(this.entity!.id));
-              overlayComp.points[i].x = back.x;
-              overlayComp.points[i].y = back.y;
-            }
-          }
+          this.updateOverlay(this.entity, mapped);
 
           this.entity = null;
           return;
@@ -201,24 +218,35 @@ export class TileBrushInterceptor extends ToolInterceptor<MouseEvent, AddToolSer
     const mapped = this.entity ? this.getEntityPoint({ x, y }, grid) : { x, y };
 
     const found = !!this.entity && this.placements.find(_ => _.x === mapped.x && _.y === mapped.y);
-    if (!found) {
+    if (!found && !this.deleting) {
       if (!this.entity) {
         tool.addEntity({ x, y }).subscribe(_ => {
           this.entity = _;
           const comp = this.entity?.components.byId('tileset.positions') as SceneComponent & { values: IPoint[] };
           this.pushPlacement({ x, y }, grid);
           comp.values = this.placements;
+          this.updateOverlay(this.entity!, mapped);
         });
       } else {
         this.pushPlacement({ x, y }, grid);
       }
     } else {
+      if (this.deleting && this.entity) {
+        const comp = this.entity?.components.byId('tileset.positions') as SceneComponent & { values: IPoint[] };
+        const tileIndex = comp.values.findIndex(_ => _.x === mapped.x && _.y === mapped.y);
+        if (tileIndex >= 0) {
+          comp.values.splice(tileIndex, 1);
+          this.updateOverlay(this.entity!, mapped);
+        }
+      }
+
       this.selection.mousemove(origin);
     }
 
     const renderer = this.scene.renderer as PixiRendererService;
-    const back = renderer.scene.toLocal(mapped, renderer.getContainer(this.entity!.id));
+    const back = this.entity ? renderer.scene.toLocal(mapped, renderer.getContainer(this.entity.id)) : null;
 
-    this.scene.updatePreview(back.x ?? x, back.y ?? y);
+    this.scene.updatePreview(back?.x ?? x, back?.y ?? y);
+    if (this.entity) this.updateOverlay(this.entity!, mapped);
   }
 }

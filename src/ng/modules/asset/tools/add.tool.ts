@@ -89,7 +89,7 @@ export class AddToolService extends Tool {
     this.updateMouse(origin);
     const selected = this.selectedEntities.length;
     if (selected > 0) this.selection.mousedown(origin);
-    this.mousePressed = selected <= 0 && this.selectedEntities.length <= 0 && origin.button === 0 && !this.selection.handledByExternal;
+    this.mousePressed = selected <= 0 && this.selectedEntities.length <= 0 && !this.selection.handledByExternal;
   }
 
   mouseup({ origin }: ToolEvent<MouseEvent>): void {
